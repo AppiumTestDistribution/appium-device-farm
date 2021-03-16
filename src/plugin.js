@@ -17,23 +17,38 @@ export default class DevicePlugin extends BasePlugin {
     connectedDevices = await adb.getConnectedDevices();
     const deviceState = [];
     connectedDevices.forEach((device) =>
-      deviceState.push(Object.assign({}, { busy: false }, device))
+      deviceState.push(
+        Object.assign({
+          key: device.udid,
+          val: { busy: false, state: device.state },
+        })
+      )
     );
-    deviceCache.mset([{ key: 'android', val: deviceState }]);
-    const { udid } = deviceCache
-      .get('android')
-      .find((device) => device.busy === false);
-    if (connectedDevices.length > 0) {
-      caps.firstMatch[0]['appium:deviceName'] = udid;
+
+    deviceCache.mset(deviceState);
+    const freeDevice = deviceCache
+      .keys()
+      .find((key) => deviceCache.get(key).busy === false);
+    if (freeDevice) {
+      caps.firstMatch[0]['appium:deviceName'] = freeDevice;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
+    } else {
+      throw new Error('No free device available');
     }
-    deviceCache.get('android').find((device) => {
-      if (device.udid === udid) {
-        device.busy = true;
-      }
-    });
-    console.log(deviceCache.get('android'));
-    return await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
+
+    const session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
+    if (!session.error) {
+      deviceCache.set(freeDevice, {
+        busy: true,
+        state: deviceCache.get(freeDevice).state,
+      });
+      console.log('====================================');
+      console.log(deviceCache.get(freeDevice));
+      console.log('====================================');
+    } else {
+      console.log(session, 'driver failed');
+    }
+    return session;
   }
 
   async getFreePort() {
