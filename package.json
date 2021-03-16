@@ -30,7 +30,8 @@
   "homepage": "https://github.com/SrinivasanTarget/appium-device-plugin#readme",
   "dependencies": {
     "@appium/base-plugin": "^1.6.4",
-    "appium-adb": "^8.11.0"
+    "appium-adb": "^8.11.0",
+    "portfinder": "1.0.28"
   },
   "devDependencies": {
     "husky": "^4.2.5",
