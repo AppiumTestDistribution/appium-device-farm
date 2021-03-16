@@ -27,6 +27,12 @@ export default class DevicePlugin extends BasePlugin {
       caps.firstMatch[0]['appium:deviceName'] = udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
     }
+    deviceCache.get('android').find((device) => {
+      if (device.udid === udid) {
+        device.busy = true;
+      }
+    });
+    console.log(deviceCache.get('android'));
     return await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
   }
 
