@@ -15,9 +15,16 @@ export default class DevicePlugin extends BasePlugin {
     await this.getFreePort();
     const adb = await ADB.createADB();
     connectedDevices = await adb.getConnectedDevices();
-    deviceCache.mset([{ key: 'android', val: connectedDevices }]);
+    const deviceState = [];
+    connectedDevices.forEach((device) =>
+      deviceState.push(Object.assign({}, { busy: false }, device))
+    );
+    deviceCache.mset([{ key: 'android', val: deviceState }]);
+    const { udid } = deviceCache
+      .get('android')
+      .find((device) => device.busy === false);
     if (connectedDevices.length > 0) {
-      caps.firstMatch[0]['appium:deviceName'] = connectedDevices[0].udid;
+      caps.firstMatch[0]['appium:deviceName'] = udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
     }
     return await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
