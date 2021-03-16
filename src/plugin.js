@@ -1,6 +1,8 @@
 import BasePlugin from '@appium/base-plugin';
 import ADB from 'appium-adb';
 let portfinder = require('portfinder');
+const NodeCache = require('node-cache');
+const deviceCache = new NodeCache();
 
 let connectedDevices;
 let freePort;
@@ -11,9 +13,9 @@ export default class DevicePlugin extends BasePlugin {
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
-    console.log('FreePort', freePort);
     const adb = await ADB.createADB();
     connectedDevices = await adb.getConnectedDevices();
+    deviceCache.mset([{ key: 'android', val: connectedDevices }]);
     if (connectedDevices.length > 0) {
       caps.firstMatch[0]['appium:deviceName'] = connectedDevices[0].udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
