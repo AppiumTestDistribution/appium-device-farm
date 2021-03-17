@@ -28,36 +28,41 @@ class DevicePlugin extends BasePlugin {
     console.log('deviceState before session creation');
     console.log(deviceState);
     console.log('====================================');
-    const { udid } = deviceState.find((device) => device.busy === false);
+    const freeDevice = deviceState.find((device) => device.busy === false);
     console.log('====================================');
-    console.log(`free device found is ${udid}`);
+    console.log(`free device found is ${freeDevice}`);
     console.log('====================================');
-    if (udid) {
-      caps.firstMatch[0]['appium:udid'] = udid;
-      caps.firstMatch[0]['appium:deviceName'] = udid;
+    if (freeDevice) {
+      caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
+      caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
     } else {
       throw new Error('No free device available');
     }
-    const session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
-    if (!session.error) {
+    this.session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
+    if (!this.session.error) {
       deviceState.find(
-        (device) => device.udid === udid && ((device.busy = true), true)
+        (device) =>
+          device.udid === freeDevice.udid && ((device.busy = true), true)
       );
       console.log('====================================');
       console.log('deviceState after session creation');
       console.log(deviceState);
       console.log('====================================');
     } else {
-      console.log(session, 'driver failed');
+      console.log(this.session, 'driver failed');
     }
-    return session;
+    return this.session;
   }
 
   async getFreePort() {
     await portfinder.getPort(function (err, port) {
       freePort = port;
     });
+  }
+
+  async deleteSession(driver) {
+    await driver.deleteSession();
   }
 }
 
