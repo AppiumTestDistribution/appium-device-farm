@@ -32,7 +32,6 @@
   "dependencies": {
     "@appium/base-plugin": "^1.6.4",
     "appium-adb": "^8.11.0",
-    "node-cache": "^5.1.2",
     "portfinder": "1.0.28"
   },
   "devDependencies": {
