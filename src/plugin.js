@@ -11,13 +11,19 @@ class DevicePlugin extends BasePlugin {
     const adb = await ADB.createADB();
     const connectedDevices = await adb.getConnectedDevices();
 
-    if (deviceState.length == 0) {
-      connectedDevices.forEach((device) =>
+    connectedDevices.forEach((device) => {
+      if (
+        !deviceState.find((devicestate) => devicestate.udid === device.udid)
+      ) {
         deviceState.push(
-          Object.assign({ busy: false, state: device.state, udid: device.udid })
-        )
-      );
-    }
+          Object.assign({
+            busy: false,
+            state: device.state,
+            udid: device.udid,
+          })
+        );
+      }
+    });
     console.log('====================================');
     console.log('deviceState before session creation');
     console.log(deviceState);
