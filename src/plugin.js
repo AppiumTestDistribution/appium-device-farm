@@ -4,6 +4,7 @@ let portfinder = require('portfinder');
 
 let deviceState = [];
 let freePort;
+let freeDevice;
 portfinder.basePort = 60535;
 class DevicePlugin extends BasePlugin {
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
@@ -28,7 +29,7 @@ class DevicePlugin extends BasePlugin {
     console.log('deviceState before session creation');
     console.log(deviceState);
     console.log('====================================');
-    const freeDevice = deviceState.find((device) => device.busy === false);
+    freeDevice = deviceState.find((device) => device.busy === false);
     console.log('====================================');
     console.log(`free device found is ${freeDevice}`);
     console.log('====================================');
@@ -61,8 +62,13 @@ class DevicePlugin extends BasePlugin {
     });
   }
 
-  async deleteSession(driver) {
-    await driver.deleteSession();
+  async deleteSession(next) {
+    deviceState.find(
+      (device) =>
+        device.udid === freeDevice.udid && ((device.busy = false), true)
+    );
+    console.log(deviceState);
+    await next();
   }
 }
 
