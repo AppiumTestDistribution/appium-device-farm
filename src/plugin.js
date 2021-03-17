@@ -1,49 +1,35 @@
 import BasePlugin from '@appium/base-plugin';
 import ADB from 'appium-adb';
 let portfinder = require('portfinder');
-const NodeCache = require('node-cache');
-const deviceCache = new NodeCache();
 
 let connectedDevices;
 let freePort;
 portfinder.basePort = 60535;
-export default class DevicePlugin extends BasePlugin {
-  constructor(pluginName) {
-    super(pluginName);
-  }
+class DevicePlugin extends BasePlugin {
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
     const adb = await ADB.createADB();
     connectedDevices = await adb.getConnectedDevices();
-    const deviceState = [];
+    let deviceState = [];
     connectedDevices.forEach((device) =>
       deviceState.push(
-        Object.assign({
-          key: device.udid,
-          val: { busy: false, state: device.state },
-        })
+        Object.assign({ busy: false, state: device.state, udid: device.udid })
       )
     );
-
-    deviceCache.mset(deviceState);
-    const freeDevice = deviceCache
-      .keys()
-      .find((key) => deviceCache.get(key).busy === false);
-    if (freeDevice) {
-      caps.firstMatch[0]['appium:deviceName'] = freeDevice;
+    const { udid } = deviceState.find((device) => device.busy === false);
+    if (udid) {
+      caps.firstMatch[0]['appium:deviceName'] = udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
     } else {
       throw new Error('No free device available');
     }
-
     const session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
     if (!session.error) {
-      deviceCache.set(freeDevice, {
-        busy: true,
-        state: deviceCache.get(freeDevice).state,
-      });
+      deviceState.find(
+        (device) => device.udid === udid && ((device.busy = true), true)
+      );
       console.log('====================================');
-      console.log(deviceCache.get(freeDevice));
+      console.log(deviceState);
       console.log('====================================');
     } else {
       console.log(session, 'driver failed');
@@ -57,3 +43,5 @@ export default class DevicePlugin extends BasePlugin {
     });
   }
 }
+
+export default DevicePlugin;
