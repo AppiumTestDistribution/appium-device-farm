@@ -1,9 +1,10 @@
 import ADB from 'appium-adb';
+import log from './logger';
 
 let deviceState = [];
 export default class AndroidDeviceMananger {
   async getDevices() {
-    console.log('In get devices');
+    log.info('Fetching Android Devices');
     const adb = await ADB.createADB();
     const connectedDevices = await adb.getConnectedDevices();
 
@@ -20,7 +21,7 @@ export default class AndroidDeviceMananger {
         );
       }
     });
-    console.log(deviceState);
+    log.info(`Android Devices found ${JSON.stringify(deviceState)}`);
     return deviceState;
   }
 }

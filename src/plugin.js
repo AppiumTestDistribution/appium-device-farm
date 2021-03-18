@@ -1,6 +1,7 @@
 import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
 let portfinder = require('portfinder');
+import log from './logger';
 
 let freePort;
 let freeDevice;
@@ -9,27 +10,19 @@ let instance = false;
 portfinder.basePort = 60535;
 portfinder.highestPort = 60888;
 export default class DevicePlugin extends BasePlugin {
-  constructor(pluginName) {
-    super(pluginName);
+  constructor() {
+    super();
     if (instance === false) {
       return (async () => {
         let androidDevices = new AndroidDeviceManager();
         deviceState = await androidDevices.getDevices();
         instance = true;
-        console.log('Instance', instance);
       })();
     }
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
-    console.log('====================================');
-    console.log('deviceState before session creation');
-    console.log(deviceState);
-    console.log('====================================');
     freeDevice = deviceState.find((device) => device.busy === false);
-    console.log('====================================');
-    console.log(`free device found is ${freeDevice}`);
-    console.log('====================================');
     if (freeDevice) {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
@@ -37,6 +30,11 @@ export default class DevicePlugin extends BasePlugin {
       deviceState.find(
         (device) =>
           device.udid === freeDevice.udid && ((device.busy = true), true)
+      );
+      log.info(
+        `Device UDID ${freeDevice.udid} locked from stack ${JSON.stringify(
+          deviceState
+        )}`
       );
     } else {
       throw new Error('No free device available');
@@ -47,12 +45,6 @@ export default class DevicePlugin extends BasePlugin {
         (device) =>
           device.udid === freeDevice.udid && ((device.busy = false), true)
       );
-      console.log('====================================');
-      console.log('deviceState after session creation');
-      console.log(deviceState);
-      console.log('====================================');
-    } else {
-      console.log(this.session, 'driver failed');
     }
     return this.session;
   }
@@ -74,7 +66,11 @@ export default class DevicePlugin extends BasePlugin {
       (device) =>
         device.udid === freeDevice.udid && ((device.busy = false), true)
     );
-    console.log(deviceState);
+    log.info(
+      `Deleting Session and device UDID ${
+        freeDevice.udid
+      } unblocked from stack ${JSON.stringify(deviceState)}`
+    );
     await next();
   }
 }
