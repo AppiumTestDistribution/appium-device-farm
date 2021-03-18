@@ -1,30 +1,26 @@
 import BasePlugin from '@appium/base-plugin';
-import ADB from 'appium-adb';
+import AndroidDeviceManager from './AndroidDeviceManager';
 let portfinder = require('portfinder');
 
-let deviceState = [];
 let freePort;
 let freeDevice;
+let deviceState;
+let instance = false;
 portfinder.basePort = 60535;
-class DevicePlugin extends BasePlugin {
+export default class DevicePlugin extends BasePlugin {
+  constructor(pluginName) {
+    super(pluginName);
+    if (instance === false) {
+      return (async () => {
+        let androidDevices = new AndroidDeviceManager();
+        deviceState = await androidDevices.getDevices();
+        instance = true;
+        console.log('Instance', instance);
+      })();
+    }
+  }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
-    const adb = await ADB.createADB();
-    const connectedDevices = await adb.getConnectedDevices();
-
-    connectedDevices.forEach((device) => {
-      if (
-        !deviceState.find((devicestate) => devicestate.udid === device.udid)
-      ) {
-        deviceState.push(
-          Object.assign({
-            busy: false,
-            state: device.state,
-            udid: device.udid,
-          })
-        );
-      }
-    });
     console.log('====================================');
     console.log('deviceState before session creation');
     console.log(deviceState);
@@ -71,5 +67,3 @@ class DevicePlugin extends BasePlugin {
     await next();
   }
 }
-
-export default DevicePlugin;
