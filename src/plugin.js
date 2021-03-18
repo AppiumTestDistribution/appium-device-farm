@@ -7,6 +7,7 @@ let freeDevice;
 let deviceState;
 let instance = false;
 portfinder.basePort = 60535;
+portfinder.highestPort = 60888;
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName) {
     super(pluginName);
@@ -33,6 +34,10 @@ export default class DevicePlugin extends BasePlugin {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
+      deviceState.find(
+        (device) =>
+          device.udid === freeDevice.udid && ((device.busy = true), true)
+      );
     } else {
       throw new Error('No free device available');
     }
@@ -53,9 +58,15 @@ export default class DevicePlugin extends BasePlugin {
   }
 
   async getFreePort() {
-    await portfinder.getPort(function (err, port) {
-      freePort = port;
-    });
+    await portfinder.getPort(
+      {
+        port: 3000, // minimum port
+        stopPort: 3333, // maximum port
+      },
+      function (err, port) {
+        freePort = port;
+      }
+    );
   }
 
   async deleteSession(next) {
