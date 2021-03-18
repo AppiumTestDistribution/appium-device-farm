@@ -45,7 +45,7 @@ export default class DevicePlugin extends BasePlugin {
     if (!this.session.error) {
       deviceState.find(
         (device) =>
-          device.udid === freeDevice.udid && ((device.busy = true), true)
+          device.udid === freeDevice.udid && ((device.busy = false), true)
       );
       console.log('====================================');
       console.log('deviceState after session creation');
