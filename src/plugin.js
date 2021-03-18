@@ -1,30 +1,27 @@
 import BasePlugin from '@appium/base-plugin';
-import ADB from 'appium-adb';
+import AndroidDeviceManager from './AndroidDeviceManager';
 let portfinder = require('portfinder');
 
-let deviceState = [];
 let freePort;
 let freeDevice;
+let deviceState;
+let instance = false;
 portfinder.basePort = 60535;
-class DevicePlugin extends BasePlugin {
+portfinder.highestPort = 60888;
+export default class DevicePlugin extends BasePlugin {
+  constructor(pluginName) {
+    super(pluginName);
+    if (instance === false) {
+      return (async () => {
+        let androidDevices = new AndroidDeviceManager();
+        deviceState = await androidDevices.getDevices();
+        instance = true;
+        console.log('Instance', instance);
+      })();
+    }
+  }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
-    const adb = await ADB.createADB();
-    const connectedDevices = await adb.getConnectedDevices();
-
-    connectedDevices.forEach((device) => {
-      if (
-        !deviceState.find((devicestate) => devicestate.udid === device.udid)
-      ) {
-        deviceState.push(
-          Object.assign({
-            busy: false,
-            state: device.state,
-            udid: device.udid,
-          })
-        );
-      }
-    });
     console.log('====================================');
     console.log('deviceState before session creation');
     console.log(deviceState);
@@ -37,6 +34,10 @@ class DevicePlugin extends BasePlugin {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
+      deviceState.find(
+        (device) =>
+          device.udid === freeDevice.udid && ((device.busy = true), true)
+      );
     } else {
       throw new Error('No free device available');
     }
@@ -44,7 +45,7 @@ class DevicePlugin extends BasePlugin {
     if (!this.session.error) {
       deviceState.find(
         (device) =>
-          device.udid === freeDevice.udid && ((device.busy = true), true)
+          device.udid === freeDevice.udid && ((device.busy = false), true)
       );
       console.log('====================================');
       console.log('deviceState after session creation');
@@ -57,9 +58,15 @@ class DevicePlugin extends BasePlugin {
   }
 
   async getFreePort() {
-    await portfinder.getPort(function (err, port) {
-      freePort = port;
-    });
+    await portfinder.getPort(
+      {
+        port: 3000, // minimum port
+        stopPort: 3333, // maximum port
+      },
+      function (err, port) {
+        freePort = port;
+      }
+    );
   }
 
   async deleteSession(next) {
@@ -71,5 +78,3 @@ class DevicePlugin extends BasePlugin {
     await next();
   }
 }
-
-export default DevicePlugin;

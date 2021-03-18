@@ -1,4 +1,4 @@
 import DevicePlugin from './plugin';
 
-export default DevicePlugin;
+export default new DevicePlugin();
 export { DevicePlugin };
