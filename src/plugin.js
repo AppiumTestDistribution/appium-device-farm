@@ -30,13 +30,16 @@ export default class DevicePlugin extends BasePlugin {
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
       devices.blockDevice(freeDevice);
-      log.info(`Device UDID ${freeDevice.udid} locked`);
+      log.info(`Device UDID ${freeDevice.udid} blocked for execution.`);
     } else {
       throw new Error('No free device available');
     }
     this.session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
-    if (!this.session.error) {
+    if (this.session.error) {
       devices.unblockDevice(freeDevice);
+      log.info(
+        `Device UDID ${freeDevice.udid} unblocked. Reason: Session failed to create`
+      );
     }
     return this.session;
   }
