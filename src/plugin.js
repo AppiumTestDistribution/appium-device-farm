@@ -2,10 +2,11 @@ import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
 let portfinder = require('portfinder');
 import log from './logger';
+import Device from './Devices';
 
 let freePort;
 let freeDevice;
-let deviceState;
+let devices;
 let instance = false;
 portfinder.basePort = 60535;
 portfinder.highestPort = 60888;
@@ -15,36 +16,27 @@ export default class DevicePlugin extends BasePlugin {
     if (instance === false) {
       return (async () => {
         let androidDevices = new AndroidDeviceManager();
-        deviceState = await androidDevices.getDevices();
+        let deviceState = await androidDevices.getDevices();
+        devices = new Device(deviceState);
         instance = true;
       })();
     }
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     await this.getFreePort();
-    freeDevice = deviceState.find((device) => device.busy === false);
+    freeDevice = devices.getFreeDevice();
     if (freeDevice) {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
       caps.firstMatch[0]['appium:systemPort'] = freePort;
-      deviceState.find(
-        (device) =>
-          device.udid === freeDevice.udid && ((device.busy = true), true)
-      );
-      log.info(
-        `Device UDID ${freeDevice.udid} locked from stack ${JSON.stringify(
-          deviceState
-        )}`
-      );
+      devices.blockDevice(freeDevice);
+      log.info(`Device UDID ${freeDevice.udid} locked`);
     } else {
       throw new Error('No free device available');
     }
     this.session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
     if (!this.session.error) {
-      deviceState.find(
-        (device) =>
-          device.udid === freeDevice.udid && ((device.busy = false), true)
-      );
+      devices.unblockDevice(freeDevice);
     }
     return this.session;
   }
@@ -62,15 +54,8 @@ export default class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next) {
-    deviceState.find(
-      (device) =>
-        device.udid === freeDevice.udid && ((device.busy = false), true)
-    );
-    log.info(
-      `Deleting Session and device UDID ${
-        freeDevice.udid
-      } unblocked from stack ${JSON.stringify(deviceState)}`
-    );
+    devices.unblockDevice(freeDevice);
+    log.info(`Deleting Session and device UDID ${freeDevice.udid} unblocked`);
     await next();
   }
 }
