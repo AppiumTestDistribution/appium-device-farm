@@ -4,7 +4,6 @@ const getPort = require('get-port');
 import log from './logger';
 import Device from './Devices';
 
-let freeDevice;
 let devices;
 let instance = false;
 export default class DevicePlugin extends BasePlugin {
@@ -20,7 +19,7 @@ export default class DevicePlugin extends BasePlugin {
     }
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    freeDevice = devices.getFreeDevice();
+    const freeDevice = devices.getFreeDevice();
     if (freeDevice) {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
@@ -36,11 +35,14 @@ export default class DevicePlugin extends BasePlugin {
       log.info(
         `Device UDID ${freeDevice.udid} unblocked. Reason: Session failed to create`
       );
+    } else {
+      devices.updateDevice(freeDevice, this.session.value[0]);
     }
     return this.session;
   }
 
-  async deleteSession(next) {
+  async deleteSession(next, driver, args) {
+    const freeDevice = devices.getDeviceForSession(args);
     devices.unblockDevice(freeDevice);
     log.info(
       `Deleting Session and device UDID ${freeDevice.udid} is unblocked`
