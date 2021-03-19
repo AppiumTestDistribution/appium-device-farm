@@ -4,7 +4,6 @@ const getPort = require('get-port');
 import log from './logger';
 import Device from './Devices';
 
-let freePort;
 let freeDevice;
 let devices;
 let instance = false;
@@ -21,16 +20,15 @@ export default class DevicePlugin extends BasePlugin {
     }
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    freePort = await getPort();
     freeDevice = devices.getFreeDevice();
     if (freeDevice) {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
       caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
-      caps.firstMatch[0]['appium:systemPort'] = freePort;
+      caps.firstMatch[0]['appium:systemPort'] = await getPort();
       devices.blockDevice(freeDevice);
-      log.info(`Device UDID ${freeDevice.udid} blocked for execution.`);
+      log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
     } else {
-      throw new Error('No free device available');
+      throw new Error('No free device is available to create session');
     }
     this.session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
     if (this.session.error) {
@@ -44,7 +42,9 @@ export default class DevicePlugin extends BasePlugin {
 
   async deleteSession(next) {
     devices.unblockDevice(freeDevice);
-    log.info(`Deleting Session and device UDID ${freeDevice.udid} unblocked`);
+    log.info(
+      `Deleting Session and device UDID ${freeDevice.udid} is unblocked`
+    );
     await next();
   }
 }
