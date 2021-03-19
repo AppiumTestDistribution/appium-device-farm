@@ -1,6 +1,6 @@
 import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
-let portfinder = require('portfinder');
+const getPort = require('get-port');
 import log from './logger';
 import Device from './Devices';
 
@@ -8,8 +8,6 @@ let freePort;
 let freeDevice;
 let devices;
 let instance = false;
-portfinder.basePort = 60535;
-portfinder.highestPort = 60888;
 export default class DevicePlugin extends BasePlugin {
   constructor() {
     super();
@@ -23,7 +21,7 @@ export default class DevicePlugin extends BasePlugin {
     }
   }
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    await this.getFreePort();
+    freePort = await getPort();
     freeDevice = devices.getFreeDevice();
     if (freeDevice) {
       caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
@@ -42,18 +40,6 @@ export default class DevicePlugin extends BasePlugin {
       );
     }
     return this.session;
-  }
-
-  async getFreePort() {
-    await portfinder.getPort(
-      {
-        port: 3000, // minimum port
-        stopPort: 3333, // maximum port
-      },
-      function (err, port) {
-        freePort = port;
-      }
-    );
   }
 
   async deleteSession(next) {
