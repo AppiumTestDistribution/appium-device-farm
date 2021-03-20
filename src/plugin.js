@@ -13,8 +13,8 @@ export default class DevicePlugin extends BasePlugin {
     if (instance === false) {
       return (async () => {
         let androidDevices = new AndroidDeviceManager();
-        let deviceState = await androidDevices.getDevices();
-        devices = new Device(deviceState);
+        let connectedDevices = await androidDevices.getDevices();
+        devices = new Device(connectedDevices);
         instance = true;
       })();
     }
@@ -43,10 +43,11 @@ export default class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next, driver, args) {
-    const freeDevice = devices.getDeviceForSession(args);
-    devices.unblockDevice(freeDevice);
+    const blockedDevice = devices.getDeviceForSession(args);
+    log.info(`Unblocking device UDID: ${blockedDevice.udid}`);
+    devices.unblockDevice(blockedDevice);
     log.info(
-      `Deleting Session and device UDID ${freeDevice.udid} is unblocked`
+      `Deleting Session and device UDID ${blockedDevice.udid} is unblocked`
     );
     await next();
   }

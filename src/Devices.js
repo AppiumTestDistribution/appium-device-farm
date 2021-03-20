@@ -1,81 +1,91 @@
 import _ from 'lodash';
 import { eventEmitter } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
-import log from './logger';
 
 const schedule = require('node-schedule');
-let devices;
-let mergedDevices;
+let actualDevices;
 eventEmitter.on('ADB', function (data) {
-  const { actual, emittedDevices } = data;
-  function comparer(otherArray) {
-    return function (current) {
-      return (
-        otherArray.filter(function (other) {
-          return other.udid === current.udid;
-        }).length === 0
-      );
-    };
-  }
-  const newDevice = emittedDevices.filter(comparer(actual));
-  let temp = [];
-  newDevice.forEach((device) =>
-    temp.push(Object.assign({ busy: false }, device))
-  );
-  log.info(`New Devices Detected ${newDevice}`);
-  mergedDevices = temp.concat(devices);
-  temp.splice(0, temp.length);
-  log.info(`Master Device List ${JSON.stringify(mergedDevices)}`);
+  const { emittedDevices } = data;
+  emittedDevices.forEach((emittedDevice) => {
+    const actualDevice = actualDevices.find(
+      (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
+    );
+    const deviceIndex = _.findIndex(emittedDevices, {
+      udid: emittedDevice.udid,
+    });
+    if (actualDevice) {
+      const deviceIndex = _.findIndex(emittedDevices, {
+        udid: emittedDevice.udid,
+      });
+      emittedDevices[deviceIndex] = Object.assign({
+        busy: actualDevice.busy,
+        state: emittedDevice.state,
+        udid: emittedDevice.udid,
+        sessionId: actualDevice.sessionId,
+      });
+    } else {
+      emittedDevices[deviceIndex] = Object.assign({
+        busy: false,
+        state: emittedDevice.state,
+        udid: emittedDevice.udid,
+        sessionId: null,
+      });
+    }
+  });
+  actualDevices = emittedDevices;
+  console.log('Master Device List', actualDevices);
 });
 
 export default class Devices {
-  constructor(foundDevice) {
-    devices = foundDevice;
-    this.initADB(devices);
+  constructor(connectedDevices) {
+    actualDevices = connectedDevices;
+    this.initADB();
   }
 
-  initADB(devices) {
+  initADB() {
     console.log('Starting & initializing the timer');
     let rule = new schedule.RecurrenceRule();
     rule.second = [0, 10, 20, 30, 40, 50];
     schedule.scheduleJob(rule, async function () {
       let androidDevices = new AndroidDeviceManager();
-      let deviceState = await androidDevices.getConnectedDevices();
+      let connectedDevices = await androidDevices.getConnectedDevices();
       eventEmitter.emit('ADB', {
-        actual: devices,
-        emittedDevices: deviceState,
+        emittedDevices: connectedDevices,
       });
     });
   }
 
+  listAllDevices() {
+    return actualDevices;
+  }
+
   getFreeDevice() {
-    console.log('------', mergedDevices);
-    return mergedDevices.find((device) => device.busy === false);
+    return actualDevices.find((device) => device.busy === false);
   }
 
   blockDevice(freeDevice) {
-    return mergedDevices.find(
+    return actualDevices.find(
       (device) =>
         device.udid === freeDevice.udid && ((device.busy = true), true)
     );
   }
 
-  unblockDevice(freeDevice) {
-    return mergedDevices.find(
+  unblockDevice(blockedDevice) {
+    return actualDevices.find(
       (device) =>
-        device.udid === freeDevice.udid && ((device.busy = false), true)
+        device.udid === blockedDevice.udid && ((device.busy = false), true)
     );
   }
 
   updateDevice(freeDevice, sessionId) {
-    const device = mergedDevices.find(
+    const device = actualDevices.find(
       (device) => device.udid === freeDevice.udid
     );
-    const deviceIndex = _.findIndex(mergedDevices, { udid: freeDevice.udid });
-    mergedDevices[deviceIndex] = Object.assign(device, { sessionId });
+    const deviceIndex = _.findIndex(actualDevices, { udid: freeDevice.udid });
+    actualDevices[deviceIndex] = Object.assign(device, { sessionId });
   }
 
   getDeviceForSession(sessionId) {
-    return mergedDevices.find((device) => device.sessionId === sessionId);
+    return actualDevices.find((device) => device.sessionId === sessionId);
   }
 }
