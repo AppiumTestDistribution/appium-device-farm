@@ -8,8 +8,8 @@ let devices;
 let instance = false;
 
 export default class DevicePlugin extends BasePlugin {
-  constructor() {
-    super();
+  constructor(pluginName) {
+    super(pluginName);
     if (instance === false) {
       return (async () => {
         let androidDevices = new AndroidDeviceManager();
