@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { eventEmitter } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
+import log from './logger';
+
 const schedule = require('node-schedule');
 let devices;
 let mergedDevices;
@@ -20,10 +22,10 @@ eventEmitter.on('ADB', function (data) {
   newDevice.forEach((device) =>
     temp.push(Object.assign({ busy: false }, device))
   );
-  console.log('New Devices Detected', newDevice);
-  console.log('Master Device List', devices);
+  log.info(`New Devices Detected ${newDevice}`);
   mergedDevices = temp.concat(devices);
-  console.log('Master Merged Device List', mergedDevices);
+  temp.splice(0, temp.length);
+  log.info(`Master Device List ${JSON.stringify(mergedDevices)}`);
 });
 
 export default class Devices {
