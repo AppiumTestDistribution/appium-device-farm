@@ -6,6 +6,7 @@ import Device from './Devices';
 
 let devices;
 let instance = false;
+
 export default class DevicePlugin extends BasePlugin {
   constructor() {
     super();

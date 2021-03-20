@@ -5,8 +5,7 @@ let deviceState = [];
 export default class AndroidDeviceMananger {
   async getDevices() {
     log.info('Fetching Android Devices');
-    const adb = await ADB.createADB();
-    const connectedDevices = await adb.getConnectedDevices();
+    const connectedDevices = await this.getConnectedDevices();
 
     connectedDevices.forEach((device) => {
       if (
@@ -23,5 +22,11 @@ export default class AndroidDeviceMananger {
     });
     log.info(`Android Devices found ${JSON.stringify(deviceState)}`);
     return deviceState;
+  }
+
+  async getConnectedDevices() {
+    const adb = await ADB.createADB();
+    const connectedDevices = await adb.getConnectedDevices();
+    return connectedDevices;
   }
 }
