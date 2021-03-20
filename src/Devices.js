@@ -16,9 +16,14 @@ eventEmitter.on('ADB', function (data) {
     };
   }
   const newDevice = emittedDevices.filter(comparer(actual));
+  let temp = [];
+  newDevice.forEach((device) =>
+    temp.push(Object.assign({ busy: false }, device))
+  );
   console.log('New Devices Detected', newDevice);
-  console.log('New Device List', devices);
-  mergedDevices = newDevice.concat(devices);
+  console.log('Master Device List', devices);
+  mergedDevices = temp.concat(devices);
+  console.log('Master Merged Device List', mergedDevices);
 });
 
 export default class Devices {
