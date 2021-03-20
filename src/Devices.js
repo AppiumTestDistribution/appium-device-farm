@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { eventEmitter } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 const schedule = require('node-schedule');
+let devices;
 
 eventEmitter.on('ADB', function (data) {
   const { actual, emittedDevices } = data;
@@ -16,11 +17,12 @@ eventEmitter.on('ADB', function (data) {
   }
   const newDevice = emittedDevices.filter(comparer(actual));
   console.log('New Devices Detected', newDevice);
+  console.log('New Device List', devices);
 });
 
 export default class Devices {
-  constructor(devices) {
-    this.devices = devices;
+  constructor(foundDevice) {
+    devices = foundDevice;
     this.initADB(devices);
   }
 
@@ -39,32 +41,31 @@ export default class Devices {
   }
 
   getFreeDevice() {
-    return this.devices.find((device) => device.busy === false);
+    console.log('------', devices);
+    return devices.find((device) => device.busy === false);
   }
 
   blockDevice(freeDevice) {
-    return this.devices.find(
+    return devices.find(
       (device) =>
         device.udid === freeDevice.udid && ((device.busy = true), true)
     );
   }
 
   unblockDevice(freeDevice) {
-    return this.devices.find(
+    return devices.find(
       (device) =>
         device.udid === freeDevice.udid && ((device.busy = false), true)
     );
   }
 
   updateDevice(freeDevice, sessionId) {
-    const device = this.devices.find(
-      (device) => device.udid === freeDevice.udid
-    );
-    const deviceIndex = _.findIndex(this.devices, { udid: freeDevice.udid });
-    this.devices[deviceIndex] = Object.assign(device, { sessionId });
+    const device = devices.find((device) => device.udid === freeDevice.udid);
+    const deviceIndex = _.findIndex(devices, { udid: freeDevice.udid });
+    devices[deviceIndex] = Object.assign(device, { sessionId });
   }
 
   getDeviceForSession(sessionId) {
-    return this.devices.find((device) => device.sessionId === sessionId);
+    return devices.find((device) => device.sessionId === sessionId);
   }
 }
