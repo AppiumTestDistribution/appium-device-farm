@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { eventEmitter } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
+import log from './logger';
 
 const schedule = require('node-schedule');
 let actualDevices;
@@ -33,7 +34,7 @@ eventEmitter.on('ADB', function (data) {
     }
   });
   actualDevices = emittedDevices;
-  console.log('Master Device List', actualDevices);
+  log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
 });
 
 export default class Devices {
@@ -43,7 +44,7 @@ export default class Devices {
   }
 
   initADB() {
-    console.log('Starting & initializing the timer');
+    log.info('Starting & initializing the listen to device changes');
     let rule = new schedule.RecurrenceRule();
     rule.second = [0, 10, 20, 30, 40, 50];
     schedule.scheduleJob(rule, async function () {
