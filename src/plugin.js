@@ -19,6 +19,7 @@ export default class DevicePlugin extends BasePlugin {
       })();
     }
   }
+
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     const freeDevice = devices.getFreeDevice();
     if (freeDevice) {

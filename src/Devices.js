@@ -56,10 +56,6 @@ export default class Devices {
     });
   }
 
-  listAllDevices() {
-    return actualDevices;
-  }
-
   getFreeDevice() {
     return actualDevices.find((device) => device.busy === false);
   }
@@ -89,4 +85,8 @@ export default class Devices {
   getDeviceForSession(sessionId) {
     return actualDevices.find((device) => device.sessionId === sessionId);
   }
+}
+
+export function listAllDevices() {
+  return actualDevices;
 }
