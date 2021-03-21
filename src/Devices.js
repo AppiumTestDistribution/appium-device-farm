@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { findIndex } from 'lodash';
 import { eventEmitter } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import log from './logger';
@@ -11,7 +11,7 @@ eventEmitter.on('ADB', function (data) {
     const actualDevice = actualDevices.find(
       (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
     );
-    const deviceIndex = _.findIndex(emittedDevices, {
+    const deviceIndex = findIndex(emittedDevices, {
       udid: emittedDevice.udid,
     });
     emittedDevices[deviceIndex] = Object.assign({
@@ -66,7 +66,7 @@ export default class Devices {
     const device = actualDevices.find(
       (device) => device.udid === freeDevice.udid
     );
-    const deviceIndex = _.findIndex(actualDevices, { udid: freeDevice.udid });
+    const deviceIndex = findIndex(actualDevices, { udid: freeDevice.udid });
     actualDevices[deviceIndex] = Object.assign(device, { sessionId });
   }
 
