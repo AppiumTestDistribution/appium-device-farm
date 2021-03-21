@@ -14,24 +14,12 @@ eventEmitter.on('ADB', function (data) {
     const deviceIndex = _.findIndex(emittedDevices, {
       udid: emittedDevice.udid,
     });
-    if (actualDevice) {
-      const deviceIndex = _.findIndex(emittedDevices, {
-        udid: emittedDevice.udid,
-      });
-      emittedDevices[deviceIndex] = Object.assign({
-        busy: actualDevice.busy,
-        state: emittedDevice.state,
-        udid: emittedDevice.udid,
-        sessionId: actualDevice.sessionId,
-      });
-    } else {
-      emittedDevices[deviceIndex] = Object.assign({
-        busy: false,
-        state: emittedDevice.state,
-        udid: emittedDevice.udid,
-        sessionId: null,
-      });
-    }
+    emittedDevices[deviceIndex] = Object.assign({
+      busy: actualDevice ? actualDevice.busy : false,
+      state: emittedDevice.state,
+      udid: emittedDevice.udid,
+      sessionId: actualDevice ? actualDevice.sessionId : null,
+    });
   });
   actualDevices = emittedDevices;
   log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
