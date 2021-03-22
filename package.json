@@ -1,6 +1,6 @@
 {
   "name": "appium-device-plugin",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
