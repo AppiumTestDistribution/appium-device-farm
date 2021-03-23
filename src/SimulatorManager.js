@@ -6,7 +6,7 @@ export default class SimulatorManager {
   }
 
   async getSimulators() {
-    const devices = await this.simctl.getDevices('13.5', 'iOS');
+    const devices = await this.simctl.getDevices(null, 'iOS');
     console.log(devices);
   }
 }
