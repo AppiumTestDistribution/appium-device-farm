@@ -4,11 +4,11 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Why Appium Device Plugin?
 
-- Appium device plugin automatically detects connected android devices before session creation and maintains it in global device pool.
-- Appium device plugin dynamically allocates a free device from global device pool while creating driver session.
-- Appium device plugin dynamically updates global device pool when new device is detected or an existing device is removed during the test execution.
-- Appium device plugin dynamically updates global device pool by polling for connected devices every 10 seconds.
-- Appium device plugin automatically allocates a free port to systemPort capability during session creation.
+- Automatically detects connected android devices before session creation and maintains it in global device pool.
+- Dynamically allocates a free device from global device pool while creating driver session.
+- Dynamically updates global device pool when new device is detected or an existing device is removed during the test execution.
+- Dynamically updates global device pool by polling for connected devices every 10 seconds.
+- Allocates a free port to systemPort capability during session creation.
 
 ## Prerequisite
 
