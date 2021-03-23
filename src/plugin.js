@@ -3,15 +3,17 @@ import AndroidDeviceManager from './AndroidDeviceManager';
 const getPort = require('get-port');
 import log from './logger';
 import Device from './Devices';
+import SimulatorManager from './SimulatorManager';
 
 let devices;
 let instance = false;
-
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName) {
     super(pluginName);
     if (instance === false) {
       return (async () => {
+        let simulatorManager = new SimulatorManager();
+        await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
         let connectedDevices = await androidDevices.getDevices();
         devices = new Device(connectedDevices);
