@@ -1,5 +1,5 @@
 import { findIndex } from 'lodash';
-import { eventEmitter } from './events';
+import eventEmitter from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import log from './logger';
 
