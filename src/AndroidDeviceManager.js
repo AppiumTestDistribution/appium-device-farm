@@ -26,7 +26,6 @@ export default class AndroidDeviceMananger {
 
   async getConnectedDevices() {
     const adb = await ADB.createADB();
-    const connectedDevices = await adb.getConnectedDevices();
-    return connectedDevices;
+    return await adb.getConnectedDevices();
   }
 }
