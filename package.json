@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src -d lib",
     "prepublish": "babel src -d lib",
-    "prettier": "prettier --write --single-quote",
+    "lint": "eslint '**/*.js' --fix",
+    "prettier": "prettier '**/*.js' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-plugin"
   },
   "repository": {

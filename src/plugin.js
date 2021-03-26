@@ -2,7 +2,7 @@ import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
 const getPort = require('get-port');
 import log from './logger';
-import Device from './Devices';
+import Devices from './Devices';
 import SimulatorManager from './SimulatorManager';
 
 let devices;
@@ -16,7 +16,7 @@ export default class DevicePlugin extends BasePlugin {
         await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
         let connectedDevices = await androidDevices.getDevices();
-        devices = new Device(connectedDevices);
+        devices = new Devices(connectedDevices);
         instance = true;
       })();
     }
