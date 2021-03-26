@@ -15,10 +15,10 @@ eventEmitter.on('ADB', function (data) {
       udid: emittedDevice.udid,
     });
     emittedDevices[deviceIndex] = Object.assign({
-      busy: actualDevice ? actualDevice.busy : false,
+      busy: !!actualDevice?.busy,
       state: emittedDevice.state,
       udid: emittedDevice.udid,
-      sessionId: actualDevice ? actualDevice.sessionId : null,
+      sessionId: actualDevice?.sessionId ?? null,
     });
   });
   actualDevices = emittedDevices;
