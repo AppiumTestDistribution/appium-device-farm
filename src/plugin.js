@@ -5,35 +5,43 @@ import log from './logger';
 import Devices from './Devices';
 import SimulatorManager from './SimulatorManager';
 
+const AsyncLock = require('async-lock');
+
 let devices;
 let instance = false;
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName) {
     super(pluginName);
-    if (instance === false) {
-      return (async () => {
+    this.commandsQueueGuard = new AsyncLock();
+  }
+
+  async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
+    async function fetchDevices() {
+      if (instance === false) {
         let simulatorManager = new SimulatorManager();
         await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
         let connectedDevices = await androidDevices.getDevices();
         devices = new Devices(connectedDevices);
         instance = true;
-      })();
+      }
     }
-  }
+    let freeDevice;
+    await this.commandsQueueGuard.acquire('DeviceManager', async function () {
+      await fetchDevices();
+      freeDevice = devices.getFreeDevice();
+      if (freeDevice) {
+        caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
+        caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
+        caps.firstMatch[0]['appium:systemPort'] = await getPort();
+        devices.blockDevice(freeDevice);
+        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+      } else {
+        throw new Error('No free device is available to create session');
+      }
+    });
 
-  async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    const freeDevice = devices.getFreeDevice();
-    if (freeDevice) {
-      caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-      caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
-      caps.firstMatch[0]['appium:systemPort'] = await getPort();
-      devices.blockDevice(freeDevice);
-      log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-    } else {
-      throw new Error('No free device is available to create session');
-    }
-    this.session = await driver.createSession(jwpDesCaps, jwpReqCaps, caps);
+    this.session = await next();
     if (this.session.error) {
       devices.unblockDevice(freeDevice);
       log.info(
