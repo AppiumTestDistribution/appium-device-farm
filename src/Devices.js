@@ -2,33 +2,32 @@ import { findIndex } from 'lodash';
 import eventEmitter from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import log from './logger';
+import schedule from 'node-schedule';
 
-const schedule = require('node-schedule');
 let actualDevices;
-eventEmitter.on('ADB', function (data) {
-  const { emittedDevices } = data;
-  emittedDevices.forEach((emittedDevice) => {
-    const actualDevice = actualDevices.find(
-      (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
-    );
-    const deviceIndex = findIndex(emittedDevices, {
-      udid: emittedDevice.udid,
-    });
-    emittedDevices[deviceIndex] = Object.assign({
-      busy: !!actualDevice?.busy,
-      state: emittedDevice.state,
-      udid: emittedDevice.udid,
-      sessionId: actualDevice?.sessionId ?? null,
-    });
-  });
-  actualDevices = emittedDevices;
-  log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
-});
-
 export default class Devices {
   constructor(connectedDevices) {
     actualDevices = connectedDevices;
     this.initADB();
+    eventEmitter.on('ADB', function (data) {
+      const { emittedDevices } = data;
+      emittedDevices.forEach((emittedDevice) => {
+        const actualDevice = actualDevices.find(
+          (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
+        );
+        const deviceIndex = findIndex(emittedDevices, {
+          udid: emittedDevice.udid,
+        });
+        emittedDevices[deviceIndex] = Object.assign({
+          busy: !!actualDevice?.busy,
+          state: emittedDevice.state,
+          udid: emittedDevice.udid,
+          sessionId: actualDevice?.sessionId ?? null,
+        });
+      });
+      actualDevices = emittedDevices;
+      log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
+    });
   }
 
   initADB() {
