@@ -1,11 +1,10 @@
 import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
-const getPort = require('get-port');
+import getPort from 'get-port';
 import log from './logger';
 import Devices from './Devices';
 import SimulatorManager from './SimulatorManager';
-
-const AsyncLock = require('async-lock');
+import AsyncLock from 'async-lock';
 
 let devices;
 let instance = false;
