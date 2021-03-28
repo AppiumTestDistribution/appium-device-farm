@@ -18,10 +18,10 @@ export default class DevicePlugin extends BasePlugin {
     async function fetchDevices() {
       if (instance === false) {
         let simulatorManager = new SimulatorManager();
-        await simulatorManager.getSimulators();
+        const simulators = await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
         let connectedDevices = await androidDevices.getDevices();
-        devices = new Devices(connectedDevices);
+        devices = new Devices(Object.assign(simulators, connectedDevices));
         instance = true;
       }
     }
