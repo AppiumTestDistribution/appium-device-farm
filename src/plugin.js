@@ -20,8 +20,10 @@ export default class DevicePlugin extends BasePlugin {
         let simulatorManager = new SimulatorManager();
         const simulators = await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
-        let connectedDevices = await androidDevices.getDevices();
-        devices = new Devices(Object.assign(simulators, connectedDevices));
+        let connectedAndroidDevices = await androidDevices.getDevices();
+        devices = new Devices(
+          Object.assign(simulators, connectedAndroidDevices)
+        );
         instance = true;
       }
     }
