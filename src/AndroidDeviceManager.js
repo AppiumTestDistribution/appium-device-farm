@@ -16,6 +16,7 @@ export default class AndroidDeviceMananger {
             busy: false,
             state: device.state,
             udid: device.udid,
+            platform: 'android',
           })
         );
       }

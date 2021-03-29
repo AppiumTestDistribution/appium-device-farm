@@ -30,7 +30,7 @@ export default class DevicePlugin extends BasePlugin {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
       await fetchDevices();
-      freeDevice = devices.getFreeDevice();
+      freeDevice = devices.getFreeDevice(caps.firstMatch[0]['platformName']);
       if (freeDevice) {
         caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
         caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;

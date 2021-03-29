@@ -43,8 +43,11 @@ export default class Devices {
     });
   }
 
-  getFreeDevice() {
-    return actualDevices.find((device) => device.busy === false);
+  getFreeDevice(platform) {
+    log.info(`Finding Free Device for Platform ${platform}`);
+    return actualDevices.find(
+      (device) => device.busy === false && device.platform === platform
+    );
   }
 
   blockDevice(freeDevice) {
