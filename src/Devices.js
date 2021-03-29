@@ -26,10 +26,7 @@ export default class Devices {
           platform: 'android',
         });
       });
-      actualDevices = remove(
-        actualDevices,
-        (device) => device.platform != 'android'
-      );
+      remove(actualDevices, (device) => device.platform === 'android');
       actualDevices.push(...emittedDevices);
       log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
     });
