@@ -1,4 +1,4 @@
-import { findIndex } from 'lodash';
+import { findIndex, remove } from 'lodash';
 import eventEmitter from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import log from './logger';
@@ -23,9 +23,14 @@ export default class Devices {
           state: emittedDevice.state,
           udid: emittedDevice.udid,
           sessionId: actualDevice?.sessionId ?? null,
+          platform: 'android',
         });
       });
-      actualDevices = emittedDevices;
+      actualDevices = remove(
+        actualDevices,
+        (device) => device.platform != 'android'
+      );
+      actualDevices.push(...emittedDevices);
       log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
     });
   }
