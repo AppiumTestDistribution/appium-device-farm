@@ -12,7 +12,9 @@ export default class SimulatorManager {
     flatten(
       Object.values(await this.simctl.getDevicesByParsing('iOS'))
     ).forEach((device) =>
-      simulators.push(Object.assign({}, device, { busy: false }))
+      simulators.push(
+        Object.assign({}, device, { busy: false, realDevice: false })
+      )
     );
     return simulators;
   }
