@@ -1,6 +1,6 @@
 # appium-device-plugin
 
-This is an Appium plugin designed to manage and create driver session on connected android devices.
+This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
 
 ## Why Appium Device Plugin?
 
