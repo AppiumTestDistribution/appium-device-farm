@@ -31,10 +31,16 @@ export default class DevicePlugin extends BasePlugin {
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
       await fetchDevices();
       freeDevice = devices.getFreeDevice(caps.firstMatch[0]['platformName']);
-      if (freeDevice) {
+      if (freeDevice && caps.firstMatch[0]['platformName'] === 'android') {
         caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
         caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
         caps.firstMatch[0]['appium:systemPort'] = await getPort();
+        devices.blockDevice(freeDevice);
+        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+      } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'iOS') {
+        caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
+        caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
+        caps.firstMatch[0]['appium:wdaLocalPort'] = await getPort();
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
       } else {
