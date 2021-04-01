@@ -1,6 +1,6 @@
 import BasePlugin from '@appium/base-plugin';
 import AndroidDeviceManager from './AndroidDeviceManager';
-import getPort from 'get-port';
+import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import Devices from './Devices';
 import SimulatorManager from './SimulatorManager';
@@ -32,15 +32,11 @@ export default class DevicePlugin extends BasePlugin {
       await fetchDevices();
       freeDevice = devices.getFreeDevice(caps.firstMatch[0]['platformName']);
       if (freeDevice && caps.firstMatch[0]['platformName'] === 'android') {
-        caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-        caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
-        caps.firstMatch[0]['appium:systemPort'] = await getPort();
+        await androidCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'iOS') {
-        caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-        caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
-        caps.firstMatch[0]['appium:wdaLocalPort'] = await getPort();
+      } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'ios') {
+        await iOSCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
       } else {
