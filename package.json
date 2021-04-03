@@ -37,7 +37,8 @@
     "get-port": "^5.1.1",
     "node-simctl": "^6.4.1",
     "node-schedule": "^2.0.0",
-    "async-lock": "^1.2.8"
+    "async-lock": "^1.2.8",
+    "appium-ios-device": "^1.7.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
