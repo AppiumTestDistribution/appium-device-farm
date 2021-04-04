@@ -1,7 +1,5 @@
-const sinon = require('sinon');
-const chai = require('chai');
-const expect = chai.expect;
-
+import sinon from 'sinon';
+import { expect } from 'chai';
 import SimulatorManager from '../src/SimulatorManager';
 
 describe('Simulator Manager', () => {

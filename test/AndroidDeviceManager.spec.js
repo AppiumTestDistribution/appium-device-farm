@@ -1,8 +1,5 @@
-const assert = require('assert');
-const sinon = require('sinon');
-const chai = require('chai');
-const expect = chai.expect;
-
+import sinon from 'sinon';
+import { expect } from 'chai';
 import AndroidDeviceManager from '../src/AndroidDeviceManager';
 
 describe('Android Device Manager', () => {
