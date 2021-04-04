@@ -1,4 +1,4 @@
-# appium-device-plugin
+# appium-device-plugin [![Node.js CI](https://github.com/SrinivasanTarget/appium-device-plugin/actions/workflows/node.js.yml/badge.svg)](https://github.com/SrinivasanTarget/appium-device-plugin/actions/workflows/node.js.yml)
 
 This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
 
