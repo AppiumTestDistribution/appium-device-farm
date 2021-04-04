@@ -4,7 +4,7 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --require esm test/*.spec.js",
     "build": "babel src -d lib",
     "prepublish": "babel src -d lib",
     "lint": "eslint '**/*.js' --fix",
@@ -54,7 +54,11 @@
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "lodash": "^4.17.21",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "sinon": "^10.0.0",
+    "mocha": "^8.3.2",
+    "esm": "^3.2.25",
+    "chai": "^4.1.0"
   },
   "appium": {
     "pluginName": "device-manager",
