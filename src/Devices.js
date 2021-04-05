@@ -19,10 +19,10 @@ export default class Devices {
           udid: emittedDevice.udid,
         });
         emittedDevices[deviceIndex] = Object.assign({
-          busy: actualDevice ? actualDevice.busy : false,
+          busy: !!actualDevice?.busy,
           state: emittedDevice.state,
           udid: emittedDevice.udid,
-          sessionId: actualDevice ? actualDevice.sessionId : null,
+          sessionId: actualDevice?.sessionId ?? null,
           platform: 'android',
         });
       });

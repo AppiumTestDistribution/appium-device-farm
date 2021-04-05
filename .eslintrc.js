@@ -8,12 +8,15 @@ module.exports = {
   env: {
     node: true,
     es6: true,
-    jest: true,
+    mocha: true,
   },
   parser: 'babel-eslint',
   parserOptions: {
     ecmaVersion: 2016,
     sourceType: 'module',
+    babelOptions: {
+      plugins: ['@babel/plugin-proposal-class-properties'],
+    },
   },
   plugins: ['prettier'],
   rules: {
