@@ -1,0 +1,9 @@
+.device-row {
+    border: 1px solid;
+    border-color: #D3D3D3;
+    border-radius: 4px;
+}
+.device-container {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
