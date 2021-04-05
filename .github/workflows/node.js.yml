@@ -29,6 +29,7 @@ jobs:
       - run: npm test
 
   auto-merge:
+    if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
