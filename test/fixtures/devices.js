@@ -29,4 +29,4 @@ export const deviceMock = [
     busy: false,
     realDevice: false,
   },
-]
+];
