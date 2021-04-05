@@ -4,7 +4,7 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha --require esm test/*.spec.js",
+    "test": "mocha --require esm test/*.spec.js --exit",
     "build": "babel src -d lib",
     "prepublish": "babel src -d lib",
     "lint": "eslint '**/*.js' --fix",
