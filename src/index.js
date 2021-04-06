@@ -1,6 +1,5 @@
 import DevicePlugin from './plugin';
-// eslint-disable-next-line no-unused-vars,import/default
-import App from './app';
-
+// eslint-disable-next-line import/default
+import './app';
 export default new DevicePlugin();
 export { DevicePlugin };
