@@ -43,4 +43,16 @@ describe('Devices', () => {
       platform: 'android',
     });
   });
+
+  it('UnBlock device should set busy state to false', async () => {
+    const devices = new Devices(deviceMock);
+    const blockedDevice = deviceMock.find((device) => device.busy === true);
+    const unblockedDevice = await devices.unblockDevice(blockedDevice);
+    expect(unblockedDevice).to.deep.equal({
+      busy: false,
+      state: 'device',
+      udid: 'emulator-5555',
+      platform: 'android',
+    });
+  });
 });
