@@ -36,6 +36,20 @@ export default class DevicePlugin extends BasePlugin {
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
       } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'ios') {
+        if (caps.firstMatch[0]['appium:iPhoneOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(
+            caps.firstMatch[0]['platformName'],
+            { simulator: 'iPhone' }
+          );
+        } else if (caps.firstMatch[0]['appium:iPadOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(
+            caps.firstMatch[0]['platformName'],
+            { simulator: 'iPad' }
+          );
+        }
+        console.log('====================================');
+        console.log(freeDevice);
+        console.log('====================================');
         await iOSCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);

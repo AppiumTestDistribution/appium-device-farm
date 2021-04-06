@@ -45,12 +45,21 @@ export default class Devices {
     });
   }
 
-  getFreeDevice(platform) {
+  getFreeDevice(platform, options) {
     log.info(`Finding Free Device for Platform ${platform}`);
-    return actualDevices.find(
-      (device) =>
-        device.busy === false && device.platform.toLowerCase() === platform
-    );
+    if (options) {
+      return actualDevices.find(
+        (device) =>
+          device.busy === false &&
+          device.platform.toLowerCase() === platform &&
+          device.name.includes(options.simulator)
+      );
+    } else {
+      return actualDevices.find(
+        (device) =>
+          device.busy === false && device.platform.toLowerCase() === platform
+      );
+    }
   }
 
   blockDevice(freeDevice) {

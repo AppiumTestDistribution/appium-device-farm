@@ -34,6 +34,22 @@ The plugin will not be active unless turned on when invoking the Appium server:
 appium --plugins=device-manager
 ```
 
+## Capabilities
+
+By default global devices pool includes all the iOS simulators.
+
+To allocate only iPhone simulators set below capability to true,
+
+```
+capabilities.setCapability("appium:iPhoneOnly", "true");
+```
+
+To allocate only iPad simulators set below capability to true,
+
+```
+capabilities.setCapability("appium:iPadOnly", "true");
+```
+
 ## Example
 
 Server logs will be as below:
