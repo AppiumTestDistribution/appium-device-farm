@@ -22,7 +22,7 @@ export default class IOSDeviceManager {
       deviceState.push(
         Object.assign({
           udid,
-          OSVersion: await this.getOSVersion(udid),
+          sdk: await this.getOSVersion(udid),
           name: await this.getDeviceName(udid),
           busy: false,
           realDevice: true,

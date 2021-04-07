@@ -15,7 +15,7 @@ describe('IOS Device Manager', () => {
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
-        OSVersion: '14.1.1',
+        sdk: '14.1.1',
         name: 'Sai’s iPhone',
         busy: false,
         realDevice: true,
