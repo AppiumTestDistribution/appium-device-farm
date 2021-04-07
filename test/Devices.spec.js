@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-
 import Devices, { listAllDevices } from '../src/Devices';
 import { deviceMock } from './fixtures/devices';
+import IOSDeviceManager from '../src/IOSDeviceManager';
 
 describe('Devices', () => {
   it('Get Free device for iOS Platform', async () => {

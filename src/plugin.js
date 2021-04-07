@@ -30,26 +30,23 @@ export default class DevicePlugin extends BasePlugin {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
       await fetchDevices();
-      freeDevice = devices.getFreeDevice(caps.firstMatch[0]['platformName']);
-      if (freeDevice && caps.firstMatch[0]['platformName'] === 'android') {
+      let firstMatch = caps.firstMatch[0];
+      let firstMatchPlatform = firstMatch['platformName'];
+      freeDevice = devices.getFreeDevice(firstMatchPlatform);
+      if (freeDevice && firstMatchPlatform === 'android') {
         await androidCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'ios') {
-        if (caps.firstMatch[0]['appium:iPhoneOnly'] === 'true') {
-          freeDevice = devices.getFreeDevice(
-            caps.firstMatch[0]['platformName'],
-            { simulator: 'iPhone' }
-          );
-        } else if (caps.firstMatch[0]['appium:iPadOnly'] === 'true') {
-          freeDevice = devices.getFreeDevice(
-            caps.firstMatch[0]['platformName'],
-            { simulator: 'iPad' }
-          );
+      } else if (freeDevice && firstMatchPlatform === 'ios') {
+        if (firstMatch['appium:iPhoneOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+            simulator: 'iPhone',
+          });
+        } else if (firstMatch['appium:iPadOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+            simulator: 'iPad',
+          });
         }
-        console.log('====================================');
-        console.log(freeDevice);
-        console.log('====================================');
         await iOSCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
