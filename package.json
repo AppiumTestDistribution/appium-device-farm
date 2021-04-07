@@ -53,7 +53,7 @@
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^3.0.1",
-    "husky": "^4.2.5",
+    "husky": "^6.0.0",
     "lint-staged": "^10.2.11",
     "lodash": "^4.17.21",
     "mocha": "^8.3.2",
