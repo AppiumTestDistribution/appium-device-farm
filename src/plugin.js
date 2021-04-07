@@ -5,6 +5,7 @@ import log from './logger';
 import Devices from './Devices';
 import SimulatorManager from './SimulatorManager';
 import AsyncLock from 'async-lock';
+import IOSDeviceManager from './IOSDeviceManager';
 
 let devices;
 let instance = false;
@@ -18,11 +19,17 @@ export default class DevicePlugin extends BasePlugin {
     async function fetchDevices() {
       if (instance === false) {
         let simulatorManager = new SimulatorManager();
-        const simulators = await simulatorManager.getSimulators();
         let androidDevices = new AndroidDeviceManager();
-        let connectedAndroidDevices = await androidDevices.getDevices();
+        let iosDevices = new IOSDeviceManager();
+        const simulators = await simulatorManager.getSimulators();
+        const connectedAndroidDevices = await androidDevices.getDevices();
+        const connectedIOSDevices = await iosDevices.getDevices();
         devices = new Devices(
-          Object.assign(simulators, connectedAndroidDevices)
+          Object.assign(
+            simulators,
+            connectedAndroidDevices,
+            connectedIOSDevices
+          )
         );
         instance = true;
       }
@@ -30,26 +37,23 @@ export default class DevicePlugin extends BasePlugin {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
       await fetchDevices();
-      freeDevice = devices.getFreeDevice(caps.firstMatch[0]['platformName']);
-      if (freeDevice && caps.firstMatch[0]['platformName'] === 'android') {
+      let firstMatch = caps.firstMatch[0];
+      let firstMatchPlatform = firstMatch['platformName'];
+      freeDevice = devices.getFreeDevice(firstMatchPlatform);
+      if (freeDevice && firstMatchPlatform === 'android') {
         await androidCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && caps.firstMatch[0]['platformName'] === 'ios') {
-        if (caps.firstMatch[0]['appium:iPhoneOnly'] === 'true') {
-          freeDevice = devices.getFreeDevice(
-            caps.firstMatch[0]['platformName'],
-            { simulator: 'iPhone' }
-          );
-        } else if (caps.firstMatch[0]['appium:iPadOnly'] === 'true') {
-          freeDevice = devices.getFreeDevice(
-            caps.firstMatch[0]['platformName'],
-            { simulator: 'iPad' }
-          );
+      } else if (freeDevice && firstMatchPlatform === 'ios') {
+        if (firstMatch['appium:iPhoneOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+            simulator: 'iPhone',
+          });
+        } else if (firstMatch['appium:iPadOnly'] === 'true') {
+          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+            simulator: 'iPad',
+          });
         }
-        console.log('====================================');
-        console.log(freeDevice);
-        console.log('====================================');
         await iOSCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
