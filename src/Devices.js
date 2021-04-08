@@ -25,13 +25,15 @@ export default class Devices {
           udid: emittedDevice.udid,
           sessionId: actualDevice?.sessionId ?? null,
           platform: emittedDevice.platform,
+          realDevice: emittedDevice.realDevice,
+          sdk: emittedDevice.sdk,
         });
       });
       remove(
         actualDevices,
         (device) =>
           device.platform === 'android' ||
-          (device.platform === 'ios' && device.realDevice)
+          (device.platform === 'iOS' && device.realDevice === true)
       );
       actualDevices.push(...emittedDevices);
       log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
