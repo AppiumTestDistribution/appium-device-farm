@@ -10,7 +10,7 @@ export default class Devices {
   constructor(connectedDevices) {
     actualDevices = connectedDevices;
     this.initADB();
-    eventEmitter.on('ADB', function (data) {
+    eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
       emittedDevices.forEach((emittedDevice) => {
         const actualDevice = actualDevices.find(
@@ -47,7 +47,7 @@ export default class Devices {
       let iOSDeviceManager = new IOSDeviceManager();
       const connectedAndroidDevices = await androidDeviceManager.getDevices();
       const connectedIOSDevices = await iOSDeviceManager.getDevices();
-      eventEmitter.emit('ADB', {
+      eventEmitter.emit('ConnectedDevices', {
         emittedDevices: Object.assign(
           connectedAndroidDevices,
           connectedIOSDevices
