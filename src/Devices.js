@@ -1,6 +1,7 @@
 import { findIndex, remove } from 'lodash';
 import eventEmitter from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
+import IOSDeviceManager from './IOSDeviceManager';
 import log from './logger';
 import schedule from 'node-schedule';
 
@@ -9,7 +10,7 @@ export default class Devices {
   constructor(connectedDevices) {
     actualDevices = connectedDevices;
     this.initADB();
-    eventEmitter.on('ADB', function (data) {
+    eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
       emittedDevices.forEach((emittedDevice) => {
         const actualDevice = actualDevices.find(
@@ -23,10 +24,17 @@ export default class Devices {
           state: emittedDevice.state,
           udid: emittedDevice.udid,
           sessionId: actualDevice?.sessionId ?? null,
-          platform: 'android',
+          platform: emittedDevice.platform,
+          realDevice: emittedDevice.realDevice,
+          sdk: emittedDevice.sdk,
         });
       });
-      remove(actualDevices, (device) => device.platform === 'android');
+      remove(
+        actualDevices,
+        (device) =>
+          device.platform === 'android' ||
+          (device.platform === 'iOS' && device.realDevice === true)
+      );
       actualDevices.push(...emittedDevices);
       log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
     });
@@ -37,10 +45,15 @@ export default class Devices {
     let rule = new schedule.RecurrenceRule();
     rule.second = [0, 10, 20, 30, 40, 50];
     schedule.scheduleJob(rule, async function () {
-      let androidDevices = new AndroidDeviceManager();
-      let connectedDevices = await androidDevices.getConnectedDevices();
-      eventEmitter.emit('ADB', {
-        emittedDevices: connectedDevices,
+      let androidDeviceManager = new AndroidDeviceManager();
+      let iOSDeviceManager = new IOSDeviceManager();
+      const connectedAndroidDevices = await androidDeviceManager.getDevices();
+      const connectedIOSDevices = await iOSDeviceManager.getDevices();
+      eventEmitter.emit('ConnectedDevices', {
+        emittedDevices: Object.assign(
+          connectedAndroidDevices,
+          connectedIOSDevices
+        ),
       });
     });
   }
