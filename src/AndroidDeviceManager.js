@@ -2,6 +2,7 @@ import ADB from 'appium-adb';
 import log from './logger';
 
 let deviceState = [];
+let adbInstance = null;
 export default class AndroidDeviceMananger {
   async getDevices() {
     log.info('Fetching Android Devices');
@@ -25,8 +26,25 @@ export default class AndroidDeviceMananger {
     return deviceState;
   }
 
+  async createADB() {
+    if (adbInstance === null) {
+      this.adb = await ADB.createADB();
+      adbInstance = true;
+    }
+  }
   async getConnectedDevices() {
-    const adb = await ADB.createADB();
-    return await adb.getConnectedDevices();
+    await this.createADB();
+    return await this.adb.getConnectedDevices();
+  }
+
+  async getDeviceVersion(udid) {
+    await this.createADB();
+    return await this.adb.adbExec([
+      '-s',
+      udid,
+      'shell',
+      'getprop',
+      'ro.build.version.release',
+    ]);
   }
 }

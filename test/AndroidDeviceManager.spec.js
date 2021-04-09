@@ -1,6 +1,5 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-
 import AndroidDeviceManager from '../src/AndroidDeviceManager';
 
 describe('Android Device Manager', () => {
