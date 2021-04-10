@@ -8,11 +8,13 @@ describe('Android Device Manager', () => {
     sinon
       .stub(androidDevices, 'getConnectedDevices')
       .returns([{ udid: 'emulator-5554', state: 'device' }]);
+    sinon.stub(androidDevices, 'getDeviceVersion').returns('9');
     const devices = await androidDevices.getDevices();
     expect(devices).to.deep.equal([
       {
         busy: false,
         state: 'device',
+        sdk: '9',
         udid: 'emulator-5554',
         platform: 'android',
       },

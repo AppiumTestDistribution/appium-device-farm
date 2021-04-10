@@ -1,5 +1,6 @@
 import { utilities } from 'appium-ios-device';
 import log from './logger';
+import { asyncForEach } from './helpers';
 
 export default class IOSDeviceManager {
   async getConnectedDevices() {
@@ -31,11 +32,5 @@ export default class IOSDeviceManager {
       );
     });
     return deviceState;
-  }
-}
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
   }
 }

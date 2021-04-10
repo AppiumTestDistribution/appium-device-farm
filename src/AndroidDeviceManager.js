@@ -1,14 +1,15 @@
 import ADB from 'appium-adb';
 import log from './logger';
+import { asyncForEach } from './helpers';
 
 let deviceState = [];
 let adbInstance = null;
+let adb;
 export default class AndroidDeviceMananger {
   async getDevices() {
     log.info('Fetching Android Devices');
     const connectedDevices = await this.getConnectedDevices();
-
-    connectedDevices.forEach((device) => {
+    await asyncForEach(connectedDevices, async(device) => {
       if (
         !deviceState.find((devicestate) => devicestate.udid === device.udid)
       ) {
@@ -18,6 +19,7 @@ export default class AndroidDeviceMananger {
             state: device.state,
             udid: device.udid,
             platform: 'android',
+            sdk: await this.getDeviceVersion(device.udid),
           })
         );
       }
@@ -28,18 +30,19 @@ export default class AndroidDeviceMananger {
 
   async createADB() {
     if (adbInstance === null) {
-      this.adb = await ADB.createADB();
+      adb = await ADB.createADB();
       adbInstance = true;
     }
   }
   async getConnectedDevices() {
     await this.createADB();
-    return await this.adb.getConnectedDevices();
+    console.log('ADB', adb);
+    return await adb.getConnectedDevices();
   }
 
   async getDeviceVersion(udid) {
     await this.createADB();
-    return await this.adb.adbExec([
+    return await adb.adbExec([
       '-s',
       udid,
       'shell',
