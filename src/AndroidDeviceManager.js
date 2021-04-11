@@ -20,7 +20,7 @@ export default class AndroidDeviceMananger {
             udid: device.udid,
             platform: 'android',
             sdk: await this.getDeviceVersion(device.udid),
-            realDevice: await this.isEmulator(device.udid)
+            realDevice: await this.isRealDevice(device.udid)
           })
         );
       }
@@ -50,12 +50,12 @@ export default class AndroidDeviceMananger {
     return await adb.adbExec(['-s', udid, 'shell', 'getprop', prop]);
   }
 
-  async isEmulator(udid) {
+  async isRealDevice(udid) {
     await this.createADB();
     const character = await this.getDeviceProperty(
       udid,
       'ro.build.characteristics'
     );
-    return character === 'emulator';
+    return character !== 'emulator';
   }
 }
