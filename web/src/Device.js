@@ -22,7 +22,7 @@ const Device = ({ device }) => {
             placement="bottom"
             overlay={<Tooltip id={`tooltip-bottom`}>{udid}</Tooltip>}
           >
-            <div>{name ? `${name} (SDK - ${sdk})` : udid}</div>
+            <div>{name ? `${name} (SDK - ${sdk})` : `${udid} (SDK - ${sdk})`}</div>
           </OverlayTrigger>
         </div>
         <div class="p-2 bd-highlight">

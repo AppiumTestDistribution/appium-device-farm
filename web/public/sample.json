@@ -3,13 +3,17 @@
         "busy": true,
         "state": "device",
         "udid": "emulator-5554",
-        "platform": "android"
+        "platform": "android",
+        "realDevice": true,
+        "sdk": "13.5"
     },
     {
         "busy": false,
         "state": "device",
         "udid": "emulator-5556",
-        "platform": "android"
+        "platform": "android",
+        "realDevice": true,
+        "sdk": "13.5"
     },
     {
         "name": "iPhone 8 Plus",
