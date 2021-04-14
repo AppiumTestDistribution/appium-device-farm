@@ -34,7 +34,7 @@ export default class Devices {
   }
 
   getFreeDevice(platform, options) {
-    log.info(`Finding Free Device for Platform ${platform}, ${actualDevices}`);
+    log.info(`Finding Free Device for Platform ${platform}`);
     if (options) {
       return actualDevices.find(
         (device) =>
