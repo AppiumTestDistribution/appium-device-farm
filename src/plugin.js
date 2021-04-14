@@ -1,7 +1,7 @@
 import BasePlugin from '@appium/base-plugin';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
-import Devices from './Devices';
+import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
 
 let devices;
@@ -14,8 +14,7 @@ export default class DevicePlugin extends BasePlugin {
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
-      devices = new Devices();
-      await devices.fetchDevices();
+      devices = await fetchDevices();
       let firstMatch = caps.firstMatch[0];
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
