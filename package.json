@@ -40,7 +40,8 @@
     "express": "^4.17.1",
     "get-port": "^5.1.1",
     "node-schedule": "^2.0.0",
-    "node-simctl": "^6.4.1"
+    "node-simctl": "^6.4.1",
+    "rewire": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",

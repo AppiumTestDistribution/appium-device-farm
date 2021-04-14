@@ -1,11 +1,14 @@
 import { expect } from 'chai';
 import Devices, { listAllDevices } from '../src/Devices';
 import { deviceMock } from './fixtures/devices';
-import IOSDeviceManager from '../src/IOSDeviceManager';
+
+let rewire = require('rewire');
+let myModule = rewire('../src/Devices.js');
 
 describe('Devices', () => {
-  it('Get Free device for iOS Platform', async () => {
-    const devices = new Devices(deviceMock);
+  it.only('Get Free device for iOS Platform', async () => {
+    const devices = new Devices();
+    myModule.__set__('actualDevices', deviceMock);
     const freeDevice = await devices.getFreeDevice('ios');
     expect(freeDevice).to.deep.equal({
       name: 'iPad Air (3rd generation)',
@@ -19,7 +22,7 @@ describe('Devices', () => {
   });
 
   it('Get Free device for android Platform', async () => {
-    const devices = new Devices(deviceMock);
+    const devices = new Devices();
     const freeDevice = await devices.getFreeDevice('android');
     expect(freeDevice).to.deep.equal({
       busy: false,
@@ -30,7 +33,7 @@ describe('Devices', () => {
   });
 
   it('Block device should set busy state to true', async () => {
-    const devices = new Devices(deviceMock);
+    const devices = new Devices();
     const freeDevice = await devices.getFreeDevice('android');
     await devices.blockDevice(freeDevice);
     const deviceList = await listAllDevices().find(
@@ -45,7 +48,7 @@ describe('Devices', () => {
   });
 
   it('UnBlock device should set busy state to false', async () => {
-    const devices = new Devices(deviceMock);
+    const devices = new Devices();
     const blockedDevice = deviceMock.find((device) => device.busy === true);
     const unblockedDevice = await devices.unblockDevice(blockedDevice);
     expect(unblockedDevice).to.deep.equal({

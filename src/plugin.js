@@ -1,14 +1,10 @@
 import BasePlugin from '@appium/base-plugin';
-import AndroidDeviceManager from './AndroidDeviceManager';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import Devices from './Devices';
-import SimulatorManager from './SimulatorManager';
 import AsyncLock from 'async-lock';
-import IOSDeviceManager from './IOSDeviceManager';
 
 let devices;
-let instance = false;
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName) {
     super(pluginName);
@@ -16,27 +12,10 @@ export default class DevicePlugin extends BasePlugin {
   }
 
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    async function fetchDevices() {
-      if (instance === false) {
-        let simulatorManager = new SimulatorManager();
-        let androidDevices = new AndroidDeviceManager();
-        let iosDevices = new IOSDeviceManager();
-        const simulators = await simulatorManager.getSimulators();
-        const connectedAndroidDevices = await androidDevices.getDevices();
-        const connectedIOSDevices = await iosDevices.getDevices();
-        devices = new Devices(
-          Object.assign(
-            simulators,
-            connectedAndroidDevices,
-            connectedIOSDevices
-          )
-        );
-        instance = true;
-      }
-    }
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
-      await fetchDevices();
+      devices = new Devices();
+      await devices.fetchDevices();
       let firstMatch = caps.firstMatch[0];
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);

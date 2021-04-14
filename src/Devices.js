@@ -4,42 +4,13 @@ import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
 import log from './logger';
 import schedule from 'node-schedule';
+import SimulatorManager from './SimulatorManager';
+import { isMac } from './helpers';
 
 let actualDevices;
-export default class Devices {
-  constructor(connectedDevices) {
-    actualDevices = connectedDevices;
-    this.initADB();
-    eventEmitter.on('ConnectedDevices', function (data) {
-      const { emittedDevices } = data;
-      emittedDevices.forEach((emittedDevice) => {
-        const actualDevice = actualDevices.find(
-          (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
-        );
-        const deviceIndex = findIndex(emittedDevices, {
-          udid: emittedDevice.udid,
-        });
-        emittedDevices[deviceIndex] = Object.assign({
-          busy: !!actualDevice?.busy,
-          state: emittedDevice.state,
-          udid: emittedDevice.udid,
-          sessionId: actualDevice?.sessionId ?? null,
-          platform: emittedDevice.platform,
-          realDevice: emittedDevice.realDevice,
-          sdk: emittedDevice.sdk,
-        });
-      });
-      remove(
-        actualDevices,
-        (device) =>
-          device.platform === 'android' ||
-          (device.platform === 'iOS' && device.realDevice === true)
-      );
-      actualDevices.push(...emittedDevices);
-      log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
-    });
-  }
+let instance = false;
 
+export default class Devices {
   initADB() {
     log.info('Starting & initializing the listen to device changes');
     let rule = new schedule.RecurrenceRule();
@@ -59,7 +30,7 @@ export default class Devices {
   }
 
   getFreeDevice(platform, options) {
-    log.info(`Finding Free Device for Platform ${platform}`);
+    log.info(`Finding Free Device for Platform ${platform}, ${actualDevices}`);
     if (options) {
       return actualDevices.find(
         (device) =>
@@ -99,6 +70,61 @@ export default class Devices {
 
   getDeviceForSession(sessionId) {
     return actualDevices.find((device) => device.sessionId === sessionId);
+  }
+
+  async fetchDevices() {
+    if (instance === false) {
+      let simulators;
+      let connectedIOSDevices;
+      let connectedAndroidDevices;
+      let simulatorManager = new SimulatorManager();
+      let androidDevices = new AndroidDeviceManager();
+      let iosDevices = new IOSDeviceManager();
+      if (isMac()) {
+        simulators = await simulatorManager.getSimulators();
+        connectedIOSDevices = await iosDevices.getDevices();
+        connectedAndroidDevices = await androidDevices.getDevices();
+        actualDevices = Object.assign(
+          simulators,
+          connectedAndroidDevices,
+          connectedIOSDevices
+        );
+      } else {
+        actualDevices = await androidDevices.getDevices();
+      }
+
+      instance = true;
+      this.initADB();
+      eventEmitter.on('ConnectedDevices', function (data) {
+        const { emittedDevices } = data;
+        emittedDevices.forEach((emittedDevice) => {
+          const actualDevice = actualDevices.find(
+            (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
+          );
+          const deviceIndex = findIndex(emittedDevices, {
+            udid: emittedDevice.udid,
+          });
+          emittedDevices[deviceIndex] = Object.assign({
+            busy: !!actualDevice?.busy,
+            state: emittedDevice.state,
+            udid: emittedDevice.udid,
+            sessionId: actualDevice?.sessionId ?? null,
+            platform: emittedDevice.platform,
+            realDevice: emittedDevice.realDevice,
+            sdk: emittedDevice.sdk,
+          });
+        });
+        remove(
+          actualDevices,
+          (device) =>
+            device.platform === 'android' ||
+            (device.platform === 'iOS' && device.realDevice === true)
+        );
+        actualDevices.push(...emittedDevices);
+        log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
+      });
+    }
+    return actualDevices;
   }
 }
 
