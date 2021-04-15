@@ -1,5 +1,12 @@
 .App {
+  font-family: 'Inter', sans-serif;
   text-align: center;
+  height: 100vh;
+  background: #edc0bf;
+  background: linear-gradient(90deg, #edc0bf 0, #c4caef 58%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .App-logo {
@@ -13,19 +20,19 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.header {
+  margin: 30px auto;
+  height: 6rem;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
+  color: black;
 }
 
-.App-link {
-  color: #61dafb;
+.header,
+.device-row {
+  width: 680px;
 }
 
 @keyframes App-logo-spin {
