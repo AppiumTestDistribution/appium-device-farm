@@ -14,6 +14,7 @@ export default class SimulatorManager {
         Object.assign({}, device, { busy: false, realDevice: false })
       )
     );
+    simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
     return simulators;
   }
 
