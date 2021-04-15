@@ -10,11 +10,11 @@ This is an Appium plugin designed to manage and create driver session on connect
 - Dynamically updates global device pool by polling for connected devices every 10 seconds.
 - Allocates random ports for parallel execution.
 
-
 ## Device UI
 
-- Navigate to localhost:3000 once the first session is created. 
+- Navigate to localhost:3333 once the first session is created.
 
+<img src="./images/dashboard.png">
 
 ## Prerequisite
 

@@ -9,7 +9,7 @@ const Device = ({ device }) => {
   const { platform, name, udid, busy, sdk, realDevice } = device;
   return (
     <div>
-      <div class="d-flex flex-row bd-highlight mb-1 justify-content-between device-row ml-2 mr-2">
+      <div class="d-flex flex-row bd-highlight mb-1 justify-content-between device-row">
         <div class="p-2 bd-highlight">
           {platform === 'android' ? (
             <FontAwesomeIcon icon={faAndroid} color="green" />
@@ -22,19 +22,19 @@ const Device = ({ device }) => {
             placement="bottom"
             overlay={<Tooltip id={`tooltip-bottom`}>{udid}</Tooltip>}
           >
-            <div>{name ? `${name} (SDK - ${sdk})` : `${udid} (SDK - ${sdk})`}</div>
+            <div class="names">{name ? `${name} (SDK - ${sdk})` : `${udid} (SDK - ${sdk})`}</div>
           </OverlayTrigger>
         </div>
         <div class="p-2 bd-highlight">
           {realDevice ? (
             <div>
-              <FontAwesomeIcon icon={faMobileAlt} color="grey" />
-              <span className="text-muted">&nbsp;Mobile</span>
+              <FontAwesomeIcon icon={faMobileAlt} color="black" />
+              <span>&nbsp;Mobile</span>
             </div>
           ) : (
             <div>
-              <FontAwesomeIcon icon={faDesktop} color="grey" />
-              <span className="text-muted">&nbsp;Emulated</span>
+              <FontAwesomeIcon icon={faDesktop} color="black" />
+              <span>&nbsp;Emulated</span>
             </div>
           )}
         </div>
