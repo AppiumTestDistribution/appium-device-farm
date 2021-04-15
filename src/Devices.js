@@ -15,7 +15,7 @@ export default class Devices {
   constructor(devices) {
     actualDevices = devices;
   }
-  initADB() {
+  emitConnectedDevices() {
     log.info('Starting & initializing the listen to device changes');
     let rule = new schedule.RecurrenceRule();
     rule.second = [0, 10, 20, 30, 40, 50];
@@ -97,7 +97,7 @@ export async function fetchDevices() {
     }
 
     instance = true;
-    devices.initADB();
+    devices.emitConnectedDevices();
     eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
       emittedDevices.forEach((emittedDevice) => {
