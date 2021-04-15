@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 3333;
 const path = require('path');
 // eslint-disable-next-line import/named
 import { listAllDevices } from './Devices';
@@ -10,7 +10,6 @@ app.get('/devices', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Device Dashboard listening at http://localhost:${port}`);
 });
-console.log(__dirname);
 app.use(express.static(path.join(__dirname, 'public')));
