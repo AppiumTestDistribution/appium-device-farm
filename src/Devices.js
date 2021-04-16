@@ -124,7 +124,6 @@ export async function fetchDevices() {
           (device.platform === 'iOS' && device.realDevice === true)
       );
       actualDevices.push(...emittedDevices);
-      log.info(`Master Device List ${JSON.stringify(actualDevices)}`);
     });
   }
   return devices;
