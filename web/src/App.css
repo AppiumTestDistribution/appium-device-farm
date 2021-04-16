@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;500;700;900&display=swap");
+
 .App {
-  font-family: 'Inter', sans-serif;
-  text-align: center;
   height: 100vh;
   background: #edc0bf;
   background: linear-gradient(90deg, #edc0bf 0, #c4caef 58%);
@@ -23,16 +23,23 @@
 .header {
   margin: 30px auto;
   height: 6rem;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px;
-  backdrop-filter: blur(2px);
-  color: black;
+  text-align: center;
+}
+
+.device-row {
+  text-align: left;
 }
 
 .header,
 .device-row {
   width: 680px;
+  font-family: "Poppins", sans-serif;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  color: black;
+  box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 @keyframes App-logo-spin {
