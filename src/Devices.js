@@ -5,7 +5,7 @@ import IOSDeviceManager from './IOSDeviceManager';
 import log from './logger';
 import schedule from 'node-schedule';
 import SimulatorManager from './SimulatorManager';
-import { isMac } from './helpers';
+import { isMac, checkIfPathIsAbsolute } from './helpers';
 
 let actualDevices;
 let instance = false;
@@ -74,6 +74,14 @@ export default class Devices {
 
   getDeviceForSession(sessionId) {
     return actualDevices.find((device) => device.sessionId === sessionId);
+  }
+}
+
+export function isDeviceConfigPathAbsolute(path) {
+  if (checkIfPathIsAbsolute(path)) {
+    return true;
+  } else {
+    throw new Error(`Device Config Path ${path} should be absolute`);
   }
 }
 
