@@ -21,6 +21,7 @@ export default class AndroidDeviceMananger {
             platform: 'android',
             sdk: await this.getDeviceVersion(device.udid),
             realDevice: await this.isRealDevice(device.udid),
+            name: await this.getDeviceName(device.udid),
           })
         );
       }
@@ -35,6 +36,7 @@ export default class AndroidDeviceMananger {
       adbInstance = true;
     }
   }
+
   async getConnectedDevices() {
     await this.createADB();
     return await adb.getConnectedDevices();
@@ -56,5 +58,10 @@ export default class AndroidDeviceMananger {
       'ro.build.characteristics'
     );
     return character !== 'emulator';
+  }
+
+  async getDeviceName(udid) {
+    await this.createADB();
+    return await this.getDeviceProperty(udid, 'ro.product.name');
   }
 }
