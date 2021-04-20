@@ -14,8 +14,8 @@ export default class DevicePlugin extends BasePlugin {
   async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
-      devices = await fetchDevices();
       let firstMatch = caps.firstMatch[0];
+      devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       if (freeDevice && firstMatchPlatform === 'android') {
