@@ -111,16 +111,22 @@ export async function fetchDevices() {
           )
         );
         devices = new Devices(filteredDevices);
+      } else {
+        devices = new Devices(
+          Object.assign(
+            simulators,
+            connectedAndroidDevices,
+            connectedIOSDevices
+          )
+        );
+        devices.emitConnectedDevices();
       }
-      devices = new Devices(
-        Object.assign(simulators, connectedAndroidDevices, connectedIOSDevices)
-      );
     } else {
       devices = new Devices(await androidDevices.getDevices());
+      devices.emitConnectedDevices();
     }
 
     instance = true;
-    devices.emitConnectedDevices();
     eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
       emittedDevices.forEach((emittedDevice) => {
