@@ -97,6 +97,21 @@ export async function fetchDevices() {
       simulators = await simulatorManager.getSimulators();
       connectedIOSDevices = await iosDevices.getDevices();
       connectedAndroidDevices = await androidDevices.getDevices();
+      if (process.env.UDIDS) {
+        const userSpecifiedUDIDS = process.env.UDIDS.split(',');
+        const availableDevices = Object.assign(
+          simulators,
+          connectedAndroidDevices,
+          connectedIOSDevices
+        );
+        let filteredDevices = [];
+        userSpecifiedUDIDS.forEach((value) =>
+          filteredDevices.push(
+            availableDevices.find((device) => device.udid === value)
+          )
+        );
+        devices = new Devices(filteredDevices);
+      }
       devices = new Devices(
         Object.assign(simulators, connectedAndroidDevices, connectedIOSDevices)
       );
