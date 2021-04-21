@@ -12,6 +12,12 @@ export const deviceMock = [
     platform: 'android',
   },
   {
+    busy: false,
+    state: 'device',
+    udid: 'emulator-5556',
+    platform: 'android',
+  },
+  {
     name: 'iPad Air',
     udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
     state: 'Shutdown',

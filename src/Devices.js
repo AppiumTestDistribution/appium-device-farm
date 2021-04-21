@@ -85,7 +85,18 @@ export function isDeviceConfigPathAbsolute(path) {
   }
 }
 
+export function findUserSpecifiesDevices(userSpecifiedUDIDS, availableDevices) {
+  let filteredDevices = [];
+  userSpecifiedUDIDS.forEach((value) =>
+    filteredDevices.push(
+      availableDevices.find((device) => device.udid === value)
+    )
+  );
+  return filteredDevices;
+}
+
 export async function fetchDevices() {
+  const udids = process.env.UDIDS;
   if (instance === false) {
     let simulators;
     let connectedIOSDevices;
@@ -97,15 +108,44 @@ export async function fetchDevices() {
       simulators = await simulatorManager.getSimulators();
       connectedIOSDevices = await iosDevices.getDevices();
       connectedAndroidDevices = await androidDevices.getDevices();
-      devices = new Devices(
-        Object.assign(simulators, connectedAndroidDevices, connectedIOSDevices)
-      );
+      if (udids) {
+        const userSpecifiedUDIDS = process.env.UDIDS.split(',');
+        const availableDevices = Object.assign(
+          simulators,
+          connectedAndroidDevices,
+          connectedIOSDevices
+        );
+        const filteredDevices = findUserSpecifiesDevices(
+          userSpecifiedUDIDS,
+          availableDevices
+        );
+        devices = new Devices(filteredDevices);
+      } else {
+        devices = new Devices(
+          Object.assign(
+            simulators,
+            connectedAndroidDevices,
+            connectedIOSDevices
+          )
+        );
+        devices.emitConnectedDevices();
+      }
     } else {
-      devices = new Devices(await androidDevices.getDevices());
+      if (udids) {
+        const userSpecifiedUDIDS = process.env.UDIDS.split(',');
+        const availableDevices = await androidDevices.getDevices();
+        const filteredDevices = findUserSpecifiesDevices(
+          userSpecifiedUDIDS,
+          availableDevices
+        );
+        devices = new Devices(filteredDevices);
+      } else {
+        devices = new Devices(await androidDevices.getDevices());
+        devices.emitConnectedDevices();
+      }
     }
 
     instance = true;
-    devices.emitConnectedDevices();
     eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
       emittedDevices.forEach((emittedDevice) => {
