@@ -4,7 +4,8 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register ./test/*.spec.js --exit",
+    "test": "mocha -r ts-node/register ./test/unit/*.spec.js --exit",
+    "integration": "mocha -r ts-node/register ./test/integration/*.spec.js --exit",
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",

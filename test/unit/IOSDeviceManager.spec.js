@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
 
-import IOSDeviceManager from '../src/IOSDeviceManager';
+import IOSDeviceManager from '../../src/IOSDeviceManager';
 
 describe('IOS Device Manager', () => {
   it('IOS Device List to have added state', async () => {
