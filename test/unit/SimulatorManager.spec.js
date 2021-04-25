@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-import SimulatorManager from '../src/SimulatorManager';
+import SimulatorManager from '../../src/SimulatorManager';
 
 describe('Simulator Manager', () => {
   it('Simulator List to have added state', async () => {

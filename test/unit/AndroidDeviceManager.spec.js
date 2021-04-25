@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-import AndroidDeviceManager from '../src/AndroidDeviceManager';
+import AndroidDeviceManager from '../../src/AndroidDeviceManager';
 
 describe('Android Device Manager', () => {
   it('Android Device List to have added state', async () => {
