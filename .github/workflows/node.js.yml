@@ -29,13 +29,13 @@ jobs:
       - run: npm run build --if-present
       - run: npm test
 
-  integratio-tests:
-    name: Unit Tests
+  integration-tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [ 10.x, 12.x, 14.x, 15.x ]
+        node-version: [ 14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -52,12 +52,8 @@ jobs:
         run: |
           echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-28;google_apis;x86_64'
           echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_device -k 'system-images;android-28;google_apis;x86_64' --force
-          echo $ANDROID_HOME/emulator/emulator -list-avds
-          echo "Starting emulator"
           nohup $ANDROID_HOME/emulator/emulator -avd test_device -no-snapshot > /dev/null 2>&1 &
           $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-          $ANDROID_HOME/platform-tools/adb devices
-          echo "Emulator started"
       - run: npm ci
       - run: npm run build --if-present
       - run: npm run integration
