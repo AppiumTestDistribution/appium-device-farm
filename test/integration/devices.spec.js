@@ -5,5 +5,6 @@ describe('Get Devices', () => {
   it('Fetch all connected devices', async () => {
     await fetchDevices();
     expect(listAllDevices()).to.not.be.empty;
+    console.log(listAllDevices());
   });
 })
