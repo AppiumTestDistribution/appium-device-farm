@@ -5,7 +5,11 @@
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --exit",
+<<<<<<< HEAD
     "integration": "mocha -r ts-node/register ./test/integration/*.spec.js --exit",
+=======
+    "integration": "mocha -r ts-node/register ./test/integration/*.spec.js --timeout 90000 --exit",
+>>>>>>> fe4f3efb2af6083a522cfd5abd9e4e7d37977daa
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
