@@ -95,6 +95,20 @@ export function findUserSpecifiesDevices(userSpecifiedUDIDS, availableDevices) {
   return filteredDevices;
 }
 
+function fetchDevicesFromUDIDS(simulators, connectedAndroidDevices, connectedIOSDevices) {
+  const userSpecifiedUDIDS = process.env.UDIDS.split(',');
+  const availableDevices = Object.assign(
+    simulators,
+    connectedAndroidDevices,
+    connectedIOSDevices
+  );
+  const filteredDevices = findUserSpecifiesDevices(
+    userSpecifiedUDIDS,
+    availableDevices
+  );
+  return new Devices(filteredDevices);
+}
+
 export async function fetchDevices() {
   const udids = process.env.UDIDS;
   if (instance === false) {
@@ -109,17 +123,7 @@ export async function fetchDevices() {
       connectedIOSDevices = await iosDevices.getDevices();
       connectedAndroidDevices = await androidDevices.getDevices();
       if (udids) {
-        const userSpecifiedUDIDS = process.env.UDIDS.split(',');
-        const availableDevices = Object.assign(
-          simulators,
-          connectedAndroidDevices,
-          connectedIOSDevices
-        );
-        const filteredDevices = findUserSpecifiesDevices(
-          userSpecifiedUDIDS,
-          availableDevices
-        );
-        devices = new Devices(filteredDevices);
+       devices = fetchDevicesFromUDIDS(simulators, connectedAndroidDevices, connectedIOSDevices);
       } else {
         devices = new Devices(
           Object.assign(
