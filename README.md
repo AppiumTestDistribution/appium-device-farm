@@ -1,8 +1,8 @@
-# appium-device-plugin [![Node.js CI](https://github.com/SrinivasanTarget/appium-device-plugin/actions/workflows/node.js.yml/badge.svg)](https://github.com/SrinivasanTarget/appium-device-plugin/actions/workflows/node.js.yml)
+# appium-device-farm [![Node.js CI](https://github.com/AppiumTestDistribution/appium-device-farm/actions/workflows/node.js.yml/badge.svg)](https://github.com/AppiumTestDistribution/appium-device-farm/actions/workflows/node.js.yml)
 
 This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
 
-## Why Appium Device Plugin?
+## Why Appium Device Farm?
 
 - Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in global device pool.
 - Dynamically allocates a free device from global device pool while creating driver session.
@@ -25,7 +25,7 @@ Appium version 2.0
 Install the plugin using Appium's plugin CLI, either as a named plugin or via NPM:
 
 ```
-appium plugin install --source=npm appium-device-plugin
+appium plugin install --source=npm appium-device-farm
 ```
 
 ## Installation - Client

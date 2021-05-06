@@ -1,5 +1,5 @@
 {
-  "name": "appium-device-plugin",
+  "name": "appium-device-farm",
   "version": "1.0.0-beta.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
@@ -12,11 +12,11 @@
     "prepublish": "npx tsc",
     "lint": "eslint '**/*.js' --fix",
     "prettier": "prettier '**/*.js' --write --single-quote",
-    "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-plugin"
+    "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-farm"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SrinivasanTarget/appium-device-plugin/"
+    "url": "https://github.com/AppiumTestDistribution/appium-device-farm"
   },
   "contributors": [
     {
@@ -30,9 +30,9 @@
   ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/SrinivasanTarget/appium-device-plugin/issues"
+    "url": "https://github.com/AppiumTestDistribution/appium-device-farm/issues"
   },
-  "homepage": "https://github.com/SrinivasanTarget/appium-device-plugin#readme",
+  "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "^1.6.4",
     "appium-adb": "^8.11.0",
@@ -64,7 +64,7 @@
     "typescript": "^4.2.3"
   },
   "appium": {
-    "pluginName": "device-manager",
+    "pluginName": "device-farm",
     "mainClass": "DevicePlugin"
   },
   "engines": {

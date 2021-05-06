@@ -1,5 +1,5 @@
 {
-  "name": "appium-device-plugin-web",
+  "name": "appium-device-farm-web",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
