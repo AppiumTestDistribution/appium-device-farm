@@ -37,7 +37,7 @@ No special action is needed to make things work on the client side.
 The plugin will not be active unless turned on when invoking the Appium server:
 
 ```
-appium --plugins=device-manager
+appium --plugins=device-farm
 ```
 
 ## Capabilities
