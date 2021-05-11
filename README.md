@@ -47,13 +47,13 @@ By default global devices pool includes all the iOS simulators.
 To allocate only iPhone simulators set below capability to true,
 
 ```
-capabilities.setCapability("appium:iPhoneOnly", "true");
+capabilities.setCapability("appium:iPhoneOnly", true);
 ```
 
 To allocate only iPad simulators set below capability to true,
 
 ```
-capabilities.setCapability("appium:iPadOnly", "true");
+capabilities.setCapability("appium:iPadOnly", true);
 ```
 
 ## Example

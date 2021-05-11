@@ -18,16 +18,16 @@ export default class DevicePlugin extends BasePlugin {
       devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
-      if (freeDevice && firstMatchPlatform === 'android') {
+      if (freeDevice && firstMatchPlatform == 'android') {
         await androidCapabilities(caps, freeDevice);
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && firstMatchPlatform === 'ios') {
-        if (firstMatch['appium:iPhoneOnly'] === 'true') {
+      } else if (freeDevice && firstMatchPlatform == 'ios') {
+        if (firstMatch['appium:iPhoneOnly']) {
           freeDevice = devices.getFreeDevice(firstMatchPlatform, {
             simulator: 'iPhone',
           });
-        } else if (firstMatch['appium:iPadOnly'] === 'true') {
+        } else if (firstMatch['appium:iPadOnly']) {
           freeDevice = devices.getFreeDevice(firstMatchPlatform, {
             simulator: 'iPad',
           });
