@@ -3,7 +3,7 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
-import { waitUntil } from 'async-wait-until';
+import { waitUntil, TimeoutError } from 'async-wait-until';
 
 let devices;
 export default class DevicePlugin extends BasePlugin {
@@ -37,14 +37,20 @@ export default class DevicePlugin extends BasePlugin {
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
       } else {
-        await waitUntil(
-          async () => {
-            log.info('Waiting for free device');
-            freeDevice = devices.getFreeDevice(firstMatchPlatform);
-            return freeDevice !== undefined;
-          },
-          { timeout: 60000, intervalBetweenAttempts: 5000 }
-        );
+        try {
+          await waitUntil(
+            async () => {
+              log.info('Waiting for free device');
+              freeDevice = devices.getFreeDevice(firstMatchPlatform);
+              return freeDevice !== undefined;
+            },
+            { timeout: 60000, intervalBetweenAttempts: 1000 }
+          );
+        } catch (e) {
+          if (e instanceof TimeoutError) {
+            throw new Error('Timeout waiting for device to be free');
+          }
+        }
       }
     });
     this.session = await next();
