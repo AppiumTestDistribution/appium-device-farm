@@ -3,6 +3,7 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
+import { waitFor } from './helpers';
 
 let devices;
 export default class DevicePlugin extends BasePlugin {
@@ -11,7 +12,7 @@ export default class DevicePlugin extends BasePlugin {
     this.commandsQueueGuard = new AsyncLock();
   }
 
-  async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
+  async getFreeDeviceAndAssignCapabilities(caps) {
     let freeDevice;
     await this.commandsQueueGuard.acquire('DeviceManager', async function () {
       let firstMatch = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
@@ -36,10 +37,25 @@ export default class DevicePlugin extends BasePlugin {
         devices.blockDevice(freeDevice);
         log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
       } else {
-        throw new Error('No free device is available to create session');
+        await waitFor(async () => {
+          let firstMatch = Object.assign(
+            {},
+            caps.firstMatch[0],
+            caps.alwaysMatch
+          );
+          devices = await fetchDevices();
+          let firstMatchPlatform = firstMatch['platformName'];
+          freeDevice = devices.getFreeDevice(firstMatchPlatform);
+          return freeDevice != undefined;
+        });
       }
     });
 
+    return freeDevice;
+  }
+
+  async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
+    let freeDevice = await this.getFreeDeviceAndAssignCapabilities(caps);
     this.session = await next();
     if (this.session.error) {
       devices.unblockDevice(freeDevice);
