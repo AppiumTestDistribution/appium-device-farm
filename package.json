@@ -38,6 +38,7 @@
     "appium-adb": "^8.11.0",
     "appium-ios-device": "^1.7.1",
     "async-lock": "^1.2.8",
+    "async-wait-until": "^2.0.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
     "node-schedule": "^2.0.0",

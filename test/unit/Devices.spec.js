@@ -20,9 +20,10 @@ describe('Devices', () => {
     });
   });
 
-  it('Get Free device for android Platform', async () => {
+  it.only('Get Free device for android Platform', async () => {
     const devices = new Devices(deviceMock);
     const freeDevice = await devices.getFreeDevice('android');
+    console.log(freeDevice)
     expect(freeDevice).to.deep.equal({
       busy: false,
       state: 'device',
