@@ -116,6 +116,7 @@ function fetchDevicesFromUDIDS(
 export async function fetchDevices() {
   const udids = process.env.UDIDS;
   if (instance === false) {
+    log.info('Fetching all connected devices');
     let simulators;
     let connectedIOSDevices;
     let connectedAndroidDevices;

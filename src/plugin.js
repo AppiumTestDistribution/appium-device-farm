@@ -1,8 +1,9 @@
 import BasePlugin from '@appium/base-plugin';
-import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
+import { waitUntil, TimeoutError } from 'async-wait-until';
+import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 
 let devices;
 export default class DevicePlugin extends BasePlugin {
@@ -18,28 +19,39 @@ export default class DevicePlugin extends BasePlugin {
       devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
-      if (freeDevice && firstMatchPlatform == 'android') {
-        await androidCapabilities(caps, freeDevice);
-        devices.blockDevice(freeDevice);
-        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && firstMatchPlatform == 'ios') {
-        if (firstMatch['appium:iPhoneOnly']) {
-          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
-            simulator: 'iPhone',
-          });
-        } else if (firstMatch['appium:iPadOnly']) {
-          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
-            simulator: 'iPad',
-          });
+      const assignedDevice = await _assignCapabilitiesAndBlockDevice(
+        freeDevice,
+        firstMatch,
+        firstMatchPlatform,
+        caps
+      );
+      if (!assignedDevice) {
+        try {
+          const timeout =
+            firstMatch['appium:deviceAvailabilityTimeout'] || 180000;
+          const intervalBetweenAttempts =
+            firstMatch['appium:deviceRetryInterval'] || 10000;
+          await waitUntil(
+            async () => {
+              log.info('Waiting for free device');
+              freeDevice = devices.getFreeDevice(firstMatchPlatform);
+              return freeDevice !== undefined;
+            },
+            { timeout, intervalBetweenAttempts }
+          );
+          await _assignCapabilitiesAndBlockDevice(
+            freeDevice,
+            firstMatch,
+            firstMatchPlatform,
+            caps
+          );
+        } catch (e) {
+          if (e instanceof TimeoutError) {
+            throw new Error('Timeout waiting for device to be free');
+          }
         }
-        await iOSCapabilities(caps, freeDevice);
-        devices.blockDevice(freeDevice);
-        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else {
-        throw new Error('No free device is available to create session');
       }
     });
-
     this.session = await next();
     if (this.session.error) {
       devices.unblockDevice(freeDevice);
@@ -64,4 +76,33 @@ export default class DevicePlugin extends BasePlugin {
     );
     await next();
   }
+}
+
+async function _assignCapabilitiesAndBlockDevice(
+  freeDevice,
+  firstMatch,
+  firstMatchPlatform,
+  caps
+) {
+  if (freeDevice && firstMatchPlatform == 'android') {
+    await androidCapabilities(caps, freeDevice);
+    devices.blockDevice(freeDevice);
+    log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+    return true;
+  } else if (freeDevice && firstMatchPlatform == 'ios') {
+    if (firstMatch['appium:iPhoneOnly']) {
+      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+        simulator: 'iPhone',
+      });
+    } else if (firstMatch['appium:iPadOnly']) {
+      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+        simulator: 'iPad',
+      });
+    }
+    await iOSCapabilities(caps, freeDevice);
+    devices.blockDevice(freeDevice);
+    log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+    return true;
+  }
+  return false;
 }

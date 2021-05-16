@@ -4,15 +4,16 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Why Appium Device Farm?
 
-- Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in global device pool.
-- Dynamically allocates a free device from global device pool while creating driver session.
-- Dynamically updates global device pool when new device is detected, or an existing device is removed during the test execution.
-- Dynamically updates global device pool by polling for connected devices every 10 seconds.
+- Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in device pool.
+- Dynamically allocates a free device from device pool while creating driver session.
+- Updates the device pool with a new device during test execution.  
+- Queues the test cases when no free device is available for session creation.
+    Example: 3 Devices online and 5 test cases. Plugin will hold the remaining two test cases in the queue until a free device is available.
 - Allocates random ports for parallel execution.
 
 ## Device UI
 
-- Navigate to localhost:3333 once the first session is created.
+- Navigate to localhost:3333 once the first session is created to know the device availability. 
 
 <img src="./images/dashboard.png">
 
@@ -42,19 +43,12 @@ appium --plugins=device-farm
 
 ## Capabilities
 
-By default global devices pool includes all the iOS simulators.
-
-To allocate only iPhone simulators set below capability to true,
-
-```
-capabilities.setCapability("appium:iPhoneOnly", true);
-```
-
-To allocate only iPad simulators set below capability to true,
-
-```
-capabilities.setCapability("appium:iPadOnly", true);
-```
+| Capability Name                  | Description                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| appium:iPhoneOnly                | Allocate only iPhone simulators for execution when to true. Default value is `false`.                                                                                                          |
+| appium:iPadOnly                  | Allocate only iPad simulators for execution when to true. Default value is `false`.                                                                                                            |
+| appium:deviceAvailabilityTimeout | When create session requests are more than available connected devices, plugin waits for a certain interval for device availability before it timeout. Default value is `180000` milliseconds. |
+| appium:deviceRetryInterval       | When create session requests are more than available connected devices, plugin polls for device availability in certain intervals. Default value is `10000` milliseconds.                      |
 
 ## Example
 
