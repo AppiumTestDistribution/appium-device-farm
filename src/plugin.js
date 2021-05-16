@@ -34,7 +34,11 @@ export default class DevicePlugin extends BasePlugin {
               freeDevice = devices.getFreeDevice(firstMatchPlatform);
               return freeDevice !== undefined;
             },
-            { timeout: 60000, intervalBetweenAttempts: 1000 }
+            {
+              timeout: firstMatch['appium:deviceAvailabilityTimeout'] || 180000,
+              intervalBetweenAttempts:
+                firstMatch['appium:deviceRetryInterval'] || 10000,
+            }
           );
           await assignCapabilitiesAndBlockDevice(
             devices,
