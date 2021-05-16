@@ -1,9 +1,9 @@
 import BasePlugin from '@appium/base-plugin';
-import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import log from './logger';
 import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
 import { waitUntil, TimeoutError } from 'async-wait-until';
+import { assignCapabilitiesAndBlockDevice } from './helpers';
 
 let devices;
 export default class DevicePlugin extends BasePlugin {
@@ -19,24 +19,14 @@ export default class DevicePlugin extends BasePlugin {
       devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
-      if (freeDevice && firstMatchPlatform == 'android') {
-        await androidCapabilities(caps, freeDevice);
-        devices.blockDevice(freeDevice);
-        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else if (freeDevice && firstMatchPlatform == 'ios') {
-        if (firstMatch['appium:iPhoneOnly']) {
-          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
-            simulator: 'iPhone',
-          });
-        } else if (firstMatch['appium:iPadOnly']) {
-          freeDevice = devices.getFreeDevice(firstMatchPlatform, {
-            simulator: 'iPad',
-          });
-        }
-        await iOSCapabilities(caps, freeDevice);
-        devices.blockDevice(freeDevice);
-        log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
-      } else {
+      const assignedDevice = await assignCapabilitiesAndBlockDevice(
+        devices,
+        freeDevice,
+        firstMatch,
+        firstMatchPlatform,
+        caps
+      );
+      if (!assignedDevice) {
         try {
           await waitUntil(
             async () => {
@@ -51,6 +41,13 @@ export default class DevicePlugin extends BasePlugin {
             throw new Error('Timeout waiting for device to be free');
           }
         }
+        await assignCapabilitiesAndBlockDevice(
+          devices,
+          freeDevice,
+          firstMatch,
+          firstMatchPlatform,
+          caps
+        );
       }
     });
     this.session = await next();
