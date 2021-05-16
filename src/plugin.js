@@ -20,7 +20,6 @@ export default class DevicePlugin extends BasePlugin {
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
-        devices,
         freeDevice,
         firstMatch,
         firstMatchPlatform,
@@ -41,7 +40,6 @@ export default class DevicePlugin extends BasePlugin {
             { timeout, intervalBetweenAttempts }
           );
           await _assignCapabilitiesAndBlockDevice(
-            devices,
             freeDevice,
             firstMatch,
             firstMatchPlatform,
@@ -81,7 +79,6 @@ export default class DevicePlugin extends BasePlugin {
 }
 
 async function _assignCapabilitiesAndBlockDevice(
-  devices,
   freeDevice,
   firstMatch,
   firstMatchPlatform,
