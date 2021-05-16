@@ -36,18 +36,18 @@ export default class DevicePlugin extends BasePlugin {
             },
             { timeout: 60000, intervalBetweenAttempts: 1000 }
           );
+          await assignCapabilitiesAndBlockDevice(
+            devices,
+            freeDevice,
+            firstMatch,
+            firstMatchPlatform,
+            caps
+          );
         } catch (e) {
           if (e instanceof TimeoutError) {
             throw new Error('Timeout waiting for device to be free');
           }
         }
-        await assignCapabilitiesAndBlockDevice(
-          devices,
-          freeDevice,
-          firstMatch,
-          firstMatchPlatform,
-          caps
-        );
       }
     });
     this.session = await next();
