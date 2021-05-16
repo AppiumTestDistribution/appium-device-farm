@@ -28,13 +28,17 @@ export default class DevicePlugin extends BasePlugin {
       );
       if (!assignedDevice) {
         try {
+          const timeout =
+            firstMatch['appium:deviceAvailabilityTimeout'] || 180000;
+          const intervalBetweenAttempts =
+            firstMatch['appium:deviceRetryInterval'] || 10000;
           await waitUntil(
             async () => {
               log.info('Waiting for free device');
               freeDevice = devices.getFreeDevice(firstMatchPlatform);
               return freeDevice !== undefined;
             },
-            { timeout: 60000, intervalBetweenAttempts: 1000 }
+            { timeout, intervalBetweenAttempts }
           );
           await assignCapabilitiesAndBlockDevice(
             devices,
