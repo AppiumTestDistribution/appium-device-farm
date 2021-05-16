@@ -4,15 +4,16 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Why Appium Device Farm?
 
-- Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in global device pool.
-- Dynamically allocates a free device from global device pool while creating driver session.
-- Dynamically updates global device pool when new device is detected, or an existing device is removed during the test execution.
-- Dynamically updates global device pool by polling for connected devices every 10 seconds.
+- Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in device pool.
+- Dynamically allocates a free device from device pool while creating driver session.
+- Updates the device pool with a new device during test execution.  
+- Queues the test cases when no free device is available for session creation.
+    Example: 3 Devices online and 5 test cases. Plugin will hold the remaining two test cases in the queue until a free device is available.
 - Allocates random ports for parallel execution.
 
 ## Device UI
 
-- Navigate to localhost:3333 once the first session is created.
+- Navigate to localhost:3333 once the first session is created to know the device availability. 
 
 <img src="./images/dashboard.png">
 
