@@ -3,7 +3,7 @@ import log from './logger';
 import { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
 import { waitUntil, TimeoutError } from 'async-wait-until';
-import { assignCapabilitiesAndBlockDevice } from './helpers';
+import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 
 let devices;
 export default class DevicePlugin extends BasePlugin {
@@ -19,7 +19,7 @@ export default class DevicePlugin extends BasePlugin {
       devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
-      const assignedDevice = await assignCapabilitiesAndBlockDevice(
+      const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         devices,
         freeDevice,
         firstMatch,
@@ -40,7 +40,7 @@ export default class DevicePlugin extends BasePlugin {
             },
             { timeout, intervalBetweenAttempts }
           );
-          await assignCapabilitiesAndBlockDevice(
+          await _assignCapabilitiesAndBlockDevice(
             devices,
             freeDevice,
             firstMatch,
@@ -78,4 +78,34 @@ export default class DevicePlugin extends BasePlugin {
     );
     await next();
   }
+}
+
+async function _assignCapabilitiesAndBlockDevice(
+  devices,
+  freeDevice,
+  firstMatch,
+  firstMatchPlatform,
+  caps
+) {
+  if (freeDevice && firstMatchPlatform == 'android') {
+    await androidCapabilities(caps, freeDevice);
+    devices.blockDevice(freeDevice);
+    log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+    return true;
+  } else if (freeDevice && firstMatchPlatform == 'ios') {
+    if (firstMatch['appium:iPhoneOnly']) {
+      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+        simulator: 'iPhone',
+      });
+    } else if (firstMatch['appium:iPadOnly']) {
+      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+        simulator: 'iPad',
+      });
+    }
+    await iOSCapabilities(caps, freeDevice);
+    devices.blockDevice(freeDevice);
+    log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
+    return true;
+  }
+  return false;
 }
