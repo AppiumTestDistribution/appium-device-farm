@@ -1,7 +1,5 @@
 import os from 'os';
 import path from 'path';
-import log from './logger';
-import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 
 export async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
