@@ -42,19 +42,12 @@ appium --plugins=device-farm
 
 ## Capabilities
 
-By default global devices pool includes all the iOS simulators.
-
-To allocate only iPhone simulators set below capability to true,
-
-```
-capabilities.setCapability("appium:iPhoneOnly", true);
-```
-
-To allocate only iPad simulators set below capability to true,
-
-```
-capabilities.setCapability("appium:iPadOnly", true);
-```
+| Capability Name                  | Description                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| appium:iPhoneOnly                | Allocate only iPhone simulators for execution when to true. Default value is `false`.                                                                                                          |
+| appium:iPadOnly                  | Allocate only iPad simulators for execution when to true. Default value is `false`.                                                                                                            |
+| appium:deviceAvailabilityTimeout | When create session requests are more than available connected devices, plugin waits for a certain interval for device availability before it timeout. Default value is `180000` milliseconds. |
+| appium:deviceRetryInterval       | When create session requests are more than available connected devices, plugin polls for device availability in certain intervals. Default value is `10000` milliseconds.                      |
 
 ## Example
 
