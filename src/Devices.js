@@ -10,6 +10,8 @@ import { isMac, checkIfPathIsAbsolute } from './helpers';
 let actualDevices;
 let instance = false;
 let devices;
+const android = 'android';
+const iOS = 'iOS';
 
 export default class Devices {
   constructor(devices) {
@@ -181,8 +183,8 @@ export async function fetchDevices() {
       remove(
         actualDevices,
         (device) =>
-          device.platform === 'android' ||
-          (device.platform === 'iOS' && device.realDevice === true)
+          device.platform === android ||
+          (device.platform === iOS && device.realDevice === true)
       );
       actualDevices.push(...emittedDevices);
     });
@@ -192,4 +194,12 @@ export async function fetchDevices() {
 
 export function listAllDevices() {
   return actualDevices;
+}
+
+export function listAllAndroidDevices() {
+  return actualDevices.filter((device) => device.platform === android);
+}
+
+export function listAlliOSDevices() {
+  return actualDevices.filter((device) => device.platform === iOS);
 }

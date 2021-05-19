@@ -4,10 +4,22 @@ const port = 3333;
 const path = require('path');
 import log from './logger';
 // eslint-disable-next-line import/named
-import { listAllDevices } from './Devices';
+import {
+  listAllAndroidDevices,
+  listAlliOSDevices,
+  listAllDevices,
+} from './Devices';
 
 app.get('/devices', (req, res) => {
   res.send(JSON.stringify(listAllDevices()));
+});
+
+app.get('/devices/android', (req, res) => {
+  res.send(JSON.stringify(listAllAndroidDevices()));
+});
+
+app.get('/devices/ios', (req, res) => {
+  res.send(JSON.stringify(listAlliOSDevices()));
 });
 
 app.listen(port, () => {
