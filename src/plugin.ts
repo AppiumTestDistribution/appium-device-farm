@@ -1,20 +1,27 @@
 import BasePlugin from '@appium/base-plugin';
 import log from './logger';
-import { fetchDevices } from './Devices';
+import Devices, { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
+import { IDevice } from './interfaces/IDevice';
 
-let devices;
+let devices: Devices;
+let commandsQueueGuard = new AsyncLock();
 export default class DevicePlugin extends BasePlugin {
-  constructor(pluginName) {
+  constructor(pluginName: string) {
     super(pluginName);
-    this.commandsQueueGuard = new AsyncLock();
   }
 
-  async createSession(next, driver, jwpDesCaps, jwpReqCaps, caps) {
-    let freeDevice;
-    await this.commandsQueueGuard.acquire('DeviceManager', async function () {
+  async createSession(
+    next: () => any,
+    driver: any,
+    jwpDesCaps: any,
+    jwpReqCaps: any,
+    caps: { firstMatch: any[]; alwaysMatch: any }
+  ) {
+    let freeDevice: IDevice;
+    await commandsQueueGuard.acquire('DeviceManager', async function () {
       let firstMatch = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
       devices = await fetchDevices();
       let firstMatchPlatform = firstMatch['platformName'];
@@ -52,24 +59,24 @@ export default class DevicePlugin extends BasePlugin {
         }
       }
     });
-    this.session = await next();
-    if (this.session.error) {
+    const session = await next();
+    if (session.error) {
       devices.unblockDevice(freeDevice);
       log.info(
         `Device UDID ${freeDevice.udid} unblocked. Reason: Session failed to create`
       );
     } else {
-      devices.updateDevice(freeDevice, this.session.value[0]);
+      devices.updateDevice(freeDevice, session.value[0]);
     }
-    return this.session;
+    return session;
   }
 
-  async deleteSession(next, driver, args) {
-    const blockedDevice = devices.getDeviceForSession(args);
+  async deleteSession(next: () => any, driver: any, args: any) {
+    const blockedDevice: IDevice = devices.getDeviceForSession(args);
     log.info(
       `Unblocking device UDID: ${blockedDevice.udid} from session ${args}`
     );
-    devices.updateDevice(blockedDevice, null);
+    devices.updateDevice(blockedDevice);
     devices.unblockDevice(blockedDevice);
     log.info(
       `Deleting Session and device UDID ${blockedDevice.udid} is unblocked`
@@ -79,10 +86,10 @@ export default class DevicePlugin extends BasePlugin {
 }
 
 async function _assignCapabilitiesAndBlockDevice(
-  freeDevice,
-  firstMatch,
-  firstMatchPlatform,
-  caps
+  freeDevice: IDevice,
+  firstMatch: { [x: string]: any },
+  firstMatchPlatform: string,
+  caps: any
 ) {
   if (freeDevice && firstMatchPlatform == 'android') {
     await androidCapabilities(caps, freeDevice);

@@ -1,14 +1,11 @@
 import Simctl from 'node-simctl';
 import { flatten } from 'lodash';
+import { IDevice } from './interfaces/IDevice';
 
-let simulators = [];
+let simulators: Array<IDevice> = [];
 
 export default class SimulatorManager {
-  constructor() {
-    this.simctl = new Simctl();
-  }
-
-  async getSimulators() {
+  async getSimulators(): Promise<Array<IDevice>> {
     flatten(Object.values(await this.getiOSSimulators())).forEach((device) =>
       simulators.push(
         Object.assign({}, device, { busy: false, realDevice: false })
@@ -18,7 +15,7 @@ export default class SimulatorManager {
     return simulators;
   }
 
-  async getiOSSimulators() {
-    return await this.simctl.getDevicesByParsing('iOS');
+  async getiOSSimulators(): Promise<Array<IDevice>> {
+    return await new Simctl().getDevicesByParsing('iOS');
   }
 }
