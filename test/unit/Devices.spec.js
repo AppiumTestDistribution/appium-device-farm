@@ -14,7 +14,7 @@ describe('Devices', () => {
       udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
       state: 'Shutdown',
       sdk: '13.5',
-      platform: 'iOS',
+      platform: 'ios',
       busy: false,
       realDevice: false,
     });
@@ -79,7 +79,7 @@ describe('Devices', () => {
         udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
         state: 'Shutdown',
         sdk: '13.5',
-        platform: 'iOS',
+        platform: 'ios',
         busy: true,
         realDevice: false,
       },
