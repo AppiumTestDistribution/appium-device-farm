@@ -25,8 +25,8 @@ export default class Devices {
     schedule.scheduleJob(rule, async function () {
       let androidDeviceManager = new AndroidDeviceManager();
       let iOSDeviceManager = new IOSDeviceManager();
-      const connectedAndroidDevices = await androidDeviceManager.getDevices();
-      const connectedIOSDevices = await iOSDeviceManager.getDevices();
+      const connectedAndroidDevices: Array<IDevice> = await androidDeviceManager.getDevices();
+      const connectedIOSDevices: Array<IDevice> = await iOSDeviceManager.getDevices();
       eventEmitter.emit('ConnectedDevices', {
         emittedDevices: Object.assign(
           connectedAndroidDevices,
@@ -39,12 +39,12 @@ export default class Devices {
   getFreeDevice(platform: Platform, options?: IOptions): IDevice {
     log.info(`Finding Free Device for Platform ${platform}`);
     if (options) {
-      return (actualDevices.find(
+      return actualDevices.find(
         (device) =>
-        (!device.busy &&
+          !device.busy &&
           device.platform.toLowerCase() === platform &&
-          device.name.includes(options.simulator))
-      ) as IDevice);
+          device.name.includes(options.simulator)
+      ) as IDevice;
     } else {
       return (actualDevices.find(
         (device) => !device.busy && device.platform.toLowerCase() === platform
@@ -98,9 +98,9 @@ export function findUserSpecifiesDevices(userSpecifiedUDIDS: Array<string>, avai
 }
 
 function fetchDevicesFromUDIDS(
-  simulators: IDevice,
-  connectedAndroidDevices: IDevice,
-  connectedIOSDevices: IDevice
+  simulators: Array<IDevice>,
+  connectedAndroidDevices: Array<IDevice>,
+  connectedIOSDevices: Array<IDevice>
 ): Devices {
   const userSpecifiedUDIDS: Array<string> = (process.env.UDIDS as string).split(',');
   const availableDevices: Array<IDevice> = Object.assign(
@@ -163,7 +163,7 @@ export async function fetchDevices() {
     instance = true;
     eventEmitter.on('ConnectedDevices', function (data) {
       const { emittedDevices } = data;
-      emittedDevices.forEach((emittedDevice) => {
+      emittedDevices.forEach((emittedDevice: IDevice) => {
         const actualDevice = actualDevices.find(
           (actualDeviceState) => actualDeviceState.udid === emittedDevice.udid
         );
@@ -184,7 +184,7 @@ export async function fetchDevices() {
         actualDevices,
         (device) =>
           device.platform === 'android' ||
-          (device.platform === 'iOS' && device.realDevice)
+          (device.platform === 'ios' && device.realDevice)
       );
       actualDevices.push(...emittedDevices);
     });
@@ -201,5 +201,5 @@ export function listAllAndroidDevices() {
 }
 
 export function listAlliOSDevices() {
-  return actualDevices.filter((device) => device.platform === 'iOS');
+  return actualDevices.filter((device) => device.platform === 'ios');
 }

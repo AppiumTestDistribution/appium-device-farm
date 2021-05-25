@@ -5,6 +5,7 @@ import AsyncLock from 'async-lock';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import { IDevice } from './interfaces/IDevice';
+import { Platform } from './types/Platform';
 
 let devices: Devices;
 let commandsQueueGuard = new AsyncLock();
@@ -20,11 +21,11 @@ export default class DevicePlugin extends BasePlugin {
     jwpReqCaps: any,
     caps: { firstMatch: any[]; alwaysMatch: any }
   ) {
-    let freeDevice: IDevice;
+    let freeDevice = {} as IDevice;
     await commandsQueueGuard.acquire('DeviceManager', async function () {
       let firstMatch = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
       devices = await fetchDevices();
-      let firstMatchPlatform = firstMatch['platformName'];
+      let firstMatchPlatform: Platform = firstMatch['platformName'];
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         freeDevice,

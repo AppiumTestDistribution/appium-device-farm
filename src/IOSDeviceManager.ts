@@ -28,7 +28,7 @@ export default class IOSDeviceManager {
           name: await this.getDeviceName(udid),
           busy: false,
           realDevice: true,
-          platform: 'iOS',
+          platform: 'ios',
         })
       );
     });

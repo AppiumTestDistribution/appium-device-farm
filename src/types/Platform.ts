@@ -1,1 +1,1 @@
-export type Platform = 'android' | 'iOS';
+export type Platform = 'android' | 'ios';
