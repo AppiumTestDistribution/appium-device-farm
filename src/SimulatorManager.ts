@@ -13,7 +13,6 @@ export default class SimulatorManager {
     );
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
     simulators.forEach((simulator) => (simulator.platform = 'ios'));
-    console.log(JSON.stringify(simulators));
     return simulators;
   }
 
