@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const app = express();
 const port = 3333;
-const path = require('path');
+import path from 'path';
 import log from './logger';
 // eslint-disable-next-line import/named
 import {

@@ -23,4 +23,11 @@ module.exports = {
     'prettier/prettier': ['error', { singleQuote: true }],
     quotes: ['error', 'single'],
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
+  },
 };

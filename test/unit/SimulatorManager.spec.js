@@ -11,7 +11,7 @@ describe('Simulator Manager', () => {
         udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
         state: 'Shutdown',
         sdk: '13.5',
-        platform: 'iOS',
+        platform: 'ios',
       },
     ]);
     const simulators = await simulatorManager.getSimulators();
@@ -21,7 +21,7 @@ describe('Simulator Manager', () => {
         udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
         state: 'Shutdown',
         sdk: '13.5',
-        platform: 'iOS',
+        platform: 'ios',
         busy: false,
         realDevice: false,
       },

@@ -19,7 +19,7 @@ describe('IOS Device Manager', () => {
         name: 'Sai’s iPhone',
         busy: false,
         realDevice: true,
-        platform: 'iOS',
+        platform: 'ios',
       },
     ]);
   });
