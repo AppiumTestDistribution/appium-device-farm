@@ -25,7 +25,7 @@ export default class DevicePlugin extends BasePlugin {
     await commandsQueueGuard.acquire('DeviceManager', async function () {
       let firstMatch = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
       devices = await fetchDevices();
-      let firstMatchPlatform: Platform = firstMatch['platformName'];
+      let firstMatchPlatform: Platform = firstMatch['platformName'].toLowerCase();
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         freeDevice,
