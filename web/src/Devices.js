@@ -2,11 +2,11 @@ import Device from './Device';
 
 const Devices = ({ devices }) => {
   return (
-    <div>
+    <section class="grid-container">
       {devices.map((device) => (
         <Device device={device} />
       ))}
-    </div>
+    </section>
   );
 };
 
