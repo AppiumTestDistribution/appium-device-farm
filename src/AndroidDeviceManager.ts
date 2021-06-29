@@ -6,28 +6,38 @@ import { IDevice } from './interfaces/IDevice';
 let adbInstance: boolean = false;
 let adb: any;
 export default class AndroidDeviceMananger {
-  async getDevices(): Promise<Array<IDevice>> {
+  async getDevices(actualDevices: Array<IDevice>): Promise<Array<IDevice>> {
     let deviceState: Array<IDevice> = [];
     log.info('Fetching Android Devices');
     const connectedDevices = await this.getConnectedDevices();
+    let sdk = '';
+    let realDevice = false;
+    let name = '';
     await asyncForEach(
       connectedDevices,
       async (device: { udid: any; state: any }) => {
-        if (
-          !deviceState.find((devicestate) => devicestate.udid === device.udid)
-        ) {
+        let value = actualDevices ? actualDevices[0] : null;
+        if(!actualDevices.find(i => i.udid === device.udid)){
+          sdk = await this.getDeviceVersion(device.udid);
+          realDevice = await this.isRealDevice(device.udid);
+          name = await this.getDeviceName(device.udid);
+        }
+        else if(value){
+          sdk = actualDevices.find(i => i.udid === device.udid)?.sdk as string;
+          realDevice = actualDevices.find(i => i.udid === device.udid)?.realDevice as boolean;
+          name = actualDevices.find(i => i.udid === device.udid)?.name as string;
+        }
           deviceState.push(
             Object.assign({
               busy: false,
               state: device.state,
               udid: device.udid,
               platform: 'android',
-              sdk: await this.getDeviceVersion(device.udid),
-              realDevice: await this.isRealDevice(device.udid),
-              name: await this.getDeviceName(device.udid),
+              sdk: sdk,
+              realDevice: realDevice,
+              name: name,
             })
           );
-        }
       }
     );
     log.info(`Android Devices found ${JSON.stringify(deviceState)}`);

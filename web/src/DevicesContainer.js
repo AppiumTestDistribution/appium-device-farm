@@ -12,7 +12,7 @@ const DevicesContainer = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/devices')
+    fetch('./sample.json')
       .then((res) => res.json())
       .then(
         (devices) => {

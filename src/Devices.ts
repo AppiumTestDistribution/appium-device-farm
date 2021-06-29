@@ -25,8 +25,8 @@ export default class Devices {
     schedule.scheduleJob(rule, async function () {
       let androidDeviceManager = new AndroidDeviceManager();
       let iOSDeviceManager = new IOSDeviceManager();
-      const connectedAndroidDevices: Array<IDevice> = await androidDeviceManager.getDevices();
-      const connectedIOSDevices: Array<IDevice> = await iOSDeviceManager.getDevices();
+      const connectedAndroidDevices: Array<IDevice> = await androidDeviceManager.getDevices(actualDevices);
+      const connectedIOSDevices: Array<IDevice> = await iOSDeviceManager.getDevices(actualDevices);
       eventEmitter.emit('ConnectedDevices', {
         emittedDevices: Object.assign(
           connectedAndroidDevices,
@@ -127,8 +127,8 @@ export async function fetchDevices() {
     let iosDevices = new IOSDeviceManager();
     if (isMac()) {
       simulators = await simulatorManager.getSimulators();
-      connectedIOSDevices = await iosDevices.getDevices();
-      connectedAndroidDevices = await androidDevices.getDevices();
+      connectedIOSDevices = await iosDevices.getDevices(actualDevices);
+      connectedAndroidDevices = await androidDevices.getDevices(actualDevices);
       if (udids) {
         devices = fetchDevicesFromUDIDS(
           simulators,
@@ -148,14 +148,14 @@ export async function fetchDevices() {
     } else {
       if (udids) {
         const userSpecifiedUDIDS = (process.env.UDIDS as string).split(',');
-        const availableDevices = await androidDevices.getDevices();
+        const availableDevices = await androidDevices.getDevices(actualDevices);
         const filteredDevices = findUserSpecifiesDevices(
           userSpecifiedUDIDS,
           availableDevices
         );
         devices = new Devices(filteredDevices);
       } else {
-        devices = new Devices(await androidDevices.getDevices());
+        devices = new Devices(await androidDevices.getDevices(actualDevices));
         devices.emitConnectedDevices();
       }
     }
