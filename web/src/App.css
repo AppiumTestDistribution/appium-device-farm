@@ -1,57 +1,60 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;500;700;900&display=swap");
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .header {
-  margin: 30px auto;
-  height: 6rem;
-  width: 680px;
-  font-family: "Poppins", sans-serif;
-  border-radius: 1rem;
-  color: black;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.4);
-  border-left: 1px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(2px);
-  text-align: center;
-  padding-top: 19px;
+    margin: 30px auto;
+    height: 6rem;
+    width: 680px;
+    font-family: "Poppins", sans-serif;
+    border-radius: 1rem;
+    color: black;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(2px);
+    text-align: center;
+    padding-top: 19px;
 }
 
 .grid-container {
-  display: grid;
-  font-family: "Poppins", sans-serif;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-gap: 0.5rem;
-  padding-left: 10px;
-  padding-top: 5px;
-  padding-right: 10px;
-  padding-bottom: 5px;
+    display: grid;
+    font-family: "Poppins", sans-serif;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-gap: 0.5rem;
+    padding: 5px 10px;
 }
 
 .grid-container > div {
-  padding: 0.5rem;
-  border-radius: 1rem;
-  color: black;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.4);
-  border-left: 1px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(2px);
+    padding: 0.5rem;
+    border-radius: 1rem;
+    color: black;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.deviceTile {
+    cursor: pointer;
+}
+
+.deviceTile:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

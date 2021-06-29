@@ -1,0 +1,44 @@
+.modal-content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 1rem;
+    color: black;
+    letter-spacing: 0.1rem;
+}
+
+.deviceDetail {
+    justify-content: space-between;
+    display: flex;
+}
+
+.deviceDetailsCloseButton {
+    background-color: #5b66ce;
+    border: #5b66ce;
+}
+
+.deviceDetailsCloseButton:hover {
+    background-color: #edc0bf;
+    border: #edc0bf;
+}
+
+@media only screen and (max-width: 320px) {
+    hr {
+        margin-bottom: 0.3rem;
+    }
+
+    h4 {
+        font-size: small;
+    }
+}
+
+@media only screen and (min-width: 360px) {
+    h4 {
+        font-size: small;
+    }
+}
