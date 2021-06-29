@@ -35,6 +35,7 @@ export default class DevicePlugin extends BasePlugin {
                 caps
             );
             if (!assignedDevice) {
+                noOfSessionRequests++;
                 try {
                     const timeout =
                         firstMatch['appium:deviceAvailabilityTimeout'] || 180000;
@@ -42,10 +43,8 @@ export default class DevicePlugin extends BasePlugin {
                         firstMatch['appium:deviceRetryInterval'] || 10000;
                     await waitUntil(
                         async () => {
-                            noOfSessionRequests++;
                             log.info('Waiting for free device');
                             freeDevice = devices.getFreeDevice(firstMatchPlatform);
-                            if (freeDevice !== undefined) noOfSessionRequests--;
                             return freeDevice !== undefined;
                         },
                         {timeout, intervalBetweenAttempts}
@@ -56,6 +55,7 @@ export default class DevicePlugin extends BasePlugin {
                         firstMatchPlatform,
                         caps
                     );
+                    noOfSessionRequests--;
                 } catch (e) {
                     if (e instanceof TimeoutError) {
                         throw new Error('Timeout waiting for device to be free');
