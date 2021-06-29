@@ -16,6 +16,16 @@ const App = () => {
                 <h1>Appium Device Farm</h1>
             </div>
             <PendingSessionsCount>
+                <div className="platform">
+                    <DropdownButton id="dropdown"
+                                    title={platformValue}
+                                    onSelect={handleSelect}
+                    >
+                        <Dropdown.Item eventKey="All">All</Dropdown.Item>
+                        <Dropdown.Item eventKey="Android">Android</Dropdown.Item>
+                        <Dropdown.Item eventKey="iOS">iOS</Dropdown.Item>
+                    </DropdownButton>
+                </div>
             </PendingSessionsCount>
             <DevicesContainer platform={platformValue}/>
         </div>
