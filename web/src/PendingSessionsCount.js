@@ -5,19 +5,24 @@ const PendingSessionsCount = ({children}) => {
     const [pendingTests, setPendingTests] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
     useEffect(() => {
-        axios.get("http://localhost:3333/info")
-            .then(res => {
-                setPendingTests(res.data);
-                setLoading(false);
-            })
-            .catch((error) => {
+        const interval = setInterval(() => {
+            // eslint-disable-next-line no-unused-expressions
+            axios.get("http://localhost:3333/info")
+                .then(res => {
+                    setPendingTests(res.data);
+                    setLoading(false);
+                })
+                .catch((error) => {
                     setLoading(false);
                     setError(error);
                     console.log(error)
-                }
-            );
-    }, []);
+                })}, 10000);
+        return () => {
+            clearInterval(interval);
+        };
+    },[] );
     if (loading) {
         return (
             <div className="d-flex flex-column bd-highlight mt-4 text-center">
