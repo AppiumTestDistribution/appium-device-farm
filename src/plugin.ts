@@ -7,6 +7,7 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import { IDevice } from './interfaces/IDevice';
 import { Platform } from './types/Platform';
 
+let noOfSessionRequests=0;
 let devices: Devices;
 let commandsQueueGuard = new AsyncLock();
 export default class DevicePlugin extends BasePlugin {
@@ -41,6 +42,7 @@ export default class DevicePlugin extends BasePlugin {
             firstMatch['appium:deviceRetryInterval'] || 10000;
           await waitUntil(
             async () => {
+              noOfSessionRequests++;
               log.info('Waiting for free device');
               freeDevice = devices.getFreeDevice(firstMatchPlatform);
               return freeDevice !== undefined;
@@ -53,6 +55,9 @@ export default class DevicePlugin extends BasePlugin {
             firstMatchPlatform,
             caps
           );
+          if(assignedDevice) {
+            noOfSessionRequests--;
+          }
         } catch (e) {
           if (e instanceof TimeoutError) {
             throw new Error('Timeout waiting for device to be free');
@@ -113,4 +118,7 @@ async function _assignCapabilitiesAndBlockDevice(
     return true;
   }
   return false;
+}
+export function numberOfPendingSessionRequests() {
+  return noOfSessionRequests;
 }
