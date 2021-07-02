@@ -1,24 +1,24 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
 
 const PendingSessionsCount = ({children}) => {
-    const [pendingTests, setPendingTests] = useState("");
+    const [pendingTests, setPendingTests] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
         const interval = setInterval(() => {
-            // eslint-disable-next-line no-unused-expressions
-            axios.get("http://localhost:3333/info")
-                .then(res => {
-                    setPendingTests(res.data);
+            fetch('/queue')
+            .then((res) => res.json())
+            .then(
+                (data) => {
                     setLoading(false);
-                })
-                .catch((error) => {
+                    setPendingTests(data);
+                },
+                (error) => {
                     setLoading(false);
                     setError(error);
-                    console.log(error)
-                })}, 10000);
+                });
+        }, 10000);
         return () => {
             clearInterval(interval);
         };
@@ -36,7 +36,7 @@ const PendingSessionsCount = ({children}) => {
             </div>
         );
     } else {
-        return <div className="pending-tests mt-4 p-2 bd-highlight">{children}Pending Tests : {pendingTests}  </div>;
+        return <div className="pending-tests mt-4 p-2 bd-highlight">{children}Queued Tests : {pendingTests}  </div>;
     }
 };
 export default PendingSessionsCount;
