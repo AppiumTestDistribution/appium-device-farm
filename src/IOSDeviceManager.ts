@@ -17,7 +17,7 @@ export default class IOSDeviceManager {
   }
 
   async getDevices(): Promise<Array<IDevice>> {
-    let deviceState: Array<IDevice> = [];
+    const deviceState: Array<IDevice> = [];
     log.info('Fetching iOS Devices');
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
