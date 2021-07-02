@@ -1,7 +1,6 @@
 import express from 'express';
 const app = express();
 const port = 3333;
-const cors = require('cors');
 import path from 'path';
 import log from './logger';
 // eslint-disable-next-line import/named
@@ -10,13 +9,13 @@ import {
   listAlliOSDevices,
   listAllDevices,
 } from './Devices';
-import {numberOfPendingSessionRequests} from './plugin';
+import { numberOfPendingSessionRequests } from './plugin';
 
 app.get('/devices', (req, res) => {
   res.send(JSON.stringify(listAllDevices()));
 });
 
-app.get('/info', cors(), (req, res) => {
+app.get('/queue', (req, res) => {
   res.send(JSON.stringify(numberOfPendingSessionRequests()));
 });
 

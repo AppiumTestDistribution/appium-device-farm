@@ -1,42 +1,38 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
 
 const PendingSessionsCount = ({children}) => {
-    const [pendingTests, setPendingTests] = useState("");
+    const [pendingTests, setPendingTests] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
         const interval = setInterval(() => {
-            // eslint-disable-next-line no-unused-expressions
-            axios.get("http://localhost:3333/info")
-                .then(res => {
-                    setPendingTests(res.data);
+            fetch('/queue')
+            .then((res) => res.json())
+            .then(
+                (data) => {
                     setLoading(false);
-                })
-                .catch((error) => {
+                    setPendingTests(data);
+                },
+                (error) => {
                     setLoading(false);
                     setError(error);
-                    console.log(error)
-                })}, 10000);
+                });
+        }, 10000);
         return () => {
             clearInterval(interval);
         };
     },[] );
     if (loading) {
         return (
-            <div className="d-flex flex-column bd-highlight mt-4 text-center">
-                <div className="p-2 bd-highlight">Loading pending tests</div>
-            </div>
+            <div>Loading pending tests</div>
         );
     } else if (error) {
         return (
-            <div className="d-flex flex-column bd-highlight mb-4 text-center">
-                <div className="p-2 bd-highlight">Something went wrong</div>
-            </div>
+            <div>Something went wrong</div>
         );
     } else {
-        return <div className="pending-tests mt-4 p-2 bd-highlight">{children}Pending Tests : {pendingTests}  </div>;
+        return <div className="pending-tests">{children}Queued Tests : {pendingTests}  </div>;
     }
 };
 export default PendingSessionsCount;

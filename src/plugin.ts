@@ -1,11 +1,11 @@
 import BasePlugin from '@appium/base-plugin';
 import log from './logger';
-import Devices, {fetchDevices} from './Devices';
+import Devices, { fetchDevices } from './Devices';
 import AsyncLock from 'async-lock';
-import {waitUntil, TimeoutError} from 'async-wait-until';
-import {androidCapabilities, iOSCapabilities} from './CapabilityManager';
-import {IDevice} from './interfaces/IDevice';
-import {Platform} from './types/Platform';
+import { waitUntil, TimeoutError } from 'async-wait-until';
+import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
+import { IDevice } from './interfaces/IDevice';
+import { Platform } from './types/Platform';
 
 let noOfSessionRequests = 0;
 let devices: Devices;
@@ -47,7 +47,7 @@ export default class DevicePlugin extends BasePlugin {
                             freeDevice = devices.getFreeDevice(firstMatchPlatform);
                             return freeDevice !== undefined;
                         },
-                        {timeout, intervalBetweenAttempts}
+                        { timeout, intervalBetweenAttempts }
                     );
                     await _assignCapabilitiesAndBlockDevice(
                         freeDevice,
