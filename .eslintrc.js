@@ -1,8 +1,8 @@
 module.exports = {
   extends: [
     'eslint:recommended',
-    'plugin:import/errors',
-    'plugin:import/warnings',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
     'prettier',
   ],
   env: {
@@ -10,7 +10,7 @@ module.exports = {
     es6: true,
     mocha: true,
   },
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2016,
     sourceType: 'module',
@@ -18,7 +18,7 @@ module.exports = {
       plugins: ['@babel/plugin-proposal-class-properties'],
     },
   },
-  plugins: ['prettier'],
+  plugins: ['prettier', '@typescript-eslint'],
   rules: {
     'prettier/prettier': ['error', { singleQuote: true }],
     quotes: ['error', 'single'],

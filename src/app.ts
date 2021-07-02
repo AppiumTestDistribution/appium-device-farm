@@ -3,7 +3,7 @@ const app = express();
 const port = 3333;
 import path from 'path';
 import log from './logger';
-// eslint-disable-next-line import/named
+// eslint-disable-next-line
 import {
   listAllAndroidDevices,
   listAlliOSDevices,

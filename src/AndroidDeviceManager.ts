@@ -3,11 +3,11 @@ import log from './logger';
 import { asyncForEach } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 
-let adbInstance: boolean = false;
+let adbInstance = false;
 let adb: any;
 export default class AndroidDeviceMananger {
   async getDevices(): Promise<Array<IDevice>> {
-    let deviceState: Array<IDevice> = [];
+    const deviceState: Array<IDevice> = [];
     log.info('Fetching Android Devices');
     const connectedDevices = await this.getConnectedDevices();
     await asyncForEach(
