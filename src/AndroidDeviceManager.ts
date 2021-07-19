@@ -25,6 +25,9 @@ export default class AndroidDeviceMananger {
               sdk: await this.getDeviceVersion(device.udid),
               realDevice: await this.isRealDevice(device.udid),
               name: await this.getDeviceName(device.udid),
+              model: await this.getDeviceModel(device.udid),
+              manufacturer: await this.getDeviceManufacturer(device.udid),
+              brand: await this.getDeviceBrand(device.udid),
             })
           );
         }
@@ -67,5 +70,19 @@ export default class AndroidDeviceMananger {
   async getDeviceName(udid: string) {
     await this.createADB();
     return await this.getDeviceProperty(udid, 'ro.product.name');
+  }
+
+  async getDeviceModel(udid: string) {
+    await this.createADB();
+    return await this.getDeviceProperty(udid, 'ro.product.model');
+  }
+
+  async getDeviceManufacturer(udid: string) {
+    await this.createADB();
+    return await this.getDeviceProperty(udid, 'ro.product.manufacturer');
+  }
+  async getDeviceBrand(udid: string) {
+    await this.createADB();
+    return await this.getDeviceProperty(udid, 'ro.product.brand');
   }
 }

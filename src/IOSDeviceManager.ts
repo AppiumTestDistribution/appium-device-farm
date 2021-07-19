@@ -29,6 +29,9 @@ export default class IOSDeviceManager {
           busy: false,
           realDevice: true,
           platform: 'ios',
+          brand: 'Apple',
+          manufacturer: 'Apple',
+          model: await this.getDeviceName(udid),
         })
       );
     });

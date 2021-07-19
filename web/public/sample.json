@@ -1,108 +1,144 @@
 [
-    {
-        "busy": true,
-        "state": "device",
-        "udid": "emulator-5554",
-        "platform": "android",
-        "realDevice": true,
-        "sdk": "13.5"
-    },
-    {
-        "busy": false,
-        "state": "device",
-        "udid": "emulator-5556",
-        "platform": "android",
-        "realDevice": true,
-        "sdk": "13.5"
-    },
-    {
-        "name": "iPhone 8 Plus",
-        "udid": "D016AC0B-7A62-4D0D-A1B2-0C42AE2FE2A6",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": true
-    },
-    {
-        "name": "iPhone 11",
-        "udid": "99F570C8-DD6E-4640-816A-EEEE04DDD12A",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPhone 11 Pro",
-        "udid": "2D1BC28A-7A9B-4AE5-B4C2-742E85F6AEF2",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPhone 11 Pro Max",
-        "udid": "290F7A1F-A116-42B4-BF7D-2EAB575ECCD5",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPhone SE (2nd generation)",
-        "udid": "CD653100-D6DC-47CB-991A-5DB85EA0DEEE",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPad Pro (9.7-inch)",
-        "udid": "3D20BDEC-BECD-438F-AFC0-EC03DF81A8AB",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPad (7th generation)",
-        "udid": "82D315FB-0240-491F-966B-0D08523DCD8A",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPad Pro (11-inch) (2nd generation)",
-        "udid": "D4107B35-F2F4-482C-AB91-4727DEAD8604",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPad Pro (12.9-inch) (4th generation)",
-        "udid": "641249B7-95A0-447E-823C-FE172B3E32FD",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    },
-    {
-        "name": "iPad Air (3rd generation)",
-        "udid": "0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866",
-        "state": "Shutdown",
-        "sdk": "13.5",
-        "platform": "iOS",
-        "busy": false,
-        "realDevice": false
-    }
+  {
+    "busy": true,
+    "state": "device",
+    "udid": "emulator-5554",
+    "platform": "android",
+    "realDevice": true,
+    "sdk": "13.5",
+    "model": "Samsung Galaxy M31",
+    "manufacturer": "Samsung",
+    "brand": "Samsung"
+  },
+  {
+    "busy": false,
+    "state": "device",
+    "udid": "emulator-5556",
+    "platform": "android",
+    "realDevice": true,
+    "sdk": "13.5",
+    "model": "Google Pixel 2",
+    "manufacturer": "Google",
+    "brand": "Google"
+  },
+  {
+    "name": "iPhone 8 Plus",
+    "udid": "D016AC0B-7A62-4D0D-A1B2-0C42AE2FE2A6",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": true,
+    "model": "iPhone 8 Plus",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPhone 11",
+    "udid": "99F570C8-DD6E-4640-816A-EEEE04DDD12A",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPhone 11",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPhone 11 Pro",
+    "udid": "2D1BC28A-7A9B-4AE5-B4C2-742E85F6AEF2",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPhone 11 Pro",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPhone 11 Pro Max",
+    "udid": "290F7A1F-A116-42B4-BF7D-2EAB575ECCD5",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPhone 11 Pro Max",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPhone SE (2nd generation)",
+    "udid": "CD653100-D6DC-47CB-991A-5DB85EA0DEEE",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPhone SE (2nd generation)\"",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPad Pro (9.7-inch)",
+    "udid": "3D20BDEC-BECD-438F-AFC0-EC03DF81A8AB",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPad Pro (9.7-inch)",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPad (7th generation)",
+    "udid": "82D315FB-0240-491F-966B-0D08523DCD8A",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPad (7th generation)",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPad Pro (11-inch) (2nd generation)",
+    "udid": "D4107B35-F2F4-482C-AB91-4727DEAD8604",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPad Pro (11-inch) (2nd generation)",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPad Pro (12.9-inch) (4th generation)",
+    "udid": "641249B7-95A0-447E-823C-FE172B3E32FD",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPad Pro (12.9-inch) (4th generation)",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  },
+  {
+    "name": "iPad Air (3rd generation)",
+    "udid": "0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866",
+    "state": "Shutdown",
+    "sdk": "13.5",
+    "platform": "iOS",
+    "busy": false,
+    "realDevice": false,
+    "model": "iPad Air (3rd generation)",
+    "manufacturer": "Apple",
+    "brand": "Apple"
+  }
 ]
