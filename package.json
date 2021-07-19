@@ -12,7 +12,7 @@
     "prepublish": "npx tsc",
     "lint": "eslint . --ext .ts --fix",
     "prettier": "prettier '**/*.js' --write --single-quote",
-    "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-farm"
+    "install-plugin": "npm run build && /Users/saikrisv/.node/bin/appium plugin install --source=local /Users/saikrisv/git/appium-device-farm"
   },
   "repository": {
     "type": "git",
