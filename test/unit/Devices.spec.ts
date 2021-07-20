@@ -1,9 +1,7 @@
-// import { expect } from 'chai';
 import Devices, {
   listAllDevices,
   findUserSpecifiesDevices,
 } from '../../src/Devices';
-// import { deviceMock } from './fixtures/devices';
 
 describe('Devices', () => {
   const deviceMock = [
