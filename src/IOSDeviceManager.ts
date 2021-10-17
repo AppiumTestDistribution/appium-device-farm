@@ -24,19 +24,18 @@ export default class IOSDeviceManager {
     let name = '';
     await asyncForEach(devices, async (udid: string) => {
       let value = actualDevices ? actualDevices[0] : null;
-        if(!actualDevices.find(i => i.udid === udid)){
-          sdk = await this.getOSVersion(udid);
-          name = await this.getDeviceName(udid);
-        }
-        else if(value){
-          sdk = actualDevices.find(i => i.udid === udid)?.sdk as string;
-          name = actualDevices.find(i => i.udid === udid)?.name as string;
-        }
+      if (value) {
+        sdk = actualDevices.find((i) => i.udid === udid)?.sdk as string;
+        name = actualDevices.find((i) => i.udid === udid)?.name as string;
+      } else {
+        sdk = await this.getOSVersion(udid);
+        name = await this.getDeviceName(udid);
+      }
       deviceState.push(
         Object.assign({
-          udid: udid,
-          sdk: sdk,
-          name: name,
+          udid,
+          sdk,
+          name,
           busy: false,
           realDevice: true,
           platform: 'ios',

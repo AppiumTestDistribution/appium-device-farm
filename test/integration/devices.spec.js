@@ -6,4 +6,4 @@ describe('Get Devices', () => {
     await fetchDevices();
     expect(listAllDevices()).to.not.be.empty;
   });
-})
+});

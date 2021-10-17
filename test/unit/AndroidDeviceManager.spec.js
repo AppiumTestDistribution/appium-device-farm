@@ -44,12 +44,14 @@ describe('Android Device Manager', () => {
         realDevice: false,
         udid: 'emulator-5554',
         platform: 'android',
-      }
-    ]
+      },
+    ];
     sinon.stub([], 'push');
-    sinon
-      .stub(androidDevices, 'getConnectedDevices')
-      .returns([{ udid: 'emulator-5553', state: 'device' }, { udid: 'emulator-5554', state: 'device' }, { udid: 'emulator-5555', state: 'device' }]);
+    sinon.stub(androidDevices, 'getConnectedDevices').returns([
+      { udid: 'emulator-5553', state: 'device' },
+      { udid: 'emulator-5554', state: 'device' },
+      { udid: 'emulator-5555', state: 'device' },
+    ]);
     sinon.stub(androidDevices, 'getDeviceVersion').returns('9');
     sinon.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sinon.stub(androidDevices, 'isRealDevice').returns(false);
@@ -131,12 +133,14 @@ describe('Android Device Manager', () => {
         realDevice: false,
         udid: 'emulator-5554',
         platform: 'android',
-      }
-    ]
+      },
+    ];
     sinon.stub([], 'push');
-    sinon
-      .stub(androidDevices, 'getConnectedDevices')
-      .returns([{ udid: 'emulator-5553', state: 'device' }, { udid: 'emulator-5554', state: 'device' }, { udid: 'emulator-5555', state: 'device' }]);
+    sinon.stub(androidDevices, 'getConnectedDevices').returns([
+      { udid: 'emulator-5553', state: 'device' },
+      { udid: 'emulator-5554', state: 'device' },
+      { udid: 'emulator-5555', state: 'device' },
+    ]);
     sinon.stub(androidDevices, 'getDeviceVersion').returns('9');
     sinon.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sinon.stub(androidDevices, 'isRealDevice').returns(false);

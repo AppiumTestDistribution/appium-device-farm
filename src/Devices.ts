@@ -25,8 +25,10 @@ export default class Devices {
     schedule.scheduleJob(rule, async function () {
       let androidDeviceManager = new AndroidDeviceManager();
       let iOSDeviceManager = new IOSDeviceManager();
-      const connectedAndroidDevices: Array<IDevice> = await androidDeviceManager.getDevices(actualDevices);
-      const connectedIOSDevices: Array<IDevice> = await iOSDeviceManager.getDevices(actualDevices);
+      const connectedAndroidDevices: Array<IDevice> =
+        await androidDeviceManager.getDevices(actualDevices);
+      const connectedIOSDevices: Array<IDevice> =
+        await iOSDeviceManager.getDevices(actualDevices);
       eventEmitter.emit('ConnectedDevices', {
         emittedDevices: Object.assign(
           connectedAndroidDevices,

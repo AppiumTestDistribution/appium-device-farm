@@ -11,7 +11,7 @@
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc",
     "lint": "eslint . --ext .ts --fix",
-    "prettier": "prettier '**/*.js' --write --single-quote",
+    "prettier": "prettier '**/*.js' '**/*.ts' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-farm"
   },
   "repository": {

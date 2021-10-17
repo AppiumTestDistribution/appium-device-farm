@@ -17,27 +17,29 @@ export default class AndroidDeviceMananger {
       connectedDevices,
       async (device: { udid: any; state: any }) => {
         let value = actualDevices ? actualDevices[0] : null;
-        if(!actualDevices.find(i => i.udid === device.udid)){
+        if (!actualDevices.find((i) => i.udid === device.udid)) {
           sdk = await this.getDeviceVersion(device.udid);
           realDevice = await this.isRealDevice(device.udid);
           name = await this.getDeviceName(device.udid);
+        } else if (value) {
+          sdk = actualDevices.find((i) => i.udid === device.udid)
+            ?.sdk as string;
+          realDevice = actualDevices.find((i) => i.udid === device.udid)
+            ?.realDevice as boolean;
+          name = actualDevices.find((i) => i.udid === device.udid)
+            ?.name as string;
         }
-        else if(value){
-          sdk = actualDevices.find(i => i.udid === device.udid)?.sdk as string;
-          realDevice = actualDevices.find(i => i.udid === device.udid)?.realDevice as boolean;
-          name = actualDevices.find(i => i.udid === device.udid)?.name as string;
-        }
-          deviceState.push(
-            Object.assign({
-              busy: false,
-              state: device.state,
-              udid: device.udid,
-              platform: 'android',
-              sdk: sdk,
-              realDevice: realDevice,
-              name: name,
-            })
-          );
+        deviceState.push(
+          Object.assign({
+            busy: false,
+            state: device.state,
+            udid: device.udid,
+            platform: 'android',
+            sdk,
+            realDevice: realDevice,
+            name,
+          })
+        );
       }
     );
     log.info(`Android Devices found ${JSON.stringify(deviceState)}`);
