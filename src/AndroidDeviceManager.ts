@@ -3,7 +3,7 @@ import log from './logger';
 import { asyncForEach } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 
-let adbInstance: boolean = false;
+let adbInstance = false;
 let adb: any;
 export default class AndroidDeviceMananger {
   async getDevices(actualDevices: Array<IDevice>): Promise<Array<IDevice>> {

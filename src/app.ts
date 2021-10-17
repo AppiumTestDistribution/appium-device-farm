@@ -3,15 +3,20 @@ const app = express();
 const port = 3333;
 import path from 'path';
 import log from './logger';
-// eslint-disable-next-line import/named
+// eslint-disable-next-line
 import {
   listAllAndroidDevices,
   listAlliOSDevices,
   listAllDevices,
 } from './Devices';
+import { numberOfPendingSessionRequests } from './plugin';
 
 app.get('/devices', (req, res) => {
   res.send(JSON.stringify(listAllDevices()));
+});
+
+app.get('/queue', (req, res) => {
+  res.send(JSON.stringify(numberOfPendingSessionRequests()));
 });
 
 app.get('/devices/android', (req, res) => {

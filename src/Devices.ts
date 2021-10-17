@@ -11,7 +11,7 @@ import { IOptions } from './interfaces/IOptions';
 import { Platform } from './types/Platform';
 
 let actualDevices: Array<IDevice>;
-let instance: boolean = false;
+let instance = false;
 let devices: Devices;
 
 export default class Devices {
@@ -20,7 +20,7 @@ export default class Devices {
   }
   emitConnectedDevices() {
     log.info('Starting & initializing the listen to device changes');
-    let rule = new schedule.RecurrenceRule();
+    const rule = new schedule.RecurrenceRule();
     rule.second = [0, 10, 20, 30, 40, 50];
     schedule.scheduleJob(rule, async function () {
       let androidDeviceManager = new AndroidDeviceManager();
@@ -46,24 +46,24 @@ export default class Devices {
           device.name.includes(options.simulator)
       ) as IDevice;
     } else {
-      return (actualDevices.find(
+      return actualDevices.find(
         (device) => !device.busy && device.platform.toLowerCase() === platform
-      ) as IDevice);
+      ) as IDevice;
     }
   }
 
   blockDevice(freeDevice: IDevice): IDevice {
-    return (actualDevices.find(
+    return actualDevices.find(
       (device) =>
         device.udid === freeDevice.udid && ((device.busy = true), true)
-    ) as IDevice);
+    ) as IDevice;
   }
 
   unblockDevice(blockedDevice: IDevice): IDevice {
-    return (actualDevices.find(
+    return actualDevices.find(
       (device) =>
         device.udid === blockedDevice.udid && ((device.busy = false), true)
-    ) as IDevice);
+    ) as IDevice;
   }
 
   updateDevice(freeDevice: IDevice, sessionId?: string) {
@@ -75,7 +75,9 @@ export default class Devices {
   }
 
   getDeviceForSession(sessionId: string): IDevice {
-    return (actualDevices.find((device) => device.sessionId === sessionId) as IDevice);
+    return actualDevices.find(
+      (device) => device.sessionId === sessionId
+    ) as IDevice;
   }
 }
 
@@ -87,11 +89,14 @@ export function isDeviceConfigPathAbsolute(path: string) {
   }
 }
 
-export function findUserSpecifiesDevices(userSpecifiedUDIDS: Array<string>, availableDevices: Array<IDevice>) {
-  let filteredDevices: Array<IDevice> = [];
+export function findUserSpecifiesDevices(
+  userSpecifiedUDIDS: Array<string>,
+  availableDevices: Array<IDevice>
+) {
+  const filteredDevices: Array<IDevice> = [];
   userSpecifiedUDIDS.forEach((value) =>
     filteredDevices.push(
-      (availableDevices.find((device) => device.udid === value) as IDevice)
+      availableDevices.find((device) => device.udid === value) as IDevice
     )
   );
   return filteredDevices;
@@ -102,7 +107,9 @@ function fetchDevicesFromUDIDS(
   connectedAndroidDevices: Array<IDevice>,
   connectedIOSDevices: Array<IDevice>
 ): Devices {
-  const userSpecifiedUDIDS: Array<string> = (process.env.UDIDS as string).split(',');
+  const userSpecifiedUDIDS: Array<string> = (process.env.UDIDS as string).split(
+    ','
+  );
   const availableDevices: Array<IDevice> = Object.assign(
     simulators,
     connectedAndroidDevices,
@@ -122,9 +129,9 @@ export async function fetchDevices() {
     let simulators: Array<IDevice>;
     let connectedIOSDevices: Array<IDevice>;
     let connectedAndroidDevices: Array<IDevice>;
-    let simulatorManager = new SimulatorManager();
-    let androidDevices = new AndroidDeviceManager();
-    let iosDevices = new IOSDeviceManager();
+    const simulatorManager = new SimulatorManager();
+    const androidDevices = new AndroidDeviceManager();
+    const iosDevices = new IOSDeviceManager();
     if (isMac()) {
       simulators = await simulatorManager.getSimulators();
       connectedIOSDevices = await iosDevices.getDevices(actualDevices);

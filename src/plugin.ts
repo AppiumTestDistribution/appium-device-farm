@@ -7,8 +7,9 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import { IDevice } from './interfaces/IDevice';
 import { Platform } from './types/Platform';
 
+let noOfSessionRequests = 0;
 let devices: Devices;
-let commandsQueueGuard = new AsyncLock();
+const commandsQueueGuard = new AsyncLock();
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName: string) {
     super(pluginName);
@@ -23,9 +24,14 @@ export default class DevicePlugin extends BasePlugin {
   ) {
     let freeDevice = {} as IDevice;
     await commandsQueueGuard.acquire('DeviceManager', async function () {
-      let firstMatch = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
+      const firstMatch = Object.assign(
+        {},
+        caps.firstMatch[0],
+        caps.alwaysMatch
+      );
       devices = await fetchDevices();
-      let firstMatchPlatform: Platform = firstMatch['platformName'].toLowerCase();
+      const firstMatchPlatform: Platform =
+        firstMatch['platformName'].toLowerCase();
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         freeDevice,
@@ -34,6 +40,7 @@ export default class DevicePlugin extends BasePlugin {
         caps
       );
       if (!assignedDevice) {
+        noOfSessionRequests++;
         try {
           const timeout =
             firstMatch['appium:deviceAvailabilityTimeout'] || 180000;
@@ -53,6 +60,7 @@ export default class DevicePlugin extends BasePlugin {
             firstMatchPlatform,
             caps
           );
+          noOfSessionRequests--;
         } catch (e) {
           if (e instanceof TimeoutError) {
             throw new Error('Timeout waiting for device to be free');
@@ -113,4 +121,8 @@ async function _assignCapabilitiesAndBlockDevice(
     return true;
   }
   return false;
+}
+
+export function numberOfPendingSessionRequests() {
+  return noOfSessionRequests;
 }

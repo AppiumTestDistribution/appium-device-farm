@@ -6,7 +6,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Devices from './Devices';
 
-const DevicesContainer = () => {
+const DevicesContainer = ({platform}) => {
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
   const [error, setError] = useState('');
@@ -45,7 +45,7 @@ const DevicesContainer = () => {
       </div>
     );
   } else {
-    return <Devices devices={devices} />;
+    return <Devices devices={devices} platform ={platform} />;
   }
 };
 
