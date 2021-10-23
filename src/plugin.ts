@@ -11,8 +11,16 @@ let noOfSessionRequests = 0;
 let devices: Devices;
 const commandsQueueGuard = new AsyncLock();
 export default class DevicePlugin extends BasePlugin {
-  constructor(pluginName: string) {
-    super(pluginName);
+  constructor(pluginName: string, opts: any) {
+    super(pluginName, opts);
+  }
+
+  static get argsConstraints() {
+    return {
+      Platform: {
+        isString: true,
+      },
+    };
   }
 
   async createSession(
@@ -23,12 +31,13 @@ export default class DevicePlugin extends BasePlugin {
     caps: { firstMatch: any[]; alwaysMatch: any }
   ) {
     let freeDevice = {} as IDevice;
-    await commandsQueueGuard.acquire('DeviceManager', async function () {
+    await commandsQueueGuard.acquire('DeviceManager', async () => {
       const firstMatch = Object.assign(
         {},
         caps.firstMatch[0],
         caps.alwaysMatch
       );
+      console.log('CLI Args', this.cliArgs);
       devices = await fetchDevices();
       const firstMatchPlatform: Platform =
         firstMatch['platformName'].toLowerCase();
