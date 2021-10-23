@@ -42,7 +42,8 @@
     "express": "^4.17.1",
     "get-port": "^5.1.1",
     "node-schedule": "^2.0.0",
-    "node-simctl": "^6.4.1"
+    "node-simctl": "^6.4.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -63,7 +64,6 @@
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^7.0.0",
     "lint-staged": "^11.0.0",
-    "lodash": "^4.17.21",
     "mocha": "^9.0.1",
     "prettier": "^2.0.5",
     "sinon": "^11.0.0",

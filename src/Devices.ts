@@ -38,35 +38,41 @@ export default class Devices {
     });
   }
 
+  private isDeviceBusy = (device: IDevice) => device.busy;
+  private devicePlatForm = (device: IDevice) => device.platform.toLowerCase();
+  private findDeviceAndSetState = (currentDevice: IDevice, state: boolean) =>
+    actualDevices.find(
+      (device) =>
+        device.udid === currentDevice.udid && ((device.busy = state), true)
+    ) as IDevice;
+
   getFreeDevice(platform: Platform, options?: IOptions): IDevice {
     log.info(`Finding Free Device for Platform ${platform}`);
+
+    const deviceState = (device: IDevice) => {
+      return (
+        !this.isDeviceBusy(device) && this.devicePlatForm(device) === platform
+      );
+    };
+
     if (options) {
       return actualDevices.find(
         (device) =>
-          !device.busy &&
-          device.platform.toLowerCase() === platform &&
+          deviceState.call(this, device) &&
           device.name.includes(options.simulator)
       ) as IDevice;
     } else {
-      return actualDevices.find(
-        (device) => !device.busy && device.platform.toLowerCase() === platform
+      return actualDevices.find((device) =>
+        deviceState.call(this, device)
       ) as IDevice;
     }
   }
 
-  blockDevice(freeDevice: IDevice): IDevice {
-    return actualDevices.find(
-      (device) =>
-        device.udid === freeDevice.udid && ((device.busy = true), true)
-    ) as IDevice;
-  }
+  blockDevice = (freeDevice: IDevice): IDevice =>
+    this.findDeviceAndSetState(freeDevice, true) as IDevice;
 
-  unblockDevice(blockedDevice: IDevice): IDevice {
-    return actualDevices.find(
-      (device) =>
-        device.udid === blockedDevice.udid && ((device.busy = false), true)
-    ) as IDevice;
-  }
+  unblockDevice = (blockedDevice: IDevice): IDevice =>
+    this.findDeviceAndSetState(blockedDevice, false);
 
   updateDevice(freeDevice: IDevice, sessionId?: string) {
     const device = actualDevices.find(
@@ -124,9 +130,9 @@ function fetchDevicesFromUDIDS(
   return new Devices(filteredDevices);
 }
 
-export async function fetchDevices() {
+export async function fetchDevices(): Promise<Devices> {
   const udids = process.env.UDIDS;
-  if (instance === false) {
+  if (!instance) {
     log.info('Fetching all connected devices');
     let simulators: Array<IDevice>;
     let connectedIOSDevices: Array<IDevice>;
@@ -201,7 +207,7 @@ export async function fetchDevices() {
   return devices;
 }
 
-export function listAllDevices() {
+export function listAllDevices(): Array<IDevice> {
   return actualDevices;
 }
 

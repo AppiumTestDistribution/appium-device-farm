@@ -47,7 +47,6 @@ export default class AndroidDeviceMananger {
   }
 
   async getDeviceVersion(udid: string) {
-    await this.createADB();
     return await this.getDeviceProperty(udid, 'ro.build.version.release');
   }
 
@@ -56,7 +55,6 @@ export default class AndroidDeviceMananger {
   }
 
   async isRealDevice(udid: string): Promise<boolean> {
-    await this.createADB();
     const character = await this.getDeviceProperty(
       udid,
       'ro.build.characteristics'
@@ -64,8 +62,6 @@ export default class AndroidDeviceMananger {
     return character !== 'emulator';
   }
 
-  async getDeviceName(udid: string) {
-    await this.createADB();
-    return await this.getDeviceProperty(udid, 'ro.product.name');
-  }
+  getDeviceName = async (udid: string) =>
+    await this.getDeviceProperty(udid, 'ro.product.name');
 }
