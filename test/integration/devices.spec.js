@@ -21,7 +21,6 @@ describe('Get Devices', () => {
     const deviceAfterUpdate = updateDevice(
       androidDevices,
       freeDevice,
-      'android',
       '11111111111111'
     );
     const session = sessionId(freeDevice.udid)(deviceAfterUpdate);
@@ -68,7 +67,7 @@ const unblockDevice = curry((devices, freeDevice, platform) => {
   return devices();
 });
 
-const updateDevice = curry((devices, freeDevice, platform, sessionId) => {
-  device.updateDevice(freeDevice, platform, sessionId);
+const updateDevice = curry((devices, freeDevice, sessionId) => {
+  device.updateDevice(freeDevice, sessionId);
   return devices();
 });
