@@ -23,7 +23,7 @@ describe('Plugin1 Test', () => {
   });
 
   it('Basic Plugin test 2', async () => {
-    await driver.$('~login1').click();
+    await driver.$('~login').click();
   });
 
   afterEach(async () => await driver.deleteSession());
