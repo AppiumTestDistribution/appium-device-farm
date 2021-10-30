@@ -1,14 +1,21 @@
 import { expect } from 'chai';
-import Devices, {
+import {
   listAllDevices,
   findUserSpecifiesDevices,
+  getFreeDevice,
 } from '../../src/Devices';
 import { deviceMock } from './fixtures/devices';
+import NodeCache from 'node-cache';
+import sinon from 'sinon';
+
+let cache = new NodeCache();
 
 describe('Devices', () => {
   it('Get Free device for iOS Platform', async () => {
-    const devices = new Devices(deviceMock);
-    const freeDevice = await devices.getFreeDevice('ios');
+    sinon
+      .stub(cache, 'get')
+      .returns('ios', [{ udid: 'emulator-5554', state: 'device' }]);
+    const freeDevice = await getFreeDevice('ios');
     expect(freeDevice).to.deep.equal({
       name: 'iPad Air (3rd generation)',
       udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',

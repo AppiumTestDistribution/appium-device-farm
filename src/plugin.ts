@@ -1,14 +1,14 @@
 import BasePlugin from '@appium/base-plugin';
 import log from './logger';
-import Devices, { fetchDevices } from './Devices';
+import * as devices from './Devices';
 import AsyncLock from 'async-lock';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import { IDevice } from './interfaces/IDevice';
 import { Platform } from './types/Platform';
+import logger from './logger';
 
 let noOfSessionRequests = 0;
-let devices: Devices;
 const commandsQueueGuard = new AsyncLock();
 export default class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, opts: any) {
@@ -38,7 +38,7 @@ export default class DevicePlugin extends BasePlugin {
         caps.alwaysMatch
       );
       console.log('CLI Args', this.cliArgs);
-      devices = await fetchDevices();
+      await devices.fetchDevices();
       const firstMatchPlatform: Platform =
         firstMatch['platformName'].toLowerCase();
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
@@ -79,23 +79,26 @@ export default class DevicePlugin extends BasePlugin {
     });
     const session = await next();
     if (session.error) {
-      devices.unblockDevice(freeDevice);
+      devices.unblockDevice(freeDevice, freeDevice.platform);
       log.info(
         `Device UDID ${freeDevice.udid} unblocked. Reason: Session failed to create`
       );
     } else {
+      logger.info(
+        `Updating Device ${freeDevice.udid} with session ID ${session.value[0]}`
+      );
       devices.updateDevice(freeDevice, session.value[0]);
     }
     return session;
   }
 
   async deleteSession(next: () => any, driver: any, args: any) {
-    const blockedDevice: IDevice = devices.getDeviceForSession(args);
+    const blockedDevice: IDevice = devices.getDeviceForSession(args, 'android');
     log.info(
       `Unblocking device UDID: ${blockedDevice.udid} from session ${args}`
     );
-    devices.updateDevice(blockedDevice);
-    devices.unblockDevice(blockedDevice);
+    devices.updateDevice(blockedDevice, args);
+    devices.unblockDevice(blockedDevice, blockedDevice.platform);
     log.info(
       `Deleting Session and device UDID ${blockedDevice.udid} is unblocked`
     );
@@ -111,7 +114,7 @@ async function _assignCapabilitiesAndBlockDevice(
 ) {
   if (freeDevice && firstMatchPlatform == 'android') {
     await androidCapabilities(caps, freeDevice);
-    devices.blockDevice(freeDevice);
+    devices.blockDevice(freeDevice, firstMatchPlatform);
     log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
     return true;
   } else if (freeDevice && firstMatchPlatform == 'ios') {
@@ -125,7 +128,7 @@ async function _assignCapabilitiesAndBlockDevice(
       });
     }
     await iOSCapabilities(caps, freeDevice);
-    devices.blockDevice(freeDevice);
+    devices.blockDevice(freeDevice, firstMatchPlatform);
     log.info(`Device UDID ${freeDevice.udid} is blocked for execution.`);
     return true;
   }

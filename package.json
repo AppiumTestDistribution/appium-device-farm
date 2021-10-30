@@ -5,6 +5,8 @@
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --exit",
+    "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
+    "test-parallel": "mocha --require ts-node/register -p ./test/e2e/*.spec.js --timeout 60000",
     "integration": "mocha -r ts-node/register ./test/integration/*.spec.js --timeout 90000 --exit",
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
@@ -12,7 +14,7 @@
     "prepublish": "npx tsc",
     "lint": "eslint . --ext .ts --fix",
     "prettier": "prettier '**/*.js' --write --single-quote",
-    "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/git/appium-device-farm"
+    "install-plugin": "npm run build && appium plugin install --source=local /Users/saikrisv/Documents/git/appium-device-farm"
   },
   "repository": {
     "type": "git",
@@ -35,15 +37,18 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "^1.7.2",
+    "@types/ramda": "^0.27.45",
     "appium-adb": "^8.11.0",
     "appium-ios-device": "^1.7.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
+    "lodash": "^4.17.21",
+    "node-cache": "^5.1.2",
     "node-schedule": "^2.0.0",
     "node-simctl": "^6.4.1",
-    "lodash": "^4.17.21"
+    "ramda": "^0.27.1"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -63,12 +68,14 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^7.0.0",
+    "jest": "^27.3.1",
     "lint-staged": "^11.0.0",
     "mocha": "^9.0.1",
     "prettier": "^2.0.5",
     "sinon": "^11.0.0",
     "ts-node": "^10.0.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.2.3",
+    "webdriverio": "7.12.5"
   },
   "appium": {
     "pluginName": "device-farm",
