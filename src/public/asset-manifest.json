@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/static/css/main.4aa33ad3.chunk.css",
-    "main.js": "/static/js/main.810d6879.chunk.js",
-    "main.js.map": "/static/js/main.810d6879.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.fc931f35.js",
-    "runtime-main.js.map": "/static/js/runtime-main.fc931f35.js.map",
-    "static/css/2.4c97ca4f.chunk.css": "/static/css/2.4c97ca4f.chunk.css",
-    "static/js/2.509eb668.chunk.js": "/static/js/2.509eb668.chunk.js",
-    "static/js/2.509eb668.chunk.js.map": "/static/js/2.509eb668.chunk.js.map",
-    "static/js/3.adfdca2f.chunk.js": "/static/js/3.adfdca2f.chunk.js",
-    "static/js/3.adfdca2f.chunk.js.map": "/static/js/3.adfdca2f.chunk.js.map",
-    "index.html": "/index.html",
-    "static/css/2.4c97ca4f.chunk.css.map": "/static/css/2.4c97ca4f.chunk.css.map",
-    "static/css/main.4aa33ad3.chunk.css.map": "/static/css/main.4aa33ad3.chunk.css.map",
-    "static/js/2.509eb668.chunk.js.LICENSE.txt": "/static/js/2.509eb668.chunk.js.LICENSE.txt"
+    "main.css": "/device-farm/static/css/main.4aa33ad3.chunk.css",
+    "main.js": "/device-farm/static/js/main.c21aef27.chunk.js",
+    "main.js.map": "/device-farm/static/js/main.c21aef27.chunk.js.map",
+    "runtime-main.js": "/device-farm/static/js/runtime-main.4de6999a.js",
+    "runtime-main.js.map": "/device-farm/static/js/runtime-main.4de6999a.js.map",
+    "static/css/2.4c97ca4f.chunk.css": "/device-farm/static/css/2.4c97ca4f.chunk.css",
+    "static/js/2.509eb668.chunk.js": "/device-farm/static/js/2.509eb668.chunk.js",
+    "static/js/2.509eb668.chunk.js.map": "/device-farm/static/js/2.509eb668.chunk.js.map",
+    "static/js/3.adfdca2f.chunk.js": "/device-farm/static/js/3.adfdca2f.chunk.js",
+    "static/js/3.adfdca2f.chunk.js.map": "/device-farm/static/js/3.adfdca2f.chunk.js.map",
+    "index.html": "/device-farm/index.html",
+    "static/css/2.4c97ca4f.chunk.css.map": "/device-farm/static/css/2.4c97ca4f.chunk.css.map",
+    "static/css/main.4aa33ad3.chunk.css.map": "/device-farm/static/css/main.4aa33ad3.chunk.css.map",
+    "static/js/2.509eb668.chunk.js.LICENSE.txt": "/device-farm/static/js/2.509eb668.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.fc931f35.js",
+    "static/js/runtime-main.4de6999a.js",
     "static/css/2.4c97ca4f.chunk.css",
     "static/js/2.509eb668.chunk.js",
     "static/css/main.4aa33ad3.chunk.css",
-    "static/js/main.810d6879.chunk.js"
+    "static/js/main.c21aef27.chunk.js"
   ]
 }

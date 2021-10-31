@@ -1,6 +1,4 @@
 import express from 'express';
-const app = express();
-const port = 3333;
 import path from 'path';
 import log from './logger';
 // eslint-disable-next-line
@@ -11,23 +9,26 @@ import {
 } from './Devices';
 import { numberOfPendingSessionRequests } from './plugin';
 
-app.get('/devices', (req, res) => {
+const router = express.Router(),
+  apiRouter = express.Router();
+
+apiRouter.get('/devices', (req, res) => {
   res.send(JSON.stringify(listAllDevices()));
 });
 
-app.get('/queue', (req, res) => {
+apiRouter.get('/queue', (req, res) => {
   res.send(JSON.stringify(numberOfPendingSessionRequests()));
 });
 
-app.get('/devices/android', (req, res) => {
+apiRouter.get('/devices/android', (req, res) => {
   res.send(JSON.stringify(listAllAndroidDevices()));
 });
 
-app.get('/devices/ios', (req, res) => {
+apiRouter.get('/devices/ios', (req, res) => {
   res.send(JSON.stringify(listAlliOSDevices()));
 });
 
-app.listen(port, () => {
-  log.info(`Device Dashboard listening at http://localhost:${port}`);
-});
-app.use(express.static(path.join(__dirname, 'public')));
+router.use('/api', apiRouter);
+router.use(express.static(path.join(__dirname, 'public')));
+
+export { router };
