@@ -9,7 +9,7 @@ import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 import { IOptions } from './interfaces/IOptions';
 import { Platform } from './types/Platform';
-import { findIndex, propEq, curry, map, assoc, when } from 'ramda';
+import { compose, propEq, curry, map, assoc, when, filter } from 'ramda';
 import logger from './logger';
 import NodeCache from 'node-cache';
 
@@ -20,25 +20,25 @@ const simulatorManager = new SimulatorManager();
 const androidDevices = new AndroidDeviceManager();
 const iosDevices = new IOSDeviceManager();
 
-// emitConnectedDevices() {
-//   log.info('Starting & initializing the listen to device changes');
-//   const rule = new schedule.RecurrenceRule();
-//   rule.second = [0, 10, 20, 30, 40, 50];
-//   schedule.scheduleJob(rule, async function () {
-//     const androidDeviceManager = new AndroidDeviceManager();
-//     const iOSDeviceManager = new IOSDeviceManager();
-//     const connectedAndroidDevices: Array<IDevice> =
-//       await androidDeviceManager.getDevices();
-//     const connectedIOSDevices: Array<IDevice> =
-//       await iOSDeviceManager.getDevices();
-//     eventEmitter.emit('ConnectedDevices', {
-//       emittedDevices: Object.assign(
-//         connectedAndroidDevices,
-//         connectedIOSDevices
-//       ),
-//     });
-//   });
-// }
+export const emitConnectedDevices = () => {
+  log.info('Starting & initializing the listen to device changes');
+  const rule = new schedule.RecurrenceRule();
+  rule.second = [0, 10, 20, 30, 40, 50];
+  schedule.scheduleJob(rule, async function () {
+    const androidDeviceManager = new AndroidDeviceManager();
+    const iOSDeviceManager = new IOSDeviceManager();
+    const connectedAndroidDevices: Array<IDevice> =
+      await androidDeviceManager.getDevices();
+    const connectedIOSDevices: Array<IDevice> =
+      await iOSDeviceManager.getDevices();
+    eventEmitter.emit('ConnectedDevices', {
+      emittedDevices: Object.assign(
+        connectedAndroidDevices,
+        connectedIOSDevices
+      ),
+    });
+  });
+};
 
 const isDeviceBusy = (device: IDevice) => device.busy;
 const devicePlatForm = (device: IDevice) => device.platform.toLowerCase();
@@ -50,6 +50,9 @@ const alter = curry((state, udid, platform) => {
   );
   cache.set(platform, alteredDeviceMap);
 });
+const filterRealDevices = curry((isRealDevice: boolean, devices) =>
+  filter(compose(propEq('realDevice', isRealDevice)))(devices)
+);
 
 export const getFreeDevice = (
   platform: Platform,
@@ -120,10 +123,9 @@ export const fetchDevices = async () => {
       } else {
         cache.mset([
           { key: 'android', val: connectedAndroidDevices },
-          { key: 'iosSimulators', val: simulators },
-          { key: 'iosDevices', val: connectedIOSDevices },
+          { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
         ]);
-        //devices.emitConnectedDevices();
+        emitConnectedDevices();
       }
     } else {
       if (udids) {
@@ -137,7 +139,7 @@ export const fetchDevices = async () => {
       } else {
         const android = await androidDevices.getDevices();
         cache.set('android', android);
-        //devices.emitConnectedDevices();
+        emitConnectedDevices();
       }
     }
 
@@ -230,9 +232,11 @@ export function cachedDevices() {
 }
 
 export function listiOSSimulators() {
-  return cache.get('iosSimulators');
+  const allIOS = cache.get('ios');
+  return filterRealDevices(false, allIOS);
 }
 
 export function listAlliOSDevices() {
-  return cache.mget(['iosSimulators', 'iosDevices']);
+  const allIOS = cache.get('ios');
+  return filterRealDevices(true, allIOS);
 }
