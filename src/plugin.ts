@@ -52,6 +52,8 @@ class DevicePlugin extends BasePlugin {
       await devices.fetchDevices();
       const firstMatchPlatform: Platform =
         firstMatch['platformName'].toLowerCase();
+      const app: string = firstMatch['appium:app'];
+      console.log('App path----------', app);
       freeDevice = devices.getFreeDevice(firstMatchPlatform);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         freeDevice,
