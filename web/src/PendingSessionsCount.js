@@ -7,7 +7,7 @@ const PendingSessionsCount = ({children}) => {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            fetch('/queue')
+            fetch('/device-farm/api/queue')
             .then((res) => res.json())
             .then(
                 (data) => {

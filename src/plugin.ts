@@ -7,10 +7,11 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import { IDevice } from './interfaces/IDevice';
 import { Platform } from './types/Platform';
 import logger from './logger';
+import { router } from './app';
 
 let noOfSessionRequests = 0;
 const commandsQueueGuard = new AsyncLock();
-export default class DevicePlugin extends BasePlugin {
+class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, opts: any) {
     super(pluginName, opts);
   }
@@ -21,6 +22,16 @@ export default class DevicePlugin extends BasePlugin {
         isString: true,
       },
     };
+  }
+
+  public static updateServer(expressApp: any) {
+    expressApp.use('/device-farm', router);
+    log.info(
+      'Device Farm Plugin will be served at http://localhost:4723/device-farm'
+    );
+    log.info(
+      'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
+    );
   }
 
   async createSession(
@@ -135,6 +146,8 @@ async function _assignCapabilitiesAndBlockDevice(
   return false;
 }
 
-export function numberOfPendingSessionRequests() {
+function numberOfPendingSessionRequests() {
   return noOfSessionRequests;
 }
+
+export { DevicePlugin, numberOfPendingSessionRequests };

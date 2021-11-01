@@ -12,7 +12,7 @@ const DevicesContainer = ({platform}) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/devices')
+    fetch('/device-farm/api/devices')
       .then((res) => res.json())
       .then(
         (devices) => {
