@@ -1,4 +1,3 @@
-import { remove } from 'lodash';
 import eventEmitter from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
@@ -8,10 +7,20 @@ import SimulatorManager from './SimulatorManager';
 import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 import { IOptions } from './interfaces/IOptions';
-import { Platform } from './types/Platform';
-import { compose, propEq, curry, map, assoc, when, filter } from 'ramda';
+import {
+  compose,
+  propEq,
+  curry,
+  map,
+  assoc,
+  when,
+  filter,
+  concat,
+  find,
+} from 'ramda';
 import logger from './logger';
 import NodeCache from 'node-cache';
+import { Platform } from './types/Platform';
 
 const cache = new NodeCache();
 
@@ -95,12 +104,10 @@ export const updateDevice = (freeDevice: IDevice, sessionId?: string) => {
   cache.set(freeDevice.platform, alteredDeviceMap);
 };
 
-export const getDeviceForSession = (
-  sessionId: string,
-  platform: string
-): IDevice => {
-  const device: Array<IDevice> = cache.get(platform) as Array<IDevice>;
-  return device.find((device) => device.sessionId === sessionId) as IDevice;
+export const getDeviceForSession = (sessionId: string): IDevice => {
+  const device: any = cache.mget(['android', 'ios']);
+  const mergedDevices = concat(device.android, device.ios);
+  return find(propEq('sessionId', sessionId), mergedDevices) as IDevice;
 };
 
 export const fetchDevices = async () => {

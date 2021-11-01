@@ -93,7 +93,7 @@ export default class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, args: any) {
-    const blockedDevice: IDevice = devices.getDeviceForSession(args, 'android');
+    const blockedDevice: IDevice = devices.getDeviceForSession(args);
     log.info(
       `Unblocking device UDID: ${blockedDevice.udid} from session ${args}`
     );

@@ -7,6 +7,7 @@
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --exit",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
     "test-parallel": "mocha --require ts-node/register -p ./test/e2e/*.spec.js --timeout 60000",
+    "test-e2e": "mocha --require ts-node/register ./test/e2e/conf.spec.js --timeout 999999",
     "integration": "mocha -r ts-node/register ./test/integration/*.spec.js --timeout 90000 --exit",
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
