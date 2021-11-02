@@ -4,7 +4,10 @@ import { curry, find, pipe, prop, propEq } from 'ramda';
 
 describe('Get Devices', () => {
   it('Fetch all connected android devices and block and unblock', async () => {
-    const freeDevice = await findFreeDevice('android');
+    const freeDevice = await findFreeDevice({
+      platformName: 'android',
+      'appium:app': '/default-path/sample.apk',
+    });
     const blockedDevice = blockDevice(androidDevices, freeDevice, 'android');
     const deviceStateAfterBlocking = deviceState(freeDevice.udid)(
       blockedDevice
@@ -16,7 +19,10 @@ describe('Get Devices', () => {
   });
 
   it('Attach a sessionId to blocked device', async () => {
-    const freeDevice = await findFreeDevice('android');
+    const freeDevice = await findFreeDevice({
+      platformName: 'android',
+      'appium:app': '/default-path/sample.apk',
+    });
     blockDevice(androidDevices, freeDevice, 'android');
     const deviceAfterUpdate = updateDevice(
       androidDevices,
@@ -28,7 +34,10 @@ describe('Get Devices', () => {
   });
 
   it('Fetch all connected iOS Simulators devices and block and unblock', async () => {
-    const freeDevice = await findFreeDevice('ios');
+    const freeDevice = await findFreeDevice({
+      platformName: 'ios',
+      'appium:app': '/default-path/sample.app',
+    });
     const blockedDevice = blockDevice(simulators, freeDevice, 'ios');
     const deviceStateAfterBlocking = deviceState(freeDevice.udid)(
       blockedDevice
@@ -46,9 +55,9 @@ const deviceState = (device) =>
 const sessionId = (device) =>
   pipe(find(propEq('udid', device)), prop('sessionId'));
 
-async function findFreeDevice(platform) {
+async function findFreeDevice(firstMatch) {
   await device.fetchDevices();
-  return device.getFreeDevice(platform);
+  return device.getFreeDevice(firstMatch);
 }
 
 const androidDevices = () => device.listAllAndroidDevices();
