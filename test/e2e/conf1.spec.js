@@ -11,10 +11,10 @@ const WDIO_PARAMS = {
   logLevel: 'silent',
 };
 const capabilities = {
-  platformName: 'Android',
-  'appium:uiautomator2ServerInstallTimeout': '50000',
-  'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Documents/git/AppiumSample/VodQA.apk',
+  platformName: 'iOS',
+  'appium:automationName': 'XCUITest',
+  'appium:iPhoneOnly': true,
+  'appium:app': '/Users/saikrishna/Downloads/vodqa.zip',
 };
 describe('Plugin1 Test', () => {
   let driver;

@@ -1,7 +1,7 @@
 import { remote } from 'webdriverio';
 import { command } from 'webdriver';
 
-const APPIUM_HOST = 'localhost';
+const APPIUM_HOST = '127.0.0.1';
 const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,
@@ -14,7 +14,7 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Documents/git/AppiumSample/VodQA.apk',
+  'appium:app': '/Users/saikrishna/Downloads/VodQA.apk',
 };
 describe('Plugin Test', () => {
   it('Basic Plugin test', async () => {

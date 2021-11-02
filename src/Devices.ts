@@ -7,20 +7,18 @@ import SimulatorManager from './SimulatorManager';
 import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 import { IOptions } from './interfaces/IOptions';
-import {
-  compose,
-  propEq,
-  curry,
-  map,
-  assoc,
-  when,
-  filter,
-  concat,
-  find,
-} from 'ramda';
+import { propEq, map, assoc, when, concat, find, not } from 'ramda';
 import logger from './logger';
 import NodeCache from 'node-cache';
 import { Platform } from './types/Platform';
+
+import {
+  findiOSPlatform,
+  isDeviceBusy,
+  alter,
+  filterRealDevices,
+  devicePlatForm,
+} from './device-utils';
 
 const cache = new NodeCache();
 
@@ -49,52 +47,63 @@ export const emitConnectedDevices = () => {
   });
 };
 
-const isDeviceBusy = (device: IDevice) => device.busy;
-const devicePlatForm = (device: IDevice) => device.platform.toLowerCase();
-const alter = curry((state, udid, platform) => {
-  const device: Array<IDevice> = cache.get(platform) as Array<IDevice>;
-  const alteredDeviceMap = map(
-    when(propEq('udid', udid), assoc('busy', state)),
-    device
-  );
-  cache.set(platform, alteredDeviceMap);
-});
-const filterRealDevices = curry((isRealDevice: boolean, devices) =>
-  filter(compose(propEq('realDevice', isRealDevice)))(devices)
-);
-
-export const getFreeDevice = (
-  platform: Platform,
-  options?: IOptions
-): IDevice => {
+export const getFreeDevice = (firstMatch: any, options?: IOptions): IDevice => {
+  console.log(firstMatch);
+  const platform: Platform = firstMatch['platformName'].toLowerCase();
+  const app: string = firstMatch['appium:app'];
+  const iosAppExtension: any = findiOSPlatform(app);
   log.info(`Finding Free Device for Platform ${platform}`);
 
-  const deviceState = (device: IDevice) => {
-    return !isDeviceBusy(device) && platform.includes(devicePlatForm(device));
+  const deviceState = (device: IDevice, androidOrIOS: any) => {
+    return (
+      not(isDeviceBusy(device)) &&
+      platform.includes(devicePlatForm(device)) &&
+      androidOrIOS
+    );
   };
+  const iOSRealDevice = (device: IDevice) => device.realDevice;
+  const iOSSimulator = (device: IDevice) => not(device.realDevice);
+  const androidDevice = (device: IDevice) =>
+    device.realDevice || not(device.realDevice);
+
   const device: Array<IDevice> = cache.get(platform) as Array<IDevice>;
   if (options) {
     return device.find(
       (device) =>
-        deviceState.call(this, device) &&
+        deviceState.call(this, device, iOSSimulator(device)) &&
         device.name.includes(options.simulator)
     ) as IDevice;
   } else {
-    return device.find((device) => deviceState.call(this, device)) as IDevice;
+    if (iosAppExtension?.simulator) {
+      logger.info('Find Free Simulator');
+      return device.find((device) =>
+        deviceState.call(this, device, iOSSimulator(device))
+      ) as IDevice;
+    } else if (iosAppExtension?.realDevice) {
+      logger.info('Find Free iOS Device');
+      return device.find((device) =>
+        deviceState.call(this, device, iOSRealDevice(device))
+      ) as IDevice;
+    } else {
+      logger.info('Find Free Android Device');
+      return device.find((device) =>
+        deviceState.call(this, device, androidDevice(device))
+      ) as IDevice;
+    }
   }
 };
 
 export const blockDevice = (freeDevice: IDevice, firstMatchPlatform: string) =>
-  alter(true, freeDevice.udid, firstMatchPlatform);
+  alter(true, freeDevice.udid, firstMatchPlatform, cache);
 
 export const unblockDevice = (
   blockedDevice: IDevice,
   firstMatchPlatform: string
-) => alter(false, blockedDevice.udid, firstMatchPlatform);
+) => alter(false, blockedDevice.udid, firstMatchPlatform, cache);
 
 export const updateDevice = (freeDevice: IDevice, sessionId?: string) => {
   const devices: Array<IDevice> = cache.get(
-    freeDevice.platform //This will fail for ios
+    freeDevice.platform
   ) as Array<IDevice>;
   logger.info(`Updating Device ${freeDevice.udid} with ${sessionId}`);
   const alteredDeviceMap = map(
@@ -132,7 +141,7 @@ export const fetchDevices = async () => {
           { key: 'android', val: connectedAndroidDevices },
           { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
         ]);
-        emitConnectedDevices();
+        //emitConnectedDevices();
       }
     } else {
       if (udids) {
@@ -146,7 +155,7 @@ export const fetchDevices = async () => {
       } else {
         const android = await androidDevices.getDevices();
         cache.set('android', android);
-        emitConnectedDevices();
+        //emitConnectedDevices();
       }
     }
 
@@ -227,7 +236,7 @@ function fetchDevicesFromUDIDS(
 }
 
 export function listAllDevices() {
-  return cache.mget(['android', 'iosSimulators', 'iosDevices']);
+  return cache.mget(['android', 'ios']);
 }
 
 export function listAllAndroidDevices() {

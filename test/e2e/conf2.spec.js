@@ -14,7 +14,7 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Documents/git/AppiumSample/VodQA.apk',
+  'appium:app': '/Users/saikrishna/Downloads/VodQA.apk',
 };
 describe('Plugin1 Test', () => {
   let driver;

@@ -52,9 +52,8 @@ class DevicePlugin extends BasePlugin {
       await devices.fetchDevices();
       const firstMatchPlatform: Platform =
         firstMatch['platformName'].toLowerCase();
-      const app: string = firstMatch['appium:app'];
-      console.log('App path----------', app);
-      freeDevice = devices.getFreeDevice(firstMatchPlatform);
+      freeDevice = devices.getFreeDevice(firstMatch);
+      logger.info(`Found Device ${JSON.stringify(freeDevice)}`);
       const assignedDevice = await _assignCapabilitiesAndBlockDevice(
         freeDevice,
         firstMatch,
@@ -132,11 +131,11 @@ async function _assignCapabilitiesAndBlockDevice(
     return true;
   } else if (freeDevice && firstMatchPlatform == 'ios') {
     if (firstMatch['appium:iPhoneOnly']) {
-      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+      freeDevice = devices.getFreeDevice(firstMatch, {
         simulator: 'iPhone',
       });
     } else if (firstMatch['appium:iPadOnly']) {
-      freeDevice = devices.getFreeDevice(firstMatchPlatform, {
+      freeDevice = devices.getFreeDevice(firstMatch, {
         simulator: 'iPad',
       });
     }
