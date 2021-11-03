@@ -34,15 +34,13 @@ export const emitConnectedDevices = () => {
   schedule.scheduleJob(rule, async function () {
     const androidDeviceManager = new AndroidDeviceManager();
     const iOSDeviceManager = new IOSDeviceManager();
-    const connectedAndroidDevices: Array<IDevice> =
-      await androidDeviceManager.getDevices();
-    const connectedIOSDevices: Array<IDevice> =
-      await iOSDeviceManager.getDevices();
+    const android: Array<IDevice> = await androidDeviceManager.getDevices();
+    const ios: Array<IDevice> = await iOSDeviceManager.getDevices();
     eventEmitter.emit('ConnectedDevices', {
-      emittedDevices: Object.assign(
-        connectedAndroidDevices,
-        connectedIOSDevices
-      ),
+      emittedDevices: {
+        android,
+        ios,
+      },
     });
   });
 };
@@ -141,7 +139,7 @@ export const fetchDevices = async () => {
           { key: 'android', val: connectedAndroidDevices },
           { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
         ]);
-        //emitConnectedDevices();
+        emitConnectedDevices();
       }
     } else {
       if (udids) {
@@ -155,42 +153,43 @@ export const fetchDevices = async () => {
       } else {
         const android = await androidDevices.getDevices();
         cache.set('android', android);
-        //emitConnectedDevices();
+        emitConnectedDevices();
       }
     }
 
     instance = true;
-    /*   eventEmitter.on('ConnectedDevices', function (data) {
-        const { emittedDevices } = data;
-        emittedDevices.forEach((emittedDevice: IDevice) => {
-          const allDevices: any = cache.mget([
-            'android',
-            'iOSSimulators',
-            'iOSDevices',
-          ]);
-          allDevices.find((device: any) => device.udid === emittedDevice.udid);
-          const deviceIndex = findIndex(
-            propEq('udid', emittedDevices.udid),
-            emittedDevices
-          );
-          emittedDevices[deviceIndex] = Object.assign({
-            busy: !!actualDevice?.busy,
-            state: emittedDevice.state,
-            udid: emittedDevice.udid,
-            sessionId: actualDevice?.sessionId ?? null,
-            platform: emittedDevice.platform,
-            realDevice: emittedDevice.realDevice,
-            sdk: emittedDevice.sdk,
-          });
-        });
-        remove(
-          actualDevices,
-          (device) =>
-            device.platform === 'android' ||
-            (device.platform === 'ios' && device.realDevice)
+    eventEmitter.on('ConnectedDevices', function (data) {
+      const { emittedDevices } = data;
+      const filteredAndroidDevice = emittedDevices.android.filter(
+        (element: IDevice) =>
+          !listAllAndroidDevices().some((o: IDevice) => o.udid === element.udid)
+      );
+      if (filteredAndroidDevice) {
+        filteredAndroidDevice.forEach((device: IDevice) =>
+          logger.info(
+            `Found new device 📲 ${device.udid}, adding to master list`
+          )
         );
-        actualDevices.push(...emittedDevices);
-      });*/
+      }
+
+      const filterediOSDevice = emittedDevices.ios.filter(
+        (element: IDevice) =>
+          !listAlliOSDevices().some((o: IDevice) => o.udid === element.udid)
+      );
+      if (filterediOSDevice) {
+        filterediOSDevice.forEach((device: IDevice) =>
+          logger.info(
+            `Found new device 📲 ${device.udid}, adding to master list`
+          )
+        );
+      }
+
+      cache.set(
+        'android',
+        concat(filteredAndroidDevice, listAllAndroidDevices())
+      );
+      cache.set('ios', concat(filterediOSDevice, listAlliOSDevices()));
+    });
   }
 };
 
@@ -239,7 +238,7 @@ export function listAllDevices() {
   return cache.mget(['android', 'ios']);
 }
 
-export function listAllAndroidDevices() {
+export function listAllAndroidDevices(): any {
   return cache.get('android');
 }
 
@@ -252,7 +251,7 @@ export function listiOSSimulators() {
   return filterRealDevices(false, allIOS);
 }
 
-export function listAlliOSDevices() {
+export function listAlliOSDevices(): any {
   const allIOS = cache.get('ios');
   return filterRealDevices(true, allIOS);
 }
