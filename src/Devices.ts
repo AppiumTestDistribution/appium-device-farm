@@ -1,4 +1,4 @@
-import eventEmitter from './events';
+import eventEmitter, { emitDevices } from './events';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
 import log from './logger';
@@ -19,6 +19,7 @@ import {
   filterRealDevices,
   devicePlatForm,
 } from './device-utils';
+import { ServerCLI } from './types/CLIArgs';
 
 const cache = new NodeCache();
 
@@ -27,21 +28,31 @@ const simulatorManager = new SimulatorManager();
 const androidDevices = new AndroidDeviceManager();
 const iosDevices = new IOSDeviceManager();
 
-export const emitConnectedDevices = () => {
+export const emitConnectedDevices = (cliArgs: ServerCLI) => {
   log.info('Starting & initializing the listen to device changes');
   const rule = new schedule.RecurrenceRule();
   rule.second = [0, 10, 20, 30, 40, 50];
   schedule.scheduleJob(rule, async function () {
     const androidDeviceManager = new AndroidDeviceManager();
     const iOSDeviceManager = new IOSDeviceManager();
-    const android: Array<IDevice> = await androidDeviceManager.getDevices();
-    const ios: Array<IDevice> = await iOSDeviceManager.getDevices();
-    eventEmitter.emit('ConnectedDevices', {
-      emittedDevices: {
+    if (isAndroid(cliArgs)) {
+      const android: Array<IDevice> = await androidDeviceManager.getDevices();
+      emitDevices({
+        android,
+      });
+    } else if (isIOS(cliArgs)) {
+      const ios: Array<IDevice> = await iOSDeviceManager.getDevices();
+      emitDevices({
+        ios,
+      });
+    } else if (isAndroidAndIOS(cliArgs)) {
+      const android: Array<IDevice> = await androidDeviceManager.getDevices();
+      const ios: Array<IDevice> = await iOSDeviceManager.getDevices();
+      emitDevices({
         android,
         ios,
-      },
-    });
+      });
+    }
   });
 };
 
@@ -117,79 +128,101 @@ export const getDeviceForSession = (sessionId: string): IDevice => {
   return find(propEq('sessionId', sessionId), mergedDevices) as IDevice;
 };
 
-export const fetchDevices = async () => {
+function isAndroid(cliArgs: ServerCLI) {
+  return cliArgs.Platform.toLowerCase() === 'android';
+}
+
+function isIOS(cliArgs: ServerCLI) {
+  return isMac() && cliArgs.Platform.toLowerCase() === 'ios';
+}
+
+function isAndroidAndIOS(cliArgs: ServerCLI) {
+  return isMac() && cliArgs.Platform.toLowerCase() === 'both';
+}
+
+function onIOSDeviceEmitted() {
+  eventEmitter.on('ConnectedDevices', function(data) {
+    const { emittedDevices } = data;
+    const filterediOSDevice = emittedDevices.ios.filter(
+      (element: IDevice) =>
+        !listAlliOSDevices().some((o: IDevice) => o.udid === element.udid)
+    );
+    if (filterediOSDevice) {
+      filterediOSDevice.forEach((device: IDevice) =>
+        logger.info(
+          `Found new device 📲 ${device.udid}, adding to master list`
+        )
+      );
+    }
+    cache.set('ios', concat(filterediOSDevice, listAlliOSDevices()));
+  });
+}
+
+function onAndroidDevicesEmitted() {
+  eventEmitter.on('ConnectedDevices', function(data) {
+    const { emittedDevices } = data;
+    const filteredAndroidDevice = emittedDevices.android.filter(
+      (element: IDevice) =>
+        !listAllAndroidDevices().some((o: IDevice) => o.udid === element.udid)
+    );
+    if (filteredAndroidDevice) {
+      filteredAndroidDevice.forEach((device: IDevice) =>
+        logger.info(
+          `Found new device 📲 ${device.udid}, adding to master list`
+        )
+      );
+    }
+    cache.set(
+      'android',
+      concat(filteredAndroidDevice, listAllAndroidDevices())
+    );
+  });
+}
+
+const detectDevices = async (cliArgs: ServerCLI) => {
+  if (isAndroid(cliArgs)) {
+    logger.info('Finding Android devices');
+    cache.set('android', await androidDevices.getDevices());
+    emitConnectedDevices(cliArgs);
+    onAndroidDevicesEmitted();
+  } else if (isIOS(cliArgs)) {
+    logger.info('Finding IOS devices');
+    const simulators = await simulatorManager.getSimulators();
+    const connectedIOSDevices = await iosDevices.getDevices();
+    cache.set('ios', Object.assign(simulators, connectedIOSDevices));
+    emitConnectedDevices(cliArgs);
+    onIOSDeviceEmitted();
+  } else if (isAndroidAndIOS(cliArgs)) {
+    logger.info('Finding iOS and Android devices');
+    const simulators = await simulatorManager.getSimulators();
+    const connectedIOSDevices = await iosDevices.getDevices();
+    const connectedAndroidDevices = await androidDevices.getDevices();
+    cache.mset([
+      { key: 'android', val: connectedAndroidDevices },
+      { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
+    ]);
+    emitConnectedDevices(cliArgs);
+    onIOSDeviceEmitted();
+    onAndroidDevicesEmitted();
+  }
+};
+export const fetchDevices = async (cliArgs: ServerCLI) => {
+  console.log('CLI Args', cliArgs);
   const udids = process.env.UDIDS;
   if (!instance) {
     log.info('Fetching all connected devices');
-    let simulators: Array<IDevice>;
-    let connectedIOSDevices: Array<IDevice>;
-    let connectedAndroidDevices: Array<IDevice>;
-    if (isMac()) {
-      simulators = await simulatorManager.getSimulators();
-      connectedIOSDevices = await iosDevices.getDevices();
-      connectedAndroidDevices = await androidDevices.getDevices();
-      if (udids) {
-        fetchDevicesFromUDIDS(
-          simulators,
-          connectedAndroidDevices,
-          connectedIOSDevices
-        );
-      } else {
-        cache.mset([
-          { key: 'android', val: connectedAndroidDevices },
-          { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
-        ]);
-        emitConnectedDevices();
-      }
+    if (udids) {
+      const userSpecifiedUDIDS = (process.env.UDIDS as string).split(',');
+      const availableDevices = await androidDevices.getDevices();
+      const filteredDevices = findUserSpecifiesDevices(
+        userSpecifiedUDIDS,
+        availableDevices
+      );
+      cache.set('userSpecifiedUDIDS', filteredDevices);
     } else {
-      if (udids) {
-        const userSpecifiedUDIDS = (process.env.UDIDS as string).split(',');
-        const availableDevices = await androidDevices.getDevices();
-        const filteredDevices = findUserSpecifiesDevices(
-          userSpecifiedUDIDS,
-          availableDevices
-        );
-        cache.set('userSpecifiedUDIDS', filteredDevices);
-      } else {
-        const android = await androidDevices.getDevices();
-        cache.set('android', android);
-        emitConnectedDevices();
-      }
+      await detectDevices(cliArgs);
     }
-
     instance = true;
-    eventEmitter.on('ConnectedDevices', function (data) {
-      const { emittedDevices } = data;
-      const filteredAndroidDevice = emittedDevices.android.filter(
-        (element: IDevice) =>
-          !listAllAndroidDevices().some((o: IDevice) => o.udid === element.udid)
-      );
-      if (filteredAndroidDevice) {
-        filteredAndroidDevice.forEach((device: IDevice) =>
-          logger.info(
-            `Found new device 📲 ${device.udid}, adding to master list`
-          )
-        );
-      }
-
-      const filterediOSDevice = emittedDevices.ios.filter(
-        (element: IDevice) =>
-          !listAlliOSDevices().some((o: IDevice) => o.udid === element.udid)
-      );
-      if (filterediOSDevice) {
-        filterediOSDevice.forEach((device: IDevice) =>
-          logger.info(
-            `Found new device 📲 ${device.udid}, adding to master list`
-          )
-        );
-      }
-
-      cache.set(
-        'android',
-        concat(filteredAndroidDevice, listAllAndroidDevices())
-      );
-      cache.set('ios', concat(filterediOSDevice, listAlliOSDevices()));
-    });
   }
 };
 
