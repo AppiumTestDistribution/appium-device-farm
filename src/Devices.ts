@@ -141,7 +141,7 @@ function isAndroidAndIOS(cliArgs: ServerCLI) {
 }
 
 function onIOSDeviceEmitted() {
-  eventEmitter.on('ConnectedDevices', function(data) {
+  eventEmitter.on('ConnectedDevices', function (data) {
     const { emittedDevices } = data;
     const filterediOSDevice = emittedDevices.ios.filter(
       (element: IDevice) =>
@@ -149,9 +149,7 @@ function onIOSDeviceEmitted() {
     );
     if (filterediOSDevice) {
       filterediOSDevice.forEach((device: IDevice) =>
-        logger.info(
-          `Found new device 📲 ${device.udid}, adding to master list`
-        )
+        logger.info(`Found new device 📲 ${device.udid}, adding to master list`)
       );
     }
     cache.set('ios', concat(filterediOSDevice, listAlliOSDevices()));
@@ -159,7 +157,7 @@ function onIOSDeviceEmitted() {
 }
 
 function onAndroidDevicesEmitted() {
-  eventEmitter.on('ConnectedDevices', function(data) {
+  eventEmitter.on('ConnectedDevices', function (data) {
     const { emittedDevices } = data;
     const filteredAndroidDevice = emittedDevices.android.filter(
       (element: IDevice) =>
@@ -167,9 +165,7 @@ function onAndroidDevicesEmitted() {
     );
     if (filteredAndroidDevice) {
       filteredAndroidDevice.forEach((device: IDevice) =>
-        logger.info(
-          `Found new device 📲 ${device.udid}, adding to master list`
-        )
+        logger.info(`Found new device 📲 ${device.udid}, adding to master list`)
       );
     }
     cache.set(
