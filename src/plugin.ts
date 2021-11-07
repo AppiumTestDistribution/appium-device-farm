@@ -48,8 +48,7 @@ class DevicePlugin extends BasePlugin {
         caps.firstMatch[0],
         caps.alwaysMatch
       );
-      console.log('CLI Args', this.cliArgs);
-      await devices.fetchDevices();
+      await devices.fetchDevices(this.cliArgs);
       const firstMatchPlatform: Platform =
         firstMatch['platformName'].toLowerCase();
       freeDevice = devices.getFreeDevice(firstMatch);
