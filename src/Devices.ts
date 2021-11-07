@@ -7,7 +7,16 @@ import SimulatorManager from './SimulatorManager';
 import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { IDevice } from './interfaces/IDevice';
 import { IOptions } from './interfaces/IOptions';
-import { propEq, map, assoc, when, concat, find, not } from 'ramda';
+import {
+  propEq,
+  map,
+  assoc,
+  when,
+  concat,
+  find,
+  not,
+  differenceWith,
+} from 'ramda';
 import logger from './logger';
 import NodeCache from 'node-cache';
 import { Platform } from './types/Platform';
@@ -102,15 +111,17 @@ export const getFreeDevice = (firstMatch: any, options?: IOptions): IDevice => {
   }
 };
 
-export const blockDevice = (freeDevice: IDevice, firstMatchPlatform: string) =>
-  alter(true, freeDevice.udid, firstMatchPlatform, cache);
+export const blockDevice = (
+  freeDevice: IDevice,
+  firstMatchPlatform: string
+): void => alter(true, freeDevice.udid, firstMatchPlatform, cache);
 
 export const unblockDevice = (
   blockedDevice: IDevice,
   firstMatchPlatform: string
-) => alter(false, blockedDevice.udid, firstMatchPlatform, cache);
+): void => alter(false, blockedDevice.udid, firstMatchPlatform, cache);
 
-export const updateDevice = (freeDevice: IDevice, sessionId?: string) => {
+export const updateDevice = (freeDevice: IDevice, sessionId?: string): void => {
   const devices: Array<IDevice> = cache.get(
     freeDevice.platform
   ) as Array<IDevice>;
@@ -140,54 +151,47 @@ function isAndroidAndIOS(cliArgs: ServerCLI) {
   return isMac() && cliArgs.Platform.toLowerCase() === 'both';
 }
 
-function onIOSDeviceEmitted() {
+function onDeviceEmitted(platform: string, devicesInCache: Array<IDevice>) {
   eventEmitter.on('ConnectedDevices', function (data) {
     const { emittedDevices } = data;
-    const filterediOSDevice = emittedDevices.ios.filter(
+    const emittedNewDevices = emittedDevices[platform].filter(
       (element: IDevice) =>
-        !listAlliOSDevices().some((o: IDevice) => o.udid === element.udid)
+        !devicesInCache.some((o: IDevice) => o.udid === element.udid)
     );
-    if (filterediOSDevice) {
-      filterediOSDevice.forEach((device: IDevice) =>
+    if (emittedNewDevices) {
+      emittedNewDevices.forEach((device: IDevice) =>
         logger.info(`Found new device 📲 ${device.udid}, adding to master list`)
       );
     }
-    cache.set('ios', concat(filterediOSDevice, listAlliOSDevices()));
-  });
-}
-
-function onAndroidDevicesEmitted() {
-  eventEmitter.on('ConnectedDevices', function (data) {
-    const { emittedDevices } = data;
-    const filteredAndroidDevice = emittedDevices.android.filter(
-      (element: IDevice) =>
-        !listAllAndroidDevices().some((o: IDevice) => o.udid === element.udid)
+    const cmp = (x: { udid: any }, y: { udid: any }) => x.udid === y.udid;
+    const removedDevices = differenceWith(
+      cmp,
+      devicesInCache,
+      emittedDevices[platform]
     );
-    if (filteredAndroidDevice) {
-      filteredAndroidDevice.forEach((device: IDevice) =>
-        logger.info(`Found new device 📲 ${device.udid}, adding to master list`)
+    let updatedDevices: Array<IDevice> = [];
+    removedDevices.forEach((removedDevice) => {
+      updatedDevices = devicesInCache.filter(
+        (device) => device.udid != removedDevice.udid
       );
-    }
-    cache.set(
-      'android',
-      concat(filteredAndroidDevice, listAllAndroidDevices())
-    );
+    });
+    cache.set(platform, concat(emittedNewDevices, updatedDevices));
   });
 }
 
 const detectDevices = async (cliArgs: ServerCLI) => {
+  const platform: string = cliArgs.Platform.toLowerCase();
+  emitConnectedDevices(cliArgs);
   if (isAndroid(cliArgs)) {
     logger.info('Finding Android devices');
     cache.set('android', await androidDevices.getDevices());
-    emitConnectedDevices(cliArgs);
-    onAndroidDevicesEmitted();
+    onDeviceEmitted(platform, listAllAndroidDevices());
   } else if (isIOS(cliArgs)) {
     logger.info('Finding IOS devices');
     const simulators = await simulatorManager.getSimulators();
     const connectedIOSDevices = await iosDevices.getDevices();
     cache.set('ios', Object.assign(simulators, connectedIOSDevices));
-    emitConnectedDevices(cliArgs);
-    onIOSDeviceEmitted();
+    onDeviceEmitted(platform, listAlliOSDevices());
   } else if (isAndroidAndIOS(cliArgs)) {
     logger.info('Finding iOS and Android devices');
     const simulators = await simulatorManager.getSimulators();
@@ -197,9 +201,8 @@ const detectDevices = async (cliArgs: ServerCLI) => {
       { key: 'android', val: connectedAndroidDevices },
       { key: 'ios', val: Object.assign(simulators, connectedIOSDevices) },
     ]);
-    emitConnectedDevices(cliArgs);
-    onIOSDeviceEmitted();
-    onAndroidDevicesEmitted();
+    onDeviceEmitted(platform, listAlliOSDevices());
+    onDeviceEmitted(platform, listAllAndroidDevices());
   }
 };
 export const fetchDevices = async (cliArgs: ServerCLI) => {
