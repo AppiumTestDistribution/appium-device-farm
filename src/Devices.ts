@@ -58,7 +58,6 @@ export const emitConnectedDevices = (cliArgs: ServerCLI) => {
 };
 
 export const getFreeDevice = (firstMatch: any, options?: IOptions): IDevice => {
-  console.log(firstMatch);
   const platform: Platform = firstMatch['platformName'].toLowerCase();
   const app: string = firstMatch['appium:app'];
   const iosAppExtension: any = findiOSPlatform(app);
@@ -124,8 +123,8 @@ export const updateDevice = (freeDevice: IDevice, sessionId?: string) => {
 };
 
 export const getDeviceForSession = (sessionId: string): IDevice => {
-  const device: any = cache.mget(['android', 'ios']);
-  const mergedDevices = concat(device.android, device.ios);
+  const { android = [], ios = [] }: any = cache.mget(['android', 'ios']);
+  const mergedDevices = concat(android, ios);
   return find(propEq('sessionId', sessionId), mergedDevices) as IDevice;
 };
 
@@ -204,10 +203,8 @@ const detectDevices = async (cliArgs: ServerCLI) => {
   }
 };
 export const fetchDevices = async (cliArgs: ServerCLI) => {
-  console.log('CLI Args', cliArgs);
   const udids = process.env.UDIDS;
   if (!instance) {
-    log.info('Fetching all connected devices');
     if (udids) {
       const userSpecifiedUDIDS = (process.env.UDIDS as string).split(',');
       const availableDevices = await androidDevices.getDevices();
@@ -265,7 +262,7 @@ function fetchDevicesFromUDIDS(
 }
 
 export function listAllDevices() {
-  return flatten(Object.values(cache.mget(['android', 'ios'])))
+  return flatten(Object.values(cache.mget(['android', 'ios'])));
 }
 
 export function listAllAndroidDevices(): any {
