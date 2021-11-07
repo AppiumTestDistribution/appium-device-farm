@@ -13,13 +13,13 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Device UI
 
-- Navigate to localhost:3333 once the first session is created to know the device availability.
+- Navigate to localhost:4723/device-farm once the first session is created to know the device availability.
 
 <img src="./images/dashboard.png">
 
 ## Prerequisite
 
-Appium version 2.0
+Appium version 2.0 - Tested with 2.0.0-beta.18
 
 ## Installation - Server
 
@@ -38,7 +38,13 @@ No special action is needed to make things work on the client side.
 The plugin will not be active unless turned on when invoking the Appium server:
 
 ```
-appium --plugins=device-farm
+appium server -ka 800 --plugins=device-farm  -pa /wd/hub --plugin-args='{"device-farm": {"Platform": "android"}}'
+
+Arguments options: 
+
+* Android - If you want to use only Android devices for parallel execution.
+* iOS - If you want to use only iOS devices and simulator for parallel execution.
+* both - If you want to use both android and iOS devices for parallel execution.
 ```
 
 ## Capabilities
