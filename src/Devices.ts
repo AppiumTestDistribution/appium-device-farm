@@ -20,6 +20,7 @@ import {
   devicePlatForm,
 } from './device-utils';
 import { ServerCLI } from './types/CLIArgs';
+import { flatten } from 'lodash';
 
 const cache = new NodeCache();
 
@@ -264,7 +265,7 @@ function fetchDevicesFromUDIDS(
 }
 
 export function listAllDevices() {
-  return cache.mget(['android', 'ios']);
+  return flatten(Object.values(cache.mget(['android', 'ios'])))
 }
 
 export function listAllAndroidDevices(): any {
