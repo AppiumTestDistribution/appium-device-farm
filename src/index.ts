@@ -21,4 +21,4 @@ let pluginArgs: any = {};
   }
 })();
 
-export { DevicePlugin } from './plugin-new';
+export { DevicePlugin } from './plugin';
