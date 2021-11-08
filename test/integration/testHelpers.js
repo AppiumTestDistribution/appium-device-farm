@@ -1,11 +1,9 @@
 import { curry, find, pipe, prop, propEq } from 'ramda';
 import * as device from '../../src/Devices';
 
-export const deviceState = (device) =>
-  pipe(find(propEq('udid', device)), prop('busy'));
+export const deviceState = (device) => pipe(find(propEq('udid', device)), prop('busy'));
 
-export const sessionId = (device) =>
-  pipe(find(propEq('udid', device)), prop('sessionId'));
+export const sessionId = (device) => pipe(find(propEq('udid', device)), prop('sessionId'));
 
 export async function findFreeDevice(firstMatch, cliArgs) {
   await device.fetchDevices(cliArgs);

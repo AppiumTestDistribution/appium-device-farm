@@ -1,34 +1,26 @@
-import { IDevice } from './interfaces/IDevice';
-import {
-  always,
-  assoc,
-  compose,
-  cond,
-  curry,
-  endsWith,
-  filter,
-  map,
-  propEq,
-  when,
-} from 'ramda';
+import { isMac, checkIfPathIsAbsolute } from './helpers';
+import { ServerCLI } from './types/CLIArgs';
 
-export const isDeviceBusy = (device: IDevice) => device.busy;
-export const devicePlatForm = (device: IDevice) =>
-  device.platform.toLowerCase();
-export const alter = curry((state, udid, platform, cache) => {
-  const device: Array<IDevice> = cache.get(platform) as Array<IDevice>;
-  const alteredDeviceMap = map(
-    when(propEq('udid', udid), assoc('busy', state)),
-    device
-  );
-  cache.set(platform, alteredDeviceMap);
-});
-export const filterRealDevices = curry((isRealDevice: boolean, devices) =>
-  filter(compose(propEq('realDevice', isRealDevice)))(devices)
-);
+export const getDeviceTypeFromApp = (app: string) => {
+  return app.endsWith('app') || app.endsWith('zip') ? 'simulator' : 'real';
+};
 
-export const findiOSPlatform = cond([
-  [endsWith('app'), always({ simulator: true })],
-  [endsWith('ipa'), always({ realDevice: true })],
-  [endsWith('zip'), always({ simulator: true })],
-]);
+export function isAndroid(cliArgs: ServerCLI) {
+  return cliArgs.Platform.toLowerCase() === 'android';
+}
+
+export function isIOS(cliArgs: ServerCLI) {
+  return isMac() && cliArgs.Platform.toLowerCase() === 'ios';
+}
+
+export function isAndroidAndIOS(cliArgs: ServerCLI) {
+  return isMac() && cliArgs.Platform.toLowerCase() === 'both';
+}
+
+export function isDeviceConfigPathAbsolute(path: string) {
+  if (checkIfPathIsAbsolute(path)) {
+    return true;
+  } else {
+    throw new Error(`Device Config Path ${path} should be absolute`);
+  }
+}

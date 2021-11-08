@@ -6,7 +6,9 @@ export interface IDevice {
   state: string;
   sdk: string;
   platform: Platform;
+  deviceType: string;
   busy: boolean;
   realDevice: boolean;
-  sessionId: string;
+  session_id?: string;
+  offline?: boolean;
 }

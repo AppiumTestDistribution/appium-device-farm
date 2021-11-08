@@ -1,12 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
-import {
-  faTruckLoading,
-  faSkullCrossbones,
-} from '@fortawesome/free-solid-svg-icons';
+import { faTruckLoading, faSkullCrossbones } from '@fortawesome/free-solid-svg-icons';
 import Devices from './Devices';
 
-const DevicesContainer = ({platform}) => {
+const DevicesContainer = ({ platform }) => {
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
   const [error, setError] = useState('');
@@ -45,7 +42,7 @@ const DevicesContainer = ({platform}) => {
       </div>
     );
   } else {
-    return <Devices devices={devices} platform ={platform} />;
+    return <Devices devices={devices} platform={platform} />;
   }
 };
 

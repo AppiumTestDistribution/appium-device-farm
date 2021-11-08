@@ -1,31 +1,33 @@
 import express from 'express';
 import path from 'path';
 import log from './logger';
-// eslint-disable-next-line
-import {
-  listAllAndroidDevices,
-  listAlliOSDevices,
-  listAllDevices,
-} from './Devices';
-import { numberOfPendingSessionRequests } from './plugin';
+import { DeviceModel, PendingSessionsModel } from './data-service/db';
 
 const router = express.Router(),
   apiRouter = express.Router();
 
 apiRouter.get('/devices', (req, res) => {
-  res.send(JSON.stringify(listAllDevices()));
+  res.json(DeviceModel.find());
 });
 
 apiRouter.get('/queue', (req, res) => {
-  res.send(JSON.stringify(numberOfPendingSessionRequests()));
+  res.json(PendingSessionsModel.chain().find().data().length);
 });
 
 apiRouter.get('/devices/android', (req, res) => {
-  res.send(JSON.stringify(listAllAndroidDevices()));
+  res.json(
+    DeviceModel.find({
+      platform: 'android',
+    })
+  );
 });
 
 apiRouter.get('/devices/ios', (req, res) => {
-  res.send(JSON.stringify(listAlliOSDevices()));
+  res.json(
+    DeviceModel.find({
+      platform: 'ios',
+    })
+  );
 });
 
 router.use('/api', apiRouter);
