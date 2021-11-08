@@ -1,12 +1,12 @@
 import Simctl from 'node-simctl';
 import { flatten } from 'lodash';
-import { utilities as IOSUtils } from 'appium-ios-device';
+import { utilities as IOSUtils} from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 
-export class IOSDeviceManager implements IDeviceManager {
+export default class IOSDeviceManager implements IDeviceManager {
   /**
    * Method to get all ios devices and simulators
    *
@@ -20,6 +20,18 @@ export class IOSDeviceManager implements IDeviceManager {
     }
   }
 
+  async getConnectedDevices() {
+    return await IOSUtils.getConnectedDevices();
+  }
+
+  async getOSVersion(udid: string) {
+    return await IOSUtils.getOSVersion(udid);
+  }
+
+  async getDeviceName(udid: string) {
+    return await IOSUtils.getDeviceName(udid);
+  }
+
   /**
    * Method to get all ios real devices
    *
@@ -27,12 +39,9 @@ export class IOSDeviceManager implements IDeviceManager {
    */
   private async getRealDevices(): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    const devices = await IOSUtils.getConnectedDevices();
+    const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
-      let [sdk, name] = await Promise.all([
-        IOSUtils.getOSVersion(udid),
-        IOSUtils.getDeviceName(udid),
-      ]);
+      const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
       deviceState.push(
         Object.assign({
           udid,

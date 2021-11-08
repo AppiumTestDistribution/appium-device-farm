@@ -1,8 +1,8 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { Platform } from '../types/Platform';
-import { AndroidDeviceManager } from './AndroidDeviceManager';
-import { IOSDeviceManager } from './IOSDeviceManager';
+import AndroidDeviceManager from './AndroidDeviceManager';
+import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];

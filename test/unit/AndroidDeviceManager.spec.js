@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
-import AndroidDeviceManager from '../../src/AndroidDeviceManager';
+import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 
 describe('Android Device Manager', () => {
   it('Android Device List to have added state', async () => {
@@ -17,6 +17,7 @@ describe('Android Device Manager', () => {
         busy: false,
         name: 'sdk_phone_x86',
         state: 'device',
+        deviceType: 'emulator',
         sdk: '9',
         realDevice: false,
         udid: 'emulator-5554',

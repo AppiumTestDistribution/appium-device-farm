@@ -3,7 +3,7 @@ import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { asyncForEach } from '../helpers';
 import ADB from 'appium-adb';
 
-export class AndroidDeviceManager implements IDeviceManager {
+export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
 
@@ -52,7 +52,7 @@ export class AndroidDeviceManager implements IDeviceManager {
     return this.adb;
   }
 
-  private async getConnectedDevices() {
+  public async getConnectedDevices() {
     return await (await this.getAdb()).getConnectedDevices();
   }
 

@@ -1,5 +1,5 @@
 import path from 'path';
-import { isDeviceConfigPathAbsolute } from '../../src/Devices';
+import { isDeviceConfigPathAbsolute } from '../../src/device-utils';
 import { expect } from 'chai';
 
 describe('Config Test', () => {
