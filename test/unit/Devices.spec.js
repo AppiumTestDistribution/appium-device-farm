@@ -4,14 +4,8 @@ import { deviceMock } from './fixtures/devices';
 
 describe('Devices', () => {
   it('Filter only user specified devices', async () => {
-    const userSpecifiedUDIDS = [
-      'emulator-5556',
-      '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
-    ];
-    const filteredDevices = findUserSpecifiesDevices(
-      userSpecifiedUDIDS,
-      deviceMock
-    );
+    const userSpecifiedUDIDS = ['emulator-5556', '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888'];
+    const filteredDevices = findUserSpecifiesDevices(userSpecifiedUDIDS, deviceMock);
     expect(filteredDevices).to.deep.equal([
       {
         busy: false,

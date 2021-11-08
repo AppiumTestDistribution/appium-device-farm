@@ -6,7 +6,7 @@ import {
   androidDevices,
   unblockDevice,
   updateDevice,
-  sessionId
+  sessionId,
 } from './testHelpers';
 
 describe('Get Devices', () => {
@@ -19,9 +19,7 @@ describe('Get Devices', () => {
       { Platform: 'android' }
     );
     const blockedDevice = blockDevice(androidDevices, freeDevice, 'android');
-    const deviceStateAfterBlocking = deviceState(freeDevice.udid)(
-      blockedDevice
-    );
+    const deviceStateAfterBlocking = deviceState(freeDevice.udid)(blockedDevice);
     expect(deviceStateAfterBlocking).to.be.equal(true);
     const unblock = await unblockDevice(androidDevices, freeDevice, 'android');
     const deviceStateAfterUnblocking = deviceState(freeDevice.udid)(unblock);
@@ -37,11 +35,7 @@ describe('Get Devices', () => {
       { Platform: 'android' }
     );
     blockDevice(androidDevices, freeDevice, 'android');
-    const deviceAfterUpdate = updateDevice(
-      androidDevices,
-      freeDevice,
-      '11111111111111'
-    );
+    const deviceAfterUpdate = updateDevice(androidDevices, freeDevice, '11111111111111');
     const session = sessionId(freeDevice.udid)(deviceAfterUpdate);
     expect(session).to.be.equal('11111111111111');
   });

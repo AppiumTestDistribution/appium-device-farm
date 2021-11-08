@@ -1,1 +1,1 @@
-export type DeviceType = "real" | "emulator" | "simulator";
+export type DeviceType = 'real' | 'emulator' | 'simulator';

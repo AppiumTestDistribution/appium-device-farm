@@ -1,34 +1,34 @@
-import BasePlugin from "@appium/base-plugin";
-import log from "./logger";
-import { router } from "./app";
-import { IDevice } from "./interfaces/IDevice";
-import { ISessionCapability } from "./interfaces/ISessionCapability";
-import AsyncLock from "async-lock";
-import { Platform } from "./types/Platform";
-import { saveDevices, getDevice, updateDevice, unblockDevice } from "./data-service/device-service";
+import BasePlugin from '@appium/base-plugin';
+import log from './logger';
+import { router } from './app';
+import { IDevice } from './interfaces/IDevice';
+import { ISessionCapability } from './interfaces/ISessionCapability';
+import AsyncLock from 'async-lock';
+import { Platform } from './types/Platform';
+import { saveDevices, getDevice, updateDevice, unblockDevice } from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
-} from "./data-service/pending-sessions-service";
-import { getDeviceTypeFromApp } from "./device-utils";
-import { DeviceFarmManager } from "./device-managers";
-import { IDeviceFilterOptions } from "./interfaces/IDeviceFilterOptions";
-import { Container } from "typedi";
-import logger from "./logger";
-import { androidCapabilities, iOSCapabilities } from "./CapabilityManager";
-import waitUntil from "async-wait-until";
-import { isMac } from "./helpers";
-import { v4 as uuidv4 } from "uuid";
+} from './data-service/pending-sessions-service';
+import { getDeviceTypeFromApp } from './device-utils';
+import { DeviceFarmManager } from './device-managers';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
+import { Container } from 'typedi';
+import logger from './logger';
+import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
+import waitUntil from 'async-wait-until';
+import { isMac } from './helpers';
+import { v4 as uuidv4 } from 'uuid';
 
 const commandsQueueGuard = new AsyncLock();
-const DEVICE_MANAGER_LOCK_NAME = "DeviceManager";
+const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
-let customCapability = {
-  deviceTimeOut: "appium:deviceAvailabilityTimeout",
-  deviceQueryInteval: "appium:deviceRetryInterval",
-  iphoneOnly: "appium:iPhoneOnly",
-  ipadOnly: "appium:iPadOnly",
+const customCapability = {
+  deviceTimeOut: 'appium:deviceAvailabilityTimeout',
+  deviceQueryInteval: 'appium:deviceRetryInterval',
+  iphoneOnly: 'appium:iPhoneOnly',
+  ipadOnly: 'appium:iPadOnly',
 };
 
 let timer: any;
@@ -46,11 +46,11 @@ export class DevicePlugin extends BasePlugin {
     };
   }
 
-  public static async updateServer(expressApp: any) {
-    expressApp.use("/device-farm", router);
-    log.info("Device Farm Plugin will be served at http://localhost:4723/device-farm");
+  public static async updateServer(expressApp: any): Promise<void> {
+    expressApp.use('/device-farm', router);
+    log.info('Device Farm Plugin will be served at http://localhost:4723/device-farm');
     log.info(
-      "If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard"
+      'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
     );
     await refreshDeviceList();
   }
@@ -71,11 +71,11 @@ export class DevicePlugin extends BasePlugin {
     /**
      *  Wait untill a free device is available for the given capabilities
      */
-    let devicePromise = new Promise(async (resolve, reject) => {
+    const devicePromise = new Promise(async (resolve, reject) => {
       await commandsQueueGuard.acquire(DEVICE_MANAGER_LOCK_NAME, async () => {
         await refreshDeviceList();
         try {
-          let device: IDevice = await this.allocateDeviceForSession(caps);
+          const device: IDevice = await this.allocateDeviceForSession(caps);
           resolve(device);
         } catch (err) {
           await removePendingSession(pendingSessionId);
@@ -84,8 +84,8 @@ export class DevicePlugin extends BasePlugin {
       });
     });
 
-    let device = (await devicePromise) as IDevice;
-    let session = await next();
+    const device = (await devicePromise) as IDevice;
+    const session = await next();
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
@@ -114,7 +114,7 @@ export class DevicePlugin extends BasePlugin {
   private async allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
     const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
 
-    let filters = this.getDeviceFiltersFromCapability(firstMatch);
+    const filters = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
     logger.info(JSON.stringify(filters));
 
     const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
@@ -124,7 +124,7 @@ export class DevicePlugin extends BasePlugin {
     try {
       await waitUntil(
         async () => {
-          log.info("Waiting for free device");
+          log.info('Waiting for free device');
           return (await getDevice(filters)) != undefined;
         },
         { timeout, intervalBetweenAttempts }
@@ -132,18 +132,18 @@ export class DevicePlugin extends BasePlugin {
     } catch (err) {
       throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
     }
-    let device = await getDevice(filters);
+    const device = await getDevice(filters);
     log.info(`Device found: ${JSON.stringify(device)}`);
     await updateDevice(device, { busy: true });
-    await this.updateCapabilityForDevice(capability, device);
+    await DevicePlugin.updateCapabilityForDevice(capability, device);
     return device;
   }
 
-  private async updateCapabilityForDevice(capability: any, device: IDevice) {
-    if (device.platform.toLowerCase() == "ios") {
-      await androidCapabilities(capability, device);
-    } else {
+  private static async updateCapabilityForDevice(capability: any, device: IDevice) {
+    if (device.platform.toLowerCase() == 'ios') {
       await iOSCapabilities(capability, device);
+    } else {
+      await androidCapabilities(capability, device);
     }
   }
 
@@ -153,23 +153,23 @@ export class DevicePlugin extends BasePlugin {
    * @param capability
    * @returns IDeviceFilterOptions
    */
-  private getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
-    const platform: Platform = capability["platformName"].toLowerCase();
-    const udids = process.env.UDIDS?.split(",");
+  private static getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+    const platform: Platform = capability['platformName'].toLowerCase();
+    const udids = process.env.UDIDS?.split(',');
     /* Based on the app file extension, we will decide whether to run the
      * test on real device or simulator.
      *
      * Applicaple only for ios.
      */
     const deviceType =
-      platform == "ios" && isMac()
-        ? getDeviceTypeFromApp(capability["appium:app"] as string)
+      platform == 'ios' && isMac()
+        ? getDeviceTypeFromApp(capability['appium:app'] as string)
         : undefined;
-    let name = "";
+    let name = '';
     if (capability[customCapability.ipadOnly]) {
-      name = "iPhone";
-    } else if (capability["appium:iPadOnly"]) {
-      name = "iPad";
+      name = 'iPhone';
+    } else if (capability['appium:iPadOnly']) {
+      name = 'iPad';
     }
     return {
       platform,
@@ -190,7 +190,7 @@ function getDeviceManager() {
 }
 
 async function updateDeviceList() {
-  let devices = await getDeviceManager().getDevices();
+  const devices = await getDeviceManager().getDevices();
   log.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);
 }

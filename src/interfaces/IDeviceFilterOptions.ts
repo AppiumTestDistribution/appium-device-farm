@@ -1,5 +1,5 @@
-import { Platform } from "../types/Platform";
-import { DeviceType } from "../types/DeviceType";
+import { Platform } from '../types/Platform';
+import { DeviceType } from '../types/DeviceType';
 
 export interface IDeviceFilterOptions {
   platform?: Platform;

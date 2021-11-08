@@ -15,7 +15,7 @@
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc",
     "lint": "eslint . --ext .ts --fix",
-    "prettier": "prettier '**/*.js' --write --single-quote",
+    "prettier": "prettier '**/*.ts' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin"
   },

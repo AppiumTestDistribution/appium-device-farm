@@ -1,11 +1,11 @@
-import { IDevice } from "../interfaces/IDevice";
-import { IDeviceManager } from "../interfaces/IDeviceManager";
-import { asyncForEach } from "../helpers";
-import ADB from "appium-adb";
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { asyncForEach } from '../helpers';
+import ADB from 'appium-adb';
 
 export class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
-  private adbAvailable: boolean = true;
+  private adbAvailable = true;
 
   async getDevices(): Promise<IDevice[]> {
     if (!this.adbAvailable) {
@@ -16,7 +16,7 @@ export class AndroidDeviceManager implements IDeviceManager {
       const connectedDevices = await this.getConnectedDevices();
       await asyncForEach(connectedDevices, async (device: { udid: any; state: any }) => {
         if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
-          let [sdk, realDevice, name] = await Promise.all([
+          const [sdk, realDevice, name] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
@@ -28,14 +28,15 @@ export class AndroidDeviceManager implements IDeviceManager {
             busy: false,
             state: device.state,
             udid: device.udid,
-            platform: "android",
-            deviceType: realDevice ? "real" : "emulator",
+            platform: 'android',
+            deviceType: realDevice ? 'real' : 'emulator',
           });
         }
       });
     } catch (e) {
       console.log(e);
     } finally {
+      // eslint-disable-next-line no-unsafe-finally
       return deviceState;
     }
   }
@@ -56,18 +57,18 @@ export class AndroidDeviceManager implements IDeviceManager {
   }
 
   private async getDeviceVersion(udid: string) {
-    return await this.getDeviceProperty(udid, "ro.build.version.release");
+    return await this.getDeviceProperty(udid, 'ro.build.version.release');
   }
 
   private async getDeviceProperty(udid: string, prop: string) {
-    return await (await this.getAdb()).adbExec(["-s", udid, "shell", "getprop", prop]);
+    return await (await this.getAdb()).adbExec(['-s', udid, 'shell', 'getprop', prop]);
   }
 
   private async isRealDevice(udid: string): Promise<boolean> {
-    const character = await this.getDeviceProperty(udid, "ro.build.characteristics");
-    return character !== "emulator";
+    const character = await this.getDeviceProperty(udid, 'ro.build.characteristics');
+    return character !== 'emulator';
   }
 
   private getDeviceName = async (udid: string) =>
-    await this.getDeviceProperty(udid, "ro.product.name");
+    await this.getDeviceProperty(udid, 'ro.product.name');
 }

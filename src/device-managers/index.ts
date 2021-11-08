@@ -1,19 +1,19 @@
-import { IDevice } from "../interfaces/IDevice";
-import { IDeviceManager } from "../interfaces/IDeviceManager";
-import { Platform } from "../types/Platform";
-import { AndroidDeviceManager } from "./AndroidDeviceManager";
-import { IOSDeviceManager } from "./IOSDeviceManager";
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { Platform } from '../types/Platform';
+import { AndroidDeviceManager } from './AndroidDeviceManager';
+import { IOSDeviceManager } from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
 
-  constructor({ platform }: { platform: Platform | "both" }) {
-    if (platform === "both") {
+  constructor({ platform }: { platform: Platform | 'both' }) {
+    if (platform === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());
       this.deviceManagers.push(new IOSDeviceManager());
-    } else if (platform === "android") {
+    } else if (platform === 'android') {
       this.deviceManagers.push(new AndroidDeviceManager());
-    } else if (platform === "ios") {
+    } else if (platform === 'ios') {
       this.deviceManagers.push(new IOSDeviceManager());
     }
   }

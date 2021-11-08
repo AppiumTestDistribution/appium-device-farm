@@ -1,4 +1,4 @@
-import { Platform } from "../types/Platform";
+import { Platform } from '../types/Platform';
 
 export interface IDevice {
   name: string;

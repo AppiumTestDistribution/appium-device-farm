@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'prettier/prettier': ['error', { singleQuote: true }],
     quotes: ['error', 'single'],
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   settings: {
     'import/resolver': {

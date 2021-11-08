@@ -1,10 +1,10 @@
-import { DeviceModel } from "./db";
-import { IDevice } from "../interfaces/IDevice";
-import { IDeviceFilterOptions } from "../interfaces/IDeviceFilterOptions";
+import { DeviceModel } from './db';
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 
 export function saveDevices(devices: Array<IDevice>): any {
-  let newDeviveUdids = new Set(devices.map((device) => device.udid));
-  let allDeviceIds = DeviceModel.chain()
+  const newDeviveUdids = new Set(devices.map((device) => device.udid));
+  const allDeviceIds = DeviceModel.chain()
     .find()
     .data()
     .map((device) => device.udid);
@@ -41,9 +41,9 @@ export function saveDevices(devices: Array<IDevice>): any {
 }
 
 export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
-  let filter = {
+  const filter = {
     platform: filterOptions.platform,
-    name: { $contains: filterOptions.name || "" },
+    name: { $contains: filterOptions.name || '' },
     busy: filterOptions.busy,
     offline: filterOptions.offline,
   } as any;
@@ -52,7 +52,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     filter.udid = { $in: filterOptions.udid };
   }
 
-  let device = DeviceModel.chain().find(filter).data()[0];
+  const device = DeviceModel.chain().find(filter).data()[0];
 
   return device;
 }

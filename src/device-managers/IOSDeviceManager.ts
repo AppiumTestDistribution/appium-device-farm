@@ -1,10 +1,10 @@
-import Simctl from "node-simctl";
-import { flatten } from "lodash";
-import { utilities as IOSUtils } from "appium-ios-device";
-import { IDevice } from "../interfaces/IDevice";
-import { IDeviceManager } from "../interfaces/IDeviceManager";
-import { isMac } from "../helpers";
-import { asyncForEach } from "../helpers";
+import Simctl from 'node-simctl';
+import { flatten } from 'lodash';
+import { utilities as IOSUtils } from 'appium-ios-device';
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { isMac } from '../helpers';
+import { asyncForEach } from '../helpers';
 
 export class IOSDeviceManager implements IDeviceManager {
   /**
@@ -40,8 +40,8 @@ export class IOSDeviceManager implements IDeviceManager {
           name,
           busy: false,
           realDevice: true,
-          deviceType: "real",
-          platform: "ios",
+          deviceType: 'real',
+          platform: 'ios',
         })
       );
     });
@@ -55,14 +55,14 @@ export class IOSDeviceManager implements IDeviceManager {
    */
   private async getSimulators(): Promise<Array<IDevice>> {
     const simulators: Array<IDevice> = flatten(
-      Object.values((await new Simctl().getDevicesByParsing("iOS")) as Array<IDevice>)
+      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
     ).map((device) => {
       return {
         ...device,
         busy: false,
         realDevice: false,
-        platform: "ios",
-        deviceType: "simulator",
+        platform: 'ios',
+        deviceType: 'simulator',
       };
     });
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));

@@ -1,19 +1,19 @@
-import "reflect-metadata";
-import yargs from "yargs/yargs";
-import { Container } from "typedi";
-import { DeviceFarmManager } from "./device-managers";
-import logger from "./logger";
+import 'reflect-metadata';
+import yargs from 'yargs/yargs';
+import { Container } from 'typedi';
+import { DeviceFarmManager } from './device-managers';
+import logger from './logger';
 
-let appiumArgs = yargs(process.argv.slice(2)).argv;
+const appiumArgs = yargs(process.argv.slice(2)).argv;
 let pluginArgs: any = {};
 
 (async () => {
   try {
-    if (appiumArgs["plugin-args"]) {
-      pluginArgs = JSON.parse(appiumArgs["plugin-args"] as any);
+    if (appiumArgs['plugin-args']) {
+      pluginArgs = JSON.parse(appiumArgs['plugin-args'] as any);
     }
-    let deviceManager = new DeviceFarmManager({
-      platform: pluginArgs["device-farm"]?.Platform.toLowerCase(),
+    const deviceManager = new DeviceFarmManager({
+      platform: pluginArgs['device-farm']?.Platform.toLowerCase(),
     });
     Container.set(DeviceFarmManager, deviceManager);
   } catch (e) {
@@ -21,4 +21,4 @@ let pluginArgs: any = {};
   }
 })();
 
-export { DevicePlugin } from "./plugin-new";
+export { DevicePlugin } from './plugin-new';
