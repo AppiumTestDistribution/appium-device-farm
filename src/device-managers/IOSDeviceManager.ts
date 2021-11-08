@@ -1,6 +1,6 @@
 import Simctl from 'node-simctl';
 import { flatten } from 'lodash';
-import { utilities as IOSUtils} from 'appium-ios-device';
+import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { isMac } from '../helpers';

@@ -71,20 +71,20 @@ export class DevicePlugin extends BasePlugin {
     /**
      *  Wait untill a free device is available for the given capabilities
      */
-    const devicePromise = new Promise(async (resolve, reject) => {
-      await commandsQueueGuard.acquire(DEVICE_MANAGER_LOCK_NAME, async () => {
+    const device = await commandsQueueGuard.acquire(
+      DEVICE_MANAGER_LOCK_NAME,
+      async (): Promise<IDevice> => {
         await refreshDeviceList();
         try {
           const device: IDevice = await this.allocateDeviceForSession(caps);
-          resolve(device);
+          return device;
         } catch (err) {
           await removePendingSession(pendingSessionId);
-          reject(err);
+          throw err;
         }
-      });
-    });
+      }
+    );
 
-    const device = (await devicePromise) as IDevice;
     const session = await next();
     await removePendingSession(pendingSessionId);
 
