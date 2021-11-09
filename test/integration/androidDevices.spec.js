@@ -1,42 +1,73 @@
 import { expect } from 'chai';
-import {
-  findFreeDevice,
-  blockDevice,
-  deviceState,
-  androidDevices,
-  unblockDevice,
-  updateDevice,
-  sessionId,
-} from './testHelpers';
+import { DeviceFarmManager } from '../../src/device-managers';
+import { Container } from 'typedi';
+import { DeviceModel } from '../../src/data-service/db';
 
-describe('Get Devices', () => {
-  it('Fetch all connected android devices and block and unblock', async () => {
-    const freeDevice = await findFreeDevice(
-      {
+import { DevicePlugin, updateDeviceList } from '../../src/plugin';
+
+describe('Android Test', () => {
+  it('Allocate free device and verify the device state is busy in db', async () => {
+    const deviceManager = new DeviceFarmManager({
+      platform: 'android',
+    });
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList();
+    const capabilities = {
+      alwaysMatch: {
         platformName: 'android',
-        'appium:app': '/default-path/sample.apk',
+        'appium:app': '/Downloads/VodQA.apk',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
       },
-      { Platform: 'android' }
-    );
-    const blockedDevice = blockDevice(androidDevices, freeDevice, 'android');
-    const deviceStateAfterBlocking = deviceState(freeDevice.udid)(blockedDevice);
-    expect(deviceStateAfterBlocking).to.be.equal(true);
-    const unblock = await unblockDevice(androidDevices, freeDevice, 'android');
-    const deviceStateAfterUnblocking = deviceState(freeDevice.udid)(unblock);
-    expect(deviceStateAfterUnblocking).to.be.equal(false);
+      firstMatch: [{}],
+    };
+    const devices = await DevicePlugin.allocateDeviceForSession(capabilities);
+    const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
+    expect(allDeviceIds[0].busy).to.be.true;
   });
 
-  it('Attach a sessionId to blocked device', async () => {
-    const freeDevice = await findFreeDevice(
-      {
+  it('Allocate second free device and verify both the device state is busy in db', async () => {
+    const deviceManager = new DeviceFarmManager({
+      platform: 'android',
+    });
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList();
+    const capabilities = {
+      alwaysMatch: {
         platformName: 'android',
-        'appium:app': '/default-path/sample.apk',
+        'appium:app': '/Downloads/VodQA.apk',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
       },
-      { Platform: 'android' }
+      firstMatch: [{}],
+    };
+    await DevicePlugin.allocateDeviceForSession(capabilities);
+    const allDeviceIds = DeviceModel.chain().find().data();
+    allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
+  });
+
+  it('Finding a device should throw error when all devices are busy', async () => {
+    const deviceManager = new DeviceFarmManager({
+      platform: 'android',
+    });
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList();
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'android',
+        'appium:app': '/Downloads/VodQA.apk',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+      },
+      firstMatch: [{}],
+    };
+    await DevicePlugin.allocateDeviceForSession(capabilities).catch((error) =>
+      expect(error)
+        .to.be.an('error')
+        .with.property(
+          'message',
+          'No device found for filters: {"platform":"android","name":"","busy":false,"offline":false}'
+        )
     );
-    blockDevice(androidDevices, freeDevice, 'android');
-    const deviceAfterUpdate = updateDevice(androidDevices, freeDevice, '11111111111111');
-    const session = sessionId(freeDevice.udid)(deviceAfterUpdate);
-    expect(session).to.be.equal('11111111111111');
   });
 });

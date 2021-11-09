@@ -76,7 +76,7 @@ export class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         await refreshDeviceList();
         try {
-          const device: IDevice = await this.allocateDeviceForSession(caps);
+          const device: IDevice = await DevicePlugin.allocateDeviceForSession(caps);
           return device;
         } catch (err) {
           await removePendingSession(pendingSessionId);
@@ -113,7 +113,7 @@ export class DevicePlugin extends BasePlugin {
    * @param capability
    * @returns
    */
-  private async allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
+  static async allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
     const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
 
     const filters = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
@@ -156,7 +156,7 @@ export class DevicePlugin extends BasePlugin {
    * @param capability
    * @returns IDeviceFilterOptions
    */
-  private static getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+  static getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
     const platform: Platform = capability['platformName'].toLowerCase();
     const udids = process.env.UDIDS?.split(',');
     /* Based on the app file extension, we will decide whether to run the
@@ -192,7 +192,7 @@ function getDeviceManager() {
   return Container.get(DeviceFarmManager) as DeviceFarmManager;
 }
 
-async function updateDeviceList() {
+export async function updateDeviceList() {
   const devices = await getDeviceManager().getDevices();
   log.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);

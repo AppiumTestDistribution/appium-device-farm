@@ -1,20 +1,33 @@
 import { expect } from 'chai';
-import { findFreeDevice, blockDevice, simulators, deviceState, unblockDevice } from './testHelpers';
+import { DeviceFarmManager } from '../../src/device-managers';
+import { Container } from 'typedi';
 
-describe('iOS', () => {
-  it('Fetch all connected iOS Simulators devices and block and unblock', async () => {
-    const freeDevice = await findFreeDevice(
-      {
-        platformName: 'ios',
-        'appium:app': '/default-path/sample.app',
+import { DevicePlugin, updateDeviceList } from '../../src/plugin';
+
+describe('IOS Test', () => {
+  it('Throw error when no device is found for given capabilities', async () => {
+    const deviceManager = new DeviceFarmManager({
+      platform: 'android',
+    });
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList();
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'iOS',
+        'appium:app': '/Downloads/VodQA.ipa',
+        'appium:iPhoneOnly': true,
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
       },
-      { Platform: 'iOS' }
+      firstMatch: [{}],
+    };
+    await DevicePlugin.allocateDeviceForSession(capabilities).catch((error) =>
+      expect(error)
+        .to.be.an('error')
+        .with.property(
+          'message',
+          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false,"offline":false}'
+        )
     );
-    const blockedDevice = blockDevice(simulators, freeDevice, 'ios');
-    const deviceStateAfterBlocking = deviceState(freeDevice.udid)(blockedDevice);
-    expect(deviceStateAfterBlocking).to.be.equal(true);
-    const unblock = await unblockDevice(simulators, freeDevice, 'ios');
-    const deviceStateAfterUnblocking = deviceState(freeDevice.udid)(unblock);
-    expect(deviceStateAfterUnblocking).to.be.equal(false);
   });
 });
