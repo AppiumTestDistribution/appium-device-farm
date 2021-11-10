@@ -2,9 +2,12 @@ import express from 'express';
 import path from 'path';
 import log from './logger';
 import { DeviceModel, PendingSessionsModel } from './data-service/db';
-
+import cors from 'cors';
 const router = express.Router(),
   apiRouter = express.Router();
+
+router.use(cors());
+apiRouter.use(cors());
 
 apiRouter.get('/devices', (req, res) => {
   res.json(DeviceModel.find());

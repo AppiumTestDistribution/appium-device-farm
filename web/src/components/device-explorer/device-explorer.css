@@ -1,0 +1,135 @@
+.device-explorer-container {
+  height: 100%;
+  width: 99%;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  margin-right: 20px;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.device-explorer-header-container {
+  min-height: 65px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.device-explorer-header-left-container {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  height: 100%;
+  padding-right: 10px;
+}
+
+.device-explorer-header-right-container {
+  display: flex;
+  margin-left: auto;
+  height: 100%;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.device-explorer-header-entry {
+  height: 70%;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid #aca8a8;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.device-explorer-header-entry-header {
+  height: 15px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.device-explorer-header-value {
+  padding-top: 10px;
+  display: flex;
+  flex-direction: row;
+}
+
+.device-explorer-header__device-state {
+  font-size: 11px;
+  color: black;
+  font-weight: 600;
+  margin-right: 10px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.device-explorer-header__device-state::before {
+  content: '';
+  display: inline-block;
+  font-size: 10px;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+
+.device-explorer-header__device-state.ready::before {
+  background: green;
+}
+
+.device-explorer-header__device-state.busy::before {
+  background: red;
+}
+
+.device-explorer-header__device-state.offline::before {
+  background: grey;
+}
+
+img.device-explorer-header__device-platform.selected,
+.device-explorer-header__device-state.selected {
+  background: rgb(213, 238, 213);
+  border: 1px solid rgb(123, 207, 123);
+  border-radius: 10%;
+}
+
+.device-explorer-header-text-filter {
+  border: none;
+  border-bottom: 1px solid rgb(185, 185, 185);
+  outline: none;
+  font-size: 12px;
+  min-width: 200px;
+  padding-bottom: 5px;
+}
+
+.device-explorer-header-text-filter:focus {
+  border-bottom: 1px solid rgb(238, 191, 103);
+}
+
+img.device-explorer-header__device-platform {
+  height: 20px;
+  width: 20x;
+  margin-right: 10px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+img.device-explorer-header__device-platform.selected {
+  border-radius: 50%;
+}
+
+.device-explorer-header-filter-count {
+  font-size: 14px;
+  margin-right: 10px;
+  padding: 3px;
+  color: grey;
+}
+
+.device-explorer-header-filter-count span {
+  padding-left: 5px;
+  padding-right: 5px;
+  color: rgb(17, 19, 17);
+  font-weight: 600;
+}

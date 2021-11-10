@@ -14,8 +14,8 @@
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc",
-    "lint": "eslint . --ext .ts --fix",
-    "prettier": "prettier '**/*.ts' --write --single-quote",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin"
   },
@@ -45,6 +45,7 @@
     "appium-ios-device": "^1.7.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.5",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
     "lodash": "^4.17.21",

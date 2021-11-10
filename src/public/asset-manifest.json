@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/device-farm/static/css/main.4aa33ad3.chunk.css",
-    "main.js": "/device-farm/static/js/main.c21aef27.chunk.js",
-    "main.js.map": "/device-farm/static/js/main.c21aef27.chunk.js.map",
-    "runtime-main.js": "/device-farm/static/js/runtime-main.4de6999a.js",
-    "runtime-main.js.map": "/device-farm/static/js/runtime-main.4de6999a.js.map",
-    "static/css/2.4c97ca4f.chunk.css": "/device-farm/static/css/2.4c97ca4f.chunk.css",
-    "static/js/2.509eb668.chunk.js": "/device-farm/static/js/2.509eb668.chunk.js",
-    "static/js/2.509eb668.chunk.js.map": "/device-farm/static/js/2.509eb668.chunk.js.map",
-    "static/js/3.adfdca2f.chunk.js": "/device-farm/static/js/3.adfdca2f.chunk.js",
-    "static/js/3.adfdca2f.chunk.js.map": "/device-farm/static/js/3.adfdca2f.chunk.js.map",
+    "main.css": "/device-farm/static/css/main.7b825041.chunk.css",
+    "main.js": "/device-farm/static/js/main.c49309f4.chunk.js",
+    "main.js.map": "/device-farm/static/js/main.c49309f4.chunk.js.map",
+    "runtime-main.js": "/device-farm/static/js/runtime-main.e825ef0f.js",
+    "runtime-main.js.map": "/device-farm/static/js/runtime-main.e825ef0f.js.map",
+    "static/js/2.7a7b53c1.chunk.js": "/device-farm/static/js/2.7a7b53c1.chunk.js",
+    "static/js/2.7a7b53c1.chunk.js.map": "/device-farm/static/js/2.7a7b53c1.chunk.js.map",
+    "static/js/3.dd9b6958.chunk.js": "/device-farm/static/js/3.dd9b6958.chunk.js",
+    "static/js/3.dd9b6958.chunk.js.map": "/device-farm/static/js/3.dd9b6958.chunk.js.map",
     "index.html": "/device-farm/index.html",
-    "static/css/2.4c97ca4f.chunk.css.map": "/device-farm/static/css/2.4c97ca4f.chunk.css.map",
-    "static/css/main.4aa33ad3.chunk.css.map": "/device-farm/static/css/main.4aa33ad3.chunk.css.map",
-    "static/js/2.509eb668.chunk.js.LICENSE.txt": "/device-farm/static/js/2.509eb668.chunk.js.LICENSE.txt"
+    "static/css/main.7b825041.chunk.css.map": "/device-farm/static/css/main.7b825041.chunk.css.map",
+    "static/js/2.7a7b53c1.chunk.js.LICENSE.txt": "/device-farm/static/js/2.7a7b53c1.chunk.js.LICENSE.txt",
+    "static/media/android-icon.ec560eea.svg": "/device-farm/static/media/android-icon.ec560eea.svg",
+    "static/media/apple-icon.a17e460f.svg": "/device-farm/static/media/apple-icon.a17e460f.svg",
+    "static/media/apple-new-icon.568712db.svg": "/device-farm/static/media/apple-new-icon.568712db.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.4de6999a.js",
-    "static/css/2.4c97ca4f.chunk.css",
-    "static/js/2.509eb668.chunk.js",
-    "static/css/main.4aa33ad3.chunk.css",
-    "static/js/main.c21aef27.chunk.js"
+    "static/js/runtime-main.e825ef0f.js",
+    "static/js/2.7a7b53c1.chunk.js",
+    "static/css/main.7b825041.chunk.css",
+    "static/js/main.c49309f4.chunk.js"
   ]
 }

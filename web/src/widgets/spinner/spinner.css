@@ -1,0 +1,50 @@
+@keyframes ldio-f6vc10xq0d9 {
+  0% {
+    top: 42px;
+    left: 42px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 6px;
+    left: 6px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+.ldio-f6vc10xq0d9 div {
+  position: absolute;
+  border-width: 8px;
+  border-style: solid;
+  opacity: 1;
+  border-radius: 50%;
+  animation: ldio-f6vc10xq0d9 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.ldio-f6vc10xq0d9 div:nth-child(1) {
+  border-color: #0051a2;
+  animation-delay: 0s;
+}
+.ldio-f6vc10xq0d9 div:nth-child(2) {
+  border-color: #1b75be;
+  animation-delay: -0.5s;
+}
+.loadingio-spinner-ripple-oy48bsussql {
+  width: 31px;
+  height: 31px;
+  display: inline-block;
+  overflow: hidden;
+  background: transparent;
+}
+.ldio-f6vc10xq0d9 {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: translateZ(0) scale(0.31);
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.ldio-f6vc10xq0d9 div {
+  box-sizing: content-box;
+}
