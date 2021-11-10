@@ -2,8 +2,7 @@ import express from 'express';
 import path from 'path';
 import log from './logger';
 import { DeviceModel, PendingSessionsModel } from './data-service/db';
-
-const cors = require('cors');
+import cors from 'cors';
 const router = express.Router(),
   apiRouter = express.Router();
 
