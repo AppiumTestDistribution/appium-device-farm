@@ -1,0 +1,23 @@
+.header-container {
+  display: flex;
+  flex-direction: row;
+  height: 70px;
+  width: 100%;
+  border-bottom: 1px solid #ced8e1;
+}
+
+.header-logo-container {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.header-logo {
+  color: #000000;
+  font-size: 19px;
+  font-weight: 600;
+}
