@@ -78,7 +78,7 @@
     "eslint": "7.30.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-import": "2.23.4",
-    "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-prettier": "3.4.1",
     "husky": "7.0.4",
     "jest": "27.3.1",
     "lint-staged": "11.1.1",
