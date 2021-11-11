@@ -2,8 +2,8 @@ import React from 'react';
 import './device-card.css';
 import { ReactComponent as AndroidIcon } from '../../../assets/android-icon.svg';
 import { ReactComponent as AppleIcon } from '../../../assets/apple-new-icon.svg';
+import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
-
 interface IDeviceCardProps {
   device: IDevice;
 }
@@ -30,8 +30,9 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
   }
 
   render() {
-    let { name, sdk, deviceType, platform, realDevice, udid } = this.props.device;
-    let deviceState = this.getDeviceState();
+    const { name, sdk, deviceType, platform, udid, dashboard_link, total_session_count } =
+      this.props.device;
+    const deviceState = this.getDeviceState();
 
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
@@ -57,6 +58,16 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             <div className="device-info-card-container__body_row_label">Device Type:</div>
             <div className="device-info-card-container__body_row_value">{deviceType}</div>
           </div>
+        </div>
+        <div className="device-info-card-container__footer_wrapper">
+          {dashboard_link && !!total_session_count && total_session_count > 0 && (
+            <div className="dashboard-link-wrapper">
+              <SessionIcon className="footer-icon" />
+              <a className="footer-deeplink" href={dashboard_link} target="_blank">
+                {`${total_session_count} session${total_session_count > 1 ? 's' : ''}`}
+              </a>
+            </div>
+          )}
         </div>
       </div>
     );

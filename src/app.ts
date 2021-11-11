@@ -3,14 +3,70 @@ import path from 'path';
 import log from './logger';
 import { DeviceModel, PendingSessionsModel } from './data-service/db';
 import cors from 'cors';
+import AsyncLock from 'async-lock';
+import axios from 'axios';
+
+const asyncLock = new AsyncLock(),
+  serverUpTime = new Date().toISOString();
+let dashboardPluginUrl: any = null;
+
 const router = express.Router(),
   apiRouter = express.Router();
 
 router.use(cors());
 apiRouter.use(cors());
 
-apiRouter.get('/devices', (req, res) => {
-  res.json(DeviceModel.find());
+/**
+ * Middleware to check if the appium-dashboard plugin is installed
+ * If the plugin is runnig, then we should enable the react app to
+ * open the dashboard link upon clicking the device card in the UI.
+ */
+apiRouter.use(async (req, res, next) => {
+  await asyncLock.acquire('dashboard-plugin-check', async () => {
+    if (dashboardPluginUrl == null) {
+      const pingurl = `${req.protocol}://${req.get('host')}/dashboard/api/ping`;
+      try {
+        let response: any = await axios.get(pingurl);
+        if (response.data['pong']) {
+          dashboardPluginUrl = `${req.protocol}://${req.get('host')}/dashboard`;
+        } else {
+          dashboardPluginUrl = '';
+        }
+      } catch (err) {
+        dashboardPluginUrl = '';
+      }
+    }
+  });
+  (req as any)['dashboard-plugin-url'] = dashboardPluginUrl;
+  return next();
+});
+
+apiRouter.get('/devices', async (req, res) => {
+  let devices = DeviceModel.find();
+  /* dashboard-plugin-url is the base url for opening the appium-dashboard-plugin
+   * This value will be attached to all express request via middleware
+   */
+  let dashboardPluginUrl = (req as any)['dashboard-plugin-url'];
+  if (dashboardPluginUrl) {
+    let sessions = (
+      await axios.get(`${dashboardPluginUrl}/api/sessions?start_time=${serverUpTime}`)
+    ).data.rows;
+    let deviceSessionMap: any = {};
+    sessions.forEach((session: any) => {
+      if (!deviceSessionMap[session.udid]) {
+        deviceSessionMap[session.udid] = [];
+      }
+      deviceSessionMap[session.udid].push(session);
+    });
+
+    Object.keys(deviceSessionMap).forEach((key) => {});
+    devices = devices.map((d) => {
+      d.dashboard_link = `${dashboardPluginUrl}?device_udid=${d.udid}&start_time=${serverUpTime}`;
+      d.total_session_count = deviceSessionMap[d.udid]?.length || 0;
+      return d;
+    });
+  }
+  res.json(devices);
 });
 
 apiRouter.get('/queue', (req, res) => {

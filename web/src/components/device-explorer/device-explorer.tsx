@@ -53,8 +53,8 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
 
   async fetchDevices() {
     try {
-      let devices = await DeviceFarmApiService.getDevices();
-      let pendingSessionsCount = await DeviceFarmApiService.getPendingSessionsCount();
+      const devices = await DeviceFarmApiService.getDevices();
+      const pendingSessionsCount = await DeviceFarmApiService.getPendingSessionsCount();
       this.setState({ devices, pendingSessionsCount });
     } catch (error) {
       console.log(error);
@@ -62,9 +62,9 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
   }
 
   getFilteredDevice() {
-    let { ready, busy, offline } = this.state.filter.state;
-    let { ios, android } = this.state.filter.platform;
-    let filters = [
+    const { ready, busy, offline } = this.state.filter.state;
+    const { ios, android } = this.state.filter.platform;
+    const filters = [
       (d: IDevice) => (ios && d.platform == 'ios') || (android && d.platform == 'android'),
       (d: IDevice) =>
         (ready && !d.busy && !d.offline) || (busy && d.busy) || (offline && d.offline),
@@ -93,7 +93,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
 
   /* Render filter components */
   getPlatformFilterComponent() {
-    let { ios, android } = this.state.filter.platform;
+    const { ios, android } = this.state.filter.platform;
     return (
       <div className="device-explorer-header-value">
         <img
@@ -125,7 +125,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
   }
 
   getDeviceStateFilterComponent() {
-    let { ready, busy, offline } = this.state.filter.state;
+    const { ready, busy, offline } = this.state.filter.state;
     return (
       <div className="device-explorer-header-value">
         <div
@@ -172,7 +172,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
   }
 
   render() {
-    let devices = this.getFilteredDevice();
+    const devices = this.getFilteredDevice();
     return (
       <div className="device-explorer-container">
         <div className="device-explorer-header-container">

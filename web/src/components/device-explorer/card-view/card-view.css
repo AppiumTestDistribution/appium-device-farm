@@ -1,7 +1,7 @@
 .device-explorer-card-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  grid-template-rows: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-rows: repeat(auto-fill, minmax(170px, 1fr));
   row-gap: 30px;
   column-gap: 15px;
   height: 95%;
