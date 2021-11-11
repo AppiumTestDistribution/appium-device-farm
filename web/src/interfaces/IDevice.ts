@@ -7,4 +7,6 @@ export interface IDevice {
   busy: boolean;
   platform: 'ios' | 'android';
   realDevice: boolean;
+  dashboard_link?: string;
+  total_session_count?: number;
 }
