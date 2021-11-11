@@ -26,7 +26,7 @@ apiRouter.use(async (req, res, next) => {
     if (dashboardPluginUrl == null) {
       const pingurl = `${req.protocol}://${req.get('host')}/dashboard/api/ping`;
       try {
-        let response: any = await axios.get(pingurl);
+        const response: any = await axios.get(pingurl);
         if (response.data['pong']) {
           dashboardPluginUrl = `${req.protocol}://${req.get('host')}/dashboard`;
         } else {
@@ -46,20 +46,18 @@ apiRouter.get('/devices', async (req, res) => {
   /* dashboard-plugin-url is the base url for opening the appium-dashboard-plugin
    * This value will be attached to all express request via middleware
    */
-  let dashboardPluginUrl = (req as any)['dashboard-plugin-url'];
+  const dashboardPluginUrl = (req as any)['dashboard-plugin-url'];
   if (dashboardPluginUrl) {
-    let sessions = (
+    const sessions = (
       await axios.get(`${dashboardPluginUrl}/api/sessions?start_time=${serverUpTime}`)
     ).data.rows;
-    let deviceSessionMap: any = {};
+    const deviceSessionMap: any = {};
     sessions.forEach((session: any) => {
       if (!deviceSessionMap[session.udid]) {
         deviceSessionMap[session.udid] = [];
       }
       deviceSessionMap[session.udid].push(session);
     });
-
-    Object.keys(deviceSessionMap).forEach((key) => {});
     devices = devices.map((d) => {
       d.dashboard_link = `${dashboardPluginUrl}?device_udid=${d.udid}&start_time=${serverUpTime}`;
       d.total_session_count = deviceSessionMap[d.udid]?.length || 0;
