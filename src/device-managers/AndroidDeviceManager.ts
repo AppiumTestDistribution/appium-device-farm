@@ -26,7 +26,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             });
           } else {
             log.info(`Android Device details for ${device.udid} not available. So querying now.`);
-            let [sdk, realDevice, name] = await Promise.all([
+            const [sdk, realDevice, name] = await Promise.all([
               this.getDeviceVersion(device.udid),
               this.isRealDevice(device.udid),
               this.getDeviceName(device.udid),
