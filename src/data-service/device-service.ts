@@ -40,6 +40,10 @@ export function saveDevices(devices: Array<IDevice>): any {
   });
 }
 
+export function getAllDevices(): Array<IDevice> {
+  return DeviceModel.chain().find().data();
+}
+
 export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   const filter = {
     platform: filterOptions.platform,

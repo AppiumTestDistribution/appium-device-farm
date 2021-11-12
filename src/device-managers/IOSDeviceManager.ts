@@ -5,6 +5,7 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
+import log from '../logger';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -12,11 +13,13 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  async getDevices(): Promise<IDevice[]> {
+  async getDevices(existingDeviceDetails: Array<IDevice>): Promise<IDevice[]> {
     if (!isMac()) {
       return [];
     } else {
-      return flatten(await Promise.all([this.getRealDevices(), this.getSimulators()]));
+      return flatten(
+        await Promise.all([this.getRealDevices(existingDeviceDetails), this.getSimulators()])
+      );
     }
   }
 
@@ -37,22 +40,32 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getRealDevices(): Promise<Array<IDevice>> {
+  private async getRealDevices(existingDeviceDetails: Array<IDevice>): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
-      const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
-      deviceState.push(
-        Object.assign({
-          udid,
-          sdk,
-          name,
+      const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
+      if (existingDevice) {
+        log.info(`IOS Device details for ${udid} already available`);
+        deviceState.push({
+          ...existingDevice,
           busy: false,
-          realDevice: true,
-          deviceType: 'real',
-          platform: 'ios',
-        })
-      );
+        });
+      } else {
+        log.info(`IOS Device details for ${udid} not available. So querying now.`);
+        const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
+        deviceState.push(
+          Object.assign({
+            udid,
+            sdk,
+            name,
+            busy: false,
+            realDevice: true,
+            deviceType: 'real',
+            platform: 'ios',
+          })
+        );
+      }
     });
     return deviceState;
   }

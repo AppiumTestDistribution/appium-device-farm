@@ -5,7 +5,13 @@ import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
 import { Platform } from './types/Platform';
-import { saveDevices, getDevice, updateDevice, unblockDevice } from './data-service/device-service';
+import {
+  saveDevices,
+  getAllDevices,
+  getDevice,
+  updateDevice,
+  unblockDevice,
+} from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
@@ -193,7 +199,7 @@ function getDeviceManager() {
 }
 
 export async function updateDeviceList() {
-  const devices = await getDeviceManager().getDevices();
+  const devices = await getDeviceManager().getDevices(getAllDevices());
   log.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);
 }
