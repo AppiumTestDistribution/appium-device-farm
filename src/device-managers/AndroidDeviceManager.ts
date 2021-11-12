@@ -2,35 +2,47 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { asyncForEach } from '../helpers';
 import ADB from 'appium-adb';
+import log from '../logger';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
 
-  async getDevices(): Promise<IDevice[]> {
+  async getDevices(existingDeviceDetails: Array<IDevice>): Promise<IDevice[]> {
     if (!this.adbAvailable) {
       return [];
     }
     const deviceState: Array<IDevice> = [];
     try {
       const connectedDevices = await this.getConnectedDevices();
-      await asyncForEach(connectedDevices, async (device: { udid: any; state: any }) => {
+      await asyncForEach(connectedDevices, async (device: IDevice) => {
         if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
-          const [sdk, realDevice, name] = await Promise.all([
-            this.getDeviceVersion(device.udid),
-            this.isRealDevice(device.udid),
-            this.getDeviceName(device.udid),
-          ]);
-          deviceState.push({
-            sdk,
-            realDevice,
-            name,
-            busy: false,
-            state: device.state,
-            udid: device.udid,
-            platform: 'android',
-            deviceType: realDevice ? 'real' : 'emulator',
-          });
+          const existingDevice = existingDeviceDetails.find((dev) => dev.udid === device.udid);
+          if (existingDevice) {
+            log.info(`Android Device details for ${device.udid} already available`);
+            deviceState.push({
+              ...existingDevice,
+              busy: false,
+            });
+          } else {
+            log.info(`Android Device details for ${device.udid} not available. So querying now.`);
+            const [sdk, realDevice, name] = await Promise.all([
+              this.getDeviceVersion(device.udid),
+              this.isRealDevice(device.udid),
+              this.getDeviceName(device.udid),
+            ]);
+
+            deviceState.push({
+              sdk,
+              realDevice,
+              name,
+              busy: false,
+              state: device.state,
+              udid: device.udid,
+              platform: 'android',
+              deviceType: realDevice ? 'real' : 'emulator',
+            });
+          }
         }
       });
     } catch (e) {

@@ -18,10 +18,10 @@ export class DeviceFarmManager {
     }
   }
 
-  public async getDevices(): Promise<IDevice[]> {
+  public async getDevices(existingDeviceDetails?: Array<IDevice>): Promise<IDevice[]> {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
-      devices.push(...(await deviceManager.getDevices()));
+      devices.push(...(await deviceManager.getDevices(existingDeviceDetails || [])));
     }
     return devices;
   }

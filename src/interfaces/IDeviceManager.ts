@@ -1,5 +1,5 @@
 import { IDevice } from './IDevice';
 
 export interface IDeviceManager {
-  getDevices(): Promise<IDevice[]>;
+  getDevices(existingDeviceDetails: Array<IDevice>): Promise<IDevice[]>;
 }
