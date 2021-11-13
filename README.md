@@ -7,8 +7,6 @@ This is an Appium plugin designed to manage and create driver session on connect
 - Automatically detects connected Android, iOS Simulators and Real devices before session creation and maintains it in device pool.
 - Dynamically allocates a free device from device pool while creating driver session.
 - Updates the device pool with a new device during test execution.
-- Queues the test cases when no free device is available for session creation.
-  - For Example: Lets say, we have three devices connected and there are totally five test cases. Plugin will hold the remaining two test cases in the queue until a free device is available.
 - Allocates random ports for parallel execution.
 
 ## Device UI
