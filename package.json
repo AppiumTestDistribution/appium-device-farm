@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
-    "@appium/base-plugin": "^1.7.2",
+    "@appium/base-plugin": "^1.8.0",
     "@types/ramda": "^0.27.45",
     "appium-adb": "^8.11.0",
     "appium-ios-device": "^1.7.1",
@@ -91,7 +91,19 @@
   },
   "appium": {
     "pluginName": "device-farm",
-    "mainClass": "DevicePlugin"
+    "mainClass": "DevicePlugin",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "additionalProperties": false,
+      "description": "Appium configuration schema for the Device Farm plugin.",
+      "properties": {
+        "platform": {
+          "type": "string"
+        }
+      },
+      "title": "Fake Plugin Configuration",
+      "type": "object"
+    }
   },
   "engines": {
     "node": ">=10",

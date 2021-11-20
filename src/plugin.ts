@@ -52,6 +52,11 @@ export class DevicePlugin extends BasePlugin {
     };
   }
 
+  onUnexpectedShutdown(driver: any, cause: any) {
+    unblockDevice(driver.sessionId);
+    log.info(`Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`);
+  }
+
   public static async updateServer(expressApp: any): Promise<void> {
     expressApp.use('/device-farm', router);
     log.info('Device Farm Plugin will be served at http://localhost:4723/device-farm');

@@ -15,6 +15,7 @@ const capabilities = {
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
   'appium:app': '/Users/saikrishna/Downloads/VodQA.apk',
+  'appium:newCommandTimeout': 10,
 };
 describe('Plugin Test', () => {
   it('Basic Plugin test', async () => {
