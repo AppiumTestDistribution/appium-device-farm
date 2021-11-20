@@ -3,17 +3,20 @@ import yargs from 'yargs/yargs';
 import { Container } from 'typedi';
 import { DeviceFarmManager } from './device-managers';
 import logger from './logger';
+import { Platform } from './types/Platform';
 
 const appiumArgs = yargs(process.argv.slice(2)).argv;
-let pluginArgs: any = {};
 
 (async () => {
   try {
-    if (appiumArgs['plugin-args']) {
-      pluginArgs = JSON.parse(appiumArgs['plugin-args'] as any);
+    if (!appiumArgs['plugin-device-farm-platform']) {
+      throw new Error('Specify --plugin-device-farm-platform as android,iOS or both');
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const platform = appiumArgs['plugin-device-farm-platform'].toLowerCase() as Platform;
     const deviceManager = new DeviceFarmManager({
-      platform: pluginArgs['device-farm']?.Platform.toLowerCase(),
+      platform,
     });
     Container.set(DeviceFarmManager, deviceManager);
   } catch (e) {

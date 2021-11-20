@@ -48,9 +48,9 @@ apiRouter.get('/devices', async (req, res) => {
    */
   const dashboardPluginUrl = (req as any)['dashboard-plugin-url'];
   if (dashboardPluginUrl) {
-    const sessions = (
-      await axios.get(`${dashboardPluginUrl}/api/sessions?start_time=${serverUpTime}`)
-    ).data.rows;
+    const sessions =
+      (await axios.get(`${dashboardPluginUrl}/api/sessions?start_time=${serverUpTime}`)).data
+        ?.result?.rows || [];
     const deviceSessionMap: any = {};
     sessions.forEach((session: any) => {
       if (!deviceSessionMap[session.udid]) {

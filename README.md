@@ -17,7 +17,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Prerequisite
 
-Appium version 2.0 - Tested with 2.0.0-beta.18
+Appium version 2.0 - Tested with 2.0.0-beta.21
 
 ## Installation - Server
 
@@ -25,6 +25,7 @@ Install the plugin using Appium's plugin CLI, either as a named plugin or via NP
 
 ```
 appium plugin install --source=npm appium-device-farm
+appium plugin install --source=npm appium-dashboard
 ```
 
 ## Installation - Client
@@ -36,7 +37,7 @@ No special action is needed to make things work on the client side.
 The plugin will not be active unless turned on when invoking the Appium server:
 
 ```
-appium server -ka 800 --plugins=device-farm  -pa /wd/hub --plugin-args='{"device-farm": {"Platform": "android"}}'
+appium server -ka 800 --use-plugins=device-farm,appium-dashboard  -pa /wd/hub --plugin-device-farm-platform=android
 
 Arguments options: 
 
