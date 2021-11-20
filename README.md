@@ -13,7 +13,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 - Navigate to localhost:4723/device-farm once the first session is created to know the device availability.
 
-<img src="./images/dashboard.png">
+<img src="./assets/demo.gif">
 
 ## Prerequisite
 
