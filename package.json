@@ -87,7 +87,7 @@
     "sinon": "12.0.1",
     "ts-node": "10.4.0",
     "typescript": "4.5.2",
-    "webdriverio": "7.16.8"
+    "webdriverio": "7.16.9"
   },
   "appium": {
     "pluginName": "device-farm",
