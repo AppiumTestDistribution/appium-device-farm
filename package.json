@@ -13,7 +13,7 @@
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
-    "prepublish": "npx tsc",
+    "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
