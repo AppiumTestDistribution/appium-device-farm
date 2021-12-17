@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "build": "npx tsc && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
-    "prepublish": "npx tsc",
+    "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
