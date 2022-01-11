@@ -2090,10 +2090,10 @@
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.0.tgz"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
 
-"@types/styled-components@5.1.19":
-  version "5.1.19"
-  resolved "https://registry.npmjs.org/@types/styled-components/-/styled-components-5.1.19.tgz"
-  integrity sha512-hNj14Oamk7Jhb/fMMQG7TUkd3e8uMMgxsCTH+ueJNGdFo/PuhlGDQTPChqyilpZP0WttgBHkc2YyT5UG+yc6Yw==
+"@types/styled-components@5.1.20":
+  version "5.1.20"
+  resolved "https://registry.npmjs.org/@types/styled-components/-/styled-components-5.1.20.tgz"
+  integrity sha512-TvpQceFwnxJJsAzR1aHsYpL5DxWMHRzM2/0EA6sGtRjV6DtJubmNxeoPMPiIPQzKEGNHccwObXO7Hug/iwm1Xw==
   dependencies:
     "@types/hoist-non-react-statics" "*"
     "@types/react" "*"
