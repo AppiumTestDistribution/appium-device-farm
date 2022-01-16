@@ -54,7 +54,7 @@
     "node-cache": "^5.1.2",
     "node-schedule": "^2.0.0",
     "node-simctl": "^6.4.1",
-    "ramda": "^0.27.1",
+    "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
