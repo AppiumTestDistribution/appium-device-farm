@@ -44,6 +44,7 @@ Arguments options:
 * Android - If you want to use only Android devices for parallel execution.
 * iOS - If you want to use only iOS devices and simulator for parallel execution.
 * both - If you want to use both android and iOS devices for parallel execution.
+* To tests on specific devices set UDIDS in environment variables as UDIDS='device1UDID, device2UDID'
 ```
 
 ## Capabilities
