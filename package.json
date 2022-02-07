@@ -85,7 +85,7 @@
     "mocha": "9.2.0",
     "prettier": "2.5.1",
     "sinon": "12.0.1",
-    "ts-node": "10.4.0",
+    "ts-node": "10.5.0",
     "typescript": "4.5.5",
     "webdriverio": "7.16.14"
   },
