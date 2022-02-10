@@ -2,6 +2,10 @@ import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 
 export const getDeviceTypeFromApp = (app: string) => {
+  /* If the test is targeting safarim, then app capability will be empty */
+  if (!app) {
+    return;
+  }
   return app.endsWith('app') || app.endsWith('zip') ? 'simulator' : 'real';
 };
 
