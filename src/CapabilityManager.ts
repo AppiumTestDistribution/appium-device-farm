@@ -1,11 +1,12 @@
 import getPort from 'get-port';
 import { isPortBusy } from './helpers';
+
 export async function androidCapabilities(
   caps: { firstMatch: { [x: string]: number | string }[] },
   freeDevice: { udid: any; name: string }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
+  caps.firstMatch[0]['appium:deviceName'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
   caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
