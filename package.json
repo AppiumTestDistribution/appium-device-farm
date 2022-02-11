@@ -52,7 +52,7 @@
     "lokijs": "^1.5.12",
     "node-cache": "^5.1.2",
     "node-schedule": "^2.0.0",
-    "node-simctl": "^6.4.1",
+    "node-simctl": "^7.0.0",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
     "tcp-port-used": "^1.0.2",
