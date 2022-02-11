@@ -11,4 +11,5 @@ export interface IDevice {
   realDevice: boolean;
   session_id?: string;
   offline?: boolean;
+  mjpegServerPort?: number;
 }

@@ -163,6 +163,9 @@ export class DevicePlugin extends BasePlugin {
   private static async updateCapabilityForDevice(capability: any, device: IDevice) {
     if (device.platform.toLowerCase() == 'ios') {
       await iOSCapabilities(capability, device);
+      await updateDevice(device, {
+        mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
+      });
     } else {
       await androidCapabilities(capability, device);
     }
