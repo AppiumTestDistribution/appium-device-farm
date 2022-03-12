@@ -40,7 +40,7 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "^1.8.0",
-    "@types/ramda": "^0.27.45",
+    "@types/ramda": "^0.28.0",
     "appium-adb": "^9.0.0",
     "appium-ios-device": "^1.7.1",
     "async-lock": "^1.2.8",
