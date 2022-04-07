@@ -35,7 +35,7 @@
     "@testing-library/user-event": "12.8.3",
     "@types/jest": "26.0.24",
     "@types/node": "12.20.47",
-    "@types/react": "17.0.40",
+    "@types/react": "17.0.43",
     "@types/react-dom": "17.0.13",
     "@types/react-router-dom": "5.3.3",
     "@types/styled-components": "5.1.24",
