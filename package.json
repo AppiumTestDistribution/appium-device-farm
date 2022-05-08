@@ -65,7 +65,7 @@
     "@babel/core": "7.17.10",
     "@babel/plugin-proposal-class-properties": "7.16.7",
     "@types/async-lock": "1.1.5",
-    "@types/chai": "4.3.0",
+    "@types/chai": "4.3.1",
     "@types/express": "4.17.13",
     "@types/lodash": "4.14.181",
     "@types/lokijs": "1.5.7",
