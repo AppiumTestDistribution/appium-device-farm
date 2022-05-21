@@ -1,8 +1,10 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { asyncForEach } from '../helpers';
-import ADB from 'appium-adb';
+import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
+import _ from 'lodash';
+import { fs } from '@appium/support';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -14,6 +16,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     const deviceState: Array<IDevice> = [];
     try {
+      await this.requireSdkRoot();
       const connectedDevices = await this.getConnectedDevices();
       await asyncForEach(connectedDevices, async (device: IDevice) => {
         if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
@@ -79,6 +82,28 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async isRealDevice(udid: string): Promise<boolean> {
     const character = await this.getDeviceProperty(udid, 'ro.build.characteristics');
     return character !== 'emulator';
+  }
+
+  private async requireSdkRoot() {
+    const sdkRoot = getSdkRootFromEnv();
+    const docMsg =
+      'Read https://developer.android.com/studio/command-line/variables for more details';
+    if (_.isEmpty(sdkRoot)) {
+      throw new Error(
+        `Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable was exported. ${docMsg}`
+      );
+    }
+
+    if (!(await fs.exists(sdkRoot))) {
+      throw new Error(
+        `The Android SDK root folder '${sdkRoot}' does not exist on the local file system. ${docMsg}`
+      );
+    }
+    const stats = await fs.stat(sdkRoot);
+    if (!stats.isDirectory()) {
+      throw new Error(`The Android SDK root '${sdkRoot}' must be a folder. ${docMsg}`);
+    }
+    return sdkRoot;
   }
 
   private getDeviceName = async (udid: string) =>
