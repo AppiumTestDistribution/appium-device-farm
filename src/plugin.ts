@@ -35,6 +35,7 @@ const customCapability = {
   deviceQueryInteval: 'appium:deviceRetryInterval',
   iphoneOnly: 'appium:iPhoneOnly',
   ipadOnly: 'appium:iPadOnly',
+  udids: 'appium:udids',
 };
 
 let timer: any;
@@ -49,12 +50,18 @@ export class DevicePlugin extends BasePlugin {
       Platform: {
         isString: true,
       },
+      UDIDS: {
+        isString: true,
+        required: true,
+      },
     };
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
     unblockDevice(driver.sessionId);
-    log.info(`Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`);
+    log.info(
+      `Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`
+    );
   }
 
   public static async updateServer(expressApp: any): Promise<void> {
@@ -156,6 +163,9 @@ export class DevicePlugin extends BasePlugin {
   private static async updateCapabilityForDevice(capability: any, device: IDevice) {
     if (device.platform.toLowerCase() == 'ios') {
       await iOSCapabilities(capability, device);
+      await updateDevice(device, {
+        mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
+      });
     } else {
       await androidCapabilities(capability, device);
     }
@@ -169,7 +179,9 @@ export class DevicePlugin extends BasePlugin {
    */
   static getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
     const platform: Platform = capability['platformName'].toLowerCase();
-    const udids = process.env.UDIDS?.split(',');
+    const udids = capability[customCapability.udids]
+      ? capability[customCapability.udids].split(',')
+      : process.env.UDIDS?.split(',');
     /* Based on the app file extension, we will decide whether to run the
      * test on real device or simulator.
      *

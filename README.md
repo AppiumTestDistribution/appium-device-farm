@@ -39,11 +39,12 @@ The plugin will not be active unless turned on when invoking the Appium server:
 ```
 appium server -ka 800 --use-plugins=device-farm,appium-dashboard  -pa /wd/hub --plugin-device-farm-platform=android
 
-Arguments options: 
+Arguments options:
 
 * Android - If you want to use only Android devices for parallel execution.
 * iOS - If you want to use only iOS devices and simulator for parallel execution.
 * both - If you want to use both android and iOS devices for parallel execution.
+* Execute script on specific device then set UDIDS in environment variables as UDIDS='device1UDID, device2UDID'
 ```
 
 ## Capabilities
@@ -54,6 +55,7 @@ Arguments options:
 | appium:iPadOnly                  | Allocate only iPad simulators for execution when to true. Default value is `false`.                                                                                                            |
 | appium:deviceAvailabilityTimeout | When create session requests are more than available connected devices, plugin waits for a certain interval for device availability before it timeout. Default value is `180000` milliseconds. |
 | appium:deviceRetryInterval       | When create session requests are more than available connected devices, plugin polls for device availability in certain intervals. Default value is `10000` milliseconds.                      |
+| appium:udids                     | Comma separated list of device udid's to execute tests only on specific devices `appium:udids: device1UDID,device2UDID`                                                                        |
 
 ## Example
 
