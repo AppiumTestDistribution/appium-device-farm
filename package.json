@@ -44,7 +44,7 @@
     "appium-ios-device": "^2.4.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.5",
-    "axios": "^0.26.0",
+    "axios": "^0.27.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
