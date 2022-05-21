@@ -1,1 +1,1 @@
-declare module 'appium-support';
+declare module '@appium/support';
