@@ -8,7 +8,6 @@ export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
 
   constructor({ platform }: { platform: Platform | 'both' }) {
-    console.log('In Con', platform);
     if (platform === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());
       this.deviceManagers.push(new IOSDeviceManager());
