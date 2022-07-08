@@ -1,5 +1,4 @@
 import BasePlugin from '@appium/base-plugin';
-import log from './logger';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
@@ -59,15 +58,15 @@ export class DevicePlugin extends BasePlugin {
 
   onUnexpectedShutdown(driver: any, cause: any) {
     unblockDevice(driver.sessionId);
-    log.info(
+    logger.info(
       `Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`
     );
   }
 
   public static async updateServer(expressApp: any): Promise<void> {
     expressApp.use('/device-farm', router);
-    log.info('Device Farm Plugin will be served at http://localhost:4723/device-farm');
-    log.info(
+    logger.info('Device Farm Plugin will be served at http://localhost:4723/device-farm');
+    logger.info(
       'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
     );
     await refreshDeviceList();
@@ -108,7 +107,7 @@ export class DevicePlugin extends BasePlugin {
 
     if (session.error) {
       await updateDevice(device, { busy: false });
-      log.info(`Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
+      logger.info(`Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
       await updateDevice(device, {
         busy: true,
@@ -121,7 +120,7 @@ export class DevicePlugin extends BasePlugin {
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDevice(sessionId);
-    log.info(`Unblocking the device that is blocked for session ${sessionId}`);
+    logger.info(`Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
 
@@ -144,7 +143,7 @@ export class DevicePlugin extends BasePlugin {
     try {
       await waitUntil(
         async () => {
-          log.info('Waiting for free device');
+          logger.info('Waiting for free device');
           return (await getDevice(filters)) != undefined;
         },
         { timeout, intervalBetweenAttempts }
@@ -153,9 +152,9 @@ export class DevicePlugin extends BasePlugin {
       throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
     }
     const device = await getDevice(filters);
-    log.info(`Device found: ${JSON.stringify(device)}`);
+    logger.info(`Device found: ${JSON.stringify(device)}`);
     await updateDevice(device, { busy: true });
-    log.info(`Blocking device ${device.udid} for new session`);
+    logger.info(`Blocking device ${device.udid} for new session`);
     await DevicePlugin.updateCapabilityForDevice(capability, device);
     return device;
   }
@@ -217,7 +216,7 @@ function getDeviceManager() {
 
 export async function updateDeviceList() {
   const devices = await getDeviceManager().getDevices(getAllDevices());
-  log.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
+  logger.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);
 }
 

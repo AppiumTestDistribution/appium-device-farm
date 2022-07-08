@@ -4,10 +4,10 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register ./test/unit/*.spec.js --exit",
+    "test": "mocha -r ts-node/register ./test/unit/DeviceModel.spec.js --exit",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel": "mocha --require ts-node/register -p ./test/e2e/*.spec.js --timeout 60000",
-    "test-e2e": "mocha --require ts-node/register ./test/e2e/conf.spec.js --timeout 999999",
+    "test-parallel": "mocha --require ts-node/register -p ./test/e2e/*.spec.js --timeout 160000",
+    "test-e2e": "mocha --require ts-node/register ./test/e2e/conf1.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/iOSDevices.spec.js --timeout 90000 --exit",
     "build": "npx tsc && npm run copy-files",
@@ -17,7 +17,8 @@
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
-    "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin"
+    "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
+    "run-server": " appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"
   },
   "repository": {
     "type": "git",

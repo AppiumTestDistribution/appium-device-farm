@@ -1,5 +1,4 @@
 import { remote } from 'webdriverio';
-import { command } from 'webdriver';
 
 const APPIUM_HOST = 'localhost';
 const APPIUM_PORT = 4723;
@@ -14,7 +13,7 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrishna/Downloads/VodQA.apk',
+  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
 };
 describe('Plugin1 Test', () => {
   let driver;
@@ -22,9 +21,12 @@ describe('Plugin1 Test', () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities });
   });
 
-  it('Basic Plugin test 3', async () => {
+  it('Slider test', async () => {
+    console.log(await driver.capabilities.deviceUDID);
+     await driver.pause(2000);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
+    await driver.pause(2000);
   });
 
   afterEach(async () => await driver.deleteSession());

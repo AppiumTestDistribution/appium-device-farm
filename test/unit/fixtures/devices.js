@@ -4,18 +4,21 @@ export const deviceMock = [
     state: 'device',
     udid: 'emulator-5555',
     platform: 'android',
+    offline: false,
   },
   {
     busy: false,
     state: 'device',
     udid: 'emulator-5554',
     platform: 'android',
+    offline: false,
   },
   {
     busy: false,
     state: 'device',
     udid: 'emulator-5556',
     platform: 'android',
+    offline: false,
   },
   {
     name: 'iPad Air',
@@ -25,6 +28,7 @@ export const deviceMock = [
     platform: 'ios',
     busy: true,
     realDevice: false,
+    offline: false,
   },
   {
     name: 'iPad Air (3rd generation)',
@@ -34,5 +38,6 @@ export const deviceMock = [
     platform: 'ios',
     busy: false,
     realDevice: false,
+    offline: false,
   },
 ];
