@@ -101,6 +101,9 @@
       "properties": {
         "platform": {
           "type": "string"
+        },
+        "include-simulators": {
+          "type": "string"
         }
       },
       "title": "Fake Plugin Configuration",
