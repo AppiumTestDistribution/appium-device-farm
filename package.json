@@ -19,7 +19,7 @@
     "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
-    "run-server": " appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"
+    "run-server": "APPIUM_RELOAD_EXTENSIONS=1 appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"
   },
   "repository": {
     "type": "git",
@@ -67,6 +67,7 @@
     "@babel/core": "7.18.2",
     "@babel/plugin-proposal-class-properties": "7.17.12",
     "@types/async-lock": "1.1.5",
+    "@appium/types": "0.2.5",
     "@types/chai": "4.3.1",
     "@types/express": "4.17.13",
     "@types/lodash": "4.14.182",

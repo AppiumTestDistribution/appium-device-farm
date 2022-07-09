@@ -1,13 +1,13 @@
 import { DeviceModel } from '../../src/data-service/db';
 import { deviceMock } from './fixtures/devices';
-import { saveDevices } from '../../src/data-service/device-service';
 import { expect } from 'chai';
+import { saveDevices } from '../../src/data-service/device-service';
 
 describe('Model Test', () => {
   before('Add device collection', () => {
     DeviceModel.insert(deviceMock);
   });
-  it('Should update device state as offline when the new polled device does not have previous device', async () => {
+  it('Should update device state as offline when the new polled device does not have previous device', () => {
     const newDeviceList = [
       {
         busy: false,
@@ -49,7 +49,7 @@ describe('Model Test', () => {
     expect(updatedDeviceList[0].offline).to.be.true;
   });
 
-  it('Should update device state as online when the new polled device has previous offline device', async () => {
+  it('Should update device state as online when the new polled device has previous offline device', () => {
     const newDeviceList = [
       {
         busy: false,
@@ -91,7 +91,7 @@ describe('Model Test', () => {
     expect(updatedDeviceList[0].offline).to.be.false;
   });
 
-  it('Should update new device polled into the existing device list', async () => {
+  it('Should update new device polled into the existing device list', () => {
     const newDeviceList = [
       {
         busy: false,

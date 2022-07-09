@@ -24,6 +24,7 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import waitUntil from 'async-wait-until';
 import { isMac } from './helpers';
 import { v4 as uuidv4 } from 'uuid';
+import { W3CCapabilities } from '@appium/types';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -65,7 +66,7 @@ export class DevicePlugin extends BasePlugin {
 
   public static async updateServer(expressApp: any): Promise<void> {
     expressApp.use('/device-farm', router);
-    logger.info('Device Farm Plugin will be served at http://localhost:4723/device-farm');
+    logger.info('Device Farm Plugin will be served --**--- at http://localhost:4723/device-farm');
     logger.info(
       'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
     );
@@ -162,7 +163,7 @@ export class DevicePlugin extends BasePlugin {
   private static async updateCapabilityForDevice(capability: any, device: IDevice) {
     if (device.platform.toLowerCase() == 'ios') {
       await iOSCapabilities(capability, device);
-      await updateDevice(device, {
+      updateDevice(device, {
         mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
       });
     } else {
