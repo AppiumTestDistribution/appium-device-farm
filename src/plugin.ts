@@ -151,9 +151,9 @@ export class DevicePlugin extends BasePlugin {
     } catch (err) {
       throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
     }
-    const device = await getDevice(filters);
+    const device = getDevice(filters);
     logger.info(`Device found: ${JSON.stringify(device)}`);
-    await updateDevice(device, { busy: true });
+    updateDevice(device, { busy: true });
     logger.info(`Blocking device ${device.udid} for new session`);
     await DevicePlugin.updateCapabilityForDevice(capability, device);
     return device;

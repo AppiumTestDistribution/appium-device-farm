@@ -44,11 +44,15 @@ export function saveDevices(devices: Array<IDevice>): any {
    * Update the Latest Simulator state in DB
    */
   devices.forEach(function (device) {
+    const allDevices = DeviceModel.chain().find().data();
     if (device.deviceType === 'simulator') {
-      DeviceModel.update({
-        ...device,
-        state: device.state,
-      });
+      const { state } = allDevices.find((d) => d.udid === device.udid);
+      if (state !== device.state) {
+        DeviceModel.update({
+          ...device,
+          state: device.state,
+        });
+      }
     }
   });
 }

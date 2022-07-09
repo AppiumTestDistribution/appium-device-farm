@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel": "mocha --require ts-node/register -p ./test/e2e/*.spec.js --timeout 160000",
+    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/*.spec.js --timeout 260000",
+    "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
     "test-e2e": "mocha --require ts-node/register ./test/e2e/conf1.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/iOSDevices.spec.js --timeout 90000 --exit",
