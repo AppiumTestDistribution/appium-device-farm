@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "1.0.0-beta.16",
+  "version": "1.0.0-beta.17",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -64,8 +64,8 @@
   },
   "devDependencies": {
     "ramda": "0.28.0",
-    "@babel/core": "7.18.2",
-    "@babel/plugin-proposal-class-properties": "7.17.12",
+    "@babel/core": "7.18.6",
+    "@babel/plugin-proposal-class-properties": "7.18.6",
     "@types/async-lock": "1.1.5",
     "@appium/types": "0.2.5",
     "@types/chai": "4.3.1",
