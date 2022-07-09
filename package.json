@@ -90,7 +90,7 @@
     "mocha": "9.2.2",
     "prettier": "2.6.2",
     "sinon": "12.0.1",
-    "ts-node": "10.8.1",
+    "ts-node": "10.8.2",
     "typescript": "4.7.3",
     "webdriverio": "7.20.1"
   },
