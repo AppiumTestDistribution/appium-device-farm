@@ -1,6 +1,7 @@
 import { DeviceModel } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
+import logger from '../logger';
 
 export function saveDevices(devices: Array<IDevice>): any {
   const newDeviveUdids = new Set(devices.map((device) => device.udid));
@@ -10,7 +11,7 @@ export function saveDevices(devices: Array<IDevice>): any {
     .map((device) => device.udid);
 
   /**
-   * Update all devices that are previously identified as offline devices
+   * Previously connected devices which are not identified are marked offline.
    */
   DeviceModel.chain()
     .find({ udid: { $nin: [...newDeviveUdids] } }) // $nin => not in condition
@@ -19,7 +20,7 @@ export function saveDevices(devices: Array<IDevice>): any {
     });
 
   /**
-   * If the newly identified devices are already in the database, then just update the offile state as true
+   * If the newly identified devices are already in the database, mark the device as online
    */
   DeviceModel.chain()
     .find({ udid: { $in: [...newDeviveUdids] } })
@@ -36,6 +37,22 @@ export function saveDevices(devices: Array<IDevice>): any {
         ...device,
         offline: false,
       });
+    }
+  });
+
+  /**
+   * Update the Latest Simulator state in DB
+   */
+  devices.forEach(function (device) {
+    const allDevices = DeviceModel.chain().find().data();
+    if (device.deviceType === 'simulator') {
+      const { state } = allDevices.find((d) => d.udid === device.udid);
+      if (state !== device.state) {
+        DeviceModel.update({
+          ...device,
+          state: device.state,
+        });
+      }
     }
   });
 }
@@ -55,10 +72,16 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   if (filterOptions.udid) {
     filter.udid = { $in: filterOptions.udid };
   }
-
-  const device = DeviceModel.chain().find(filter).data()[0];
-
-  return device;
+  if (filterOptions.deviceType === 'simulator') {
+    filter.state = 'Booted';
+    if (DeviceModel.chain().find(filter).data()[0] != undefined) {
+      logger.info('Picking up booted simulator');
+      return DeviceModel.chain().find(filter).data()[0];
+    } else {
+      filter.state = 'Shutdown';
+    }
+  }
+  return DeviceModel.chain().find(filter).data()[0];
 }
 
 export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
