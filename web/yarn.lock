@@ -2036,10 +2036,10 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@17.0.45":
-  version "17.0.45"
-  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.45.tgz"
-  integrity sha512-YfhQ22Lah2e3CHPsb93tRwIGNiSwkuz1/blk4e6QrWS0jQzCSNbGLtOEYhPg02W0yGTTmpajp7dCTbBAMN3qsg==
+"@types/react@*", "@types/react@17.0.47":
+  version "17.0.47"
+  resolved "https://registry.npmjs.org/@types/react/-/react-17.0.47.tgz"
+  integrity sha512-mk0BL8zBinf2ozNr3qPnlu1oyVTYq+4V7WA76RgxUAtf0Em/Wbid38KN6n4abEkvO4xMTBWmnP1FtQzgkEiJoA==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
