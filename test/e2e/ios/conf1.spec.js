@@ -1,20 +1,19 @@
 import { remote } from 'webdriverio';
-import { command } from 'webdriver';
 
 const APPIUM_HOST = 'localhost';
 const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
-  connectionRetryCount: 0,
+  connectionRetryCount: 220000,
   hostname: APPIUM_HOST,
   port: APPIUM_PORT,
   path: '/wd/hub/',
   logLevel: 'silent',
 };
 const capabilities = {
-  platformName: 'Android',
-  'appium:uiautomator2ServerInstallTimeout': '50000',
-  'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrishna/Downloads/VodQA.apk',
+  platformName: 'iOS',
+  'appium:automationName': 'XCUITest',
+  'appium:iPhoneOnly': true,
+  'appium:app': '/Users/saikrisv/Downloads/vodqa.zip',
 };
 describe('Plugin1 Test', () => {
   let driver;
@@ -22,9 +21,10 @@ describe('Plugin1 Test', () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities });
   });
 
-  it('Basic Plugin test 3', async () => {
+  it('iOS veritical swipe', async () => {
     await driver.$('~login').click();
-    await driver.$('~slider1').click();
+    await driver.$('~verticalSwipe').click();
+    await driver.pause(2000);
   });
 
   afterEach(async () => await driver.deleteSession());
