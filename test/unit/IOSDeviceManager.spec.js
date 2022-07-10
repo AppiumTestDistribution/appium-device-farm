@@ -20,8 +20,8 @@ describe('IOS Device Manager', () => {
         platform: 'ios',
       },
     ]);
-    const devices = await iosDevices.getDevices([]);
-    expect(devices).to.deep.equal([
+    const all_devices = await iosDevices.getDevices(true, []);
+    expect(all_devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
@@ -38,6 +38,18 @@ describe('IOS Device Manager', () => {
         sdk: '13.5',
         platform: 'ios',
       },
+    ]);
+    const real_devices = await iosDevices.getDevices(false, []);
+    expect(real_devices).to.deep.equal([
+      {
+        udid: '00001111-00115D822222002E',
+        sdk: '14.1.1',
+        name: 'Sai’s iPhone',
+        busy: false,
+        realDevice: true,
+        deviceType: 'real',
+        platform: 'ios',
+      }
     ]);
   });
 });

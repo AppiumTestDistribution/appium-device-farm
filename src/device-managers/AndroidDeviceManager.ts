@@ -51,12 +51,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
     } catch (e) {
       console.log(e);
     } finally {
-      // eslint-disable-next-line no-unsafe-finally
-      if (!(includeSimulators)) {
-        return deviceState.filter(function(device) {
-          return device.realDevice === true;
-        });
+      if (includeSimulators === false) {
+        let devices = deviceState.filter(function(d) {
+          return d.realDevice === true;
+         });
+        return devices
       }
+      // eslint-disable-next-line no-unsafe-finally
       return deviceState;
     }
   }

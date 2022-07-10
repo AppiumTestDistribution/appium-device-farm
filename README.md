@@ -34,18 +34,21 @@ No special action is needed to make things work on the client side.
 
 ## Activation
 
-The plugin will not be active unless turned on when invoking the Appium server:
+The plugin will not be active unless turned on when invoking the Appium server. See "Argument options" below
 
 ```
 appium server -ka 800 --use-plugins=device-farm,appium-dashboard  -pa /wd/hub --plugin-device-farm-platform=android
-
-Arguments options:
-
-* Android - If you want to use only Android devices for parallel execution.
-* iOS - If you want to use only iOS devices and simulator for parallel execution.
-* both - If you want to use both android and iOS devices for parallel execution.
-* Execute script on specific device then set UDIDS in environment variables as UDIDS='device1UDID, device2UDID'
 ```
+
+### Argument options
+
+These arguments are set when you launch the Appium server, with this plugin installed.
+
+
+|Argument|Required|Description|Default|Options|
+|----|---|----------|------|-------|
+|`plugin-device-farm-platform`| Yes | Platform to run tests against for parallel execution | None | `both`,`ios`,`android` |
+|`plugin-device-farm-include-simulators`| No | Whether or not to include simulators along with real devices | `true` |`true`, `false`|
 
 ## Capabilities
 
