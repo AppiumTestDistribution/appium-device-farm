@@ -59,7 +59,6 @@ describe('IOS Device Manager', () => {
     const iosDevices = new IOSDeviceManager();
     sinon.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sinon.stub(iosDevices, 'getOSVersion').returns('14.1.1');
-    sinon.stub(Helper, 'isMac').returns(true);
     sinon.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sinon.stub(iosDevices, 'getSimulators').returns([
       {
@@ -95,7 +94,6 @@ describe('IOS Device Manager', () => {
     const iosDevices = new IOSDeviceManager();
     sinon.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sinon.stub(iosDevices, 'getOSVersion').returns('14.1.1');
-    sinon.stub(Helper, 'isMac').returns(true);
     sinon.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sinon.stub(iosDevices, 'getSimulators').returns([
       {
