@@ -23,11 +23,11 @@ export const deviceMock = [
   {
     name: 'iPad Air',
     udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
-    state: 'Shutdown',
+    state: 'Booted',
     deviceType: 'simulator',
     sdk: '13.5',
     platform: 'ios',
-    busy: true,
+    busy: false,
     realDevice: false,
     offline: false,
   },

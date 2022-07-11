@@ -29,6 +29,23 @@ export function saveDevices(devices: Array<IDevice>): any {
     });
 
   /**
+   * Update the Latest Simulator state in DB
+   */
+  devices.forEach(function (device) {
+    const allDevices = DeviceModel.chain().find().data();
+    if (allDevices.length != 0 && device.deviceType === 'simulator') {
+      const { state } = allDevices.find((d) => d.udid === device.udid);
+      if (state !== device.state) {
+        DeviceModel.chain()
+          .find({ udid: device.udid })
+          .update(function (d) {
+            d.state = device.state;
+          });
+      }
+    }
+  });
+
+  /**
    * If the newly identified devices are not in the database, then add them to the database
    */
   devices.forEach(function (device) {
@@ -37,22 +54,6 @@ export function saveDevices(devices: Array<IDevice>): any {
         ...device,
         offline: false,
       });
-    }
-  });
-
-  /**
-   * Update the Latest Simulator state in DB
-   */
-  devices.forEach(function (device) {
-    const allDevices = DeviceModel.chain().find().data();
-    if (device.deviceType === 'simulator') {
-      const { state } = allDevices.find((d) => d.udid === device.udid);
-      if (state !== device.state) {
-        DeviceModel.update({
-          ...device,
-          state: device.state,
-        });
-      }
     }
   });
 }
