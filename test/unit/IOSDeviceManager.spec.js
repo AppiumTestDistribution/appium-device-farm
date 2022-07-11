@@ -19,6 +19,13 @@ describe('IOS Device Manager', () => {
         sdk: '13.5',
         platform: 'ios',
       },
+      {
+        name: 'iPad Air (3rd generation)',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86E9999',
+        state: 'Booted',
+        sdk: '14.5',
+        platform: 'ios',
+      },
     ]);
     const devices = await iosDevices.getDevices(true, []);
     expect(devices).to.deep.equal([
@@ -36,6 +43,13 @@ describe('IOS Device Manager', () => {
         udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
         state: 'Shutdown',
         sdk: '13.5',
+        platform: 'ios',
+      },
+      {
+        name: 'iPad Air (3rd generation)',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86E9999',
+        state: 'Booted',
+        sdk: '14.5',
         platform: 'ios',
       },
     ]);

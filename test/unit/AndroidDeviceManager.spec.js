@@ -11,7 +11,7 @@ describe('Android Device Manager', () => {
     sinon.stub(androidDevices, 'getDeviceVersion').returns('9');
     sinon.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sinon.stub(androidDevices, 'isRealDevice').returns(false);
-    const devices = await androidDevices.getDevices(true, []);
+    const devices = await androidDevices.getDevices([]);
     expect(devices).to.deep.equal([
       {
         busy: false,
