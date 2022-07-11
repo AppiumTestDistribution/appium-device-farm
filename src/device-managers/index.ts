@@ -6,9 +6,15 @@ import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
-  private includeSimulators: Boolean;
+  private includeSimulators: boolean;
 
-  constructor({ platform, includeSimulators }: { platform: Platform | 'both', includeSimulators: Boolean | true }) {
+  constructor({
+    platform,
+    includeSimulators,
+  }: {
+    platform: Platform | 'both';
+    includeSimulators: boolean | true;
+  }) {
     console.log('In Con', platform);
     this.includeSimulators = includeSimulators;
     if (platform === 'both') {
@@ -24,7 +30,9 @@ export class DeviceFarmManager {
   public async getDevices(existingDeviceDetails?: Array<IDevice>): Promise<IDevice[]> {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
-      devices.push(...(await deviceManager.getDevices(this.includeSimulators, existingDeviceDetails || [])));
+      devices.push(
+        ...(await deviceManager.getDevices(this.includeSimulators, existingDeviceDetails || []))
+      );
     }
     return devices;
   }

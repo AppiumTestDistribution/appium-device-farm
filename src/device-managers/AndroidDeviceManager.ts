@@ -10,7 +10,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
 
-  async getDevices(includeSimulators: Boolean, existingDeviceDetails: Array<IDevice>): Promise<IDevice[]> {
+  async getDevices(
+    includeSimulators: boolean,
+    existingDeviceDetails: Array<IDevice>
+  ): Promise<IDevice[]> {
     if (!this.adbAvailable) {
       return [];
     }
@@ -52,10 +55,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
       console.log(e);
     } finally {
       if (includeSimulators === false) {
-        let devices = deviceState.filter(function(d) {
+        const devices = deviceState.filter(function (d) {
           return d.realDevice === true;
-         });
-        return devices
+        });
+        // eslint-disable-next-line no-unsafe-finally
+        return devices;
       }
       // eslint-disable-next-line no-unsafe-finally
       return deviceState;
