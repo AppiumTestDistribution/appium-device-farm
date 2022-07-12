@@ -29,6 +29,18 @@ export function saveDevices(devices: Array<IDevice>): any {
     });
 
   /**
+   * If the newly identified devices are not in the database, then add them to the database
+   */
+  devices.forEach(function (device) {
+    if (!allDeviceIds.includes(device.udid)) {
+      DeviceModel.insert({
+        ...device,
+        offline: false,
+      });
+    }
+  });
+
+  /**
    * Update the Latest Simulator state in DB
    */
   devices.forEach(function (device) {
@@ -42,18 +54,6 @@ export function saveDevices(devices: Array<IDevice>): any {
             d.state = device.state;
           });
       }
-    }
-  });
-
-  /**
-   * If the newly identified devices are not in the database, then add them to the database
-   */
-  devices.forEach(function (device) {
-    if (!allDeviceIds.includes(device.udid)) {
-      DeviceModel.insert({
-        ...device,
-        offline: false,
-      });
     }
   });
 }

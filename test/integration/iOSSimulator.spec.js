@@ -56,7 +56,7 @@ describe('IOS Simulator Test', () => {
   });
 });
 
-describe.skip('Boot simulator test', async () => {
+describe('Boot simulator test', async () => {
   before('Boot simulator', async () => {
     const version = (await simctl.list()).runtimes[0].version;
     simctl.udid = await simctl.createDevice(name, 'iPhone X', version);
