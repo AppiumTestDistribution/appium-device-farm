@@ -104,6 +104,9 @@
       "properties": {
         "platform": {
           "type": "string"
+        },
+        "include-simulators": {
+          "type": "string"
         }
       },
       "title": "Appium device farm plugin",

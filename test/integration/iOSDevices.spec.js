@@ -8,6 +8,7 @@ describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'iOS',
+      includeSimulators: true,
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();

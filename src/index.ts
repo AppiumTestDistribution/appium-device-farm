@@ -15,8 +15,11 @@ const appiumArgs = yargs(process.argv.slice(2)).argv;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const platform = appiumArgs['plugin-device-farm-platform'].toLowerCase() as Platform;
+    const includeSimulators = ((appiumArgs['plugin-device-farm-include-simulators'] || 'true') ===
+      'true') as boolean;
     const deviceManager = new DeviceFarmManager({
       platform,
+      includeSimulators,
     });
     Container.set(DeviceFarmManager, deviceManager);
   } catch (e) {

@@ -14,6 +14,7 @@ describe('IOS Simulator Test', () => {
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
+      includeSimulators: true,
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -36,6 +37,7 @@ describe('IOS Simulator Test', () => {
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
+      includeSimulators: true,
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -67,6 +69,7 @@ describe('Boot simulator test', async () => {
   it('Should pick Booted simulator when app path has .app', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
+      includeSimulators: true,
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
