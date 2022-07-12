@@ -106,54 +106,49 @@ describe('Model Test', () => {
     expect(updatedDeviceList.length).to.be.equal(1);
   });
 
-  describe('IOS Simulator modal', () => {
-    it('Filter only the booted simulator', () => {
-      it('Should update the ios simulator state from shutdown to booted', async () => {
-        DeviceModel.insert(deviceMock);
-        const newDeviceList = [
-          {
-            busy: false,
-            state: 'device',
-            udid: 'emulator-5554',
-            platform: 'android',
-            offline: false,
-          },
-          {
-            busy: false,
-            state: 'device',
-            udid: 'emulator-5556',
-            platform: 'android',
-            offline: false,
-          },
-          {
-            name: 'iPad Air',
-            udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
-            state: 'Shutdown',
-            deviceType: 'simulator',
-            sdk: '13.5',
-            platform: 'ios',
-            busy: true,
-            realDevice: false,
-            offline: false,
-          },
-          {
-            name: 'iPad Air (3rd generation)',
-            udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
-            state: 'Shutdown',
-            deviceType: 'simulator',
-            sdk: '13.5',
-            platform: 'ios',
-            busy: false,
-            realDevice: false,
-            offline: false,
-          },
-        ];
-        saveDevices(newDeviceList);
-        const updatedDeviceList = DeviceModel.chain()
-          .find({ udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888' })
-          .data();
-        expect(updatedDeviceList[0].state).to.be.equal('Shutdown');
-      });
-    });
+  it('Should update the ios simulator state from shutdown to booted', async () => {
+    const newDeviceList = [
+      {
+        busy: false,
+        state: 'device',
+        udid: 'emulator-5554',
+        platform: 'android',
+        offline: false,
+      },
+      {
+        busy: false,
+        state: 'device',
+        udid: 'emulator-5556',
+        platform: 'android',
+        offline: false,
+      },
+      {
+        name: 'iPad Air',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888',
+        state: 'Shutdown',
+        deviceType: 'simulator',
+        sdk: '13.5',
+        platform: 'ios',
+        busy: true,
+        realDevice: false,
+        offline: false,
+      },
+      {
+        name: 'iPad Air (3rd generation)',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
+        state: 'Shutdown',
+        deviceType: 'simulator',
+        sdk: '13.5',
+        platform: 'ios',
+        busy: false,
+        realDevice: false,
+        offline: false,
+      },
+    ];
+    saveDevices(newDeviceList);
+    const updatedDeviceList = DeviceModel.chain()
+      .find({ udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888' })
+      .data();
+    expect(updatedDeviceList[0].state).to.be.equal('Shutdown');
   });
 });

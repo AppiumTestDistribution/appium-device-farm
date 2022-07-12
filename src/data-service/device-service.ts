@@ -45,13 +45,14 @@ export function saveDevices(devices: Array<IDevice>): any {
    */
   devices.forEach(function (device) {
     const allDevices = DeviceModel.chain().find().data();
-    if (device.deviceType === 'simulator') {
+    if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d) => d.udid === device.udid);
       if (state !== device.state) {
-        DeviceModel.update({
-          ...device,
-          state: device.state,
-        });
+        DeviceModel.chain()
+          .find({ udid: device.udid })
+          .update(function (d) {
+            d.state = device.state;
+          });
       }
     }
   });
