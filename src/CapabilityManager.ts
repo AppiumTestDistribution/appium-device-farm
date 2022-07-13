@@ -17,6 +17,9 @@ export async function androidCapabilities(
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }
+  delete caps.alwaysMatch['appium:udid'];
+  delete caps.alwaysMatch['appium:systemPort'];
+  delete caps.alwaysMatch['appium:chromeDriverPort'];
 }
 
 export async function iOSCapabilities(
@@ -30,6 +33,7 @@ export async function iOSCapabilities(
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     if (freeDevice.realDevice) {
       caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
+      delete caps.alwaysMatch['appium:mjpegServerPort'];
     } else {
       /* In simulator, port forwarding won't happen for each session. So mjpegServerPort will be used only for 1st time.
        * So set the port for the first time and resuse the same port for subsequent sessions.
@@ -37,6 +41,10 @@ export async function iOSCapabilities(
       const existingPort = freeDevice.mjpegServerPort;
       caps.firstMatch[0]['appium:mjpegServerPort'] =
         existingPort && (await isPortBusy(existingPort)) ? existingPort : await getPort();
+        delete caps.alwaysMatch['appium:mjpegServerPort'];
     }
+    delete caps.alwaysMatch['appium:udid'];
+    delete caps.alwaysMatch['appium:deviceName'];
+    delete caps.alwaysMatch['appium:wdaLocalPort'];
   }
 }
