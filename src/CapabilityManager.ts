@@ -21,10 +21,11 @@ export async function androidCapabilities(
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: { udid: any; name: string; realDevice: boolean; mjpegServerPort?: number }
+  freeDevice: { udid: any; name: string; realDevice: boolean; sdk: string, mjpegServerPort?: number }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
+  caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = await getPort();
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     if (freeDevice.realDevice) {
