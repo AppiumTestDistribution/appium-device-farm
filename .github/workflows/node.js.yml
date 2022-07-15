@@ -71,6 +71,17 @@ jobs:
           npm run build --if-present
           npm run integration-android
           npm run integration-ios
+      - name: Install Appium
+        run: npm install -g appium@next
+      - name: Install Plugin
+        run: npm run reinstall-plugin
+      - name: Start Appium server
+        run: appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android
+      - name: Run Android Parallel Tests
+        run: |
+          echo "Running Android Parallel Tests..."
+          chmod +x runAndroidParallel.sh
+          ./runAndroidParallel.sh
 
   auto-merge:
     if: github.event.pull_request.base.ref == 'main'
