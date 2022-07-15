@@ -73,6 +73,7 @@ jobs:
           npm run integration-ios
       - name: Install Appium
         run: npm install -g appium@next
+        run: appium driver install uiautomator2
       - name: Install Plugin
         run: npm run reinstall-plugin
       - name: Start Appium server
