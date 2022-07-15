@@ -76,7 +76,7 @@ jobs:
       - name: Install Plugin
         run: npm run reinstall-plugin
       - name: Start Appium server
-        run: appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android
+        run: appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android &
       - name: Run Android Parallel Tests
         run: |
           echo "Running Android Parallel Tests..."
