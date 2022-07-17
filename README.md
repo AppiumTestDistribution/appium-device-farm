@@ -58,7 +58,8 @@ These arguments are set when you launch the Appium server, with this plugin inst
 | appium:iPadOnly                  | Allocate only iPad simulators for execution when to true. Default value is `false`.                                                                                                            |
 | appium:deviceAvailabilityTimeout | When create session requests are more than available connected devices, plugin waits for a certain interval for device availability before it timeout. Default value is `180000` milliseconds. |
 | appium:deviceRetryInterval       | When create session requests are more than available connected devices, plugin polls for device availability in certain intervals. Default value is `10000` milliseconds.                      |
-| appium:udids                     | Comma separated list of device udid's to execute tests only on specific devices `appium:udids: device1UDID,device2UDID`                                                                        |
+| appium:udids                     | Comma separated list of device udid's to execute tests only on specific devices `appium:udids: device1UDID,device2UDID` |
+| appium:minSDK                    | This capability is used to filter devices/simulators based on SDK. Devices/Simulators with SDK greater then or equal to minSDK would only be considered for test run. `appium:minSDK` is optional argument. ex: `'appium:minSDK': 15`   |
 
 ## Example
 

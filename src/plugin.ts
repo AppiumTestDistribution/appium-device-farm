@@ -36,6 +36,7 @@ const customCapability = {
   iphoneOnly: 'appium:iPhoneOnly',
   ipadOnly: 'appium:iPadOnly',
   udids: 'appium:udids',
+  minSDK: 'appium:minSDK'
 };
 
 let timer: any;
@@ -204,6 +205,7 @@ export class DevicePlugin extends BasePlugin {
       udid: udids?.length ? udids : undefined,
       busy: false,
       offline: false,
+      minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined
     };
   }
 }

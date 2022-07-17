@@ -73,6 +73,11 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   if (filterOptions.udid) {
     filter.udid = { $in: filterOptions.udid };
   }
+
+  if(filterOptions.minSDK) {
+    filter.sdk = { $gte: filterOptions.minSDK };
+  }
+
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
     if (DeviceModel.chain().find(filter).data()[0] != undefined) {
