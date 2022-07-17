@@ -1,8 +1,8 @@
 import { DevicePlugin } from '../../src';
 import { expect } from 'chai';
 
-describe('Plugin Test', () => {
-  it('Get Device from filter properties for real device', () => {
+describe('Device filter tests', () => {
+  it('Get Device filters for real device', () => {
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -18,6 +18,7 @@ describe('Plugin Test', () => {
       name: 'iPhone',
       deviceType: 'real',
       udid: undefined,
+      minSDK: undefined,
       busy: false,
       offline: false,
     });
@@ -28,7 +29,7 @@ describe('Plugin Test', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true,
+        'appium:iPhoneOnly': true
       },
       firstMatch: [{}],
     };
@@ -39,8 +40,33 @@ describe('Plugin Test', () => {
       name: 'iPhone',
       deviceType: 'simulator',
       udid: undefined,
+      minSDK: undefined,
       busy: false,
       offline: false,
     });
   });
+
+  it('Get Device filter properties with minSDK', () => {
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'iOS',
+        'appium:app': '/Downloads/VodQA.app',
+        'appium:iPhoneOnly': true,
+        'appium:minSDK': 10.2
+      },
+      firstMatch: [{}],
+    };
+    const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
+    const filter = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
+    expect(filter).to.deep.equal({
+      platform: 'ios',
+      name: 'iPhone',
+      deviceType: 'simulator',
+      udid: undefined,
+      minSDK: 10.2,
+      busy: false,
+      offline: false,
+    });
+  });
+
 });

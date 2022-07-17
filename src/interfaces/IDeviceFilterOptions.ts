@@ -8,4 +8,5 @@ export interface IDeviceFilterOptions {
   offline?: boolean;
   udid?: any[];
   deviceType?: DeviceType;
+  minSDK: number;
 }
