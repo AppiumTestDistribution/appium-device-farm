@@ -10,6 +10,7 @@ import {
   getDevice,
   updateDevice,
   unblockDevice,
+  updateCmdExecutedTime
 } from './data-service/device-service';
 import {
   addNewPendingSession,
@@ -40,6 +41,7 @@ const customCapability = {
 };
 
 let timer: any;
+let cronTimerToReleaseBlockedDevices: any;
 
 export class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, opts: any) {
@@ -72,6 +74,7 @@ export class DevicePlugin extends BasePlugin {
       'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
     );
     await refreshDeviceList();
+    await cronReleaseBlockedDevices();
   }
 
   async createSession(
@@ -114,10 +117,17 @@ export class DevicePlugin extends BasePlugin {
       await updateDevice(device, {
         busy: true,
         session_id: session.value[0],
+        last_cmd_exec_at: new Date().getTime()
       });
       logger.info(`Updating Device ${device.udid} with session ID ${session.value[0]}`);
     }
     return session;
+  }
+
+  async handle(next: () => any, driver: any, commandName: string, ...args: any) {
+    logger.info(`Received ${commandName} request on driver - ${driver}`);
+    await updateCmdExecutedTime(driver.sessionId);
+    return await next();
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
@@ -231,4 +241,32 @@ async function refreshDeviceList() {
   timer = setInterval(async () => {
     await updateDeviceList();
   }, 10000);
+}
+
+export async function releaseBlockedDevices() {
+  const allDevices = await getAllDevices();
+  const busyDevices = allDevices.filter( device => { return(device.busy === true) } );
+  busyDevices.forEach(function (device) {
+    const currentEpoch = new Date().getTime();
+    if(device.last_cmd_exec_at != undefined && ((currentEpoch - device.last_cmd_exec_at)/1000 > 100) ) {
+      console.log(`Found Device with udid ${device.udid} has no activity for more than 100 seconds`);
+      const sessionId = device.session_id 
+      if(sessionId !== undefined) {
+        unblockDevice(sessionId);
+        logger.info(
+          `Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than 100 seconds`
+        );
+      }
+    }
+  });
+}
+
+async function cronReleaseBlockedDevices() {
+  if (cronTimerToReleaseBlockedDevices) {
+    clearInterval(cronTimerToReleaseBlockedDevices);
+  }
+  await releaseBlockedDevices();
+  cronTimerToReleaseBlockedDevices = setInterval(async () => {
+    await releaseBlockedDevices();
+  }, 30000);
 }
