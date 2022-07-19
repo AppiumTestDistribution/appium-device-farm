@@ -105,7 +105,7 @@ export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
 export function updateCmdExecutedTime(sessionId: string) {
   DeviceModel.chain().find({session_id: sessionId})
   .update(function(device){
-    device.last_cmd_exec_at = new Date().getTime();
+    device.lastCmdExecutedAt = new Date().getTime();
   })
 }
 
@@ -117,6 +117,6 @@ export function unblockDevice(sessionId: string) {
     .update(function (device) {
       device.session_id = undefined;
       device.busy = false;
-      device.last_cmd_exec_at = undefined;
+      device.lastCmdExecutedAt = undefined;
     });
 }

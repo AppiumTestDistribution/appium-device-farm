@@ -25,7 +25,6 @@ import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
 import waitUntil from 'async-wait-until';
 import { isMac } from './helpers';
 import { v4 as uuidv4 } from 'uuid';
-import { W3CCapabilities } from '@appium/types';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -117,7 +116,7 @@ export class DevicePlugin extends BasePlugin {
       await updateDevice(device, {
         busy: true,
         session_id: session.value[0],
-        last_cmd_exec_at: new Date().getTime()
+        lastCmdExecutedAt: new Date().getTime()
       });
       logger.info(`Updating Device ${device.udid} with session ID ${session.value[0]}`);
     }
@@ -248,7 +247,7 @@ export async function releaseBlockedDevices() {
   const busyDevices = allDevices.filter( device => { return(device.busy === true) } );
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();
-    if(device.last_cmd_exec_at != undefined && ((currentEpoch - device.last_cmd_exec_at)/1000 > 100) ) {
+    if(device.lastCmdExecutedAt != undefined && ((currentEpoch - device.lastCmdExecutedAt)/1000 > 100) ) {
       console.log(`Found Device with udid ${device.udid} has no activity for more than 100 seconds`);
       const sessionId = device.session_id 
       if(sessionId !== undefined) {
