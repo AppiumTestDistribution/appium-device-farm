@@ -12,4 +12,5 @@ export interface IDevice {
   session_id?: string;
   offline?: boolean;
   mjpegServerPort?: number;
+  lastCmdExecutedAt?: number;
 }
