@@ -9,7 +9,8 @@ const appiumArgs = yargs(process.argv.slice(2)).argv;
 
 (async () => {
   try {
-    if (!appiumArgs['plugin-device-farm-platform']) {
+    const argPlatform = appiumArgs['plugin-device-farm-platform'] as string;
+    if (!argPlatform || !(['android', 'ios', 'both'].includes( argPlatform.toLowerCase())) ) {
       throw new Error('Specify --plugin-device-farm-platform as android,iOS or both');
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
