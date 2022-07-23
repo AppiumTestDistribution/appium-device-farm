@@ -1,24 +1,10 @@
 import { remote } from 'webdriverio';
+import { WDIO_PARAMS, androidCapabilities } from '../wdio.config';
 
-const APPIUM_HOST = '127.0.0.1';
-const APPIUM_PORT = 4723;
-const WDIO_PARAMS = {
-  connectionRetryCount: 0,
-  hostname: APPIUM_HOST,
-  port: APPIUM_PORT,
-  path: '/wd/hub/',
-  logLevel: 'silent',
-};
-const capabilities = {
-  platformName: 'Android',
-  'appium:uiautomator2ServerInstallTimeout': '50000',
-  'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
-};
 let driver;
 describe('Plugin Test', () => {
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities });
+    driver = await remote({ ...WDIO_PARAMS, capabilities: androidCapabilities });
   });
 
   it('Vertical swipe test', async () => {

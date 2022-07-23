@@ -24,7 +24,13 @@ export async function androidCapabilities(
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: { udid: any; name: string; realDevice: boolean; sdk: string, mjpegServerPort?: number }
+  freeDevice: {
+    udid: any;
+    name: string;
+    realDevice: boolean;
+    sdk: string;
+    mjpegServerPort?: number;
+  }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
@@ -41,7 +47,7 @@ export async function iOSCapabilities(
       const existingPort = freeDevice.mjpegServerPort;
       caps.firstMatch[0]['appium:mjpegServerPort'] =
         existingPort && (await isPortBusy(existingPort)) ? existingPort : await getPort();
-        delete caps.alwaysMatch['appium:mjpegServerPort'];
+      delete caps.alwaysMatch['appium:mjpegServerPort'];
     }
     delete caps.alwaysMatch['appium:udid'];
     delete caps.alwaysMatch['appium:deviceName'];

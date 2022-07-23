@@ -1,29 +1,15 @@
 import { remote } from 'webdriverio';
+import { WDIO_PARAMS, androidCapabilities } from '../wdio.config';
 
-const APPIUM_HOST = 'localhost';
-const APPIUM_PORT = 4723;
-const WDIO_PARAMS = {
-  connectionRetryCount: 0,
-  hostname: APPIUM_HOST,
-  port: APPIUM_PORT,
-  path: '/wd/hub/',
-  logLevel: 'silent',
-};
-const capabilities = {
-  platformName: 'Android',
-  'appium:uiautomator2ServerInstallTimeout': '50000',
-  'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
-};
 describe('Plugin1 Test', () => {
   let driver;
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities });
+    driver = await remote({ ...WDIO_PARAMS, capabilities: androidCapabilities });
   });
 
   it('Slider test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-     await driver.pause(2000);
+    await driver.pause(2000);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
     await driver.pause(2000);

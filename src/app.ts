@@ -79,6 +79,13 @@ apiRouter.get('/devices/android', (req, res) => {
   );
 });
 
+apiRouter.get('/devices/android/count', (req, res) => {
+  const totalAndroidDevices = DeviceModel.find({
+    platform: 'android',
+  });
+  res.json(totalAndroidDevices.length);
+});
+
 apiRouter.get('/devices/ios', (req, res) => {
   res.json(
     DeviceModel.find({
