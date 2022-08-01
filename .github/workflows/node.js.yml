@@ -71,6 +71,18 @@ jobs:
           npm run build --if-present
           npm run integration-android
           npm run integration-ios
+      - name: Install Appium
+        run: |
+          appium driver install uiautomator2
+      - name: Install Plugin
+        run: npm run reinstall-plugin
+      - name: Run E2E Tests
+        run: |
+          npm run test-parallel-android
+      - uses: actions/upload-artifact@v3
+        with:
+          name: AppiumLogs
+          path: test/appium.txt
 
   auto-merge:
     if: github.event.pull_request.base.ref == 'main'

@@ -16,16 +16,16 @@ const capabilities = {
   'appium:app': '/Users/saikrisv/Downloads/vodqa.zip',
 };
 describe('Plugin1 Test', () => {
-  let driver;
+  let browser;
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities });
+    browser = await remote({ ...WDIO_PARAMS, capabilities });
   });
 
   it('iOS veritical swipe', async () => {
-    await driver.$('~login').click();
-    await driver.$('~verticalSwipe').click();
-    await driver.pause(2000);
+    await browser.$('~login').click();
+    await browser.$('~verticalSwipe').click();
+    await browser.pause(2000);
   });
 
-  afterEach(async () => await driver.deleteSession());
+  afterEach(async () => await browser.deleteSession());
 });

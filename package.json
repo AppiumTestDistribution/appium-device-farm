@@ -6,9 +6,9 @@
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/*.spec.js --timeout 260000",
+    "test-parallel-android": "cd test && npm run wdio",
     "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
-    "test-e2e": "mocha --require ts-node/register ./test/e2e/conf1.spec.js --timeout 999999",
+    "test-e2e": "mocha --require ts-node/register ./test/e2e/android/conf.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/iOS*.spec.js --timeout 260000 --exit",
     "build": "npx tsc && npm run copy-files",
@@ -92,7 +92,8 @@
     "sinon": "12.0.1",
     "ts-node": "10.8.2",
     "typescript": "4.7.4",
-    "webdriverio": "7.20.5"
+    "webdriverio": "7.20.5",
+    "appium": "2.0.0-beta.40"
   },
   "appium": {
     "pluginName": "device-farm",
