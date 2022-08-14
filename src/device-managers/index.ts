@@ -15,7 +15,6 @@ export class DeviceFarmManager {
     platform: Platform | 'both';
     includeSimulators: boolean | true;
   }) {
-    console.log('In Con', platform);
     this.includeSimulators = includeSimulators;
     if (platform === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());

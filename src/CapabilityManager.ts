@@ -7,6 +7,10 @@ function isCapabilityAlreadyPresent(caps: ISessionCapability, capabilityName: st
   return _.has(caps.alwaysMatch, capabilityName) || _.has(caps.firstMatch[0], capabilityName);
 }
 
+function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
+  if (_.has(caps.alwaysMatch, capabilityName)) delete caps.alwaysMatch[capabilityName];
+}
+
 export async function androidCapabilities(
   caps: ISessionCapability,
   freeDevice: { udid: any; name: string }
@@ -17,14 +21,20 @@ export async function androidCapabilities(
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }
-  delete caps.alwaysMatch['appium:udid'];
-  delete caps.alwaysMatch['appium:systemPort'];
-  delete caps.alwaysMatch['appium:chromeDriverPort'];
+  deleteAlwaysMatch(caps, 'appium:udid');
+  deleteAlwaysMatch(caps, 'appium:systemPort');
+  deleteAlwaysMatch(caps, 'appium:chromeDriverPort');
 }
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: { udid: any; name: string; realDevice: boolean; sdk: string, mjpegServerPort?: number }
+  freeDevice: {
+    udid: any;
+    name: string;
+    realDevice: boolean;
+    sdk: string;
+    mjpegServerPort?: number;
+  }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
@@ -41,7 +51,7 @@ export async function iOSCapabilities(
       const existingPort = freeDevice.mjpegServerPort;
       caps.firstMatch[0]['appium:mjpegServerPort'] =
         existingPort && (await isPortBusy(existingPort)) ? existingPort : await getPort();
-        delete caps.alwaysMatch['appium:mjpegServerPort'];
+      delete caps.alwaysMatch['appium:mjpegServerPort'];
     }
     delete caps.alwaysMatch['appium:udid'];
     delete caps.alwaysMatch['appium:deviceName'];
