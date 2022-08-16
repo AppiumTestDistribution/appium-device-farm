@@ -47,18 +47,6 @@ export class DevicePlugin extends BasePlugin {
     super(pluginName, opts);
   }
 
-  static get argsConstraints() {
-    return {
-      Platform: {
-        isString: true,
-      },
-      UDIDS: {
-        isString: true,
-        required: true,
-      },
-    };
-  }
-
   onUnexpectedShutdown(driver: any, cause: any) {
     unblockDevice(driver.sessionId);
     logger.info(

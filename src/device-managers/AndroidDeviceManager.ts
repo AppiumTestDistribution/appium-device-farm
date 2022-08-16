@@ -1,6 +1,6 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach } from '../helpers';
+import { asyncForEach, getFreePort } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
 import _ from 'lodash';
@@ -32,6 +32,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             });
           } else {
             log.info(`Android Device details for ${device.udid} not available. So querying now.`);
+            const systemPort = await getFreePort();
             const [sdk, realDevice, name] = await Promise.all([
               this.getDeviceVersion(device.udid),
               this.isRealDevice(device.udid),
@@ -39,6 +40,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             ]);
 
             deviceState.push({
+              systemPort,
               sdk,
               realDevice,
               name,

@@ -1,6 +1,8 @@
 import { Platform } from '../types/Platform';
 
 export interface IDevice {
+  systemPort: number;
+  wdaLocalPort?: number;
   name: string;
   udid: string;
   state: string;
