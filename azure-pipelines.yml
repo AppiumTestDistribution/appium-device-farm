@@ -1,19 +1,21 @@
 trigger:
 - main
 
-pool:
-  vmImage: 'macOS-latest'
+jobs:
+ - job: Unit Test
+   pool:
+     vmImage: 'macOS-latest'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '16.x'
-  displayName: 'Install Node.js'
+  steps:
+   - task: NodeTool@0
+     inputs:
+      versionSpec: '16.x'
+    displayName: 'Install Node.js'
 
-- script: |
-    npm ci
-  displayName: 'npm install'
+  - script: |
+      npm ci
+    displayName: 'npm install'
 
-- script: |
-    npm test
-  displayName: 'npm test'
+  - script: |
+      npm test
+    displayName: 'npm test'
