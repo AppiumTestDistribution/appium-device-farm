@@ -2,7 +2,7 @@ trigger:
 - main
 
 jobs:
- - job: Unit-Test
+ - job: UnitTest
    pool:
      vmImage: 'macOS-latest'
 
