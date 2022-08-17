@@ -37,6 +37,9 @@ jobs:
         echo '---'
         echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
         echo '---'
+        echo '---'
+        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator1 -k 'system-images;android-27;google_apis;x86' --force
+        echo '---'
         $ANDROID_HOME/emulator/emulator -list-avds
       displayName: "create AVD"
     - script: |
@@ -44,10 +47,16 @@ jobs:
         echo '---'
         nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
+        echo '---'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        echo '---'
         $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
     - script: |
         npm run build --if-present
         npm run integration-android
+      displayName: "Run ANDROID Test"
+
+    - script: |
         npm run integration-ios 
-      displayName: "Run Integration Test"
+      displayName: "Run iOS Test"
