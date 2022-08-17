@@ -12,11 +12,11 @@ on:
 jobs:
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
 
     strategy:
       matrix:
-        node-version: [14.x, 15.x]
+        node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -29,49 +29,7 @@ jobs:
       - run: npm run build --if-present
       - run: npm run lint
       - run: npm test
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: macOS-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Download AVD and Start Emulator
-        run: |
-          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-28;google_apis;x86_64'
-          echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_device -k 'system-images;android-28;google_apis;x86_64' --force
-          echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_device1 -k 'system-images;android-28;google_apis;x86_64' --force
-          echo $ANDROID_HOME/emulator/emulator -list-avds
-          echo "Booting Emulators"
-          nohup $ANDROID_HOME/emulator/emulator -avd test_device -no-snapshot > /dev/null 2>&1 &
-          nohup $ANDROID_HOME/emulator/emulator -avd test_device1 -no-snapshot > /dev/null 2>&1 &
-          $ANDROID_HOME/platform-tools/adb -s emulator-5554 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-          $ANDROID_HOME/platform-tools/adb -s emulator-5556 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-      - name: Check Android Emulator
-        run: |
-          echo "Running Emulator"
-          $ANDROID_HOME/platform-tools/adb devices
-           echo "Emulator started"
-      - name: Run Tests
-        run: |
-          npm ci
-          npm run build --if-present
-          npm run integration-android
-          npm run integration-ios
-
+      
   auto-merge:
     if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest

@@ -5,12 +5,12 @@ import { DeviceFarmManager } from './device-managers';
 import logger from './logger';
 import { Platform } from './types/Platform';
 
-const appiumArgs = yargs(process.argv.slice(2)).argv;
+const appiumArgs = yargs(process.argv.slice(2)).argv as any;
 
 (async () => {
   try {
-    const argPlatform = appiumArgs['plugin-device-farm-platform'] as string;
-    if (!argPlatform || !(['android', 'ios', 'both'].includes( argPlatform.toLowerCase())) ) {
+    const argPlatform = appiumArgs['plugin-device-farm-platform'] as any;
+    if (!argPlatform || !['android', 'ios', 'both'].includes(argPlatform.toLowerCase())) {
       throw new Error('Specify --plugin-device-farm-platform as android,iOS or both');
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

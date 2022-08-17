@@ -13,10 +13,10 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
 
 export async function androidCapabilities(
   caps: ISessionCapability,
-  freeDevice: { udid: any; name: string }
+  freeDevice: { udid: any; name: string; systemPort: number }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:systemPort'] = await getPort();
+  caps.firstMatch[0]['appium:systemPort'] = freeDevice.systemPort;
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
@@ -34,12 +34,13 @@ export async function iOSCapabilities(
     realDevice: boolean;
     sdk: string;
     mjpegServerPort?: number;
+    wdaLocalPort?: number;
   }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = await getPort();
+  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     if (freeDevice.realDevice) {
       caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
@@ -53,8 +54,8 @@ export async function iOSCapabilities(
         existingPort && (await isPortBusy(existingPort)) ? existingPort : await getPort();
       delete caps.alwaysMatch['appium:mjpegServerPort'];
     }
-    delete caps.alwaysMatch['appium:udid'];
-    delete caps.alwaysMatch['appium:deviceName'];
-    delete caps.alwaysMatch['appium:wdaLocalPort'];
+    deleteAlwaysMatch(caps, 'appium:udid');
+    deleteAlwaysMatch(caps, 'appium:deviceName');
+    deleteAlwaysMatch(caps, 'appium:wdaLocalPort');
   }
 }
