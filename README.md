@@ -1,4 +1,4 @@
-# appium-device-farm [![Node.js CI](https://github.com/AppiumTestDistribution/appium-device-farm/actions/workflows/node.js.yml/badge.svg)](https://github.com/AppiumTestDistribution/appium-device-farm/actions/workflows/node.js.yml)
+# appium-device-farm [![Build Status](https://dev.azure.com/saikrishna321/ATD/_apis/build/status/AppiumTestDistribution.appium-device-farm?branchName=main)](https://dev.azure.com/saikrishna321/ATD/_build/latest?definitionId=11&branchName=main)
 
 This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
 
