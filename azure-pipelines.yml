@@ -16,7 +16,21 @@ jobs:
         npm test
       displayName: 'npm test'
 
- - job: IntegrationTest
+ - job: iOSIntegrationTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0
+      inputs:
+       versionSpec: '16.x'
+
+    - script: |
+        npm ci
+        npm run integration-ios
+      displayName: 'iOS Integration Test'
+
+ - job: Android_Integration_Test
    pool:
      vmImage: 'macOS-latest'
 
@@ -56,7 +70,3 @@ jobs:
         npm run build --if-present
         npm run integration-android
       displayName: "Run ANDROID Test"
-
-    - script: |
-        npm run integration-ios 
-      displayName: "Run iOS Test"
