@@ -85,16 +85,22 @@ export default class IOSDeviceManager implements IDeviceManager {
    * @returns {Promise<Array<IDevice>>}
    */
   private async getSimulators(): Promise<Array<IDevice>> {
-    const simulators: Array<IDevice> = flatten(
+    const flattenValued: Array<IDevice> = flatten(
       Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
-    ).map((device) => {
-      return {
-        ...device,
-        busy: false,
-        realDevice: false,
-        platform: 'ios',
-        deviceType: 'simulator',
-      };
+    );
+    const simulators: Array<IDevice> = [];
+    await asyncForEach(flattenValued, async (device: IDevice) => {
+      const wdaLocalPort = await getFreePort();
+      simulators.push(
+        Object.assign({
+          ...device,
+          wdaLocalPort,
+          busy: false,
+          realDevice: false,
+          platform: 'ios',
+          deviceType: 'simulator',
+        })
+      );
     });
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
     return simulators;

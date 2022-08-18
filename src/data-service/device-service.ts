@@ -74,7 +74,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     filter.udid = { $in: filterOptions.udid };
   }
 
-  if(filterOptions.minSDK) {
+  if (filterOptions.minSDK) {
     filter.sdk = { $gte: filterOptions.minSDK };
   }
 
@@ -103,10 +103,11 @@ export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
 }
 
 export function updateCmdExecutedTime(sessionId: string) {
-  DeviceModel.chain().find({session_id: sessionId})
-  .update(function(device){
-    device.lastCmdExecutedAt = new Date().getTime();
-  })
+  DeviceModel.chain()
+    .find({ session_id: sessionId })
+    .update(function (device) {
+      device.lastCmdExecutedAt = new Date().getTime();
+    });
 }
 
 export function unblockDevice(sessionId: string) {

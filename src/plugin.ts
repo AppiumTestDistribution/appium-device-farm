@@ -10,7 +10,7 @@ import {
   getDevice,
   updateDevice,
   unblockDevice,
-  updateCmdExecutedTime
+  updateCmdExecutedTime,
 } from './data-service/device-service';
 import {
   addNewPendingSession,
@@ -36,7 +36,7 @@ const customCapability = {
   iphoneOnly: 'appium:iPhoneOnly',
   ipadOnly: 'appium:iPadOnly',
   udids: 'appium:udids',
-  minSDK: 'appium:minSDK'
+  minSDK: 'appium:minSDK',
 };
 
 let timer: any;
@@ -104,7 +104,7 @@ export class DevicePlugin extends BasePlugin {
       await updateDevice(device, {
         busy: true,
         session_id: session.value[0],
-        lastCmdExecutedAt: new Date().getTime()
+        lastCmdExecutedAt: new Date().getTime(),
       });
       logger.info(`Updating Device ${device.udid} with session ID ${session.value[0]}`);
     }
@@ -202,7 +202,7 @@ export class DevicePlugin extends BasePlugin {
       udid: udids?.length ? udids : undefined,
       busy: false,
       offline: false,
-      minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined
+      minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     };
   }
 }
@@ -232,13 +232,20 @@ async function refreshDeviceList() {
 
 export async function releaseBlockedDevices() {
   const allDevices = await getAllDevices();
-  const busyDevices = allDevices.filter( device => { return(device.busy === true) } );
+  const busyDevices = allDevices.filter((device) => {
+    return device.busy === true;
+  });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();
-    if(device.lastCmdExecutedAt != undefined && ((currentEpoch - device.lastCmdExecutedAt)/1000 > 100) ) {
-      console.log(`Found Device with udid ${device.udid} has no activity for more than 100 seconds`);
-      const sessionId = device.session_id 
-      if(sessionId !== undefined) {
+    if (
+      device.lastCmdExecutedAt != undefined &&
+      (currentEpoch - device.lastCmdExecutedAt) / 1000 > 100
+    ) {
+      console.log(
+        `Found Device with udid ${device.udid} has no activity for more than 100 seconds`
+      );
+      const sessionId = device.session_id;
+      if (sessionId !== undefined) {
         unblockDevice(sessionId);
         logger.info(
           `Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than 100 seconds`

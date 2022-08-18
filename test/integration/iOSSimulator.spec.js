@@ -30,8 +30,10 @@ describe('IOS Simulator Test', () => {
     };
     const device = await DevicePlugin.allocateDeviceForSession(capabilities);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
-    expect(allocatedSimulator[0].busy).to.be.true;
-    expect(allocatedSimulator[0].name).to.match(/^iPhone/);
+    const foundSimulator = allocatedSimulator[0];
+    expect(foundSimulator.busy).to.be.true;
+    expect(foundSimulator.name).to.match(/^iPhone/);
+    expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
   });
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
@@ -53,8 +55,10 @@ describe('IOS Simulator Test', () => {
     };
     const device = await DevicePlugin.allocateDeviceForSession(capabilities);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
-    expect(allocatedSimulator[0].busy).to.be.true;
-    expect(allocatedSimulator[0].name).to.match(/^iPad/);
+    const foundSimulator = allocatedSimulator[0];
+    expect(foundSimulator.busy).to.be.true;
+    expect(foundSimulator.name).to.match(/^iPad/);
+    expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
   });
 });
 
