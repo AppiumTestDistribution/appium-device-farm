@@ -3,7 +3,7 @@ import { flatten } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { isMac } from '../helpers';
+import { getFreePort, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
 
@@ -60,9 +60,11 @@ export default class IOSDeviceManager implements IDeviceManager {
         });
       } else {
         log.info(`IOS Device details for ${udid} not available. So querying now.`);
+        const wdaLocalPort = await getFreePort();
         const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
         deviceState.push(
           Object.assign({
+            wdaLocalPort,
             udid,
             sdk,
             name,

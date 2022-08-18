@@ -1,7 +1,7 @@
 import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
-
+import getPort from 'get-port';
 export async function asyncForEach(
   array: string | any[],
   callback: {
@@ -21,6 +21,10 @@ export function isMac() {
 
 export function checkIfPathIsAbsolute(configPath: string) {
   return path.isAbsolute(configPath);
+}
+
+export async function getFreePort() {
+  return await getPort();
 }
 
 export async function isPortBusy(port: number) {
