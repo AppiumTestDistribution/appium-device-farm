@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import BasePlugin from '@appium/base-plugin';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
@@ -41,10 +42,9 @@ const customCapability = {
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
-
-export class DevicePlugin extends BasePlugin {
-  constructor(pluginName: string, opts: any) {
-    super(pluginName, opts);
+export default class DevicePlugin extends BasePlugin {
+  constructor(pluginName: string, cliArgs: any) {
+    super(pluginName, cliArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -54,11 +54,30 @@ export class DevicePlugin extends BasePlugin {
     );
   }
 
-  public static async updateServer(expressApp: any): Promise<void> {
+  public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
+    let platform;
+    if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
+      platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
+    }
     expressApp.use('/device-farm', router);
-    logger.info('Device Farm Plugin will be served --**--- at http://localhost:4723/device-farm');
+    if (!platform)
+      throw new Error(
+        '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
+      );
+    let includeSimulators = true;
+    // eslint-disable-next-line no-prototype-builtins
+    if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
+      includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
+    }
+    if (includeSimulators === false)
+      logger.info('❌ Skipping Simulators as per the confifuration ❌');
+    const deviceManager = new DeviceFarmManager({
+      platform,
+      includeSimulators,
+    });
+    Container.set(DeviceFarmManager, deviceManager);
     logger.info(
-      'If the appium server is started with different port other than 4723, then use the correct port number to access the device farm dashboard'
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
     await refreshDeviceList();
     await cronReleaseBlockedDevices();
@@ -99,14 +118,14 @@ export class DevicePlugin extends BasePlugin {
 
     if (session.error) {
       await updateDevice(device, { busy: false });
-      logger.info(`Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
+      logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
       await updateDevice(device, {
         busy: true,
         session_id: session.value[0],
         lastCmdExecutedAt: new Date().getTime(),
       });
-      logger.info(`Updating Device ${device.udid} with session ID ${session.value[0]}`);
+      logger.info(`📱 Updating Device ${device.udid} with session ID ${session.value[0]}`);
     }
     return session;
   }
@@ -119,7 +138,7 @@ export class DevicePlugin extends BasePlugin {
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDevice(sessionId);
-    logger.info(`Unblocking the device that is blocked for session ${sessionId}`);
+    logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
 
@@ -151,9 +170,9 @@ export class DevicePlugin extends BasePlugin {
       throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
     }
     const device = getDevice(filters);
-    logger.info(`Device found: ${JSON.stringify(device)}`);
+    logger.info(`📱 Device found: ${JSON.stringify(device)}`);
     updateDevice(device, { busy: true });
-    logger.info(`Blocking device ${device.udid} for new session`);
+    logger.info(`📱 Blocking device ${device.udid} for new session`);
     await DevicePlugin.updateCapabilityForDevice(capability, device);
     return device;
   }
@@ -216,7 +235,7 @@ function getDeviceManager() {
 
 export async function updateDeviceList() {
   const devices = await getDeviceManager().getDevices(getAllDevices());
-  logger.info(`Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
+  logger.info(`📱 Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);
 }
 
@@ -242,13 +261,13 @@ export async function releaseBlockedDevices() {
       (currentEpoch - device.lastCmdExecutedAt) / 1000 > 100
     ) {
       console.log(
-        `Found Device with udid ${device.udid} has no activity for more than 100 seconds`
+        `📱 Found Device with udid ${device.udid} has no activity for more than 100 seconds`
       );
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
         unblockDevice(sessionId);
         logger.info(
-          `Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than 100 seconds`
+          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than 100 seconds`
         );
       }
     }

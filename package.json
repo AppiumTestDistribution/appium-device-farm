@@ -110,7 +110,7 @@
           "type": "string"
         },
         "include-simulators": {
-          "type": "string"
+          "type": "boolean"
         }
       },
       "title": "Appium device farm plugin",

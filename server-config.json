@@ -1,0 +1,11 @@
+{
+    "server": {
+      "port": 31337,
+      "plugin": {
+        "device-farm": {
+          "platform": "both",
+          "include-simulators": false
+        }
+      }
+    }
+  }
