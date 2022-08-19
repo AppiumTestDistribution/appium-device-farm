@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import { DevicePlugin, updateDeviceList } from '../../src/plugin';
+import DevicePlugin, { updateDeviceList } from '../../src/plugin';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {

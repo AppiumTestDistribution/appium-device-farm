@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import { DevicePlugin, updateDeviceList } from '../../src/plugin';
+import DevicePlugin, { updateDeviceList } from '../../src/plugin';
 import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';

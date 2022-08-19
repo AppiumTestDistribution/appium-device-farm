@@ -3,7 +3,7 @@ import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { DeviceModel } from '../../src/data-service/db';
 
-import { DevicePlugin, updateDeviceList } from '../../src/plugin';
+import DevicePlugin, { updateDeviceList } from '../../src/plugin';
 
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {

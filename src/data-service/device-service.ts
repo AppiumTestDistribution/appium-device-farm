@@ -8,14 +8,14 @@ export function saveDevices(devices: Array<IDevice>): any {
   const allDeviceIds = DeviceModel.chain()
     .find()
     .data()
-    .map((device) => device.udid);
+    .map((device: IDevice) => device.udid);
 
   /**
    * Previously connected devices which are not identified are marked offline.
    */
   DeviceModel.chain()
     .find({ udid: { $nin: [...newDeviveUdids] } }) // $nin => not in condition
-    .update(function (device) {
+    .update(function (device: IDevice) {
       device.offline = true;
     });
 
@@ -24,7 +24,7 @@ export function saveDevices(devices: Array<IDevice>): any {
    */
   DeviceModel.chain()
     .find({ udid: { $in: [...newDeviveUdids] } })
-    .update(function (device) {
+    .update(function (device: IDevice) {
       device.offline = false;
     });
 
@@ -46,11 +46,11 @@ export function saveDevices(devices: Array<IDevice>): any {
   devices.forEach(function (device) {
     const allDevices = DeviceModel.chain().find().data();
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
-      const { state } = allDevices.find((d) => d.udid === device.udid);
+      const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
         DeviceModel.chain()
           .find({ udid: device.udid })
-          .update(function (d) {
+          .update(function (d: IDevice) {
             d.state = device.state;
           });
       }
@@ -95,7 +95,7 @@ export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
     .find({
       udid: device.udid,
     })
-    .update(function (device) {
+    .update(function (device: IDevice) {
       Object.assign(device, {
         ...updateData,
       });
@@ -105,7 +105,7 @@ export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
 export function updateCmdExecutedTime(sessionId: string) {
   DeviceModel.chain()
     .find({ session_id: sessionId })
-    .update(function (device) {
+    .update(function (device: IDevice) {
       device.lastCmdExecutedAt = new Date().getTime();
     });
 }
@@ -115,7 +115,7 @@ export function unblockDevice(sessionId: string) {
     .find({
       session_id: sessionId,
     })
-    .update(function (device) {
+    .update(function (device: IDevice) {
       device.session_id = undefined;
       device.busy = false;
       device.lastCmdExecutedAt = undefined;
