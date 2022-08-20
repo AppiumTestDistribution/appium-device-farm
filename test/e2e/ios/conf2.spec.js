@@ -1,7 +1,7 @@
 import { remote } from 'webdriverio';
 
 const APPIUM_HOST = 'localhost';
-const APPIUM_PORT = 31337;
+const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
   connectionRetryCount: 220000,
   hostname: APPIUM_HOST,
@@ -13,7 +13,8 @@ const capabilities = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
   'appium:iPhoneOnly': true,
-  'appium:app': '/Users/saikrishna/Downloads/vodqa.zip',
+  'appium:app':
+    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/vodqa.zip?raw=true',
 };
 describe('Plugin1 Test', () => {
   let driver;

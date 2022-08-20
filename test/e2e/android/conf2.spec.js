@@ -7,13 +7,14 @@ const WDIO_PARAMS = {
   hostname: APPIUM_HOST,
   port: APPIUM_PORT,
   path: '/wd/hub/',
-  logLevel: 'silent',
+  logLevel: 'info',
 };
 const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
+  'appium:app':
+    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };
 describe('Plugin1 Test', () => {
   let driver;
@@ -23,7 +24,7 @@ describe('Plugin1 Test', () => {
 
   it('Slider test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-     await driver.pause(2000);
+    await driver.pause(2000);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
     await driver.pause(2000);

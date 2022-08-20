@@ -16,7 +16,7 @@ jobs:
         npm test
       displayName: 'npm test'
 
- - job: iOSIntegrationTest
+ - job: IOS
    pool:
      vmImage: 'macOS-latest'
 
@@ -31,10 +31,14 @@ jobs:
       displayName: 'iOS Integration Test'
 
     - script: |
-        npm test
+        export APPIUM_HOME=/tmp/device-farm
+        ./node_modules/.bin/appium plugin install --source=local .
+        ./node_modules/.bin/appium driver install xcuitest
+        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=iOS &
+        npm run test-parallel-ios
       displayName: 'iOS Sample Test'
 
- - job: Android_Integration_Test
+ - job: ANDROID
    pool:
      vmImage: 'macOS-latest'
 
@@ -73,9 +77,16 @@ jobs:
     - script: |
         npm run build --if-present
         npm run integration-android
-      displayName: "Run ANDROID Test"
+      displayName: "Android Integration Test"
+    - script: |
+        export APPIUM_HOME=/tmp/device-farm
+        ./node_modules/.bin/appium plugin install --source=local .
+        ./node_modules/.bin/appium driver install uiautomator2
+        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android &
+        npm run test-android-ios
+      displayName: 'iOS Sample Test'
 
- - job: E2ETest
+ - job: E2E Plugin Test
    pool:
      vmImage: 'macOS-latest'
 
