@@ -30,7 +30,7 @@ jobs:
         npm run integration-ios
       displayName: 'iOS Integration Test'
 
-    script: |
+    - script: |
         npm test
       displayName: 'iOS Sample Test'
 
