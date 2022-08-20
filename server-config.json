@@ -4,7 +4,11 @@
       "plugin": {
         "device-farm": {
           "platform": "both",
-          "include-simulators": true
+          "include-simulators": true,
+          "remote": {
+            "port": 4723,
+            "host": "127.0.0.1"
+          }
         }
       }
     }

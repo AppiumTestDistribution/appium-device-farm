@@ -111,6 +111,10 @@
         },
         "include-simulators": {
           "type": "boolean"
+        },
+        "remote": {
+          "type": "object",
+          "properties": {}
         }
       },
       "title": "Appium device farm plugin",

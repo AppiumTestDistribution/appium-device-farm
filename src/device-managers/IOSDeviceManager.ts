@@ -15,14 +15,18 @@ export default class IOSDeviceManager implements IDeviceManager {
    */
   async getDevices(
     includeSimulators: boolean,
-    existingDeviceDetails: Array<IDevice>
+    existingDeviceDetails: Array<IDevice>,
+    cliArgs: any
   ): Promise<IDevice[]> {
     if (!isMac()) {
       return [];
     } else {
       if (includeSimulators) {
         return flatten(
-          await Promise.all([this.getRealDevices(existingDeviceDetails), this.getSimulators()])
+          await Promise.all([
+            this.getRealDevices(existingDeviceDetails),
+            this.getSimulators(cliArgs),
+          ])
         );
       } else {
         return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails)]));
@@ -84,7 +88,7 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getSimulators(): Promise<Array<IDevice>> {
+  private async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
     const flattenValued: Array<IDevice> = flatten(
       Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
     );
@@ -103,6 +107,14 @@ export default class IOSDeviceManager implements IDeviceManager {
       );
     });
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
+    if (
+      cliArgs.plugin &&
+      cliArgs.plugin['device-farm'] &&
+      // eslint-disable-next-line no-prototype-builtins
+      cliArgs.plugin['device-farm'].hasOwnProperty('remote')
+    ) {
+      console.log(cliArgs.plugin['device-farm'].remote);
+    }
     return simulators;
   }
 }

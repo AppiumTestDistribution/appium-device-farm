@@ -37,6 +37,7 @@ class DevicePlugin extends BasePlugin {
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
     let platform;
+    console.log(cliArgs);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
     }
@@ -55,6 +56,7 @@ class DevicePlugin extends BasePlugin {
     const deviceManager = new DeviceFarmManager({
       platform,
       includeSimulators,
+      cliArgs,
     });
     Container.set(DeviceFarmManager, deviceManager);
     logger.info(
