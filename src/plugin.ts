@@ -4,11 +4,7 @@ import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import {
-  updateDevice,
-  unblockDevice,
-  updateCmdExecutedTime,
-} from './data-service/device-service';
+import { updateDevice, unblockDevice, updateCmdExecutedTime } from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,

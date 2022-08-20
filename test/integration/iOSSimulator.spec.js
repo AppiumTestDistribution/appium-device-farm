@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import DevicePlugin, { updateDeviceList } from '../../src/plugin';
+import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
 import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
@@ -28,7 +28,7 @@ describe('IOS Simulator Test', () => {
       },
       firstMatch: [{}],
     };
-    const device = await DevicePlugin.allocateDeviceForSession(capabilities);
+    const device = await allocateDeviceForSession(capabilities);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -53,7 +53,7 @@ describe('IOS Simulator Test', () => {
       },
       firstMatch: [{}],
     };
-    const device = await DevicePlugin.allocateDeviceForSession(capabilities);
+    const device = await allocateDeviceForSession(capabilities);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -86,7 +86,7 @@ describe('Boot simulator test', async () => {
       },
       firstMatch: [{}],
     };
-    const device = await DevicePlugin.allocateDeviceForSession(capabilities);
+    const device = await allocateDeviceForSession(capabilities);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });

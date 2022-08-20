@@ -59,87 +59,87 @@ export function isDeviceConfigPathAbsolute(path: string) {
 }
 
 /**
-   * For given capability, wait untill a free device is available from the database
-   * and update the capability json with required device informations
-   * @param capability
-   * @returns
+ * For given capability, wait untill a free device is available from the database
+ * and update the capability json with required device informations
+ * @param capability
+ * @returns
+ */
+export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
+  const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
+
+  const filters = getDeviceFiltersFromCapability(firstMatch);
+  logger.info(JSON.stringify(filters));
+
+  const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
+  const intervalBetweenAttempts =
+    firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
+
+  try {
+    await waitUntil(
+      async () => {
+        logger.info('Waiting for free device');
+        return (await getDevice(filters)) != undefined;
+      },
+      { timeout, intervalBetweenAttempts }
+    );
+  } catch (err) {
+    throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
+  }
+  const device = getDevice(filters);
+  logger.info(`📱 Device found: ${JSON.stringify(device)}`);
+  updateDevice(device, { busy: true });
+  logger.info(`📱 Blocking device ${device.udid} for new session`);
+  await updateCapabilityForDevice(capability, device);
+  return device;
+}
+
+export async function updateCapabilityForDevice(capability: any, device: IDevice) {
+  if (device.platform.toLowerCase() == 'ios') {
+    await iOSCapabilities(capability, device);
+    updateDevice(device, {
+      mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
+    });
+  } else {
+    await androidCapabilities(capability, device);
+  }
+}
+
+/**
+ * Method to get the device filters from the custom session capability
+ * This filter will be used as in the query to find the free device from the databse
+ * @param capability
+ * @returns IDeviceFilterOptions
+ */
+export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+  const platform: Platform = capability['platformName'].toLowerCase();
+  const udids = capability[customCapability.udids]
+    ? capability[customCapability.udids].split(',')
+    : process.env.UDIDS?.split(',');
+  /* Based on the app file extension, we will decide whether to run the
+   * test on real device or simulator.
+   *
+   * Applicaple only for ios.
    */
-  export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
-    const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-
-    const filters = getDeviceFiltersFromCapability(firstMatch);
-    logger.info(JSON.stringify(filters));
-
-    const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
-    const intervalBetweenAttempts =
-      firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
-
-    try {
-      await waitUntil(
-        async () => {
-          logger.info('Waiting for free device');
-          return (await getDevice(filters)) != undefined;
-        },
-        { timeout, intervalBetweenAttempts }
-      );
-    } catch (err) {
-      throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
-    }
-    const device = getDevice(filters);
-    logger.info(`📱 Device found: ${JSON.stringify(device)}`);
-    updateDevice(device, { busy: true });
-    logger.info(`📱 Blocking device ${device.udid} for new session`);
-    await updateCapabilityForDevice(capability, device);
-    return device;
+  const deviceType =
+    platform == 'ios' && isMac()
+      ? getDeviceTypeFromApp(capability['appium:app'] as string)
+      : undefined;
+  let name = '';
+  if (capability[customCapability.ipadOnly]) {
+    name = 'iPad';
+  } else if (capability[customCapability.iphoneOnly]) {
+    name = 'iPhone';
   }
-
-  async function updateCapabilityForDevice(capability: any, device: IDevice) {
-    if (device.platform.toLowerCase() == 'ios') {
-      await iOSCapabilities(capability, device);
-      updateDevice(device, {
-        mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
-      });
-    } else {
-      await androidCapabilities(capability, device);
-    }
-  }
-
-  /**
-   * Method to get the device filters from the custom session capability
-   * This filter will be used as in the query to find the free device from the databse
-   * @param capability
-   * @returns IDeviceFilterOptions
-   */
-  function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
-    const platform: Platform = capability['platformName'].toLowerCase();
-    const udids = capability[customCapability.udids]
-      ? capability[customCapability.udids].split(',')
-      : process.env.UDIDS?.split(',');
-    /* Based on the app file extension, we will decide whether to run the
-     * test on real device or simulator.
-     *
-     * Applicaple only for ios.
-     */
-    const deviceType =
-      platform == 'ios' && isMac()
-        ? getDeviceTypeFromApp(capability['appium:app'] as string)
-        : undefined;
-    let name = '';
-    if (capability[customCapability.ipadOnly]) {
-      name = 'iPad';
-    } else if (capability[customCapability.iphoneOnly]) {
-      name = 'iPhone';
-    }
-    return {
-      platform,
-      name,
-      deviceType,
-      udid: udids?.length ? udids : undefined,
-      busy: false,
-      offline: false,
-      minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
-    };
-  }
+  return {
+    platform,
+    name,
+    deviceType,
+    udid: udids?.length ? udids : undefined,
+    busy: false,
+    offline: false,
+    minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
+  };
+}
 
 /**
  * Helper methods to manage devices

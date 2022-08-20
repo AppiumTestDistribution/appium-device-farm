@@ -16,7 +16,7 @@
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
-    "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
+    "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "APPIUM_RELOAD_EXTENSIONS=1 appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"

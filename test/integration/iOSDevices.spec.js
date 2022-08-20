@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import DevicePlugin, { updateDeviceList } from '../../src/plugin';
+import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
@@ -22,7 +22,7 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await DevicePlugin.allocateDeviceForSession(capabilities).catch((error) =>
+    await allocateDeviceForSession(capabilities).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
