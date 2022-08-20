@@ -1,15 +1,20 @@
 import 'reflect-metadata';
+import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import { updateDevice, unblockDevice, updateCmdExecutedTime } from './data-service/device-service';
+import { updateDevice, unblockDevice } from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
-import { refreshDeviceList, cronReleaseBlockedDevices } from './device-utils';
+import {
+  refreshDeviceList,
+  cronReleaseBlockedDevices,
+  allocateDeviceForSession,
+} from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
 import logger from './logger';
@@ -18,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
-export default class DevicePlugin extends BasePlugin {
+class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
   }
@@ -80,7 +85,7 @@ export default class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         await refreshDeviceList();
         try {
-          const device: IDevice = await DevicePlugin.allocateDeviceForSession(caps);
+          const device: IDevice = await allocateDeviceForSession(caps);
           return device;
         } catch (err) {
           await removePendingSession(pendingSessionId);
@@ -106,15 +111,12 @@ export default class DevicePlugin extends BasePlugin {
     return session;
   }
 
-  async handle(next: () => any, driver: any, commandName: string, ...args: any) {
-    logger.info(`Received ${commandName} request on driver - ${driver}`);
-    await updateCmdExecutedTime(driver.sessionId);
-    return await next();
-  }
-
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDevice(sessionId);
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
 }
+
+Object.assign(DevicePlugin.prototype, commands);
+export { DevicePlugin };

@@ -30,6 +30,10 @@ jobs:
         npm run integration-ios
       displayName: 'iOS Integration Test'
 
+    script: |
+        npm test
+      displayName: 'iOS Sample Test'
+
  - job: Android_Integration_Test
    pool:
      vmImage: 'macOS-latest'
