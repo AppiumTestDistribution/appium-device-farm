@@ -7,7 +7,7 @@ jobs:
      vmImage: 'macOS-latest'
 
    steps:
-    - task: NodeTool@0
+    - task: NodeTool@0.200.0
       inputs:
        versionSpec: '16.x'
 
@@ -21,7 +21,7 @@ jobs:
      vmImage: 'macOS-latest'
 
    steps:
-    - task: NodeTool@0
+    - task: NodeTool@0.200.0
       inputs:
        versionSpec: '16.x'
 
@@ -35,7 +35,7 @@ jobs:
      vmImage: 'macOS-latest'
 
    steps:
-    - task: NodeTool@0
+    - task: NodeTool@0.200.0
       inputs:
        versionSpec: '16.x'
 
@@ -76,7 +76,7 @@ jobs:
      vmImage: 'macOS-latest'
 
    steps:
-    - task: NodeTool@0
+    - task: NodeTool@0.200.0
       inputs:
        versionSpec: '16.x'
 
