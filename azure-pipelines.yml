@@ -86,7 +86,7 @@ jobs:
         npm run test-android-ios
       displayName: 'iOS Sample Test'
 
- - job: E2E Plugin Test
+ - job: E2EPluginTest
    pool:
      vmImage: 'macOS-latest'
 
