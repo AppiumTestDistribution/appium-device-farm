@@ -3,7 +3,7 @@ import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { DeviceModel } from '../../src/data-service/db';
 
-import DevicePlugin, { updateDeviceList } from '../../src/plugin';
+import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
 
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
@@ -22,7 +22,7 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    const devices = await DevicePlugin.allocateDeviceForSession(capabilities);
+    const devices = await allocateDeviceForSession(capabilities);
     const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
@@ -43,7 +43,7 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    await DevicePlugin.allocateDeviceForSession(capabilities);
+    await allocateDeviceForSession(capabilities);
     const allDeviceIds = DeviceModel.chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
@@ -64,7 +64,7 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    await DevicePlugin.allocateDeviceForSession(capabilities).catch((error) =>
+    await allocateDeviceForSession(capabilities).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(

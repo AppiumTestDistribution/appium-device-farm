@@ -1,4 +1,4 @@
-import { DevicePlugin } from '../../src';
+import { getDeviceFiltersFromCapability } from '../../src/device-utils';
 import { expect } from 'chai';
 
 describe('Device filter tests', () => {
@@ -12,7 +12,7 @@ describe('Device filter tests', () => {
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
       name: 'iPhone',
@@ -29,12 +29,12 @@ describe('Device filter tests', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true
+        'appium:iPhoneOnly': true,
       },
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
       name: 'iPhone',
@@ -52,12 +52,12 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
         'appium:iPhoneOnly': true,
-        'appium:minSDK': 10.2
+        'appium:minSDK': 10.2,
       },
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = DevicePlugin.getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
       name: 'iPhone',
@@ -68,5 +68,4 @@ describe('Device filter tests', () => {
       offline: false,
     });
   });
-
 });

@@ -6,8 +6,8 @@
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/*.spec.js --timeout 260000",
-    "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
+    "test-parallel-android": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/*.spec.js --timeout 260000",
+    "test-parallel-ios": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
     "test-e2e": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register ./test/e2e/*.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/iOS*.spec.js --timeout 260000 --exit",
@@ -16,7 +16,7 @@
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
-    "prettier": "prettier 'src/**/*.ts' 'web-v2/**/*.ts' 'web-v2/**/*.tsx' --write --single-quote",
+    "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "APPIUM_RELOAD_EXTENSIONS=1 appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"

@@ -7,13 +7,14 @@ const WDIO_PARAMS = {
   hostname: APPIUM_HOST,
   port: APPIUM_PORT,
   path: '/wd/hub/',
-  logLevel: 'silent',
+  logLevel: 'info',
 };
 const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
+  'appium:app':
+    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };
 let driver;
 describe('Plugin Test', () => {

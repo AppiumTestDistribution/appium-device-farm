@@ -16,7 +16,7 @@ jobs:
         npm test
       displayName: 'npm test'
 
- - job: iOSIntegrationTest
+ - job: IOS
    pool:
      vmImage: 'macOS-latest'
 
@@ -30,7 +30,7 @@ jobs:
         npm run integration-ios
       displayName: 'iOS Integration Test'
 
- - job: Android_Integration_Test
+ - job: ANDROID
    pool:
      vmImage: 'macOS-latest'
 
@@ -69,9 +69,9 @@ jobs:
     - script: |
         npm run build --if-present
         npm run integration-android
-      displayName: "Run ANDROID Test"
+      displayName: "Android Integration Test"
 
- - job: E2ETest
+ - job: E2EPluginTest
    pool:
      vmImage: 'macOS-latest'
 

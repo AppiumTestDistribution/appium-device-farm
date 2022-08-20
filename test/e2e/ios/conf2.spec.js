@@ -7,13 +7,14 @@ const WDIO_PARAMS = {
   hostname: APPIUM_HOST,
   port: APPIUM_PORT,
   path: '/wd/hub/',
-  logLevel: 'silent',
+  logLevel: 'info',
 };
 const capabilities = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
   'appium:iPhoneOnly': true,
-  'appium:app': '/Users/saikrisv/Downloads/vodqa.zip',
+  'appium:app':
+    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/vodqa.zip?raw=true',
 };
 describe('Plugin1 Test', () => {
   let driver;
