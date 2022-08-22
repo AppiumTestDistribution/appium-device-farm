@@ -5,10 +5,7 @@
         "device-farm": {
           "platform": "both",
           "include-simulators": true,
-          "remote": {
-            "port": 4723,
-            "host": "127.0.0.1"
-          }
+          "remote": ["http://127.0.0.1:4723"]
         }
       }
     }

@@ -6,6 +6,7 @@ import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { getFreePort, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
+import axios from 'axios';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -114,6 +115,9 @@ export default class IOSDeviceManager implements IDeviceManager {
       cliArgs.plugin['device-farm'].hasOwnProperty('remote')
     ) {
       console.log(cliArgs.plugin['device-farm'].remote);
+      const host = cliArgs.plugin['device-farm'].remote[0];
+      const remoteDevices = await axios.get(`${host}/device-farm/api/devices/ios`);
+      console.log('Remote Devices', remoteDevices.data);
     }
     return simulators;
   }

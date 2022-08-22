@@ -1,0 +1,11 @@
+{
+    "server": {
+      "port": 4723,
+      "plugin": {
+        "device-farm": {
+          "platform": "iOS",
+          "include-simulators": true
+        }
+      }
+    }
+  }
