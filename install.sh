@@ -6,3 +6,6 @@ echo 'Uninstall Plugin'
 ./node_modules/.bin/appium plugin uninstall device-farm
 echo 'Install Plugin'
 ./node_modules/.bin/appium plugin install --source=local .
+
+echo 'Plugin List'
+./node_modules/.bin/appium plugin list

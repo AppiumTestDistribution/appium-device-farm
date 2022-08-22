@@ -17,9 +17,10 @@
     "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
+    "appium-home": "rm -rf rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
-    "reinstall-plugin": "(appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
-    "run-server": "APPIUM_RELOAD_EXTENSIONS=1 appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both"
+    "reinstall-plugin": "npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
+    "run-server": "APPIUM_HOME=/tmp/some-temp-dir appium server -ka 800 --config=./server-config.json --use-plugins=device-farm -pa /wd/hub"
   },
   "repository": {
     "type": "git",
@@ -113,8 +114,7 @@
           "type": "boolean"
         },
         "remote": {
-          "type": "array",
-          "properties": {}
+          "type": "array"
         }
       },
       "title": "Appium device farm plugin",

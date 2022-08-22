@@ -25,12 +25,12 @@ export default class IOSDeviceManager implements IDeviceManager {
       if (includeSimulators) {
         return flatten(
           await Promise.all([
-            this.getRealDevices(existingDeviceDetails),
+            this.getRealDevices(existingDeviceDetails, cliArgs),
             this.getSimulators(cliArgs),
           ])
         );
       } else {
-        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails)]));
+        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
       }
     }
   }
@@ -52,7 +52,10 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getRealDevices(existingDeviceDetails: Array<IDevice>): Promise<Array<IDevice>> {
+  private async getRealDevices(
+    existingDeviceDetails: Array<IDevice>,
+    cliArgs: any
+  ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
@@ -77,8 +80,26 @@ export default class IOSDeviceManager implements IDeviceManager {
             realDevice: true,
             deviceType: 'real',
             platform: 'ios',
+            host: `http://127.0.0.1:${cliArgs.port}`,
           })
         );
+      }
+      // eslint-disable-next-line no-prototype-builtins
+      if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
+        const host = cliArgs.plugin['device-farm'].remote[0];
+        const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+        remoteDevices.filter((device: any) => {
+          if (device.deviceType === 'real') {
+            delete device['meta'];
+            delete device['$loki'];
+            deviceState.push(
+              Object.assign({
+                ...device,
+                host: `${host}`,
+              })
+            );
+          }
+        });
       }
     });
     return deviceState;
@@ -104,21 +125,29 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: 'ios',
           deviceType: 'simulator',
+          host: `http://127.0.0.1:${cliArgs.port}`,
         })
       );
     });
-    simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
-    if (
-      cliArgs.plugin &&
-      cliArgs.plugin['device-farm'] &&
-      // eslint-disable-next-line no-prototype-builtins
-      cliArgs.plugin['device-farm'].hasOwnProperty('remote')
-    ) {
-      console.log(cliArgs.plugin['device-farm'].remote);
+
+    // eslint-disable-next-line no-prototype-builtins
+    if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
       const host = cliArgs.plugin['device-farm'].remote[0];
-      const remoteDevices = await axios.get(`${host}/device-farm/api/devices/ios`);
-      console.log('Remote Devices', remoteDevices.data);
+      const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+      remoteDevices.filter((device: any) => {
+        if (device.deviceType === 'simulator') {
+          delete device['meta'];
+          delete device['$loki'];
+          simulators.push(
+            Object.assign({
+              ...device,
+              host: `${host}`,
+            })
+          );
+        }
+      });
     }
+    simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
     return simulators;
   }
 }

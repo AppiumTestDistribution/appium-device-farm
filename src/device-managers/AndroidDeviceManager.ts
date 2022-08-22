@@ -5,6 +5,7 @@ import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
 import _ from 'lodash';
 import { fs } from '@appium/support';
+import axios from 'axios';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -12,7 +13,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   async getDevices(
     includeSimulators: boolean,
-    existingDeviceDetails: Array<IDevice>
+    existingDeviceDetails: Array<IDevice>,
+    cliArgs: any
   ): Promise<IDevice[]> {
     if (!this.adbAvailable) {
       return [];
@@ -49,6 +51,21 @@ export default class AndroidDeviceManager implements IDeviceManager {
               udid: device.udid,
               platform: 'android',
               deviceType: realDevice ? 'real' : 'emulator',
+            });
+          }
+          // eslint-disable-next-line no-prototype-builtins
+          if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
+            const host = cliArgs.plugin['device-farm'].remote[0];
+            const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
+            remoteDevices.filter((device: any) => {
+              delete device['meta'];
+              delete device['$loki'];
+              deviceState.push(
+                Object.assign({
+                  ...device,
+                  host: `${host}`,
+                })
+              );
             });
           }
         }

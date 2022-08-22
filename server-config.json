@@ -5,8 +5,8 @@
         "device-farm": {
           "platform": "both",
           "include-simulators": true,
-          "remote": ["http://127.0.0.1:4723"]
+          "remote": ["http://192.168.0.110:4723"]
         }
-      }
     }
+      }
   }
