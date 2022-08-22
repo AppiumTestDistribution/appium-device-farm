@@ -3,9 +3,9 @@
       "port": 31337,
       "plugin": {
         "device-farm": {
-          "platform": "both",
+          "platform": "android",
           "include-simulators": true,
-          "remote": ["http://192.168.0.110:4723"]
+          "remote": ["http://192.168.0.104:4723"]
         }
     }
       }

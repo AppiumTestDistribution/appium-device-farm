@@ -84,24 +84,24 @@ export default class IOSDeviceManager implements IDeviceManager {
           })
         );
       }
-      // eslint-disable-next-line no-prototype-builtins
-      if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
-        const host = cliArgs.plugin['device-farm'].remote[0];
-        const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-        remoteDevices.filter((device: any) => {
-          if (device.deviceType === 'real') {
-            delete device['meta'];
-            delete device['$loki'];
-            deviceState.push(
-              Object.assign({
-                ...device,
-                host: `${host}`,
-              })
-            );
-          }
-        });
-      }
     });
+    // eslint-disable-next-line no-prototype-builtins
+    if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
+      const host = cliArgs.plugin['device-farm'].remote[0];
+      const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+      remoteDevices.filter((device: any) => {
+        if (device.deviceType === 'real') {
+          delete device['meta'];
+          delete device['$loki'];
+          deviceState.push(
+            Object.assign({
+              ...device,
+              host: `${host}`,
+            })
+          );
+        }
+      });
+    }
     return deviceState;
   }
 

@@ -53,23 +53,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
               deviceType: realDevice ? 'real' : 'emulator',
             });
           }
-          // eslint-disable-next-line no-prototype-builtins
-          if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
-            const host = cliArgs.plugin['device-farm'].remote[0];
-            const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
-            remoteDevices.filter((device: any) => {
-              delete device['meta'];
-              delete device['$loki'];
-              deviceState.push(
-                Object.assign({
-                  ...device,
-                  host: `${host}`,
-                })
-              );
-            });
-          }
         }
       });
+      // eslint-disable-next-line no-prototype-builtins
+      if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
+        const host = cliArgs.plugin['device-farm'].remote[0];
+        const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
+        remoteDevices.filter((device: any) => {
+          delete device['meta'];
+          delete device['$loki'];
+          deviceState.push(
+            Object.assign({
+              ...device,
+              host: `${host}`,
+            })
+          );
+        });
+      }
     } catch (e) {
       console.log(e);
     } finally {
