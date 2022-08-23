@@ -21,7 +21,7 @@ export function saveDevices(devices: Array<IDevice>): any {
       (d: IDevice) => d.udid === device.udid && device.host !== d.host
     );
     if (!isDeviceConneted) {
-      DeviceModel.find({ udid: device.udid, host: device.host }).remove();
+      DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
     }
   });
 
