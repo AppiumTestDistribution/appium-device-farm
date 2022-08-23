@@ -19,6 +19,7 @@ import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -95,20 +96,42 @@ class DevicePlugin extends BasePlugin {
         }
       }
     );
-
-    const session = await next();
+    let session;
+    if (!device.host.includes('127.0.0.1')) {
+      try {
+        session = (
+          await axios.post(`${device.host}/wd/hub/session`, {
+            capabilities: caps,
+          })
+        ).data;
+      } catch (err: any) {
+        await updateDevice(device, { busy: false });
+        logger.info(
+          `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
+        );
+        throw new Error(
+          `${err}, Please check the remote appium server log to know the reason for failure`
+        );
+      }
+    } else {
+      session = await next();
+    }
+    console.log('Session', session);
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
       await updateDevice(device, { busy: false });
       logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
+      const sessionId = device.host.includes('127.0.0.1')
+        ? session.value[0]
+        : session.value.sessionId;
       await updateDevice(device, {
         busy: true,
-        session_id: session.value[0],
+        session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
       });
-      logger.info(`📱 Updating Device ${device.udid} with session ID ${session.value[0]}`);
+      logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
   }

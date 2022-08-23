@@ -14,7 +14,11 @@ export function saveDevices(devices: Array<IDevice>): any {
     .remove();
 
   /**
-   * Check if the device is disconnecte and remove from the DB instance.
+   * 
+   */
+  
+  /**
+   * Check if the device is disconnected and remove from the DB instance.
    */
   devicesInDB.forEach((device: IDevice) => {
     const isDeviceConneted = devices.find(
@@ -67,7 +71,6 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     platform: filterOptions.platform,
     name: { $contains: filterOptions.name || '' },
     busy: filterOptions.busy,
-    offline: filterOptions.offline,
   } as any;
 
   if (filterOptions.udid) {

@@ -30,10 +30,10 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
   }
 
   render() {
-    const { name, sdk, deviceType, platform, udid, dashboard_link, total_session_count } =
+    const { name, sdk, deviceType, platform, udid, dashboard_link, total_session_count, host } =
       this.props.device;
     const deviceState = this.getDeviceState();
-
+    const hostName = host.split(':')[1].replace('//', '');
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className="device-info-card-container__title_wrapper">
@@ -57,6 +57,10 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           <div className="device-info-card-container__body_row">
             <div className="device-info-card-container__body_row_label">Device Type:</div>
             <div className="device-info-card-container__body_row_value">{deviceType}</div>
+          </div>
+          <div className="device-info-card-container__body_row">
+            <div className="device-info-card-container__body_row_label">Device Location:</div>
+            <div className="device-info-card-container__body_row_value">{hostName}</div>
           </div>
         </div>
         <div className="device-info-card-container__footer_wrapper">

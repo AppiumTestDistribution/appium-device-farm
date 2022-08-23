@@ -1,26 +1,19 @@
 {
   "files": {
-    "main.css": "/device-farm/static/css/main.e44de154.chunk.css",
-    "main.js": "/device-farm/static/js/main.eb946ee1.chunk.js",
-    "main.js.map": "/device-farm/static/js/main.eb946ee1.chunk.js.map",
-    "runtime-main.js": "/device-farm/static/js/runtime-main.e825ef0f.js",
-    "runtime-main.js.map": "/device-farm/static/js/runtime-main.e825ef0f.js.map",
-    "static/js/2.7a7b53c1.chunk.js": "/device-farm/static/js/2.7a7b53c1.chunk.js",
-    "static/js/2.7a7b53c1.chunk.js.map": "/device-farm/static/js/2.7a7b53c1.chunk.js.map",
-    "static/js/3.dd9b6958.chunk.js": "/device-farm/static/js/3.dd9b6958.chunk.js",
-    "static/js/3.dd9b6958.chunk.js.map": "/device-farm/static/js/3.dd9b6958.chunk.js.map",
+    "main.css": "/device-farm/static/css/main.ea049860.css",
+    "main.js": "/device-farm/static/js/main.5e5e5499.js",
+    "static/js/988.125737e1.chunk.js": "/device-farm/static/js/988.125737e1.chunk.js",
+    "static/media/apple-icon.svg": "/device-farm/static/media/apple-icon.a17e460ff848e58ea357b7d5e7dbb21f.svg",
+    "static/media/android-icon.svg": "/device-farm/static/media/android-icon.ec560eea7ab9466df54aa91bbf1c8983.svg",
     "index.html": "/device-farm/index.html",
-    "static/css/main.e44de154.chunk.css.map": "/device-farm/static/css/main.e44de154.chunk.css.map",
-    "static/js/2.7a7b53c1.chunk.js.LICENSE.txt": "/device-farm/static/js/2.7a7b53c1.chunk.js.LICENSE.txt",
-    "static/media/android-icon.ec560eea.svg": "/device-farm/static/media/android-icon.ec560eea.svg",
-    "static/media/apple-icon.a17e460f.svg": "/device-farm/static/media/apple-icon.a17e460f.svg",
-    "static/media/apple-new-icon.568712db.svg": "/device-farm/static/media/apple-new-icon.568712db.svg",
-    "static/media/session-icon.de13b040.svg": "/device-farm/static/media/session-icon.de13b040.svg"
+    "static/media/apple-new-icon.svg": "/device-farm/static/media/apple-new-icon.568712db98ff3f83690a4e07bfe3d702.svg",
+    "static/media/session-icon.svg": "/device-farm/static/media/session-icon.de13b0401a71c8b2ee17117134dabd57.svg",
+    "main.ea049860.css.map": "/device-farm/static/css/main.ea049860.css.map",
+    "main.5e5e5499.js.map": "/device-farm/static/js/main.5e5e5499.js.map",
+    "988.125737e1.chunk.js.map": "/device-farm/static/js/988.125737e1.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.e825ef0f.js",
-    "static/js/2.7a7b53c1.chunk.js",
-    "static/css/main.e44de154.chunk.css",
-    "static/js/main.eb946ee1.chunk.js"
+    "static/css/main.ea049860.css",
+    "static/js/main.5e5e5499.js"
   ]
 }
