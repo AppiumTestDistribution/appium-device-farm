@@ -3,7 +3,7 @@
       "port": 4723,
       "plugin": {
         "device-farm": {
-          "platform": "iOS",
+          "platform": "android",
           "include-simulators": true
         }
       }

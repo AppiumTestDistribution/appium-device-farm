@@ -9,7 +9,7 @@ export function saveDevices(devices: Array<IDevice>): any {
     .find()
     .data()
     .map((device: IDevice) => device.udid);
-
+  console.log('New UDID', newDeviveUdids, 'AllDevices', allDeviceIds);
   /**
    * Previously connected devices which are not identified are marked offline.
    */

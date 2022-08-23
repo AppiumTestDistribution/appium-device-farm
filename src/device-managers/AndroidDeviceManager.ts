@@ -58,6 +58,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       // eslint-disable-next-line no-prototype-builtins
       if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
         const host = cliArgs.plugin['device-farm'].remote[0];
+        log.info('Fetching remote android devices');
         const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
         remoteDevices.filter((device: any) => {
           delete device['meta'];
