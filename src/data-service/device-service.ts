@@ -18,7 +18,7 @@ export function saveDevices(devices: Array<IDevice>): any {
    */
   devicesInDB.forEach((device: IDevice) => {
     const isDeviceConneted = devices.find(
-      (d: IDevice) => d.udid === device.udid && device.host !== d.host
+      (d: IDevice) => d.udid === device.udid && device.host === d.host
     );
     if (!isDeviceConneted) {
       DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
