@@ -25,7 +25,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       const connectedDevices = await this.getConnectedDevices();
       await asyncForEach(connectedDevices, async (device: IDevice) => {
         if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
-          const existingDevice = existingDeviceDetails.find((dev) => dev.udid === device.udid);
+          const existingDevice = existingDeviceDetails.find(
+            (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
+          );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
             deviceState.push({
@@ -51,6 +53,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
               udid: device.udid,
               platform: 'android',
               deviceType: realDevice ? 'real' : 'emulator',
+              host: `http://127.0.0.1:${cliArgs.port}`,
             });
           }
         }
