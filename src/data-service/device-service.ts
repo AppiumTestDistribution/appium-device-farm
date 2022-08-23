@@ -5,10 +5,7 @@ import logger from '../logger';
 
 export function saveDevices(devices: Array<IDevice>): any {
   const connectedDeviceIds = new Set(devices.map((device) => device.udid));
-  const devicesInDB = DeviceModel.chain()
-    .find()
-    .data()
-    .map((device: IDevice) => device.udid);
+  const devicesInDB = DeviceModel.chain().find().data();
   /**
    * Previously connected devices which are not identified remove.
    */
@@ -20,7 +17,10 @@ export function saveDevices(devices: Array<IDevice>): any {
    * If the newly identified devices are not in the database, then add them to the database
    */
   devices.forEach(function (device) {
-    if (!devicesInDB.includes(device.udid)) {
+    const isDeviceAlreadyPresent = devicesInDB.find(
+      (d: IDevice) => d.udid === device.udid && device.host === d.host
+    );
+    if (!isDeviceAlreadyPresent) {
       DeviceModel.insert({
         ...device,
         offline: false,
