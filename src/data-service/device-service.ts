@@ -14,6 +14,18 @@ export function saveDevices(devices: Array<IDevice>): any {
     .remove();
 
   /**
+   * Check if the device is disconnecte and remove from the DB instance.
+   */
+  devicesInDB.forEach((device: IDevice) => {
+    const isDeviceConneted = devices.find(
+      (d: IDevice) => d.udid === device.udid && device.host !== d.host
+    );
+    if (!isDeviceConneted) {
+      DeviceModel.find({ udid: device.udid, host: device.host }).remove();
+    }
+  });
+
+  /**
    * If the newly identified devices are not in the database, then add them to the database
    */
   devices.forEach(function (device) {
