@@ -51,6 +51,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",
+    "http-proxy-middleware": "^2.0.6",
     "lodash": "^4.17.21",
     "lokijs": "^1.5.12",
     "node-cache": "^5.1.2",
