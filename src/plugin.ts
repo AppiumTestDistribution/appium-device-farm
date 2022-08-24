@@ -20,7 +20,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { registerProxyMiddlware } from './wd-command-proxy';
+import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -118,6 +118,7 @@ class DevicePlugin extends BasePlugin {
     } else {
       session = await next();
     }
+
     console.log('Session', session);
     await removePendingSession(pendingSessionId);
 
@@ -133,6 +134,9 @@ class DevicePlugin extends BasePlugin {
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
       });
+      if (!device.host.includes('127.0.0.1')) {
+        addProxyHandler(sessionId, device.host);
+      }
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;

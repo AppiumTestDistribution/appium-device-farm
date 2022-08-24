@@ -1,11 +1,33 @@
+import { expect } from 'chai';
 import { Request, Response, NextFunction } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
+const remoteProxyMap: Map<string, any> = new Map();
+
+export function addProxyHandler(sessionId: string, remoteHost: string) {
+  remoteProxyMap.set(sessionId, createProxyMiddleware({ target: remoteHost }));
+}
+
+function getSessionIdFromUr(url: string) {
+  const SESSION_ID_PATTERN = /\/session\/([^/]+)/;
+  const match = SESSION_ID_PATTERN.exec(url);
+  if (match) {
+    return match[1];
+  }
+  return null;
+}
+
 function handler(req: Request, res: Response, next: NextFunction) {
-  //1. check the sessionID and see if its local or remote session
-  //2. if its a local session, call next()
-  //3. if its a remote session
-  //4. return createProxyMiddleware({target: device.host})(req, res, next);
+  let sessionId = getSessionIdFromUr(req.url);
+  if (!sessionId) {
+    return next();
+  }
+
+  if (remoteProxyMap.has(sessionId)) {
+    remoteProxyMap.get(sessionId)(req, res, next);
+  } else {
+    return next();
+  }
 }
 
 export function registerProxyMiddlware(expressApp: any) {
