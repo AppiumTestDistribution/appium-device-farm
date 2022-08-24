@@ -1,11 +1,39 @@
-import { expect } from 'chai';
 import { Request, Response, NextFunction } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import _ from 'lodash';
 
 const remoteProxyMap: Map<string, any> = new Map();
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
-  remoteProxyMap.set(sessionId, createProxyMiddleware({ target: remoteHost }));
+  remoteProxyMap.set(
+    sessionId,
+    createProxyMiddleware({
+      target: new URL(remoteHost).origin,
+      logLevel: 'debug',
+      changeOrigin: true,
+      onProxyReq: proxyRequestInterceptor,
+    })
+  );
+}
+
+export function removeProxyHandler(sessionId: string) {
+  remoteProxyMap.delete(sessionId);
+}
+
+function proxyRequestInterceptor(proxyReq: any, req: any, res: any) {
+  if (!new RegExp(/post|put|patch/g).test(req.method.toLowerCase())) {
+    return;
+  }
+  const contentType = proxyReq.getHeader('Content-Type');
+
+  const writeBody = (bodyData: string) => {
+    proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  };
+
+  if (contentType && contentType.includes('application/json')) {
+    writeBody(JSON.stringify(req.body || {}));
+  }
 }
 
 function getSessionIdFromUr(url: string) {
@@ -18,7 +46,8 @@ function getSessionIdFromUr(url: string) {
 }
 
 function handler(req: Request, res: Response, next: NextFunction) {
-  let sessionId = getSessionIdFromUr(req.url);
+  const sessionId = getSessionIdFromUr(req.url);
+  console.log('SessionID in Handler', sessionId);
   if (!sessionId) {
     return next();
   }
@@ -31,7 +60,7 @@ function handler(req: Request, res: Response, next: NextFunction) {
 }
 
 export function registerProxyMiddlware(expressApp: any) {
-  let index = expressApp._router.stack.findIndex((s: any) => s.route);
+  const index = expressApp._router.stack.findIndex((s: any) => s.route);
   expressApp.use('/', handler);
   expressApp._router.stack.splice(index, 0, expressApp._router.stack.pop());
 }

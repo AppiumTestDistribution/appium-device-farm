@@ -20,7 +20,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
+import { addProxyHandler, registerProxyMiddlware, removeProxyHandler } from './wd-command-proxy';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -101,11 +101,16 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       try {
-        session = (
-          await axios.post(`${device.host}/wd/hub/session`, {
-            capabilities: caps,
-          })
-        ).data;
+        const sessionDetails = //change to give the entire URL
+          (
+            await axios.post(`${device.host}/wd/hub/session`, {
+              capabilities: caps,
+            })
+          ).data;
+        session = {
+          protocol: 'W3C',
+          value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
+        };
       } catch (err: any) {
         await updateDevice(device, { busy: false });
         logger.info(
@@ -126,9 +131,7 @@ class DevicePlugin extends BasePlugin {
       await updateDevice(device, { busy: false });
       logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
-      const sessionId = device.host.includes('127.0.0.1')
-        ? session.value[0]
-        : session.value.sessionId;
+      const sessionId = session.value[0];
       await updateDevice(device, {
         busy: true,
         session_id: sessionId,
@@ -144,6 +147,7 @@ class DevicePlugin extends BasePlugin {
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDevice(sessionId);
+    removeProxyHandler(sessionId);
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
