@@ -10,6 +10,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
+      cliArgs: { port: 4723, plugin: '' },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -31,6 +32,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
+      cliArgs: { port: 4723, plugin: '' },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -52,6 +54,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
+      cliArgs: { port: 4723, plugin: '' },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -69,7 +72,7 @@ describe('Android Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","name":"","busy":false,"offline":false}'
+          'No device found for filters: {"platform":"android","name":"","busy":false}'
         )
     );
   });
