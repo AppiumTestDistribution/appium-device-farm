@@ -14,10 +14,6 @@ export function saveDevices(devices: Array<IDevice>): any {
     .remove();
 
   /**
-   * 
-   */
-  
-  /**
    * Check if the device is disconnected and remove from the DB instance.
    */
   devicesInDB.forEach((device: IDevice) => {

@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
+import { unblockDevice } from './data-service/device-service';
+import logger from './logger';
 
 const remoteProxyMap: Map<string, any> = new Map();
 
@@ -45,15 +47,20 @@ function getSessionIdFromUr(url: string) {
   return null;
 }
 
-function handler(req: Request, res: Response, next: NextFunction) {
+async function handler(req: Request, res: Response, next: NextFunction) {
   const sessionId = getSessionIdFromUr(req.url);
-  console.log('SessionID in Handler', sessionId);
   if (!sessionId) {
     return next();
   }
-
   if (remoteProxyMap.has(sessionId)) {
     remoteProxyMap.get(sessionId)(req, res, next);
+    if (req.method === 'DELETE') {
+      logger.info(
+        `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`
+      );
+      unblockDevice(sessionId);
+      removeProxyHandler(sessionId);
+    }
   } else {
     return next();
   }

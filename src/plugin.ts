@@ -20,7 +20,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { addProxyHandler, registerProxyMiddlware, removeProxyHandler } from './wd-command-proxy';
+import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -146,8 +146,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
-    await unblockDevice(sessionId);
-    removeProxyHandler(sessionId);
+    unblockDevice(sessionId);
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }

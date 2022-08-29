@@ -17,7 +17,7 @@ describe('Android Device Manager', () => {
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sandbox.stub(androidDevices, 'isRealDevice').returns(false);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
-    const devices = await androidDevices.getDevices(true, []);
+    const devices = await androidDevices.getDevices(true, [], { port: 4723, plugin: '' });
     expect(devices).to.deep.equal([
       {
         busy: false,
@@ -29,6 +29,7 @@ describe('Android Device Manager', () => {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
+        host: 'http://127.0.0.1:4723',
       },
     ]);
   });
@@ -43,6 +44,7 @@ describe('Android Device Manager', () => {
         state: 'device',
         sdk: '9',
         name: 'sdk_phone_x86',
+        host: '127.0.0.1',
       },
       {
         udid: 'samsung_galaxy_s10',
@@ -51,6 +53,7 @@ describe('Android Device Manager', () => {
         state: 'device',
         sdk: '9',
         name: 'sdk_phone_x86',
+        host: '127.0.0.1',
       },
     ];
     sandbox.stub(androidDevices, 'getConnectedDevices').returns(existingDevices);
@@ -64,6 +67,7 @@ describe('Android Device Manager', () => {
         sdk: '9',
         realDevice: true,
         udid: 'samsung_galaxy_s10',
+        host: '127.0.0.1',
       },
     ]);
   });
@@ -78,6 +82,7 @@ describe('Android Device Manager', () => {
         state: 'device',
         sdk: '9',
         name: 'sdk_phone_x86',
+        host: '127.0.0.1',
       },
       {
         udid: 'samsung_galaxy_s10',
@@ -86,6 +91,7 @@ describe('Android Device Manager', () => {
         state: 'device',
         sdk: '9',
         name: 'sdk_phone_x86',
+        host: '127.0.0.1',
       },
     ];
     sandbox.stub(androidDevices, 'getConnectedDevices').returns(existingDevices);
@@ -99,6 +105,7 @@ describe('Android Device Manager', () => {
         sdk: '9',
         realDevice: true,
         udid: 'samsung_galaxy_s10',
+        host: '127.0.0.1',
       },
     ]);
   });
