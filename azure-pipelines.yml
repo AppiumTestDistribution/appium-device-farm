@@ -84,6 +84,6 @@ jobs:
         npm ci
         export APPIUM_HOME=/tmp/device-farm
         ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=both &
+        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./server-config.json &
         npm run test-e2e
       displayName: 'E2E Test'
