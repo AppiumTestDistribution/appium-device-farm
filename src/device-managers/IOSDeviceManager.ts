@@ -57,50 +57,56 @@ export default class IOSDeviceManager implements IDeviceManager {
     cliArgs: any
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    const devices = await this.getConnectedDevices();
-    await asyncForEach(devices, async (udid: string) => {
-      const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
-      if (existingDevice) {
-        log.info(`IOS Device details for ${udid} already available`);
-        deviceState.push({
-          ...existingDevice,
-          busy: false,
+    const hosts = cliArgs.plugin['device-farm'].remote;
+    for (const host of hosts) {
+      if (host.includes('127.0.0.1')) {
+        const devices = await this.getConnectedDevices();
+        await asyncForEach(devices, async (udid: string) => {
+          const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
+          if (existingDevice) {
+            log.info(`IOS Device details for ${udid} already available`);
+            deviceState.push({
+              ...existingDevice,
+              busy: false,
+            });
+          } else {
+            log.info(`IOS Device details for ${udid} not available. So querying now.`);
+            const wdaLocalPort = await getFreePort();
+            const [sdk, name] = await Promise.all([
+              this.getOSVersion(udid),
+              this.getDeviceName(udid),
+            ]);
+            deviceState.push(
+              Object.assign({
+                wdaLocalPort,
+                udid,
+                sdk,
+                name,
+                busy: false,
+                realDevice: true,
+                deviceType: 'real',
+                platform: 'ios',
+                host: `http://127.0.0.1:${cliArgs.port}`,
+              })
+            );
+          }
         });
       } else {
-        log.info(`IOS Device details for ${udid} not available. So querying now.`);
-        const wdaLocalPort = await getFreePort();
-        const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
-        deviceState.push(
-          Object.assign({
-            wdaLocalPort,
-            udid,
-            sdk,
-            name,
-            busy: false,
-            realDevice: true,
-            deviceType: 'real',
-            platform: 'ios',
-            host: `http://127.0.0.1:${cliArgs.port}`,
-          })
-        );
+        log.info('Fetching remote iOS devices');
+        const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+        remoteDevices.filter((device: any) => {
+          if (device.deviceType === 'real') {
+            delete device['meta'];
+            delete device['$loki'];
+            deviceState.push(
+              Object.assign({
+                ...device,
+                host: `${host}`,
+              })
+            );
+          }
+        });
       }
-    });
-    // eslint-disable-next-line no-prototype-builtins
-    if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
-      const host = cliArgs.plugin['device-farm'].remote[0];
-      const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-      remoteDevices.filter((device: any) => {
-        if (device.deviceType === 'real') {
-          delete device['meta'];
-          delete device['$loki'];
-          deviceState.push(
-            Object.assign({
-              ...device,
-              host: `${host}`,
-            })
-          );
-        }
-      });
     }
     return deviceState;
   }

@@ -20,59 +20,63 @@ export default class AndroidDeviceManager implements IDeviceManager {
       return [];
     }
     const deviceState: Array<IDevice> = [];
+    const hosts = cliArgs.plugin['device-farm'].remote;
     try {
-      await this.requireSdkRoot();
-      const connectedDevices = await this.getConnectedDevices();
-      await asyncForEach(connectedDevices, async (device: IDevice) => {
-        if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
-          const existingDevice = existingDeviceDetails.find(
-            (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
-          );
-          if (existingDevice) {
-            log.info(`Android Device details for ${device.udid} already available`);
-            deviceState.push({
-              ...existingDevice,
-              busy: false,
-            });
-          } else {
-            log.info(`Android Device details for ${device.udid} not available. So querying now.`);
-            const systemPort = await getFreePort();
-            const [sdk, realDevice, name] = await Promise.all([
-              this.getDeviceVersion(device.udid),
-              this.isRealDevice(device.udid),
-              this.getDeviceName(device.udid),
-            ]);
+      for (const host of hosts) {
+        if (host.includes('127.0.0.1')) {
+          await this.requireSdkRoot();
+          const connectedDevices = await this.getConnectedDevices();
+          await asyncForEach(connectedDevices, async (device: IDevice) => {
+            if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
+              const existingDevice = existingDeviceDetails.find(
+                (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
+              );
+              if (existingDevice) {
+                log.info(`Android Device details for ${device.udid} already available`);
+                deviceState.push({
+                  ...existingDevice,
+                  busy: false,
+                });
+              } else {
+                log.info(
+                  `Android Device details for ${device.udid} not available. So querying now.`
+                );
+                const systemPort = await getFreePort();
+                const [sdk, realDevice, name] = await Promise.all([
+                  this.getDeviceVersion(device.udid),
+                  this.isRealDevice(device.udid),
+                  this.getDeviceName(device.udid),
+                ]);
 
-            deviceState.push({
-              systemPort,
-              sdk,
-              realDevice,
-              name,
-              busy: false,
-              state: device.state,
-              udid: device.udid,
-              platform: 'android',
-              deviceType: realDevice ? 'real' : 'emulator',
-              host: `http://127.0.0.1:${cliArgs.port}`,
-            });
-          }
+                deviceState.push({
+                  systemPort,
+                  sdk,
+                  realDevice,
+                  name,
+                  busy: false,
+                  state: device.state,
+                  udid: device.udid,
+                  platform: 'android',
+                  deviceType: realDevice ? 'real' : 'emulator',
+                  host: `http://127.0.0.1:${cliArgs.port}`,
+                });
+              }
+            }
+          });
+        } else {
+          log.info('Fetching remote android devices');
+          const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
+          remoteDevices.filter((device: any) => {
+            delete device['meta'];
+            delete device['$loki'];
+            deviceState.push(
+              Object.assign({
+                ...device,
+                host: `${host}`,
+              })
+            );
+          });
         }
-      });
-      // eslint-disable-next-line no-prototype-builtins
-      if (cliArgs?.plugin['device-farm']?.hasOwnProperty('remote')) {
-        const host = cliArgs.plugin['device-farm'].remote[0];
-        log.info('Fetching remote android devices');
-        const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
-        remoteDevices.filter((device: any) => {
-          delete device['meta'];
-          delete device['$loki'];
-          deviceState.push(
-            Object.assign({
-              ...device,
-              host: `${host}`,
-            })
-          );
-        });
       }
     } catch (e) {
       console.log(e);

@@ -4,6 +4,13 @@ import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager
 import * as Helper from '../../src/helpers';
 var sandbox = sinon.createSandbox();
 
+const cliArgs = {
+  'device-farm': {
+    platform: 'android',
+    'include-simulators': true,
+    remote: ['http://127.0.0.1:4723'],
+  },
+};
 describe('Android Device Manager', () => {
   afterEach(function () {
     sandbox.restore();
@@ -17,7 +24,7 @@ describe('Android Device Manager', () => {
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sandbox.stub(androidDevices, 'isRealDevice').returns(false);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
-    const devices = await androidDevices.getDevices(true, [], { port: 4723, plugin: '' });
+    const devices = await androidDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
         busy: false,
@@ -57,7 +64,10 @@ describe('Android Device Manager', () => {
       },
     ];
     sandbox.stub(androidDevices, 'getConnectedDevices').returns(existingDevices);
-    const devices = await androidDevices.getDevices(false, existingDevices);
+    const devices = await androidDevices.getDevices(false, existingDevices, {
+      port: 4723,
+      plugin: cliArgs,
+    });
     expect(devices).to.deep.equal([
       {
         busy: false,
@@ -95,7 +105,10 @@ describe('Android Device Manager', () => {
       },
     ];
     sandbox.stub(androidDevices, 'getConnectedDevices').returns(existingDevices);
-    const devices = await androidDevices.getDevices(false, existingDevices);
+    const devices = await androidDevices.getDevices(false, existingDevices, {
+      port: 4723,
+      plugin: cliArgs,
+    });
     expect(devices).to.deep.equal([
       {
         busy: false,

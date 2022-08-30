@@ -39,15 +39,21 @@ class DevicePlugin extends BasePlugin {
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
     let platform;
+    let remote;
     registerProxyMiddlware(expressApp);
     console.log(cliArgs);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
+      remote = cliArgs.plugin['device-farm'].remote;
     }
     expressApp.use('/device-farm', router);
     if (!platform)
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
+      );
+    if (!remote)
+      throw new Error(
+        '🔴 🔴 🔴 Specify --plugin-device-farm-remote from CLI as Array or use appium server config 🔴 🔴 🔴'
       );
     let includeSimulators = true;
     // eslint-disable-next-line no-prototype-builtins

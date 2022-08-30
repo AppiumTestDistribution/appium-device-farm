@@ -4,6 +4,13 @@ import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
 var sandbox = sinon.createSandbox();
 
+const cliArgs = {
+  'device-farm': {
+    platform: 'iOS',
+    'include-simulators': true,
+    remote: ['http://127.0.0.1:4723'],
+  },
+};
 describe('IOS Device Manager', () => {
   afterEach(function () {
     sandbox.restore();
@@ -33,7 +40,7 @@ describe('IOS Device Manager', () => {
         host: 'http://127.0.0.1:4723',
       },
     ]);
-    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: '' });
+    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
@@ -81,7 +88,7 @@ describe('IOS Device Manager', () => {
         host: 'http://127.0.0.1:4723',
       },
     ]);
-    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: '' });
+    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
@@ -121,7 +128,7 @@ describe('IOS Device Manager', () => {
         host: 'http://127.0.0.1:4723',
       },
     ]);
-    const devices = await iosDevices.getDevices(false, [], { port: 4723, plugin: '' });
+    const devices = await iosDevices.getDevices(false, [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
