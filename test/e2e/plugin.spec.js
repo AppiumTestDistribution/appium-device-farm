@@ -6,6 +6,6 @@ import axios from 'axios';
 
 describe('Basic Plugin Test', () => {
   it('Basic Plugin test', async () => {
-    (await axios.get('http://localhost:4723/device-farm/api/devices')).status.should.eql(200);
+    (await axios.get('http://localhost:31337/device-farm/api/devices')).status.should.eql(200);
   });
 });
