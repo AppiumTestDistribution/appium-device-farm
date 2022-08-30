@@ -4,7 +4,7 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit",
+    "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit --timeout=10000",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
     "test-parallel-android": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/conf.spec.js --timeout 260000",
     "test-parallel-ios": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
@@ -90,6 +90,7 @@
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-prettier": "3.4.1",
     "husky": "7.0.4",
+    "ip": "^1.1.8",
     "lint-staged": "12.5.0",
     "mocha": "9.2.2",
     "prettier": "2.7.1",

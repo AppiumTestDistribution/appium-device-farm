@@ -21,61 +21,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     const deviceState: Array<IDevice> = [];
     const hosts = cliArgs.plugin['device-farm'].remote;
+    console.log(hosts);
     try {
       for (const host of hosts) {
         if (host.includes('127.0.0.1')) {
-          await this.requireSdkRoot();
-          const connectedDevices = await this.getConnectedDevices();
-          await asyncForEach(connectedDevices, async (device: IDevice) => {
-            if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
-              const existingDevice = existingDeviceDetails.find(
-                (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
-              );
-              if (existingDevice) {
-                log.info(`Android Device details for ${device.udid} already available`);
-                deviceState.push({
-                  ...existingDevice,
-                  busy: false,
-                });
-              } else {
-                log.info(
-                  `Android Device details for ${device.udid} not available. So querying now.`
-                );
-                const systemPort = await getFreePort();
-                const [sdk, realDevice, name] = await Promise.all([
-                  this.getDeviceVersion(device.udid),
-                  this.isRealDevice(device.udid),
-                  this.getDeviceName(device.udid),
-                ]);
-
-                deviceState.push({
-                  systemPort,
-                  sdk,
-                  realDevice,
-                  name,
-                  busy: false,
-                  state: device.state,
-                  udid: device.udid,
-                  platform: 'android',
-                  deviceType: realDevice ? 'real' : 'emulator',
-                  host: `http://127.0.0.1:${cliArgs.port}`,
-                });
-              }
-            }
-          });
+          await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          log.info('Fetching remote android devices');
-          const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
-          remoteDevices.filter((device: any) => {
-            delete device['meta'];
-            delete device['$loki'];
-            deviceState.push(
-              Object.assign({
-                ...device,
-                host: `${host}`,
-              })
-            );
-          });
+          await this.fetchRemoteAndroidDevices(host, deviceState);
         }
       }
     } catch (e) {
@@ -91,6 +43,65 @@ export default class AndroidDeviceManager implements IDeviceManager {
       // eslint-disable-next-line no-unsafe-finally
       return deviceState;
     }
+  }
+
+  private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[]) {
+    log.info('Fetching remote android devices');
+    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
+    remoteDevices.filter((device: any) => {
+      delete device['meta'];
+      delete device['$loki'];
+      deviceState.push(
+        Object.assign({
+          ...device,
+          host: `${host}`,
+        })
+      );
+    });
+  }
+
+  private async fetchLocalAndroidDevices(
+    deviceState: IDevice[],
+    existingDeviceDetails: IDevice[],
+    cliArgs: any
+  ) {
+    await this.requireSdkRoot();
+    const connectedDevices = await this.getConnectedDevices();
+    await asyncForEach(connectedDevices, async (device: IDevice) => {
+      if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
+        const existingDevice = existingDeviceDetails.find(
+          (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
+        );
+        if (existingDevice) {
+          log.info(`Android Device details for ${device.udid} already available`);
+          deviceState.push({
+            ...existingDevice,
+            busy: false,
+          });
+        } else {
+          log.info(`Android Device details for ${device.udid} not available. So querying now.`);
+          const systemPort = await getFreePort();
+          const [sdk, realDevice, name] = await Promise.all([
+            this.getDeviceVersion(device.udid),
+            this.isRealDevice(device.udid),
+            this.getDeviceName(device.udid),
+          ]);
+
+          deviceState.push({
+            systemPort,
+            sdk,
+            realDevice,
+            name,
+            busy: false,
+            state: device.state,
+            udid: device.udid,
+            platform: 'android',
+            deviceType: realDevice ? 'real' : 'emulator',
+            host: `http://127.0.0.1:${cliArgs.port}`,
+          });
+        }
+      }
+    });
   }
 
   private async getAdb(): Promise<any> {
