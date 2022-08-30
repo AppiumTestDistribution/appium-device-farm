@@ -10,7 +10,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
-      cliArgs: { port: 4723, plugin: '' },
+      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -32,7 +32,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
-      cliArgs: { port: 4723, plugin: '' },
+      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -54,7 +54,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'android',
       includeSimulators: true,
-      cliArgs: { port: 4723, plugin: '' },
+      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
