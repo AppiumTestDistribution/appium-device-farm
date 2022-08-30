@@ -109,7 +109,7 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: 'http://192.168.0.106:3000',
+        host: `http://${ipAddress}:3000`,
         offline: false,
       },
       {
@@ -122,7 +122,7 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: 'http://192.168.0.106:3000',
+        host: `http://${ipAddress}:3000`,
         offline: false,
       },
     ];
