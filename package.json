@@ -90,7 +90,7 @@
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-prettier": "3.4.1",
     "husky": "7.0.4",
-    "ip": "^1.1.8",
+    "ip": "1.1.8",
     "lint-staged": "12.5.0",
     "mocha": "9.2.2",
     "prettier": "2.7.1",
