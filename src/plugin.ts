@@ -41,7 +41,6 @@ class DevicePlugin extends BasePlugin {
     let platform;
     let remote;
     registerProxyMiddlware(expressApp);
-    console.log(cliArgs);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
       remote = cliArgs.plugin['device-farm'].remote;
@@ -51,10 +50,7 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
-    if (!remote)
-      throw new Error(
-        '🔴 🔴 🔴 Specify --plugin-device-farm-remote from CLI as Array or use appium server config 🔴 🔴 🔴'
-      );
+    if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
     let includeSimulators = true;
     // eslint-disable-next-line no-prototype-builtins
     if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {

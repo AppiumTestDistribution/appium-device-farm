@@ -1,7 +1,7 @@
 import { remote } from 'webdriverio';
 
 const APPIUM_HOST = 'localhost';
-const APPIUM_PORT = 4723;
+const APPIUM_PORT = 31337;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,
   hostname: APPIUM_HOST,
@@ -24,10 +24,8 @@ describe('Plugin1 Test', () => {
 
   it('Slider test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-    await driver.pause(2000);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
-    await driver.pause(2000);
   });
 
   afterEach(async () => await driver.deleteSession());

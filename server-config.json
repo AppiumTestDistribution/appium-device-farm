@@ -4,8 +4,7 @@
     "plugin": {
       "device-farm": {
         "platform": "both",
-        "include-simulators": true,
-        "remote": ["http://127.0.0.1:31337"]
+        "include-simulators": true
       }
     }
   }
