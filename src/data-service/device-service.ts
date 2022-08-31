@@ -4,35 +4,35 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
 
 export function saveDevices(devices: Array<IDevice>): any {
-  const newDeviveUdids = new Set(devices.map((device) => device.udid));
-  const allDeviceIds = DeviceModel.chain()
-    .find()
-    .data()
-    .map((device: IDevice) => device.udid);
-
+  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
+  const devicesInDB = DeviceModel.chain().find().data();
   /**
-   * Previously connected devices which are not identified are marked offline.
+   * Previously connected devices which are not identified remove.
    */
   DeviceModel.chain()
-    .find({ udid: { $nin: [...newDeviveUdids] } }) // $nin => not in condition
-    .update(function (device: IDevice) {
-      device.offline = true;
-    });
+    .find({ udid: { $nin: [...connectedDeviceIds] } }) // $nin => not in condition
+    .remove();
 
   /**
-   * If the newly identified devices are already in the database, mark the device as online
+   * Check if the device is disconnected and remove from the DB instance.
    */
-  DeviceModel.chain()
-    .find({ udid: { $in: [...newDeviveUdids] } })
-    .update(function (device: IDevice) {
-      device.offline = false;
-    });
+  devicesInDB.forEach((device: IDevice) => {
+    const isDeviceConneted = devices.find(
+      (d: IDevice) => d.udid === device.udid && device.host === d.host
+    );
+    if (!isDeviceConneted) {
+      DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
+    }
+  });
 
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
   devices.forEach(function (device) {
-    if (!allDeviceIds.includes(device.udid)) {
+    const isDeviceAlreadyPresent = devicesInDB.find(
+      (d: IDevice) => d.udid === device.udid && device.host === d.host
+    );
+    if (!isDeviceAlreadyPresent) {
       DeviceModel.insert({
         ...device,
         offline: false,
@@ -67,7 +67,6 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     platform: filterOptions.platform,
     name: { $contains: filterOptions.name || '' },
     busy: filterOptions.busy,
-    offline: filterOptions.offline,
   } as any;
 
   if (filterOptions.udid) {

@@ -7,15 +7,19 @@ import IOSDeviceManager from './IOSDeviceManager';
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
   private includeSimulators: boolean;
+  private cliArgs: any;
 
   constructor({
     platform,
     includeSimulators,
+    cliArgs,
   }: {
     platform: Platform | 'both';
     includeSimulators: boolean | true;
+    cliArgs: any;
   }) {
     this.includeSimulators = includeSimulators;
+    this.cliArgs = cliArgs;
     if (platform === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());
       this.deviceManagers.push(new IOSDeviceManager());
@@ -30,7 +34,11 @@ export class DeviceFarmManager {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(
-        ...(await deviceManager.getDevices(this.includeSimulators, existingDeviceDetails || []))
+        ...(await deviceManager.getDevices(
+          this.includeSimulators,
+          existingDeviceDetails || [],
+          this.cliArgs
+        ))
       );
     }
     return devices;

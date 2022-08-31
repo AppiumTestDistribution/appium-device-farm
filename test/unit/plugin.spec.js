@@ -20,7 +20,6 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: undefined,
       busy: false,
-      offline: false,
     });
   });
 
@@ -42,7 +41,6 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: undefined,
       busy: false,
-      offline: false,
     });
   });
 
@@ -65,7 +63,6 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: 10.2,
       busy: false,
-      offline: false,
     });
   });
 });

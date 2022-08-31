@@ -9,6 +9,7 @@ describe('IOS Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'iOS',
       includeSimulators: true,
+      cliArgs: { port: 4723, plugin: '' },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -27,7 +28,7 @@ describe('IOS Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false,"offline":false}'
+          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false}'
         )
     );
   });

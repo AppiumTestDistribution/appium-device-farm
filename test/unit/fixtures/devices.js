@@ -5,6 +5,7 @@ export const deviceMock = [
     udid: 'emulator-5555',
     platform: 'android',
     offline: false,
+    host: '127.0.0.1',
   },
   {
     busy: false,
@@ -12,6 +13,7 @@ export const deviceMock = [
     udid: 'emulator-5554',
     platform: 'android',
     offline: false,
+    host: '127.0.0.1',
   },
   {
     busy: false,
@@ -19,6 +21,7 @@ export const deviceMock = [
     udid: 'emulator-5556',
     platform: 'android',
     offline: true,
+    host: '127.0.0.1',
   },
   {
     name: 'iPad Air',

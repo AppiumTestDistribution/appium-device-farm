@@ -1,5 +1,6 @@
 export interface IDevice {
   name: string;
+  host: string;
   udid: string;
   sdk: string;
   deviceType: 'simulator' | 'emulator' | 'real';

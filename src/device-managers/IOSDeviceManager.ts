@@ -6,6 +6,7 @@ import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { getFreePort, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
+import axios from 'axios';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -15,17 +16,21 @@ export default class IOSDeviceManager implements IDeviceManager {
    */
   async getDevices(
     includeSimulators: boolean,
-    existingDeviceDetails: Array<IDevice>
+    existingDeviceDetails: Array<IDevice>,
+    cliArgs: any
   ): Promise<IDevice[]> {
     if (!isMac()) {
       return [];
     } else {
       if (includeSimulators) {
         return flatten(
-          await Promise.all([this.getRealDevices(existingDeviceDetails), this.getSimulators()])
+          await Promise.all([
+            this.getRealDevices(existingDeviceDetails, cliArgs),
+            this.getSimulators(cliArgs),
+          ])
         );
       } else {
-        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails)]));
+        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
       }
     }
   }
@@ -47,8 +52,44 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getRealDevices(existingDeviceDetails: Array<IDevice>): Promise<Array<IDevice>> {
+  private async getRealDevices(
+    existingDeviceDetails: Array<IDevice>,
+    cliArgs: any
+  ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
+    const hosts = cliArgs.plugin['device-farm'].remote;
+    for (const host of hosts) {
+      if (host.includes('127.0.0.1')) {
+        await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
+      } else {
+        await this.fetchRemoteIOSDevices(host, deviceState);
+      }
+    }
+    return deviceState;
+  }
+
+  private async fetchRemoteIOSDevices(host: any, deviceState: IDevice[]) {
+    log.info('Fetching remote iOS devices');
+    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+    remoteDevices.filter((device: any) => {
+      if (device.deviceType === 'real') {
+        delete device['meta'];
+        delete device['$loki'];
+        deviceState.push(
+          Object.assign({
+            ...device,
+            host: `${host}`,
+          })
+        );
+      }
+    });
+  }
+
+  private async fetchLocalIOSDevices(
+    existingDeviceDetails: IDevice[],
+    deviceState: IDevice[],
+    cliArgs: any
+  ) {
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
       const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
@@ -72,11 +113,11 @@ export default class IOSDeviceManager implements IDeviceManager {
             realDevice: true,
             deviceType: 'real',
             platform: 'ios',
+            host: `http://127.0.0.1:${cliArgs.port}`,
           })
         );
       }
     });
-    return deviceState;
   }
 
   /**
@@ -84,11 +125,40 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getSimulators(): Promise<Array<IDevice>> {
+  private async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
+    const hosts = cliArgs.plugin['device-farm'].remote;
+    const simulators: Array<IDevice> = [];
+    for (const host of hosts) {
+      if (host.includes('127.0.0.1')) {
+        await this.fetchLocalSimulators(simulators, cliArgs);
+      } else {
+        await this.fetchRemoteSimulators(host, simulators);
+      }
+    }
+    simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
+    return simulators;
+  }
+
+  private async fetchRemoteSimulators(host: string, simulators: IDevice[]) {
+    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
+    remoteDevices.filter((device: any) => {
+      if (device.deviceType === 'simulator') {
+        delete device['meta'];
+        delete device['$loki'];
+        simulators.push(
+          Object.assign({
+            ...device,
+            host: `${host}`,
+          })
+        );
+      }
+    });
+  }
+
+  public async fetchLocalSimulators(simulators: IDevice[], cliArgs: any) {
     const flattenValued: Array<IDevice> = flatten(
       Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
     );
-    const simulators: Array<IDevice> = [];
     await asyncForEach(flattenValued, async (device: IDevice) => {
       const wdaLocalPort = await getFreePort();
       simulators.push(
@@ -99,10 +169,9 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: 'ios',
           deviceType: 'simulator',
+          host: `http://127.0.0.1:${cliArgs.port}`,
         })
       );
     });
-    simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
-    return simulators;
   }
 }
