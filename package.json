@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "1.0.0-beta.19",
+  "version": "1.0.0-beta.20",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -81,8 +81,8 @@
     "@types/tcp-port-used": "1.0.1",
     "@types/uuid": "8.3.4",
     "@types/yargs": "17.0.11",
-    "@typescript-eslint/eslint-plugin": "5.30.5",
-    "@typescript-eslint/parser": "5.30.5",
+    "@typescript-eslint/eslint-plugin": "5.36.0",
+    "@typescript-eslint/parser": "5.36.0",
     "babel-eslint": "10.1.0",
     "chai": "4.3.6",
     "eslint": "7.32.0",
