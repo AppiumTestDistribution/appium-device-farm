@@ -8,6 +8,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 - Dynamically allocates a free device from device pool while creating driver session.
 - Updates the device pool with a new device during test execution.
 - Allocates random ports for parallel execution.
+- Remote execution
 
 ## Device UI
 
@@ -40,6 +41,11 @@ The plugin will not be active unless turned on when invoking the Appium server. 
 appium server -ka 800 --use-plugins=device-farm,appium-dashboard  -pa /wd/hub --plugin-device-farm-platform=android
 ```
 
+You can also pass all the arguments in a config file. Refer [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/server-config.json)
+```
+appium server -ka 800 --use-plugins=device-farm --config ./server-config.json -pa /wd/hub
+```
+
 ### Argument options
 
 These arguments are set when you launch the Appium server, with this plugin installed.
@@ -49,6 +55,7 @@ These arguments are set when you launch the Appium server, with this plugin inst
 |----|---|----------|------|-------|
 |`plugin-device-farm-platform`| Yes | Platform to run tests against for parallel execution | None | `both`,`ios`,`android` |
 |`plugin-device-farm-include-simulators`| No | Whether or not to include simulators along with real devices | `true` |`true`, `false`|
+|`plugin-device-farm-remote`| No | Whether or not to include simulators/real devices from remote machine | None |`remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]`|
 
 ## Capabilities
 
@@ -64,6 +71,14 @@ These arguments are set when you launch the Appium server, with this plugin inst
 
 ## Notes
 1. If there is no activity on a session for more then 100 seconds, device allocated to respective session would be unblocked and made available for new session requests.
+
+
+## Remote Execution 
+
+1. Install appium-device-farm plugin on both host and node machine. 
+2. Start the remote server
+3. Start server on host machine with `remote` arguments and give the node machine IP address. For example: `remote: ["https://10.1.1.1:4723"]`
+4. Point your test session to host machine. Host server instance will take care of orchestating the driver session and allocate devices. 
 
 
 ## Example
