@@ -18,7 +18,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 ## Prerequisite
 
-Appium version 2.0 - Tested with 2.0.0-beta.21
+Appium version 2.0.0-beta.43
 
 ## Installation - Server
 
