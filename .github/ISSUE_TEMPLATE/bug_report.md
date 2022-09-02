@@ -1,38 +1,22 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
----
 
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Link to Appium logs**
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+Create a [GIST](https://gist.github.com) which is a paste of your _full_ Appium logs, and link them here.
+Do _NOT_ paste your full Appium logs here, as it will make this issue very long and hard to read!
+If you are reporting a bug, _always_ include Appium logs!
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Environment**
 
-**Additional context**
-Add any other context about the problem here.
+ 1. Appium version (or git revision) that exhibits the issue:
+ 2. Last Appium version that did not exhibit the issue (if applicable):
+ 3. Node.js version (unless using Appium.app|exe):
+ 4. Npm or Yarn package manager:
+ 5. Mobile platform/version under test:
+ 6. Real device or emulator/simulator:
+ 7. Appium CLI or Appium.app|exe:
