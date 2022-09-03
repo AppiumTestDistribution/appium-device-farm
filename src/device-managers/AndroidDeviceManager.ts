@@ -21,7 +21,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     const deviceState: Array<IDevice> = [];
     const hosts = cliArgs.plugin['device-farm'].remote;
-    console.log(hosts);
     try {
       for (const host of hosts) {
         if (host.includes('127.0.0.1')) {

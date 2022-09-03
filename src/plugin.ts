@@ -20,8 +20,9 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 
+import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
+import ora from 'ora';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
@@ -66,6 +67,22 @@ class DevicePlugin extends BasePlugin {
     Container.set(DeviceFarmManager, deviceManager);
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
+    );
+    await Promise.all(
+      remote.map(async (url: string) => {
+        if (!url.includes('127.0.0.1')) {
+          await spinWith(`Waiting for node server ${url} to be up and running\n`, async () => {
+            await axios({
+              method: 'get',
+              url: `${url}/device-farm`,
+              timeout: 30000,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          });
+        }
+      })
     );
     await refreshDeviceList();
     await cronReleaseBlockedDevices();
@@ -151,6 +168,20 @@ class DevicePlugin extends BasePlugin {
     unblockDevice(sessionId);
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
+  }
+}
+
+async function spinWith(msg: string | ora.Options | undefined, fn: () => any) {
+  const spinner = ora(msg).start();
+  let res;
+  try {
+    res = await fn();
+    spinner.succeed();
+    return res;
+  } catch (err) {
+    spinner.fail();
+    spinner.color = 'red';
+    throw new Error(`Failed: ${msg}`);
   }
 }
 
