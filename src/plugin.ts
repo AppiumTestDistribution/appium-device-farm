@@ -69,7 +69,7 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
     await Promise.all(
-      remote.map(async (url: string) => {
+      cliArgs.plugin['device-farm'].remote.map(async (url: string) => {
         if (!url.includes('127.0.0.1')) {
           await spinWith(`Waiting for node server ${url} to be up and running\n`, async () => {
             await axios({
