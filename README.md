@@ -73,16 +73,10 @@ These arguments are set when you launch the Appium server, with this plugin inst
 1. If there is no activity on a session for more then 100 seconds, device allocated to respective session would be unblocked and made available for new session requests.
 
 
-## Remote Execution 
+## [Remote Execution](https://github.com/AppiumTestDistribution/appium-device-farm/wiki/Remote-Execution) 
 
 <img src="./assets/1a.jpg">
-
-1. Install appium-device-farm plugin on both host and node machine. 
-2. Start the remote server
-3. Start server on host machine with `remote` arguments and give the node machine IP address. For example: `remote: ["https://10.1.1.1:4723"]`
-4. Point your test session to host machine. Host server instance will take care of orchestating the driver session and allocate devices. 
-
-
+ 
 ## Example
 
 Server logs will be as below:
