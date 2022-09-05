@@ -75,6 +75,8 @@ These arguments are set when you launch the Appium server, with this plugin inst
 
 ## Remote Execution 
 
+<img src="./assets/1a.jpg">
+
 1. Install appium-device-farm plugin on both host and node machine. 
 2. Start the remote server
 3. Start server on host machine with `remote` arguments and give the node machine IP address. For example: `remote: ["https://10.1.1.1:4723"]`
