@@ -76,6 +76,8 @@ These arguments are set when you launch the Appium server, with this plugin inst
 ## [Remote Execution](https://github.com/AppiumTestDistribution/appium-device-farm/wiki/Remote-Execution) 
 
 <img src="./assets/1a.jpg">
+
+Check our [Remote Execution Wiki](https://github.com/AppiumTestDistribution/appium-device-farm/wiki/Remote-Execution) for more details.
  
 ## Example
 
