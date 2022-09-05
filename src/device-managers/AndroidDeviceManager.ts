@@ -5,8 +5,7 @@ import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
 import _ from 'lodash';
 import { fs } from '@appium/support';
-import axios from 'axios';
-
+import { DeviceFactory } from './factory/DeviceFactory';
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
@@ -26,7 +25,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         if (host.includes('127.0.0.1')) {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          await this.fetchRemoteAndroidDevices(host, deviceState);
+          deviceState.push(await this.fetchRemoteAndroidDevices(host, deviceState));
         }
       }
     } catch (e) {
@@ -45,18 +44,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[]) {
-    log.info('Fetching remote android devices');
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
-    remoteDevices.filter((device: any) => {
-      delete device['meta'];
-      delete device['$loki'];
-      deviceState.push(
-        Object.assign({
-          ...device,
-          host: `${host}`,
-        })
-      );
-    });
+    const devices = DeviceFactory.deviceInstance(host, deviceState);
+    return devices?.getDevices();
   }
 
   private async fetchLocalAndroidDevices(
