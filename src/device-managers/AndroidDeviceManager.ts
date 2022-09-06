@@ -25,7 +25,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         if (host.includes('127.0.0.1')) {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          deviceState.push(await this.fetchRemoteAndroidDevices(host, deviceState));
+          await this.fetchRemoteAndroidDevices(host, deviceState);
         }
       }
     } catch (e) {
