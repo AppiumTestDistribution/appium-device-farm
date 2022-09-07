@@ -3,7 +3,7 @@ import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { asyncForEach, getFreePort } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
-import _ from 'lodash';
+import _, { isObject } from 'lodash';
 import { fs } from '@appium/support';
 import { DeviceFactory } from './factory/DeviceFactory';
 export default class AndroidDeviceManager implements IDeviceManager {
@@ -22,10 +22,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const hosts = cliArgs.plugin['device-farm'].remote;
     try {
       for (const host of hosts) {
-        if (host.includes('127.0.0.1')) {
+        if (!isObject(host) && host.includes('127.0.0.1')) {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
           await this.fetchRemoteAndroidDevices(host, deviceState);
+          console.log('Device State', deviceState);
         }
       }
     } catch (e) {

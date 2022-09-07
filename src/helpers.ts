@@ -2,6 +2,7 @@ import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
 import getPort from 'get-port';
+
 export async function asyncForEach(
   array: string | any[],
   callback: {

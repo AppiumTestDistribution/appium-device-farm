@@ -20,6 +20,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { isObject } from 'lodash';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
@@ -69,8 +70,8 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
     await Promise.all(
-      cliArgs.plugin['device-farm'].remote.map(async (url: string) => {
-        if (!url.includes('127.0.0.1')) {
+      cliArgs.plugin['device-farm'].remote.map(async (url: any) => {
+        if (!isObject(url) && !url.includes('127.0.0.1')) {
           await spinWith(`Waiting for node server ${url} to be up and running\n`, async () => {
             await axios({
               method: 'get',
