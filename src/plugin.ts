@@ -172,7 +172,7 @@ class DevicePlugin extends BasePlugin {
   }
 }
 
-async function spinWith(msg: string | ora.Options | undefined, fn: () => any) {
+async function spinWith(msg: string, fn: () => any) {
   const spinner = ora(msg).start();
   let res;
   try {
