@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import 'reflect-metadata';
 import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
@@ -24,6 +25,7 @@ import { isObject } from 'lodash';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
+import { hubUrl } from './helpers';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
@@ -120,10 +122,11 @@ class DevicePlugin extends BasePlugin {
     );
     let session;
     if (!device.host.includes('127.0.0.1')) {
+      const remoteUrl = hubUrl(device);
       try {
         const sessionDetails = //change to give the entire URL
           (
-            await axios.post(`${device.host}/wd/hub/session`, {
+            await axios.post(remoteUrl, {
               capabilities: caps,
             })
           ).data;

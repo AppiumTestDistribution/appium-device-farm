@@ -1,7 +1,9 @@
+/* eslint-disable no-prototype-builtins */
 import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
 import getPort from 'get-port';
+import { IDevice } from './interfaces/IDevice';
 
 export async function asyncForEach(
   array: string | any[],
@@ -28,6 +30,12 @@ export async function getFreePort() {
   return await getPort();
 }
 
+export function hubUrl(device: IDevice) {
+  if (device.hasOwnProperty('cloud') && device.cloud === 'browserstack') {
+    return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
+  }
+  return `${device.host}/wd/hub/session`;
+}
 export async function isPortBusy(port: number) {
   try {
     if (!port) {

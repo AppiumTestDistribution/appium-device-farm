@@ -6,9 +6,21 @@
         "platform": "android",
         "remote": [
           {
-            "url": "http://hub-cloud.browserstack.com/wd/hub"
-          },
-          "http://10.211.55.6:4723"
+            "cloudName": "browserstack",
+            "url": "http://hub-cloud.browserstack.com",
+            "devices": [
+              {
+                "device": "Google Pixel 3",
+                "os_version": "9.0",
+                "platform": "android"
+              },
+              {
+                "device": "iPhone 11 Pro",
+                "os_version": "13",
+                "platform": "android"
+              }
+            ]
+          }
         ]
       }
     }

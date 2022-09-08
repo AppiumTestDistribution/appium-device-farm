@@ -26,7 +26,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
           await this.fetchRemoteAndroidDevices(host, deviceState);
-          console.log('Device State', deviceState);
         }
       }
     } catch (e) {

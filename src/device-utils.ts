@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import { isMac, checkIfPathIsAbsolute } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
@@ -16,6 +17,8 @@ import {
   getDevice,
 } from './data-service/device-service';
 import logger from './logger';
+import CapabilityFactory from './device-managers/factory/CapabilityFactory';
+
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
 const customCapability = {
@@ -94,13 +97,19 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
 }
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
-  if (device.platform.toLowerCase() == 'ios') {
-    await iOSCapabilities(capability, device);
-    updateDevice(device, {
-      mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
-    });
+  if (!device.hasOwnProperty('cloud')) {
+    if (device.platform.toLowerCase() == 'ios') {
+      await iOSCapabilities(capability, device);
+      updateDevice(device, {
+        mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
+      });
+    } else {
+      await androidCapabilities(capability, device);
+    }
   } else {
-    await androidCapabilities(capability, device);
+    logger.info('Updating cloud Capability for Device');
+    const capabilities = CapabilityFactory.getCapability(capability, device);
+    return capabilities.getCapability();
   }
 }
 
@@ -149,7 +158,6 @@ function getDeviceManager() {
 
 export async function updateDeviceList() {
   const devices = await getDeviceManager().getDevices(getAllDevices());
-  logger.info(`📱 Device list updated: ${JSON.stringify(devices.map((d) => d.name))}`);
   saveDevices(devices);
 }
 
