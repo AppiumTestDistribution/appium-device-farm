@@ -21,10 +21,9 @@ export default class BrowserStackAndroidDeviceManager {
         headers: {
           Accept: 'application/json',
           Authorization: auth,
-          Cookie: 'tracking_id=656a0f7f-4eef-4aad-8757-ed3e7039eb5f',
         },
       });
-      const androidDevices = (await response.data).filter((device: any) => device.os === 'android');
+      const androidDevices = (await response.data).filter((device: any) => device.os == 'android');
       const result = androidDevices.map(() =>
         Object.assign({}, ...androidDevices, { host: this.host.url })
       );
@@ -32,7 +31,7 @@ export default class BrowserStackAndroidDeviceManager {
       return this.deviceState;
     } else {
       const devices = this.host.devices;
-      const androidDevices = devices.filter((device: any) => device.platform === 'android');
+      const androidDevices = devices.filter((device: any) => device.platform == 'android');
       const result = androidDevices.map((d: any) =>
         Object.assign({}, ...androidDevices, {
           host: this.host.url,

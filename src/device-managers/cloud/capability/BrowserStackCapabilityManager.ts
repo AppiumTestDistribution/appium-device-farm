@@ -1,5 +1,5 @@
 import { IDevice } from '../../../interfaces/IDevice';
-
+import Capabilities from '../../../enums/Capabilities';
 export default class BrowserStackCapabilityManager {
   private capabilities: any;
   private freeDevice: IDevice;
@@ -9,8 +9,8 @@ export default class BrowserStackCapabilityManager {
   }
 
   getCapability() {
-    this.capabilities.alwaysMatch['appium:deviceName'] = this.freeDevice.udid;
-    this.capabilities.alwaysMatch['appium:platformVersion'] = this.freeDevice.sdk;
+    this.capabilities.alwaysMatch[Capabilities.DEVICE_NAME] = this.freeDevice.udid;
+    this.capabilities.alwaysMatch[Capabilities.PLATFORM_VERSION] = this.freeDevice.sdk;
     return this.capabilities;
   }
 }

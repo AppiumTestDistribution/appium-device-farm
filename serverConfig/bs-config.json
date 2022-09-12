@@ -1,0 +1,28 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "device-farm": {
+        "platform": "android",
+        "remote": [
+          {
+            "cloudName": "browserstack",
+            "url": "http://hub-cloud.browserstack.com",
+            "devices": [
+              {
+                "device": "Google Pixel 3",
+                "os_version": "9.0",
+                "platform": "android"
+              },
+              {
+                "device": "iPhone 11 Pro",
+                "os_version": "13",
+                "platform": "iOS"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

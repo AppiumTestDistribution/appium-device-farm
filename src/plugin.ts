@@ -74,16 +74,22 @@ class DevicePlugin extends BasePlugin {
     await Promise.all(
       cliArgs.plugin['device-farm'].remote.map(async (url: any) => {
         if (!isObject(url) && !url.includes('127.0.0.1')) {
-          await spinWith(`Waiting for node server ${url} to be up and running\n`, async () => {
-            await axios({
-              method: 'get',
-              url: `${url}/device-farm`,
-              timeout: 30000,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-          });
+          await spinWith(
+            `Waiting for node server ${url} to be up and running\n`,
+            async () => {
+              await axios({
+                method: 'get',
+                url: `${url}/device-farm`,
+                timeout: 30000,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+            },
+            (msg: any) => {
+              throw new Error(`Failed: ${msg}`);
+            }
+          );
         }
       })
     );
@@ -123,13 +129,19 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
+      let sessionDetails: any;
       try {
-        const sessionDetails = //change to give the entire URL
-          (
-            await axios.post(remoteUrl, {
-              capabilities: caps,
-            })
-          ).data;
+        await spinWith('Creating remote session', async () => {
+          sessionDetails = //change to give the entire URL
+            (
+              await axios.post(remoteUrl, {
+                capabilities: caps,
+              })
+            ).data;
+          if (sessionDetails.value.error)
+            throw new Error(`Failed ❌ ${sessionDetails.value.error}`);
+        });
+
         session = {
           protocol: 'W3C',
           value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
@@ -147,7 +159,6 @@ class DevicePlugin extends BasePlugin {
       session = await next();
     }
 
-    console.log('Session', session);
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
@@ -175,7 +186,8 @@ class DevicePlugin extends BasePlugin {
   }
 }
 
-async function spinWith(msg: string, fn: () => any) {
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
   const spinner = ora(msg).start();
   let res;
   try {
@@ -185,7 +197,7 @@ async function spinWith(msg: string, fn: () => any) {
   } catch (err) {
     spinner.fail();
     spinner.color = 'red';
-    throw new Error(`Failed: ${msg}`);
+    if (callback) callback(msg);
   }
 }
 
