@@ -26,7 +26,7 @@ describe('Plugin Test', () => {
 
   it('Vertical swipe test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-    await driver.$('~login1').click();
+    await driver.$('~login').click();
   });
 
   afterEach(async () => await driver.deleteSession());
