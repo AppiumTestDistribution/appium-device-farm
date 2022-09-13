@@ -1,5 +1,5 @@
 import { IDevice } from '../../interfaces/IDevice';
-import BrowserStackCapabilityManager from '../cloud/capability/BrowserStackCapabilityManager';
+import BrowserStackCapabilityManager from '../cloud/browserstack/capability/BrowserStackCapabilityManager';
 import Cloud from '../../enums/cloud';
 export default class CapabilityFactory {
   public static getCapability(capability: any, device: IDevice) {

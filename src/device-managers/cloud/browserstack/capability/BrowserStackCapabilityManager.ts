@@ -1,5 +1,5 @@
-import { IDevice } from '../../../interfaces/IDevice';
-import Capabilities from '../../../enums/Capabilities';
+import { IDevice } from '../../../../interfaces/IDevice';
+import Capabilities from '../../../../enums/Capabilities';
 export default class BrowserStackCapabilityManager {
   private capabilities: any;
   private freeDevice: IDevice;
