@@ -7,7 +7,7 @@ function filterAndroidByOS(device: any) {
 }
 
 function filterAndroidByPlatform(device: any) {
-  return device.os == 'android';
+  return device.platform == 'android';
 }
 
 export default class BrowserStackAndroidDeviceManager {
