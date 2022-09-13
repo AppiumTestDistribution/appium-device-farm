@@ -1,6 +1,14 @@
 /* eslint-disable no-prototype-builtins */
 import axios from 'axios';
-import { IDevice } from '../../interfaces/IDevice';
+import { IDevice } from '../../../interfaces/IDevice';
+
+function filterAndroidByOS(device: any) {
+  return device.os == 'android';
+}
+
+function filterAndroidByPlatform(device: any) {
+  return device.os == 'android';
+}
 
 export default class BrowserStackAndroidDeviceManager {
   private host: any;
@@ -23,7 +31,7 @@ export default class BrowserStackAndroidDeviceManager {
           Authorization: auth,
         },
       });
-      const androidDevices = (await response.data).filter((device: any) => device.os == 'android');
+      const androidDevices = (await response.data).filter(filterAndroidByOS);
       const result = androidDevices.map(() =>
         Object.assign({}, ...androidDevices, { host: this.host.url })
       );
@@ -31,7 +39,7 @@ export default class BrowserStackAndroidDeviceManager {
       return this.deviceState;
     } else {
       const devices = this.host.devices;
-      const androidDevices = devices.filter((device: any) => device.platform == 'android');
+      const androidDevices = devices.filter(filterAndroidByPlatform);
       const result = androidDevices.map((d: any) =>
         Object.assign({}, ...androidDevices, {
           host: this.host.url,
