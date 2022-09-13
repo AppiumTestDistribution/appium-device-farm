@@ -22,6 +22,7 @@ import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { isObject } from 'lodash';
+import { stripAppiumPrefixes } from './helpers';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
@@ -105,6 +106,12 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability
   ) {
     const pendingSessionId = uuidv4();
+    const {
+      alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
+      firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
+    } = caps;
+    stripAppiumPrefixes(requiredCaps);
+    stripAppiumPrefixes(allFirstMatchCaps);
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
