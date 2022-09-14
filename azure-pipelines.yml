@@ -102,5 +102,5 @@ jobs:
         export APPIUM_HOME=/tmp/device-farm
         ./node_modules/.bin/appium plugin install --source=local .
         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
-        npm run test-parallel-android-bs
+        npm run test-parallel-bs
       displayName: 'E2E Test'
