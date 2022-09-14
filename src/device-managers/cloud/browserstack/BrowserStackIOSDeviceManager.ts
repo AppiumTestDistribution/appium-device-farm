@@ -1,14 +1,15 @@
 import { IDevice } from '../../../interfaces/IDevice';
 import Devices from './Devices';
 
-function filterAndroidByOS(device: any) {
-  return device.os == 'android';
+function filteriOSByOS(device: any) {
+  return device.os == 'ios';
 }
 
-function filterAndroidByPlatform(device: any) {
-  return device.platform == 'android';
+function filteriOSByPlatform(device: any) {
+  return device.platform == 'ios';
 }
-export default class BrowserStackAndroidDeviceManager {
+
+export default class BrowserStackIOSDeviceManager {
   private host: any;
   private deviceState: any;
 
@@ -19,6 +20,6 @@ export default class BrowserStackAndroidDeviceManager {
 
   async getDevices() {
     const devices = new Devices(this.host, this.deviceState);
-    devices.getDevices(filterAndroidByOS, filterAndroidByPlatform);
+    devices.getDevices(filteriOSByOS, filteriOSByPlatform);
   }
 }
