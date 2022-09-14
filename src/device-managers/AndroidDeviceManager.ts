@@ -25,7 +25,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         if (!isObject(host) && host.includes('127.0.0.1')) {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          await this.fetchRemoteAndroidDevices(host, deviceState);
+          await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
       }
     } catch (e) {
@@ -43,8 +43,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
   }
 
-  private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[]) {
-    const devices = DeviceFactory.deviceInstance(host, deviceState);
+  private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[], platform: string) {
+    const devices = DeviceFactory.deviceInstance(host, deviceState, platform);
     return devices?.getDevices();
   }
 

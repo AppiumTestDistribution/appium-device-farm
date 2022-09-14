@@ -1,5 +1,5 @@
 import Simctl from 'node-simctl';
-import { flatten } from 'lodash';
+import { flatten, isObject } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
@@ -7,6 +7,7 @@ import { getFreePort, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
 import axios from 'axios';
+import { DeviceFactory } from './factory/DeviceFactory';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -59,30 +60,18 @@ export default class IOSDeviceManager implements IDeviceManager {
     const deviceState: Array<IDevice> = [];
     const hosts = cliArgs.plugin['device-farm'].remote;
     for (const host of hosts) {
-      if (host.includes('127.0.0.1')) {
+      if (!isObject(host) && host.includes('127.0.0.1')) {
         await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
       } else {
-        await this.fetchRemoteIOSDevices(host, deviceState);
+        await this.fetchRemoteIOSDevices(host, deviceState, 'ios');
       }
     }
     return deviceState;
   }
 
-  private async fetchRemoteIOSDevices(host: any, deviceState: IDevice[]) {
-    log.info('Fetching remote iOS devices');
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-    remoteDevices.filter((device: any) => {
-      if (device.deviceType === 'real') {
-        delete device['meta'];
-        delete device['$loki'];
-        deviceState.push(
-          Object.assign({
-            ...device,
-            host: `${host}`,
-          })
-        );
-      }
-    });
+  private async fetchRemoteIOSDevices(host: any, deviceState: IDevice[], platform: string) {
+    const devices = DeviceFactory.deviceInstance(host, deviceState, platform);
+    return devices?.getDevices();
   }
 
   private async fetchLocalIOSDevices(
@@ -129,7 +118,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const hosts = cliArgs.plugin['device-farm'].remote;
     const simulators: Array<IDevice> = [];
     for (const host of hosts) {
-      if (host.includes('127.0.0.1')) {
+      if (!isObject(host) && host.includes('127.0.0.1')) {
         await this.fetchLocalSimulators(simulators, cliArgs);
       } else {
         await this.fetchRemoteSimulators(host, simulators);
