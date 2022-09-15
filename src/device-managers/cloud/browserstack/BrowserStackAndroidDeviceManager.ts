@@ -1,12 +1,13 @@
+import DevicePlatform from '../../../enums/Platform';
 import { IDevice } from '../../../interfaces/IDevice';
 import Devices from './Devices';
 
 function filterAndroidByOS(device: any) {
-  return device.os == 'android';
+  return device.os == DevicePlatform.ANDROID;
 }
 
 function filterAndroidByPlatform(device: any) {
-  return device.platform == 'android';
+  return device.platform == DevicePlatform.ANDROID;
 }
 export default class BrowserStackAndroidDeviceManager {
   private host: any;

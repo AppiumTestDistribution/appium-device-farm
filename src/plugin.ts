@@ -27,6 +27,7 @@ import { stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
 import { hubUrl } from './helpers';
+import Cloud from './enums/Cloud';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
@@ -61,8 +62,9 @@ class DevicePlugin extends BasePlugin {
     if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
       includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
     }
+    if (remote[0].cloudName === Cloud.BROWSERSTACK) includeSimulators = false;
     if (includeSimulators === false)
-      logger.info('❌ Skipping Simulators as per the confifuration ❌');
+      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     const deviceManager = new DeviceFarmManager({
       platform,
       includeSimulators,
@@ -72,6 +74,12 @@ class DevicePlugin extends BasePlugin {
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
+    await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
+    await refreshDeviceList();
+    await cronReleaseBlockedDevices();
+  }
+
+  private static async waitForRemoteServerToBeRunning(cliArgs: any) {
     await Promise.all(
       cliArgs.plugin['device-farm'].remote.map(async (url: any) => {
         if (!isObject(url) && !url.includes('127.0.0.1')) {
@@ -94,8 +102,6 @@ class DevicePlugin extends BasePlugin {
         }
       })
     );
-    await refreshDeviceList();
-    await cronReleaseBlockedDevices();
   }
 
   async createSession(

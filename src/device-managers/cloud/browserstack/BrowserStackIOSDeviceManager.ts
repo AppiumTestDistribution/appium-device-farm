@@ -1,12 +1,13 @@
+import DevicePlatform from '../../../enums/Platform';
 import { IDevice } from '../../../interfaces/IDevice';
 import Devices from './Devices';
 
 function filteriOSByOS(device: any) {
-  return device.os == 'ios';
+  return device.os == DevicePlatform.IOS;
 }
 
 function filteriOSByPlatform(device: any) {
-  return device.platform == 'ios';
+  return device.platform == DevicePlatform.IOS;
 }
 
 export default class BrowserStackIOSDeviceManager {
@@ -20,6 +21,6 @@ export default class BrowserStackIOSDeviceManager {
 
   async getDevices() {
     const devices = new Devices(this.host, this.deviceState);
-    devices.getDevices(filteriOSByOS, filteriOSByPlatform);
+    return devices.getDevices(filteriOSByOS, filteriOSByPlatform);
   }
 }

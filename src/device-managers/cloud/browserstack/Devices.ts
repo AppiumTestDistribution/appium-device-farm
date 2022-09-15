@@ -10,7 +10,7 @@ export default class Devices {
     this.host = host;
     this.deviceState = deviceState;
   }
-  async getDevices(filterAndroidByOS: any, filterAndroidByPlatform: any) {
+  async getDevices(filterByOS: any, filterByPlatform: any) {
     if (!this.host.hasOwnProperty('devices')) {
       const auth =
         'Basic ' +
@@ -22,17 +22,17 @@ export default class Devices {
           Authorization: auth,
         },
       });
-      const androidDevices = (await response.data).filter(filterAndroidByOS);
-      const result = androidDevices.map(() =>
-        Object.assign({}, ...androidDevices, { host: this.host.url })
+      const devicesByOS = (await response.data).filter(filterByOS);
+      const result = devicesByOS.map(() =>
+        Object.assign({}, ...devicesByOS, { host: this.host.url })
       );
       this.deviceState.push(...result);
       return this.deviceState;
     } else {
       const devices = this.host.devices;
-      const androidDevices = devices.filter(filterAndroidByPlatform);
-      const result = androidDevices.map((d: any) =>
-        Object.assign({}, ...androidDevices, {
+      const devicesByPlatform = devices.filter(filterByPlatform);
+      const result = devicesByPlatform.map((d: any) =>
+        Object.assign({}, ...devicesByPlatform, {
           host: this.host.url,
           busy: false,
           deviceType: 'real',

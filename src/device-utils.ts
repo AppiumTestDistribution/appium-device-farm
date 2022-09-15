@@ -18,6 +18,7 @@ import {
 } from './data-service/device-service';
 import logger from './logger';
 import CapabilityFactory from './device-managers/factory/CapabilityFactory';
+import DevicePlatform from './enums/Platform';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -42,15 +43,15 @@ export const getDeviceTypeFromApp = (app: string) => {
 };
 
 export function isAndroid(cliArgs: ServerCLI) {
-  return cliArgs.Platform.toLowerCase() === 'android';
+  return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
 export function isIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === 'ios';
+  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.IOS;
 }
 
 export function isAndroidAndIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === 'both';
+  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
 export function isDeviceConfigPathAbsolute(path: string) {
@@ -98,7 +99,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
   if (!device.hasOwnProperty('cloud')) {
-    if (device.platform.toLowerCase() == 'ios') {
+    if (device.platform.toLowerCase() == DevicePlatform.IOS) {
       await iOSCapabilities(capability, device);
       updateDevice(device, {
         mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
@@ -130,7 +131,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
    * Applicaple only for ios.
    */
   const deviceType =
-    platform == 'ios' && isMac()
+    platform == DevicePlatform.IOS && isMac()
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
   let name = '';
