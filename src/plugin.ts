@@ -65,8 +65,8 @@ class DevicePlugin extends BasePlugin {
     const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
       (v: any) => typeof v === 'object'
     );
-    if (cloudExists)
-      cloudExists.cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
+    if (cloudExists.length > 0)
+      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
     if (includeSimulators === false)
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     const deviceManager = new DeviceFarmManager({
