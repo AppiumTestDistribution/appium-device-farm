@@ -14,7 +14,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     includeSimulators: boolean,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
-  ): Promise<IDevice[]> {
+  ): Promise<any> {
     if (!this.adbAvailable) {
       return [];
     }
@@ -25,21 +25,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
         if (!isObject(host) && host.includes('127.0.0.1')) {
           await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
+          return await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
       }
     } catch (e) {
       console.log(e);
-    } finally {
-      if (includeSimulators === false) {
-        const devices = deviceState.filter(function (d) {
-          return d.realDevice === true;
-        });
-        // eslint-disable-next-line no-unsafe-finally
-        return devices;
-      }
-      // eslint-disable-next-line no-unsafe-finally
-      return deviceState;
     }
   }
 

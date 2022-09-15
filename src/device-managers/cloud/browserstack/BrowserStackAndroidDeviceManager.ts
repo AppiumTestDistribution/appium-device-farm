@@ -3,11 +3,11 @@ import { IDevice } from '../../../interfaces/IDevice';
 import Devices from './Devices';
 
 function filterAndroidByOS(device: any) {
-  return device.os == DevicePlatform.ANDROID;
+  return device.os === DevicePlatform.ANDROID;
 }
 
 function filterAndroidByPlatform(device: any) {
-  return device.platform == DevicePlatform.ANDROID;
+  return device.platform === DevicePlatform.ANDROID;
 }
 export default class BrowserStackAndroidDeviceManager {
   private host: any;
@@ -20,6 +20,6 @@ export default class BrowserStackAndroidDeviceManager {
 
   async getDevices() {
     const devices = new Devices(this.host, this.deviceState);
-    devices.getDevices(filterAndroidByOS, filterAndroidByPlatform);
+    return devices.getDevices(filterAndroidByOS, filterAndroidByPlatform);
   }
 }

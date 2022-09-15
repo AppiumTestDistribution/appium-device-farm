@@ -2,10 +2,10 @@
 import { IDevice } from '../../../interfaces/IDevice';
 import axios from 'axios';
 import { CloudArgs } from '../../../types/CloudArgs';
-
 export default class Devices {
   private host: any;
   private deviceState: any;
+
   constructor(host: CloudArgs, deviceState: IDevice[]) {
     this.host = host;
     this.deviceState = deviceState;
