@@ -43,10 +43,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     existingDeviceDetails: IDevice[],
     cliArgs: any
   ) {
-    console.log('Local Android Device');
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices();
-    console.log('Connected', connectedDevices)
     await asyncForEach(connectedDevices, async (device: IDevice) => {
       if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
         const existingDevice = existingDeviceDetails.find(

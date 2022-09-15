@@ -62,7 +62,11 @@ class DevicePlugin extends BasePlugin {
     if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
       includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
     }
-    if (remote[0].cloudName === Cloud.BROWSERSTACK) includeSimulators = false;
+    const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
+      (v: any) => typeof v === 'object'
+    );
+    if (cloudExists)
+      cloudExists.cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
     if (includeSimulators === false)
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     const deviceManager = new DeviceFarmManager({
