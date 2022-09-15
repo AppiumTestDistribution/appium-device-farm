@@ -23,7 +23,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     try {
       for (const host of hosts) {
         if (!isObject(host) && host.includes('127.0.0.1')) {
-          await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
+          return await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
           return await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
@@ -43,8 +43,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
     existingDeviceDetails: IDevice[],
     cliArgs: any
   ) {
+    console.log('Local Android Device');
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices();
+    console.log('Connected', connectedDevices)
     await asyncForEach(connectedDevices, async (device: IDevice) => {
       if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
         const existingDevice = existingDeviceDetails.find(
@@ -80,6 +82,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         }
       }
     });
+    return deviceState;
   }
 
   private async getAdb(): Promise<any> {
