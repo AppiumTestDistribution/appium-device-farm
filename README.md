@@ -151,3 +151,10 @@ Server logs will be as below:
 [debug] [ADB] Connected devices: [{"udid":"emulator-5554","state":"device"},{"udid":"emulator-5556","state":"device"}]
 [device-manager] Master Device List [{"busy":false,"state":"device","udid":"emulator-5554"},{"busy":false,"state":"device","udid":"emulator-5556"}]
 ```
+
+
+## Big thanks to the following organizations for their support to the project with their open source licenses:
+<h3>
+	<a href= "https://www.browserstack.com"><img src="https://maddyness-uk.twic.pics/2021/06/Screenshot-2021-06-21-at-20.14.46.png?twic=v1/resize=630" alt="ATD" width="45%" align="top"></a>
+</h3>
+
