@@ -3,10 +3,9 @@ import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { asyncForEach, getFreePort } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
-import _ from 'lodash';
+import _, { isObject } from 'lodash';
 import { fs } from '@appium/support';
-import axios from 'axios';
-
+import { DeviceFactory } from './factory/DeviceFactory';
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
@@ -15,7 +14,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     includeSimulators: boolean,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
-  ): Promise<IDevice[]> {
+  ): Promise<any> {
     if (!this.adbAvailable) {
       return [];
     }
@@ -23,40 +22,20 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const hosts = cliArgs.plugin['device-farm'].remote;
     try {
       for (const host of hosts) {
-        if (host.includes('127.0.0.1')) {
-          await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
+        if (!isObject(host) && host.includes('127.0.0.1')) {
+          return await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          await this.fetchRemoteAndroidDevices(host, deviceState);
+          return await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
       }
     } catch (e) {
       console.log(e);
-    } finally {
-      if (includeSimulators === false) {
-        const devices = deviceState.filter(function (d) {
-          return d.realDevice === true;
-        });
-        // eslint-disable-next-line no-unsafe-finally
-        return devices;
-      }
-      // eslint-disable-next-line no-unsafe-finally
-      return deviceState;
     }
   }
 
-  private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[]) {
-    log.info('Fetching remote android devices');
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/android`)).data;
-    remoteDevices.filter((device: any) => {
-      delete device['meta'];
-      delete device['$loki'];
-      deviceState.push(
-        Object.assign({
-          ...device,
-          host: `${host}`,
-        })
-      );
-    });
+  private async fetchRemoteAndroidDevices(host: any, deviceState: IDevice[], platform: string) {
+    const devices = DeviceFactory.deviceInstance(host, deviceState, platform);
+    return devices?.getDevices();
   }
 
   private async fetchLocalAndroidDevices(
@@ -101,6 +80,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         }
       }
     });
+    return deviceState;
   }
 
   private async getAdb(): Promise<any> {
