@@ -7,6 +7,8 @@ describe('Browserstack Devices', () => {
     const androidDevices = (
       await axios.get('http://localhost:31337/device-farm/api/devices/android')
     ).data;
+    delete androidDevices[0].meta;
+    delete androidDevices[0]['loki'];
     expect(androidDevices).to.eql([
       {
         device: 'Google Pixel 3',
@@ -37,6 +39,8 @@ describe('Browserstack Devices', () => {
 
   it('Should be able to get iOS devices from Browerstack config', async () => {
     const iosDevics = (await axios.get('http://localhost:31337/device-farm/api/devices/ios')).data;
+    delete iosDevics[0].meta;
+    delete iosDevics[0]['loki'];
     expect(iosDevics).to.be.eql([
       {
         device: 'iPhone 11 Pro',
