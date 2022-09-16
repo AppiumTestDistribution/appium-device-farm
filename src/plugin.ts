@@ -58,17 +58,7 @@ class DevicePlugin extends BasePlugin {
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
     let includeSimulators = true;
-    // eslint-disable-next-line no-prototype-builtins
-    if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
-      includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
-    }
-    const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
-      (v: any) => typeof v === 'object'
-    );
-    if (cloudExists.length > 0)
-      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
-    if (includeSimulators === false)
-      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    includeSimulators = DevicePlugin.setIncludeSimulatorState(cliArgs, includeSimulators);
     const deviceManager = new DeviceFarmManager({
       platform,
       includeSimulators,
@@ -81,6 +71,20 @@ class DevicePlugin extends BasePlugin {
     await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
     await refreshDeviceList();
     await cronReleaseBlockedDevices();
+  }
+
+  private static setIncludeSimulatorState(cliArgs: any, includeSimulators: boolean) {
+    if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
+      includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
+    }
+    const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
+      (v: any) => typeof v === 'object'
+    );
+    if (cloudExists.length > 0)
+      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
+    if (includeSimulators === false)
+      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    return includeSimulators;
   }
 
   private static async waitForRemoteServerToBeRunning(cliArgs: any) {
