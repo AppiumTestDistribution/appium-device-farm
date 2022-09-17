@@ -19,6 +19,7 @@ import {
 import logger from './logger';
 import CapabilityFactory from './device-managers/factory/CapabilityFactory';
 import DevicePlatform from './enums/Platform';
+import _ from 'lodash';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -123,8 +124,8 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
 export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[customCapability.udids]
-    ? capability[customCapability.udids].split(',')
-    : process.env.UDIDS?.split(',');
+    ? capability[customCapability.udids].split(',').map(_.trim)
+    : process.env.UDIDS?.split(',').map(_.trim);
   /* Based on the app file extension, we will decide whether to run the
    * test on real device or simulator.
    *
