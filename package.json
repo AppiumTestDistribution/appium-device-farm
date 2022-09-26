@@ -116,7 +116,7 @@
           "type": "string"
         },
         "include-simulators": {
-          "type": "boolean"
+          "type": "string"
         },
         "remote": {
           "type": "array"

@@ -57,8 +57,8 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
-    let includeSimulators = true;
-    includeSimulators = DevicePlugin.setIncludeSimulatorState(cliArgs, includeSimulators);
+    let includeSimulators = ((cliArgs.plugin['device-farm'].includeSimulators || 'true') === 'true') as boolean;
+    DevicePlugin.setIncludeSimulatorState(cliArgs, includeSimulators);
     const deviceManager = new DeviceFarmManager({
       platform,
       includeSimulators,
@@ -74,9 +74,6 @@ class DevicePlugin extends BasePlugin {
   }
 
   private static setIncludeSimulatorState(cliArgs: any, includeSimulators: boolean) {
-    if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
-      includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
-    }
     const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
       (v: any) => typeof v === 'object'
     );
@@ -84,7 +81,6 @@ class DevicePlugin extends BasePlugin {
       cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
     if (includeSimulators === false)
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
-    return includeSimulators;
   }
 
   private static async waitForRemoteServerToBeRunning(cliArgs: any) {
