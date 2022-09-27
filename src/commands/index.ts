@@ -1,7 +1,7 @@
 import handle from './handle';
 
-const commands = {};
-
-Object.assign(commands, handle);
+const commands = {
+  handle,
+};
 
 export default commands;
