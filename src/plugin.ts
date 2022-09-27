@@ -45,10 +45,12 @@ class DevicePlugin extends BasePlugin {
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
     let platform;
+    let deviceTypes;
     let remote;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
+      deviceTypes = (cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both');
       remote = cliArgs.plugin['device-farm'].remote;
     }
     expressApp.use('/device-farm', router);
@@ -57,11 +59,10 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
-    let includeSimulators = true;
-    includeSimulators = DevicePlugin.setIncludeSimulatorState(cliArgs, includeSimulators);
+    DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
     const deviceManager = new DeviceFarmManager({
       platform,
-      includeSimulators,
+      deviceTypes,
       cliArgs,
     });
     Container.set(DeviceFarmManager, deviceManager);
@@ -73,18 +74,14 @@ class DevicePlugin extends BasePlugin {
     await cronReleaseBlockedDevices();
   }
 
-  private static setIncludeSimulatorState(cliArgs: any, includeSimulators: boolean) {
-    if (cliArgs.plugin['device-farm'].hasOwnProperty('include-simulators')) {
-      includeSimulators = cliArgs.plugin['device-farm']['include-simulators'];
-    }
+  private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
     const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
       (v: any) => typeof v === 'object'
     );
     if (cloudExists.length > 0)
-      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (includeSimulators = false) : true;
-    if (includeSimulators === false)
+      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (deviceTypes = "real") : true;
+    if (deviceTypes === "real")
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
-    return includeSimulators;
   }
 
   private static async waitForRemoteServerToBeRunning(cliArgs: any) {

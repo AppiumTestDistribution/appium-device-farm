@@ -6,19 +6,19 @@ import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
-  private includeSimulators: boolean;
+  private deviceTypes: string;
   private cliArgs: any;
 
   constructor({
     platform,
-    includeSimulators,
+    deviceTypes,
     cliArgs,
   }: {
     platform: Platform | 'both';
-    includeSimulators: boolean | true;
+    deviceTypes: string | 'both';
     cliArgs: any;
   }) {
-    this.includeSimulators = includeSimulators;
+    this.deviceTypes = deviceTypes;
     this.cliArgs = cliArgs;
     if (platform === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());
@@ -35,7 +35,7 @@ export class DeviceFarmManager {
     for (const deviceManager of this.deviceManagers) {
       devices.push(
         ...(await deviceManager.getDevices(
-          this.includeSimulators,
+          this.deviceTypes,
           existingDeviceDetails || [],
           this.cliArgs
         ))

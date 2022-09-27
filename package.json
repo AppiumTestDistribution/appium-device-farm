@@ -115,8 +115,9 @@
         "platform": {
           "type": "string"
         },
-        "include-simulators": {
-          "type": "boolean"
+        "device-types": {
+          "type": "string",
+          "default": "both"
         },
         "remote": {
           "type": "array"

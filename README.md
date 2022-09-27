@@ -56,7 +56,7 @@ These arguments are set when you launch the Appium server, with this plugin inst
 |Argument|Required|Description|Default|Options|
 |----|---|----------|------|-------|
 |`plugin-device-farm-platform`| Yes | Platform to run tests against for parallel execution | None | `both`,`ios`,`android` |
-|`plugin-device-farm-include-simulators`| No | Whether or not to include simulators along with real devices | `true` |`true`, `false`|
+|`plugin-device-farm-device-types`| No | Types of devices to include | `both` |`both`,`simulated`,`real`|
 |`plugin-device-farm-remote`| No | Whether or not to include simulators/real devices from remote machine | None |`remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]`|
 
 ## Capabilities

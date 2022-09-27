@@ -7,7 +7,7 @@ var sandbox = sinon.createSandbox();
 const cliArgs = {
   'device-farm': {
     platform: 'iOS',
-    'include-simulators': true,
+    'device-types': 'both',
     remote: ['http://127.0.0.1:4723'],
   },
 };

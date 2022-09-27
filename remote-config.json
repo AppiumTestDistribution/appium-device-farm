@@ -4,7 +4,7 @@
       "plugin": {
         "device-farm": {
           "platform": "android",
-          "include-simulators": true
+          "device-types": "both"
         }
       }
     }

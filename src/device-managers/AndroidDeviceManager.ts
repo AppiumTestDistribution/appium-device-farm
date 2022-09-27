@@ -11,7 +11,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adbAvailable = true;
 
   async getDevices(
-    includeSimulators: boolean,
+    deviceTypes: string,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<any> {

@@ -10,7 +10,7 @@ const ipAddress = ip.address();
 const cliArgs = {
   'device-farm': {
     platform: 'iOS',
-    'include-simulators': true,
+    'device-types': 'both',
     remote: [`http://${ipAddress}:3000`, 'http://127.0.0.1:4723'],
   },
 };
