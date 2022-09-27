@@ -86,7 +86,7 @@ describe('Remote IOS', () => {
           host: 'http://127.0.0.1:4723',
         },
       ]);
-    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices("both", [], { port: 4723, plugin: cliArgs });
     const expected = [
       {
         wdaLocalPort: 54093,

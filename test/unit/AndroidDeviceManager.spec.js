@@ -24,7 +24,7 @@ describe('Android Device Manager', () => {
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sandbox.stub(androidDevices, 'isRealDevice').returns(false);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
-    const devices = await androidDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
+    const devices = await androidDevices.getDevices("both", [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
         busy: false,
