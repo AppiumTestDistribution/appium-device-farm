@@ -112,6 +112,36 @@ describe('IOS Device Manager', () => {
     ]);
   });
 
+  it('IOS Device List to have added state - Only simulators', async () => {
+    const iosDevices = new IOSDeviceManager();
+    sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
+    sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
+    sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
+    sandbox.stub(Helper, 'getFreePort').returns(54093);
+    sandbox.stub(iosDevices, 'getSimulators').returns([
+      {
+        name: 'iPad Air (3rd generation)',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
+        state: 'Shutdown',
+        sdk: '13.5',
+        platform: 'ios',
+        host: 'http://127.0.0.1:4723',
+      },
+    ]);
+    const devices = await iosDevices.getDevices("simulated", [], { port: 4723, plugin: cliArgs });
+    expect(devices).to.deep.equal([
+      {
+        name: 'iPad Air (3rd generation)',
+        udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
+        state: 'Shutdown',
+        sdk: '13.5',
+        platform: 'ios',
+        host: 'http://127.0.0.1:4723',
+      },
+    ]);
+  });
+
+
   it('IOS Device List to have added state - Only real devices', async () => {
     const iosDevices = new IOSDeviceManager();
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
