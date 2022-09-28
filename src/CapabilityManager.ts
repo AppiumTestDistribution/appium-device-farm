@@ -16,7 +16,7 @@ export async function androidCapabilities(
   freeDevice: { udid: any; name: string; systemPort: number }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:systemPort'] = freeDevice.systemPort;
+  caps.firstMatch[0]['appium:systemPort'] = await getPort();
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
