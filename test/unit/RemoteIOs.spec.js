@@ -10,7 +10,7 @@ const ipAddress = ip.address();
 const cliArgs = {
   'device-farm': {
     platform: 'iOS',
-    'include-simulators': true,
+    'device-types': 'both',
     remote: [`http://${ipAddress}:3000`, 'http://127.0.0.1:4723'],
   },
 };
@@ -86,7 +86,7 @@ describe('Remote IOS', () => {
           host: 'http://127.0.0.1:4723',
         },
       ]);
-    const devices = await iosDevices.getDevices(true, [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices("both", [], { port: 4723, plugin: cliArgs });
     const expected = [
       {
         wdaLocalPort: 54093,

@@ -11,7 +11,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adbAvailable = true;
 
   async getDevices(
-    includeSimulators: boolean,
+    deviceTypes: string,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<any> {
@@ -22,10 +22,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const hosts = cliArgs.plugin['device-farm'].remote;
     try {
       for (const host of hosts) {
+        let devices: Array<IDevice>;
         if (!isObject(host) && host.includes('127.0.0.1')) {
-          return await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
+          devices = await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          return await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
+          devices = await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
+        }
+        if (deviceTypes === "real") {
+          return devices.filter((device) => {
+            return device.deviceType === "real";
+          });
+        } else if (deviceTypes === "simulated") {
+          return devices.filter((device) => {
+            return device.deviceType === "emulator";
+          });
+        // return both real and simulated (emulated) devices
+        } else {
+          return devices;
         }
       }
     } catch (e) {

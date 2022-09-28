@@ -14,7 +14,7 @@ describe('IOS Simulator Test', () => {
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
-      includeSimulators: true,
+      deviceTypes: 'both',
       cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
@@ -40,7 +40,7 @@ describe('IOS Simulator Test', () => {
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
-      includeSimulators: true,
+      deviceTypes: 'both',
       cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
@@ -75,7 +75,7 @@ describe('Boot simulator test', async () => {
   it('Should pick Booted simulator when app path has .app', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
-      includeSimulators: true,
+      deviceTypes: 'both',
       cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } }, 
     });
     Container.set(DeviceFarmManager, deviceManager);

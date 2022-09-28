@@ -2,7 +2,7 @@ import { IDevice } from './IDevice';
 
 export interface IDeviceManager {
   getDevices(
-    includeSimulators: boolean,
+    deviceTypes: string,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<IDevice[]>;

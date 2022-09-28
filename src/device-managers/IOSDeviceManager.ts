@@ -16,22 +16,25 @@ export default class IOSDeviceManager implements IDeviceManager {
    * @returns {Promise<Array<IDevice>>}
    */
   async getDevices(
-    includeSimulators: boolean,
+    deviceTypes: string,
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<IDevice[]> {
     if (!isMac()) {
       return [];
     } else {
-      if (includeSimulators) {
+      if (deviceTypes === "real") {
+        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
+      } else if (deviceTypes === "simulated") {
+        return flatten(await Promise.all([this.getSimulators(cliArgs)]));
+      // return both real and simulated devices
+      } else {
         return flatten(
           await Promise.all([
             this.getRealDevices(existingDeviceDetails, cliArgs),
             this.getSimulators(cliArgs),
           ])
         );
-      } else {
-        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
       }
     }
   }
