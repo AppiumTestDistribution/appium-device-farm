@@ -4,6 +4,8 @@ import { ReactComponent as AndroidIcon } from '../../../assets/android-icon.svg'
 import { ReactComponent as AppleIcon } from '../../../assets/apple-new-icon.svg';
 import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
+import prettyMilliseconds from 'pretty-ms';
+
 interface IDeviceCardProps {
   device: IDevice;
 }
@@ -30,8 +32,17 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
   }
 
   render() {
-    const { name, sdk, deviceType, platform, udid, dashboard_link, total_session_count, host } =
-      this.props.device;
+    const {
+      name,
+      sdk,
+      deviceType,
+      platform,
+      udid,
+      dashboard_link,
+      total_session_count,
+      host,
+      totalUtilizationTimeMilliSec,
+    } = this.props.device;
     const deviceState = this.getDeviceState();
     const hostName = host.split(':')[1].replace('//', '');
     return (
@@ -61,6 +72,12 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           <div className="device-info-card-container__body_row">
             <div className="device-info-card-container__body_row_label">Device Location:</div>
             <div className="device-info-card-container__body_row_value">{hostName}</div>
+          </div>
+          <div className="device-info-card-container__body_row">
+            <div className="device-info-card-container__body_row_label">Utilization:</div>
+            <div className="device-info-card-container__body_row_value">
+              {prettyMilliseconds(totalUtilizationTimeMilliSec)}
+            </div>
           </div>
         </div>
         <div className="device-info-card-container__footer_wrapper">

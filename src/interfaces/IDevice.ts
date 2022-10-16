@@ -16,5 +16,7 @@ export interface IDevice {
   offline?: boolean;
   mjpegServerPort?: number;
   lastCmdExecutedAt?: number;
+  totalUtilizationTimeMilliSec: number;
+  sessionStartTime: number;
   cloud?: any;
 }
