@@ -189,6 +189,7 @@ class DevicePlugin extends BasePlugin {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
+        sessionStartTime: new Date().getTime(),
       });
       if (!device.host.includes('127.0.0.1')) {
         addProxyHandler(sessionId, device.host);

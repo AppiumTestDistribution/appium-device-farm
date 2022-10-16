@@ -10,4 +10,6 @@ export interface IDevice {
   realDevice: boolean;
   dashboard_link?: string;
   total_session_count?: number;
+  totalUtilizationTimeMilliSec: number;
+
 }
