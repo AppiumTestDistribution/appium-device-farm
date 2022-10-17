@@ -3,25 +3,20 @@ import Sinon from 'sinon';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
 import { expect } from 'chai';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const express = require('express');
-var sandbox = Sinon.createSandbox();
-const ipAddress = ip.address();
+import axios from 'axios';
+let sandbox = Sinon.createSandbox();
+const firstNode = ip.address();
+const secondNode = ip.address();
 const cliArgs = {
   'device-farm': {
     platform: 'iOS',
     'device-types': 'both',
-    remote: [`http://${ipAddress}:3000`, 'http://127.0.0.1:4723'],
+    remote: [`http://${firstNode}:3000`, `http://${secondNode}:3000`, 'http://127.0.0.1:4723'],
   },
 };
 describe('Remote IOS', () => {
-  afterEach(function () {
-    sandbox.restore();
-  });
-  const app = express();
-  const port = 3000;
-  it('Fetch remote devices', async () => {
-    const stubResponse = [
+  const stubResponse = {
+    data: [
       {
         name: 'iPad Air (4th generation)',
         udid: 'F9C2FD71-A5A3-4E0A-A8CD-BE96BF907ABF',
@@ -60,13 +55,14 @@ describe('Remote IOS', () => {
         },
         $loki: 2,
       },
-    ];
-    app.get('/device-farm/api/devices/ios', (req, res) => {
-      res.send(JSON.stringify(stubResponse));
-    });
-    app.listen(port, `${ipAddress}`, () => {
-      console.log(`Example app listening on port ${port}`);
-    });
+    ],
+  };
+  let stub;
+  afterEach(() => {
+    stub.restore();
+  });
+  it('Fetch remote devices', async function () {
+    stub = Sinon.stub(axios, 'get').resolves(stubResponse);
     const iosDevices = new IOSDeviceManager();
     const simulators = [];
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
@@ -86,7 +82,7 @@ describe('Remote IOS', () => {
           host: 'http://127.0.0.1:4723',
         },
       ]);
-    const devices = await iosDevices.getDevices("both", [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     const expected = [
       {
         wdaLocalPort: 54093,
@@ -109,7 +105,7 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: `http://${ipAddress}:3000`,
+        host: `http://${firstNode}:3000`,
         offline: false,
       },
       {
@@ -122,7 +118,33 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: `http://${ipAddress}:3000`,
+        host: `http://${firstNode}:3000`,
+        offline: false,
+      },
+      {
+        name: 'iPad (8th generation)',
+        udid: '3F74FBC0-D50E-4317-8C33-428C1CE55C27',
+        state: 'Shutdown',
+        sdk: '14.2',
+        platform: 'ios',
+        wdaLocalPort: 62878,
+        busy: false,
+        realDevice: false,
+        deviceType: 'simulator',
+        host: `http://${secondNode}:3000`,
+        offline: false,
+      },
+      {
+        name: 'iPad Air (4th generation)',
+        udid: 'F9C2FD71-A5A3-4E0A-A8CD-BE96BF907ABF',
+        state: 'Shutdown',
+        sdk: '14.2',
+        platform: 'ios',
+        wdaLocalPort: 62879,
+        busy: false,
+        realDevice: false,
+        deviceType: 'simulator',
+        host: `http://${secondNode}:3000`,
         offline: false,
       },
     ];
