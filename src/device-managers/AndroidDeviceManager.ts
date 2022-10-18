@@ -22,24 +22,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const hosts = cliArgs.plugin['device-farm'].remote;
     try {
       for (const host of hosts) {
-        let devices: Array<IDevice>;
         if (!isObject(host) && host.includes('127.0.0.1')) {
-          devices = await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
+          await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
         } else {
-          devices = await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
+          await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
-        if (deviceTypes === "real") {
-          return devices.filter((device) => {
-            return device.deviceType === "real";
-          });
-        } else if (deviceTypes === "simulated") {
-          return devices.filter((device) => {
-            return device.deviceType === "emulator";
-          });
+      }
+      if (deviceTypes === 'real') {
+        return deviceState.filter((device) => {
+          return device.deviceType === 'real';
+        });
+      } else if (deviceTypes === 'simulated') {
+        return deviceState.filter((device) => {
+          return device.deviceType === 'emulator';
+        });
         // return both real and simulated (emulated) devices
-        } else {
-          return devices;
-        }
+      } else {
+        return deviceState;
       }
     } catch (e) {
       console.log(e);

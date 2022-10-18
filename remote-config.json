@@ -5,6 +5,7 @@
         "device-farm": {
           "platform": "android",
           "device-types": "both"
+         
         }
       }
     }
