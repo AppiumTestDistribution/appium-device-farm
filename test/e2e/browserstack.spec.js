@@ -9,21 +9,23 @@ describe('Browserstack Devices', () => {
       .data;
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
-    expect(androidDevices).to.eql([
-      {
-        device: 'Google Pixel 3',
-        os_version: '9.0',
-        platform: 'android',
-        host: 'http://hub-cloud.browserstack.com',
-        busy: false,
-        deviceType: 'real',
-        name: 'Google Pixel 3',
-        sdk: '9.0',
-        udid: 'Google Pixel 3',
-        cloud: 'browserstack',
-        offline: false,
-      },
-    ]);
+    expect(androidDevices[0]).to.include({
+      device: 'Google Pixel 3',
+      os_version: '9.0',
+      platform: 'android',
+      host: 'http://hub-cloud.browserstack.com',
+      busy: false,
+      deviceType: 'real',
+      name: 'Google Pixel 3',
+      sdk: '9.0',
+      udid: 'Google Pixel 3',
+      cloud: 'browserstack',
+      offline: false,
+    });
+    expect(androidDevices[0]).to.include.all.keys(
+      'totalUtilizationTimeMilliSec',
+      'sessionStartTime'
+    );
   });
 
   it('Should be able to run the plugin with Browerstack config', async () => {
@@ -35,20 +37,19 @@ describe('Browserstack Devices', () => {
     let iosDevics = (await axios.get('http://localhost:31337/device-farm/api/devices/ios')).data;
     delete iosDevics[0].meta;
     delete iosDevics[0]['$loki'];
-    expect(iosDevics).to.be.eql([
-      {
-        device: 'iPhone 11 Pro',
-        os_version: '15',
-        platform: 'ios',
-        host: 'http://hub-cloud.browserstack.com',
-        busy: false,
-        deviceType: 'real',
-        name: 'iPhone 11 Pro',
-        sdk: '15',
-        udid: 'iPhone 11 Pro',
-        cloud: 'browserstack',
-        offline: false,
-      },
-    ]);
+    expect(iosDevics[0]).to.include({
+      device: 'iPhone 11 Pro',
+      os_version: '15',
+      platform: 'ios',
+      host: 'http://hub-cloud.browserstack.com',
+      busy: false,
+      deviceType: 'real',
+      name: 'iPhone 11 Pro',
+      sdk: '15',
+      udid: 'iPhone 11 Pro',
+      cloud: 'browserstack',
+      offline: false,
+    });
+    expect(iosDevics[0]).to.include.all.keys('totalUtilizationTimeMilliSec', 'sessionStartTime');
   });
 });
