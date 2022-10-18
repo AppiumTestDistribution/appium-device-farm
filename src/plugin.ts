@@ -215,6 +215,7 @@ async function spinWith(msg: string, fn: () => any, callback = (msg: string) => 
     spinner.succeed();
     return res;
   } catch (err) {
+    console.log(err);
     spinner.fail();
     spinner.color = 'red';
     if (callback) callback(msg);
