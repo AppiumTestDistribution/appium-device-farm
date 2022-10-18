@@ -3,12 +3,12 @@ import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager
 import * as Helper from '../../src/helpers';
 import { expect } from 'chai';
 import axios from 'axios';
-let sandbox = Sinon.createSandbox();
 const firstNode = 'http://192.168.0.103';
 const secondNode = 'http://192.168.0.104';
 const cliArgs = {
   'device-farm': {
     platform: 'android',
+    'device-types': 'both',
     remote: [`http://${firstNode}:3000`, `http://${secondNode}:3000`, 'http://127.0.0.1:4723'],
   },
 };
@@ -37,11 +37,14 @@ describe('Remote Android', () => {
     ],
   };
   let stub;
+  let sandbox;
   afterEach(() => {
     stub.restore();
     sandbox.restore();
   });
   it('Fetch remote devices', async function () {
+    sandbox = Sinon.createSandbox();
+
     stub = Sinon.stub(axios, 'get').resolves(stubResponse);
     const androidDevices = new AndroidDeviceManager();
     sandbox
