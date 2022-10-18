@@ -50,7 +50,7 @@ class DevicePlugin extends BasePlugin {
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
-      deviceTypes = (cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both');
+      deviceTypes = cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both';
       remote = cliArgs.plugin['device-farm'].remote;
     }
     expressApp.use('/device-farm', router);
@@ -79,9 +79,8 @@ class DevicePlugin extends BasePlugin {
       (v: any) => typeof v === 'object'
     );
     if (cloudExists.length > 0)
-      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (deviceTypes = "real") : true;
-    if (deviceTypes === "real")
-      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (deviceTypes = 'real') : true;
+    if (deviceTypes === 'real') logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     return deviceTypes;
   }
 
@@ -150,16 +149,13 @@ class DevicePlugin extends BasePlugin {
       const remoteUrl = hubUrl(device);
       let sessionDetails: any;
       try {
-        await spinWith('Creating remote session', async () => {
-          sessionDetails = //change to give the entire URL
-            (
-              await axios.post(remoteUrl, {
-                capabilities: caps,
-              })
-            ).data;
-          if (sessionDetails.value.error)
-            throw new Error(`Failed ❌ ${sessionDetails.value.error}`);
-        });
+        sessionDetails = //change to give the entire URL
+          (
+            await axios.post(remoteUrl, {
+              capabilities: caps,
+            })
+          ).data;
+        if (sessionDetails.value.error) throw new Error(`Failed ❌ ${sessionDetails.value.error}`);
 
         session = {
           protocol: 'W3C',
@@ -215,7 +211,6 @@ async function spinWith(msg: string, fn: () => any, callback = (msg: string) => 
     spinner.succeed();
     return res;
   } catch (err) {
-    console.log(err);
     spinner.fail();
     spinner.color = 'red';
     if (callback) callback(msg);
