@@ -18,5 +18,6 @@ export interface IDevice {
   lastCmdExecutedAt?: number;
   totalUtilizationTimeMilliSec: number;
   sessionStartTime: number;
+  newCommandTimeout?: number;
   cloud?: any;
 }
