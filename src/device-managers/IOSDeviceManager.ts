@@ -105,6 +105,8 @@ export default class IOSDeviceManager implements IDeviceManager {
             realDevice: true,
             deviceType: 'real',
             platform: 'ios',
+            totalUtilizationTimeMilliSec: 0,
+            sessionStartTime: 0,
             host: `http://127.0.0.1:${cliArgs.port}`,
           })
         );
