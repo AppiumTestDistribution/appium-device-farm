@@ -125,5 +125,6 @@ export function unblockDevice(sessionId: string) {
       device.lastCmdExecutedAt = undefined;
       device.sessionStartTime = 0;
       device.totalUtilizationTimeMilliSec = totalUtilization;
+      device.newCommandTimeout = undefined;
     });
 }

@@ -76,6 +76,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   logger.info(JSON.stringify(filters));
 
   const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
+  const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
     firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
 
@@ -92,7 +93,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   }
   const device = getDevice(filters);
   logger.info(`📱 Device found: ${JSON.stringify(device)}`);
-  updateDevice(device, { busy: true });
+  updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
   logger.info(`📱 Blocking device ${device.udid} for new session`);
   await updateCapabilityForDevice(capability, device);
   return device;
@@ -180,18 +181,19 @@ export async function releaseBlockedDevices() {
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();
+    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60
     if (
       device.lastCmdExecutedAt != undefined &&
-      (currentEpoch - device.lastCmdExecutedAt) / 1000 > 100
+      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
     ) {
       console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than 100 seconds`
+        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`
       );
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
         unblockDevice(sessionId);
         logger.info(
-          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than 100 seconds`
+          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
         );
       }
     }
