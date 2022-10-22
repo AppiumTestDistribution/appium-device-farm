@@ -29,8 +29,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -39,8 +37,6 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -55,8 +51,6 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -65,8 +59,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -75,8 +67,6 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -95,8 +85,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -111,8 +99,6 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -121,8 +107,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -141,8 +125,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -154,8 +136,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -175,8 +155,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -191,8 +169,6 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);

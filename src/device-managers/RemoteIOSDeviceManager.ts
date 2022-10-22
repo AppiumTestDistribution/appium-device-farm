@@ -21,8 +21,6 @@ export default class RemoteIOSDeviceManager {
         this.deviceState.push(
           Object.assign({
             ...device,
-            totalUtilizationTimeMilliSec: 0,
-            sessionStartTime: 0,
             host: `${this.host}`,
           })
         );
@@ -39,8 +37,6 @@ export default class RemoteIOSDeviceManager {
         simulators.push(
           Object.assign({
             ...device,
-            totalUtilizationTimeMilliSec: 0,
-            sessionStartTime: 0,
             host: `${host}`,
           })
         );

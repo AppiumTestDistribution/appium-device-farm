@@ -41,8 +41,6 @@ describe('Android Device Manager', () => {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -55,8 +53,6 @@ describe('Android Device Manager', () => {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54321,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -91,8 +87,6 @@ describe('Android Device Manager', () => {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -124,8 +118,6 @@ describe('Android Device Manager', () => {
         udid: 'YOGAA1BBB4124',
         platform: 'android',
         systemPort: 54322,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);

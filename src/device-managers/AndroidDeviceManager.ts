@@ -86,10 +86,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
             state: device.state,
             udid: device.udid,
             platform: 'android',
-            totalUtilizationTimeMilliSec: 0,
-            sessionStartTime: 0,
             deviceType: realDevice ? 'real' : 'emulator',
             host: `http://127.0.0.1:${cliArgs.port}`,
+            totalUtilizationTimeMilliSec: 0,
+            sessionStartTime: 0,
           });
         }
       }
