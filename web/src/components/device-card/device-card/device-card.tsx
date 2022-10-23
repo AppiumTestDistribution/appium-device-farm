@@ -73,12 +73,14 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             <div className="device-info-card-container__body_row_label">Device Location:</div>
             <div className="device-info-card-container__body_row_value">{hostName}</div>
           </div>
-          <div className="device-info-card-container__body_row">
-            <div className="device-info-card-container__body_row_label">Utilization:</div>
-            <div className="device-info-card-container__body_row_value">
-              {prettyMilliseconds(totalUtilizationTimeMilliSec)}
+          {totalUtilizationTimeMilliSec != null && (
+            <div className="device-info-card-container__body_row">
+              <div className="device-info-card-container__body_row_label">Utilization:</div>
+              <div className="device-info-card-container__body_row_value">
+                {prettyMilliseconds(totalUtilizationTimeMilliSec)}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="device-info-card-container__footer_wrapper">
           {dashboard_link && !!total_session_count && total_session_count > 0 && (
