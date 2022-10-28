@@ -35,26 +35,17 @@ export async function iOSCapabilities(
     sdk: string;
     mjpegServerPort?: number;
     wdaLocalPort?: number;
+    derivedDataPath?: string;
   }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    if (freeDevice.realDevice) {
-      caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
-    } else {
-      /* In simulator, port forwarding won't happen for each session. So mjpegServerPort will be used only for 1st time.
-       * So set the port for the first time and resuse the same port for subsequent sessions.
-       */
-      const existingPort = freeDevice.mjpegServerPort;
-      caps.firstMatch[0]['appium:mjpegServerPort'] =
-        existingPort && (await isPortBusy(existingPort)) ? existingPort : await getPort();
-    }
-    deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
-    deleteAlwaysMatch(caps, 'appium:udid');
-    deleteAlwaysMatch(caps, 'appium:deviceName');
-    deleteAlwaysMatch(caps, 'appium:wdaLocalPort');
-  }
+  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
+  caps.firstMatch[0]['appium:derivedDataPath'] = freeDevice.derivedDataPath;
+  deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
+  deleteAlwaysMatch(caps, 'appium:udid');
+  deleteAlwaysMatch(caps, 'appium:deviceName');
+  deleteAlwaysMatch(caps, 'appium:wdaLocalPort');
 }

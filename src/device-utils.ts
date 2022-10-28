@@ -103,9 +103,6 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.IOS) {
       await iOSCapabilities(capability, device);
-      updateDevice(device, {
-        mjpegServerPort: capability.firstMatch[0]['appium:mjpegServerPort'],
-      });
     } else {
       await androidCapabilities(capability, device);
     }
