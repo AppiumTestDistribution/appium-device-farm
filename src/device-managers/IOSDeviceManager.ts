@@ -10,7 +10,6 @@ import axios from 'axios';
 import { DeviceFactory } from './factory/DeviceFactory';
 import os from 'os';
 import path from 'path';
-import getPort from 'get-port';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -97,7 +96,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       } else {
         log.info(`IOS Device details for ${udid} not available. So querying now.`);
         const wdaLocalPort = await getFreePort();
-        const mjpegServerPort = await getPort();
+        const mjpegServerPort = await getFreePort();
         const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
         deviceState.push(
           Object.assign({
@@ -161,7 +160,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     );
     await asyncForEach(flattenValued, async (device: IDevice) => {
       const wdaLocalPort = await getFreePort();
-      const mjpegServerPort = await getPort();
+      const mjpegServerPort = await getFreePort();
       simulators.push(
         Object.assign({
           ...device,

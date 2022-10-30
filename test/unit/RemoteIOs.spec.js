@@ -4,6 +4,8 @@ import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
 import { expect } from 'chai';
 import axios from 'axios';
+import os from 'os';
+import path from 'path';
 let sandbox = Sinon.createSandbox();
 const firstNode = ip.address();
 const secondNode = ip.address();
@@ -100,6 +102,8 @@ describe('Remote IOS', () => {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
+        derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
+        mjpegServerPort: 54093
       },
       {
         name: 'iPad (8th generation)',
