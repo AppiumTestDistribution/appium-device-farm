@@ -20,4 +20,5 @@ export interface IDevice {
   sessionStartTime: number;
   newCommandTimeout?: number;
   cloud?: any;
+  derivedDataPath?: string;
 }

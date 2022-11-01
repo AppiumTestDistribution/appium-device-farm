@@ -2,6 +2,8 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
+import os from 'os';
+import path from 'path';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -51,7 +53,11 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
+        sessionStartTime: 0,
+        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
+        derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
+        mjpegServerPort: 54093
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -100,6 +106,8 @@ describe('IOS Device Manager', () => {
         platform: 'ios',
         wdaLocalPort: 54093,
         host: 'http://127.0.0.1:4723',
+        derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
+        mjpegServerPort: 54093
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -170,6 +178,8 @@ describe('IOS Device Manager', () => {
         platform: 'ios',
         wdaLocalPort: 54093,
         host: 'http://127.0.0.1:4723',
+        derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
+        mjpegServerPort: 54093
       },
     ]);
   });

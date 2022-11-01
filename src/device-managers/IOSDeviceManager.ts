@@ -8,6 +8,8 @@ import { asyncForEach } from '../helpers';
 import log from '../logger';
 import axios from 'axios';
 import { DeviceFactory } from './factory/DeviceFactory';
+import os from 'os';
+import path from 'path';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -94,10 +96,12 @@ export default class IOSDeviceManager implements IDeviceManager {
       } else {
         log.info(`IOS Device details for ${udid} not available. So querying now.`);
         const wdaLocalPort = await getFreePort();
+        const mjpegServerPort = await getFreePort();
         const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
         deviceState.push(
           Object.assign({
             wdaLocalPort,
+            mjpegServerPort,
             udid,
             sdk,
             name,
@@ -108,6 +112,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
+            derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`)
           })
         );
       }
@@ -155,10 +160,12 @@ export default class IOSDeviceManager implements IDeviceManager {
     );
     await asyncForEach(flattenValued, async (device: IDevice) => {
       const wdaLocalPort = await getFreePort();
+      const mjpegServerPort = await getFreePort();
       simulators.push(
         Object.assign({
           ...device,
           wdaLocalPort,
+          mjpegServerPort,
           busy: false,
           realDevice: false,
           platform: 'ios',
@@ -166,6 +173,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           host: `http://127.0.0.1:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: 0,
           sessionStartTime: 0,
+          derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${device.udid}`)
         })
       );
     });
