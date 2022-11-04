@@ -109,7 +109,7 @@ describe('Android Device Manager', () => {
   //   sandbox.restore();
   // });
 
-  it.only('should call save once', function () {
+  xit('should call save once', function () {
     sandbox.stub(DeviceServices, 'getAllDevices').returns(devices);
     const unblockDeviceStub = sandbox.stub(DeviceServices, 'unblockDevice').returns('ABC***');
     // const unblockDeviceSpy = sinon.spy(DeviceServices, 'unblockDevice');

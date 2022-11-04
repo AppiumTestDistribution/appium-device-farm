@@ -89,6 +89,8 @@ describe('Remote Android', () => {
         platform: 'android',
         systemPort: 54321,
         host: 'http://127.0.0.1:4723',
+        sessionStartTime: 0,
+        totalUtilizationTimeMilliSec: 0,
       },
     ];
     expect(devices).to.deep.equal(expected);
