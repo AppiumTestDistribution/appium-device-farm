@@ -40,8 +40,6 @@ export default class Devices {
           sdk: d['os_version'],
           udid: d.device,
           cloud: this.host.cloudName,
-          totalUtilizationTimeMilliSec: 0,
-          sessionStartTime: 0,
         })
       );
       this.deviceState.push(...result);

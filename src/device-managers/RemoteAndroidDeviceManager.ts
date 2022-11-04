@@ -20,8 +20,6 @@ export default class RemoteAndroidDeviceManager {
       this.deviceState.push(
         Object.assign({
           ...device,
-          totalUtilizationTimeMilliSec: 0,
-          sessionStartTime: 0,
           host: `${this.host}`,
         })
       );

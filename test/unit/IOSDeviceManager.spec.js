@@ -31,8 +31,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -41,8 +39,6 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -57,7 +53,6 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        mjpegServerPort: 50686,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
@@ -70,8 +65,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
       {
@@ -80,8 +73,6 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -100,8 +91,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -116,11 +105,11 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
         derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
-        mjpegServerPort: 54093
+        mjpegServerPort: 54093,
+        sessionStartTime: 0,
+        totalUtilizationTimeMilliSec: 0,
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -128,8 +117,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -148,8 +135,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -161,8 +146,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);
@@ -182,8 +165,6 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: 'http://127.0.0.1:4723',
       },
     ]);

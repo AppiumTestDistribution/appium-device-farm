@@ -25,8 +25,6 @@ describe('Remote Android', () => {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54322,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         meta: {
           revision: 0,
           created: 1661836020465,
@@ -66,8 +64,6 @@ describe('Remote Android', () => {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54322,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: `http://${firstNode}:3000`,
       },
       {
@@ -80,8 +76,6 @@ describe('Remote Android', () => {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54322,
-        sessionStartTime: 0,
-        totalUtilizationTimeMilliSec: 0,
         host: `http://${secondNode}:3000`,
       },
       {
@@ -94,9 +88,9 @@ describe('Remote Android', () => {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
+        host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        host: 'http://127.0.0.1:4723',
       },
     ];
     expect(devices).to.deep.equal(expected);

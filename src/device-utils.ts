@@ -174,7 +174,7 @@ export async function refreshDeviceList() {
 export async function releaseBlockedDevices() {
   const allDevices = await getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy === true;
+    return device.busy === true && device.host.includes('127.0.0.1');
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();

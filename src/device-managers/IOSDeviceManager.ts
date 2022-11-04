@@ -109,9 +109,9 @@ export default class IOSDeviceManager implements IDeviceManager {
             realDevice: true,
             deviceType: 'real',
             platform: 'ios',
+            host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
-            host: `http://127.0.0.1:${cliArgs.port}`,
             derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`)
           })
         );
@@ -170,9 +170,9 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: 'ios',
           deviceType: 'simulator',
+          host: `http://127.0.0.1:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: 0,
           sessionStartTime: 0,
-          host: `http://127.0.0.1:${cliArgs.port}`,
           derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${device.udid}`)
         })
       );
