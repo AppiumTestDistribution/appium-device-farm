@@ -1,7 +1,11 @@
 import sinon from 'sinon';
 import * as DeviceUtils from '../../src/device-utils';
 import * as DeviceServices from '../../src/data-service/device-service';
-
+import chai from 'chai';
+import sinonChai from 'sinon-chai';
+chai.should();
+chai.use(sinonChai);
+var expect = chai.expect;
 var sandbox = sinon.createSandbox();
 
 describe('Android Device Manager', () => {
@@ -105,39 +109,14 @@ describe('Android Device Manager', () => {
     freeDevice,
   ];
 
-  // afterEach(function () {
-  //   sandbox.restore();
-  // });
-
-  xit('should call save once', function () {
-    sandbox.stub(DeviceServices, 'getAllDevices').returns(devices);
-    const unblockDeviceStub = sandbox.stub(DeviceServices, 'unblockDevice').returns('ABC***');
-    // const unblockDeviceSpy = sinon.spy(DeviceServices, 'unblockDevice');
-
-    DeviceUtils.releaseBlockedDevices();
-    sinon.assert.calledOnce(unblockDeviceStub);
-
-    // sinon.assert.calledOnce(unblockDeviceStub);
-    // const unblockDeviceStub = sandbox.stub(DeviceServices, 'unblockDevice').returns('devices in test');
-    // sandbox.stub(DeviceServices, 'unblockDevice').returns(null);
-    // unblockDeviceStub.restore();
-    // sinon.assert.calledOnce(unblockDeviceStub);
+  afterEach(function () {
+    sandbox.restore();
   });
 
-  // it.only(
-  //   'Android Device List to have added state',
-  //   sinon.test(function (done) {
-  //     const unblockDeviceStub = this.spy(DeviceServices, 'unblockDevice');
-  //     sandbox.stub(DeviceServices, 'getAllDevices').returns(devices);
-  //     DeviceUtils.releaseBlockedDevices();
-  //     sinon.assert.calledOnce(unblockDeviceStub);
-  //   })
-  // );
+  it('should call save once', async function () {
+    sandbox.stub(DeviceServices, 'getAllDevices').returns(devices);
+    const check = sandbox.stub(DeviceServices, 'unblockDevice').returns('');
+    await DeviceUtils.releaseBlockedDevices();
+    expect(check.calledOnce).to.be.ok;
+  });
 });
-
-// sinon.assert.calledOnce(DeviceServices.unblockDevice);
-// sinon.assert.calledOnce(spy);
-// console.log("----> " + JSON.stringify(spy));
-// sandbox.assert.calledWith(DeviceServices.unblockDevice);
-// const y = DeviceServices.getAllDevices();
-// console.log(JSON.stringify(y));
