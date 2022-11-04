@@ -1,7 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import axios from 'axios';
 import { expect } from 'chai';
-import lte from 'ramda/src/lte';
 
 describe('Browserstack Devices', () => {
   it('Should be able to run the android with Browerstack config', async () => {
@@ -22,10 +21,6 @@ describe('Browserstack Devices', () => {
       cloud: 'browserstack',
       offline: false,
     });
-    expect(androidDevices[0]).to.include.all.keys(
-      'totalUtilizationTimeMilliSec',
-      'sessionStartTime'
-    );
   });
 
   it('Should be able to run the plugin with Browerstack config', async () => {
@@ -50,6 +45,5 @@ describe('Browserstack Devices', () => {
       cloud: 'browserstack',
       offline: false,
     });
-    expect(iosDevics[0]).to.include.all.keys('totalUtilizationTimeMilliSec', 'sessionStartTime');
   });
 });
