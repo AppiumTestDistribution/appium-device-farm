@@ -71,10 +71,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
         } else {
           log.info(`Android Device details for ${device.udid} not available. So querying now.`);
           const systemPort = await getFreePort();
-          const [sdk, realDevice, name] = await Promise.all([
+          const [sdk, realDevice, name, chromeVersion] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
+            this.getChromeVersion(device.udid),
           ]);
 
           deviceState.push({
@@ -90,6 +91,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
+            chromeVersion,
           });
         }
       }
@@ -110,6 +112,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   public async getConnectedDevices() {
     return await (await this.getAdb()).getConnectedDevices();
+  }
+
+  public async getChromeVersion(udid: string) {
+    log.debug('Getting package info for chrome');
+    let versionName;
+    try {
+      const stdout = await (
+        await this.getAdb()
+      ).adbExec(['-s', udid, 'shell', 'dumpsys', 'package', 'com.android.chrome']);
+      const versionNameMatch = new RegExp(/versionName=([\d+.]+)/).exec(stdout);
+      if (versionNameMatch) {
+        versionName = versionNameMatch[1];
+      }
+    } catch (err: any) {
+      log.warn(`Error '${err.message}' while dumping package info`);
+    }
+    return versionName;
   }
 
   private async getDeviceVersion(udid: string) {

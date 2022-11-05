@@ -25,6 +25,7 @@ describe('Android Device Manager', () => {
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('83.0.4103.106');
     const realDevice = sandbox.stub(androidDevices, 'isRealDevice');
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
@@ -44,6 +45,7 @@ describe('Android Device Manager', () => {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeVersion: '83.0.4103.106',
       },
       {
         busy: false,
@@ -58,6 +60,7 @@ describe('Android Device Manager', () => {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeVersion: '83.0.4103.106',
       },
     ]);
   });
@@ -69,6 +72,7 @@ describe('Android Device Manager', () => {
       { udid: 'emulator-5555', state: 'device' },
     ]);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('83.0.4103.106');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
@@ -94,6 +98,7 @@ describe('Android Device Manager', () => {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeVersion: '83.0.4103.106',
       },
     ]);
   });
@@ -105,6 +110,7 @@ describe('Android Device Manager', () => {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('83.0.4103.106');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('Nexus 6');
@@ -127,6 +133,7 @@ describe('Android Device Manager', () => {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeVersion: '83.0.4103.106',
       },
     ]);
   });

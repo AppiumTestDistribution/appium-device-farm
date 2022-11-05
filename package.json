@@ -65,13 +65,14 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
-    "yargs": "^17.5.1"
+    "yargs": "^17.5.1",
+    "appium-chromedriver": "^5.2.1",
+    "@appium/types": "0.5.0"
   },
   "peerDependencies": {
-    "appium": "^2.0.0-beta.43"
+    "appium": "^2.0.0-beta.44"
   },
   "devDependencies": {
-    "@appium/types": "0.4.0",
     "@babel/core": "7.18.13",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@types/async-lock": "1.1.5",
@@ -86,6 +87,7 @@
     "@types/yargs": "17.0.12",
     "@typescript-eslint/eslint-plugin": "5.36.1",
     "@typescript-eslint/parser": "5.36.1",
+    "appium-uiautomator2-driver": "^2.10.1",
     "babel-eslint": "10.1.0",
     "chai": "4.3.6",
     "eslint": "7.32.0",

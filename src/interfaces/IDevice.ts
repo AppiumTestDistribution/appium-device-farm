@@ -21,4 +21,5 @@ export interface IDevice {
   newCommandTimeout?: number;
   cloud?: any;
   derivedDataPath?: string;
+  chromeVersion?: any;
 }
