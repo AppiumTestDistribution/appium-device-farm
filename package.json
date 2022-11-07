@@ -21,7 +21,7 @@
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
     "appium-home": "rm -rf rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
-    "reinstall-plugin": "npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
+    "reinstall-plugin": "APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "APPIUM_HOME=/tmp/some-temp-dir appium server -ka 800 --config=./server-config.json --use-plugins=device-farm -pa /wd/hub"
   },
   "repository": {
@@ -124,6 +124,9 @@
         },
         "remote": {
           "type": "array"
+        },
+        "skipChromeDownload": {
+          "type": "boolean"
         }
       },
       "title": "Appium device farm plugin",

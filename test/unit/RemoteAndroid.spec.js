@@ -9,6 +9,7 @@ const cliArgs = {
   'device-farm': {
     platform: 'android',
     'device-types': 'both',
+    skipChromeDownload: true,
     remote: [`http://${firstNode}:3000`, `http://${secondNode}:3000`, 'http://127.0.0.1:4723'],
   },
 };
@@ -25,7 +26,6 @@ describe('Remote Android', () => {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54322,
-        chromeVersion: '83.0.4103.106',
         meta: {
           revision: 0,
           created: 1661836020465,
@@ -50,7 +50,6 @@ describe('Remote Android', () => {
       .stub(androidDevices, 'getConnectedDevices')
       .returns([{ udid: 'emulator-5554', state: 'device' }]);
     sandbox.stub(androidDevices, 'getDeviceVersion').returns('9');
-    sandbox.stub(androidDevices, 'getChromeVersion').returns('83.0.4103.106');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sandbox.stub(androidDevices, 'isRealDevice').returns(false);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
@@ -67,7 +66,6 @@ describe('Remote Android', () => {
         platform: 'android',
         systemPort: 54322,
         host: `http://${firstNode}:3000`,
-        chromeVersion: '83.0.4103.106',
       },
       {
         busy: false,
@@ -80,7 +78,6 @@ describe('Remote Android', () => {
         platform: 'android',
         systemPort: 54322,
         host: `http://${secondNode}:3000`,
-        chromeVersion: '83.0.4103.106',
       },
       {
         busy: false,
@@ -95,7 +92,6 @@ describe('Remote Android', () => {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        chromeVersion: '83.0.4103.106',
       },
     ];
     expect(devices).to.deep.equal(expected);

@@ -6,6 +6,10 @@ import log from '../logger';
 import _, { isObject } from 'lodash';
 import { fs } from '@appium/support';
 import { DeviceFactory } from './factory/DeviceFactory';
+import { getOsInfo, formatCdVersion, getChromedriverBinaryPath } from '../chromeUtils';
+import { ChromedriverStorageClient } from 'appium-chromedriver';
+import { tempDir } from '@appium/support';
+
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
@@ -71,11 +75,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
         } else {
           log.info(`Android Device details for ${device.udid} not available. So querying now.`);
           const systemPort = await getFreePort();
-          const [sdk, realDevice, name, chromeVersion] = await Promise.all([
+          const [sdk, realDevice, name] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
-            this.getChromeVersion(device.udid),
+            this.getChromeVersion(device.udid, cliArgs),
           ]);
 
           deviceState.push({
@@ -91,7 +95,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
-            chromeVersion,
           });
         }
       }
@@ -114,9 +117,16 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await (await this.getAdb()).getConnectedDevices();
   }
 
-  public async getChromeVersion(udid: string) {
+  public async getChromeVersion(udid: string, cliArgs: any) {
+    if (cliArgs.plugin['device-farm'].skipChromeDownload) {
+      log.warn(
+        'APPIUM_SKIP_CHROMEDRIVER_INSTALL environment variable is set; skipping Chromedriver installation.'
+      );
+      log.warn('Android web/hybrid testing will not be possible without Chromedriver.');
+      return;
+    }
     log.debug('Getting package info for chrome');
-    let versionName;
+    let versionName = '';
     try {
       const stdout = await (
         await this.getAdb()
@@ -124,11 +134,24 @@ export default class AndroidDeviceManager implements IDeviceManager {
       const versionNameMatch = new RegExp(/versionName=([\d+.]+)/).exec(stdout);
       if (versionNameMatch) {
         versionName = versionNameMatch[1];
+        versionName = versionName.split('.')[0];
+        await this.downloadChromeDriver(versionName);
       }
     } catch (err: any) {
       log.warn(`Error '${err.message}' while dumping package info`);
     }
-    return versionName;
+  }
+
+  private async downloadChromeDriver(version: any) {
+    const tmpRoot = await tempDir.openDir();
+    const osInfo = await getOsInfo();
+    const client = new ChromedriverStorageClient({
+      chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
+    });
+    await client.syncDrivers({
+      osInfo,
+      minBrowserVersion: [await formatCdVersion(version)],
+    });
   }
 
   private async getDeviceVersion(udid: string) {

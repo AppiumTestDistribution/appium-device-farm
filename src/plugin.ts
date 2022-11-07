@@ -47,11 +47,13 @@ class DevicePlugin extends BasePlugin {
     let platform;
     let deviceTypes;
     let remote;
+    let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
       deviceTypes = cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both';
       remote = cliArgs.plugin['device-farm'].remote;
+      skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
     expressApp.use('/device-farm', router);
     if (!platform)
@@ -59,6 +61,7 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
+    if (!skipChromeDownload) cliArgs.plugin['device-farm'].skipChromeDownload = true;
     deviceTypes = DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
     const deviceManager = new DeviceFarmManager({
       platform,
