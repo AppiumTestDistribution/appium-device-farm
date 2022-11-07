@@ -112,7 +112,10 @@ export default class IOSDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
-            derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`)
+            derivedDataPath: path.join(
+              os.homedir(),
+              `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
+            ),
           })
         );
       }
@@ -173,7 +176,10 @@ export default class IOSDeviceManager implements IDeviceManager {
           host: `http://127.0.0.1:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: 0,
           sessionStartTime: 0,
-          derivedDataPath: path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${device.udid}`)
+          derivedDataPath: path.join(
+            os.homedir(),
+            `Library/Developer/Xcode/DerivedData/WebDriverAgent-${device.udid}`
+          ),
         })
       );
     });

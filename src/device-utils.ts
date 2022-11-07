@@ -178,7 +178,7 @@ export async function releaseBlockedDevices() {
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();
-    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60
+    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
     if (
       device.lastCmdExecutedAt != undefined &&
       (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
