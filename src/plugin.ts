@@ -61,7 +61,7 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
-    if (!skipChromeDownload) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+    if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
     deviceTypes = DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
     const deviceManager = new DeviceFarmManager({
       platform,

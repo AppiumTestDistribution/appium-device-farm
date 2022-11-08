@@ -75,7 +75,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         } else {
           log.info(`Android Device details for ${device.udid} not available. So querying now.`);
           const systemPort = await getFreePort();
-          const [sdk, realDevice, name] = await Promise.all([
+          const [sdk, realDevice, name, ...chromeDriverPath] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
@@ -95,6 +95,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: 0,
             sessionStartTime: 0,
+            chromeDriverPath,
           });
         }
       }
@@ -135,7 +136,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       if (versionNameMatch) {
         versionName = versionNameMatch[1];
         versionName = versionName.split('.')[0];
-        await this.downloadChromeDriver(versionName);
+        return await this.downloadChromeDriver(versionName);
       }
     } catch (err: any) {
       log.warn(`Error '${err.message}' while dumping package info`);
@@ -148,10 +149,21 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const client = new ChromedriverStorageClient({
       chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
     });
-    await client.syncDrivers({
+    const retrievedMapping = await client.retrieveMapping();
+    log.debug(
+      'Got chromedrivers mapping from the storage: ' + JSON.stringify(retrievedMapping, null, 2)
+    );
+    const synchronizedDrivers = await client.syncDrivers({
       osInfo,
       minBrowserVersion: [await formatCdVersion(version)],
     });
+    const synchronizedDriversMapping = synchronizedDrivers.reduce((acc: any, x: any) => {
+      const { version, minBrowserVersion } = retrievedMapping[x];
+      acc[version] = minBrowserVersion;
+      return acc;
+    }, {});
+    console.log(synchronizedDriversMapping);
+    return `${await getChromedriverBinaryPath(tmpRoot)}/${synchronizedDrivers[1]}`;
   }
 
   private async getDeviceVersion(udid: string) {

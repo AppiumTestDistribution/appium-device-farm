@@ -9,7 +9,7 @@ const cliArgs = {
     platform: 'android',
     'device-types': 'both',
     remote: ['http://127.0.0.1:4723'],
-    skipChromeDownload: true,
+    skipChromeDownload: false,
   },
 };
 describe('Android Device Manager', function () {
@@ -17,7 +17,7 @@ describe('Android Device Manager', function () {
   afterEach(function () {
     sandbox.restore();
   });
-  it('Android Device List to have added state', async () => {
+  it.only('Android Device List to have added state', async () => {
     const androidDevices = new AndroidDeviceManager();
     sandbox.stub(androidDevices, 'getConnectedDevices').returns([
       { udid: 'emulator-5554', state: 'device' },
@@ -46,6 +46,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeDriverPath: [undefined],
       },
       {
         busy: false,
@@ -60,6 +61,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeDriverPath: [undefined],
       },
     ]);
   });

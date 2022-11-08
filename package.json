@@ -45,7 +45,9 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "1.10.2",
+    "@appium/types": "0.5.0",
     "appium-adb": "^9.5.0",
+    "appium-chromedriver": "^5.2.1",
     "appium-ios-device": "^2.4.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.5",
@@ -65,9 +67,7 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
-    "yargs": "^17.5.1",
-    "appium-chromedriver": "^5.2.1",
-    "@appium/types": "0.5.0"
+    "yargs": "^17.5.1"
   },
   "peerDependencies": {
     "appium": "^2.0.0-beta.44"
