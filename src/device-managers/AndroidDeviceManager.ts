@@ -6,9 +6,7 @@ import log from '../logger';
 import _, { isObject } from 'lodash';
 import { fs } from '@appium/support';
 import { DeviceFactory } from './factory/DeviceFactory';
-import { getOsInfo, formatCdVersion, getChromedriverBinaryPath } from '../chromeUtils';
-import { ChromedriverStorageClient } from 'appium-chromedriver';
-import { tempDir } from '@appium/support';
+import ChromeDriverManager from './ChromeDriverManager';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -61,6 +59,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   ) {
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices();
+    const chromeDriverManager = await ChromeDriverManager.getInstance();
     await asyncForEach(connectedDevices, async (device: IDevice) => {
       if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
         const existingDevice = existingDeviceDetails.find(
@@ -75,11 +74,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
         } else {
           log.info(`Android Device details for ${device.udid} not available. So querying now.`);
           const systemPort = await getFreePort();
-          const [sdk, realDevice, name, ...chromeDriverPath] = await Promise.all([
+          const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
-            this.getChromeVersion(device.udid, cliArgs),
+            this.getChromeVersion(device.udid, cliArgs, chromeDriverManager),
           ]);
 
           deviceState.push({
@@ -118,7 +117,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await (await this.getAdb()).getConnectedDevices();
   }
 
-  public async getChromeVersion(udid: string, cliArgs: any) {
+  public async getChromeVersion(
+    udid: string,
+    cliArgs: any,
+    chromeDriverManager: ChromeDriverManager
+  ) {
     if (cliArgs.plugin['device-farm'].skipChromeDownload) {
       log.warn(
         'APPIUM_SKIP_CHROMEDRIVER_INSTALL environment variable is set; skipping Chromedriver installation.'
@@ -136,34 +139,16 @@ export default class AndroidDeviceManager implements IDeviceManager {
       if (versionNameMatch) {
         versionName = versionNameMatch[1];
         versionName = versionName.split('.')[0];
-        return await this.downloadChromeDriver(versionName);
+        return await chromeDriverManager.downloadChromeDriver(versionName);
       }
     } catch (err: any) {
       log.warn(`Error '${err.message}' while dumping package info`);
     }
   }
 
-  private async downloadChromeDriver(version: any) {
-    const tmpRoot = await tempDir.openDir();
-    const osInfo = await getOsInfo();
-    const client = new ChromedriverStorageClient({
-      chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
-    });
-    const retrievedMapping = await client.retrieveMapping();
-    log.debug(
-      'Got chromedrivers mapping from the storage: ' + JSON.stringify(retrievedMapping, null, 2)
-    );
-    const synchronizedDrivers = await client.syncDrivers({
-      osInfo,
-      minBrowserVersion: [await formatCdVersion(version)],
-    });
-    const synchronizedDriversMapping = synchronizedDrivers.reduce((acc: any, x: any) => {
-      const { version, minBrowserVersion } = retrievedMapping[x];
-      acc[version] = minBrowserVersion;
-      return acc;
-    }, {});
-    console.log(synchronizedDriversMapping);
-    return `${await getChromedriverBinaryPath(tmpRoot)}/${synchronizedDrivers[1]}`;
+  public async downloadChromeDriver(version: any) {
+    const instance = await ChromeDriverManager.getInstance();
+    return await instance.downloadChromeDriver(version);
   }
 
   private async getDeviceVersion(udid: string) {
