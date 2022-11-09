@@ -21,8 +21,6 @@ const MODULE_NAME = 'appium-device-farm';
 const CD_VER = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION;
 
 const getModuleRoot = _.memoize(function getModuleRoot() {
-  // TODO: Get rid of the condition after a while, so clients have enough time to bump their server to v44
-  // TODO: Commit date: 09.09.2022
   if (!_.isFunction(node.getModuleRootSync)) {
     const { existsSync, readFileSync } = require('fs');
     let currentDir = path.dirname(path.resolve(__filename));
