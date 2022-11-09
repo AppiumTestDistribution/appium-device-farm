@@ -9,7 +9,7 @@ const cliArgs = {
     platform: 'android',
     'device-types': 'both',
     remote: ['http://127.0.0.1:4723'],
-    skipChromeDownload: false,
+    skipChromeDownload: true,
   },
 };
 describe('Android Device Manager', function () {
@@ -17,7 +17,7 @@ describe('Android Device Manager', function () {
   afterEach(function () {
     sandbox.restore();
   });
-  it.only('Android Device List to have added state', async () => {
+  it('Android Device List to have added state', async () => {
     const androidDevices = new AndroidDeviceManager();
     sandbox.stub(androidDevices, 'getConnectedDevices').returns([
       { udid: 'emulator-5554', state: 'device' },
@@ -27,6 +27,7 @@ describe('Android Device Manager', function () {
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     const realDevice = sandbox.stub(androidDevices, 'isRealDevice');
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
@@ -46,7 +47,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        chromeDriverPath: [undefined],
+        chromeDriverPath: '/var/path/chromedriver',
       },
       {
         busy: false,
@@ -61,7 +62,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        chromeDriverPath: [undefined],
+        chromeDriverPath: '/var/path/chromedriver',
       },
     ]);
   });
@@ -73,6 +74,7 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-5555', state: 'device' },
     ]);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
@@ -98,6 +100,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeDriverPath: '/var/path/chromedriver',
       },
     ]);
   });
@@ -109,6 +112,7 @@ describe('Android Device Manager', function () {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
     sandbox.stub(androidDevices, 'getDeviceName').returns('Nexus 6');
@@ -131,6 +135,7 @@ describe('Android Device Manager', function () {
         host: 'http://127.0.0.1:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        chromeDriverPath: '/var/path/chromedriver',
       },
     ]);
   });

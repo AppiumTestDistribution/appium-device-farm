@@ -59,7 +59,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
   ) {
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices();
-    const chromeDriverManager = await ChromeDriverManager.getInstance();
+    const chromeDriverManager =
+      cliArgs.plugin['device-farm'].skipChromeDownload === false
+        ? await ChromeDriverManager.getInstance()
+        : undefined;
     await asyncForEach(connectedDevices, async (device: IDevice) => {
       if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
         const existingDevice = existingDeviceDetails.find(
@@ -117,11 +120,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await (await this.getAdb()).getConnectedDevices();
   }
 
-  public async getChromeVersion(
-    udid: string,
-    cliArgs: any,
-    chromeDriverManager: ChromeDriverManager
-  ) {
+  public async getChromeVersion(udid: string, cliArgs: any, chromeDriverManager: any) {
     if (cliArgs.plugin['device-farm'].skipChromeDownload) {
       log.warn(
         'APPIUM_SKIP_CHROMEDRIVER_INSTALL environment variable is set; skipping Chromedriver installation.'

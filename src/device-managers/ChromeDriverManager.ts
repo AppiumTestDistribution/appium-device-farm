@@ -1,5 +1,9 @@
-import { tempDir } from '@appium/support';
-import { formatCdVersion, getChromedriverBinaryPath, getOsInfo } from '../chromeUtils';
+import {
+  formatCdVersion,
+  getChromedriverBinaryPath,
+  getModuleRoot,
+  getOsInfo,
+} from '../chromeUtils';
 import { ChromedriverStorageClient } from 'appium-chromedriver';
 import log from '../logger';
 
@@ -19,8 +23,9 @@ export default class ChromeDriverManager {
   }
 
   public static async getInstance() {
+    console.log(getModuleRoot())
     if (!ChromeDriverManager.instance) {
-      const tmpRoot = await tempDir.openDir();
+      const tmpRoot = getModuleRoot();
       const osInfo = await getOsInfo();
       const client = new ChromedriverStorageClient({
         chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
@@ -45,7 +50,6 @@ export default class ChromeDriverManager {
     }, {});
     const versions = Object.keys(synchronizedDriversMapping);
     const latestVersion = versions[versions.length - 1];
-    console.log(synchronizedDriversMapping);
     return `${await getChromedriverBinaryPath(this.tempDirectory)}/chromedriver_${
       this.osInfo.name
     }${this.osInfo.arch}_${latestVersion}`;

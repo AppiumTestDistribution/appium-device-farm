@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import _ from 'lodash';
-import { system, fs } from '@appium/support';
+import { system, fs, node } from '@appium/support';
 import { BaseDriver } from 'appium/driver';
 import path from 'path';
 import axios from 'axios';
@@ -15,12 +15,42 @@ const OS = {
   windows: 'win',
   mac: 'mac',
 };
-const X64 = '64';
-const X86 = '32';
-const M1_ARCH_SUFFIX = '_m1';
 const CD_EXECUTABLE_PREFIX = 'chromedriver';
+const MODULE_NAME = 'appium-device-farm';
 
 const CD_VER = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION;
+
+const getModuleRoot = _.memoize(function getModuleRoot() {
+  // TODO: Get rid of the condition after a while, so clients have enough time to bump their server to v44
+  // TODO: Commit date: 09.09.2022
+  if (!_.isFunction(node.getModuleRootSync)) {
+    const { existsSync, readFileSync } = require('fs');
+    let currentDir = path.dirname(path.resolve(__filename));
+    let isAtFsRoot = false;
+    while (!isAtFsRoot) {
+      const manifestPath = path.join(currentDir, 'package.json');
+      console.log('----', JSON.parse(readFileSync(manifestPath, 'utf8')));
+      try {
+        if (
+          existsSync(manifestPath) &&
+          JSON.parse(readFileSync(manifestPath, 'utf8')).name === MODULE_NAME
+        ) {
+          return currentDir;
+        }
+        // eslint-disable-next-line no-empty
+      } catch (ign) {}
+      currentDir = path.dirname(currentDir);
+      isAtFsRoot = currentDir.length <= path.dirname(currentDir).length;
+    }
+    throw new Error(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
+  }
+
+  const root = node.getModuleRootSync(MODULE_NAME, __filename);
+  if (!root) {
+    throw new Error(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
+  }
+  return root;
+});
 
 async function getChromeVersion(adb: any, bundleId: any) {
   const { versionName } = await adb.getPackageInfo(bundleId);
@@ -31,16 +61,7 @@ const LATEST_VERSION = 'LATEST';
 
 async function formatCdVersion(ver: any) {
   return ver === LATEST_VERSION
-    ? (
-        await retrieveData(
-          `${CD_CDN}/LATEST_RELEASE`,
-          {
-            'user-agent': 'appium',
-            accept: '*/*',
-          },
-          { timeout: DOWNLOAD_TIMEOUT_MS }
-        )
-      ).trim()
+    ? (await retrieveData(`${CD_CDN}/LATEST_RELEASE`, { timeout: DOWNLOAD_TIMEOUT_MS })).trim()
     : ver;
 }
 
@@ -84,7 +105,7 @@ const getOsName = _.memoize(function getOsName() {
 const getOsInfo = _.memoize(async function getOsInfo() {
   let systemHardware = '';
   if (!system.isWindows()) {
-    systemHardware = await exec('uname', ['-m']).toString();
+    systemHardware = exec('uname', ['-m']).toString();
   }
   return {
     name: getOsName(),
@@ -115,9 +136,7 @@ export {
   retrieveData,
   getOsInfo,
   OS,
-  X64,
-  X86,
-  M1_ARCH_SUFFIX,
   generateLogPrefix,
   formatCdVersion,
+  getModuleRoot,
 };
