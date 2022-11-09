@@ -122,9 +122,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   public async getChromeVersion(udid: string, cliArgs: any, chromeDriverManager: any) {
     if (cliArgs.plugin['device-farm'].skipChromeDownload) {
-      log.warn(
-        'APPIUM_SKIP_CHROMEDRIVER_INSTALL environment variable is set; skipping Chromedriver installation.'
-      );
+      log.warn('skipChromeDownload server arg is set; skipping Chromedriver installation.');
       log.warn('Android web/hybrid testing will not be possible without Chromedriver.');
       return;
     }

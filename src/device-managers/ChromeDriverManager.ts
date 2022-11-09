@@ -5,7 +5,6 @@ import {
   getOsInfo,
 } from '../chromeUtils';
 import { ChromedriverStorageClient } from 'appium-chromedriver';
-import log from '../logger';
 
 export default class ChromeDriverManager {
   private static instance: ChromeDriverManager;
