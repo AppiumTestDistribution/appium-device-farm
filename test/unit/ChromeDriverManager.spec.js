@@ -8,7 +8,7 @@ describe('Chrome Driver Manager', function () {
     const chromeDriverManager = await ChromeDriverManager.getInstance();
     const eightyThree = await chromeDriverManager.downloadChromeDriver(83);
     const eightyFour = await chromeDriverManager.downloadChromeDriver(84);
-    (await fs.readdir(getChromedriverBinaryPath(getModuleRoot()))).length.should.be.eql(2);
+    (await fs.readdir(await getChromedriverBinaryPath(getModuleRoot()))).length.should.be.eql(2);
     console.log(eightyThree, eightyFour);
   });
 });
