@@ -23,7 +23,6 @@ export default class ChromeDriverManager {
   }
 
   public static async getInstance() {
-    console.log(getModuleRoot())
     if (!ChromeDriverManager.instance) {
       const tmpRoot = getModuleRoot();
       const osInfo = await getOsInfo();
@@ -31,7 +30,6 @@ export default class ChromeDriverManager {
         chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
       });
       const mapping = await client.retrieveMapping();
-      log.debug('Got chrome drivers mapping from the storage: ' + JSON.stringify(mapping, null, 2));
       return new ChromeDriverManager(client, osInfo, mapping, tmpRoot);
     }
     return Promise.resolve(ChromeDriverManager.instance);

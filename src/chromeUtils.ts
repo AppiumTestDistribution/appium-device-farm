@@ -27,7 +27,6 @@ const getModuleRoot = _.memoize(function getModuleRoot() {
     let isAtFsRoot = false;
     while (!isAtFsRoot) {
       const manifestPath = path.join(currentDir, 'package.json');
-      console.log('----', JSON.parse(readFileSync(manifestPath, 'utf8')));
       try {
         if (
           existsSync(manifestPath) &&
