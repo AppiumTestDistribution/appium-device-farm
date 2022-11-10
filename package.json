@@ -21,7 +21,7 @@
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
     "appium-home": "rm -rf rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
-    "reinstall-plugin": "npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
+    "reinstall-plugin": "APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "APPIUM_HOME=/tmp/some-temp-dir appium server -ka 800 --config=./server-config.json --use-plugins=device-farm -pa /wd/hub"
   },
   "repository": {
@@ -45,7 +45,9 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "1.10.2",
+    "@appium/types": "0.5.0",
     "appium-adb": "^9.5.0",
+    "appium-chromedriver": "^5.2.1",
     "appium-ios-device": "^2.4.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.5",
@@ -68,10 +70,9 @@
     "yargs": "^17.5.1"
   },
   "peerDependencies": {
-    "appium": "^2.0.0-beta.43"
+    "appium": "^2.0.0-beta.44"
   },
   "devDependencies": {
-    "@appium/types": "0.4.0",
     "@babel/core": "7.18.13",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@types/async-lock": "1.1.5",
@@ -86,6 +87,7 @@
     "@types/yargs": "17.0.12",
     "@typescript-eslint/eslint-plugin": "5.36.1",
     "@typescript-eslint/parser": "5.36.1",
+    "appium-uiautomator2-driver": "^2.10.1",
     "babel-eslint": "10.1.0",
     "chai": "4.3.6",
     "eslint": "7.32.0",
@@ -122,6 +124,9 @@
         },
         "remote": {
           "type": "array"
+        },
+        "skipChromeDownload": {
+          "type": "boolean"
         }
       },
       "title": "Appium device farm plugin",

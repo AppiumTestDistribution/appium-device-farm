@@ -1,5 +1,4 @@
 import getPort from 'get-port';
-import { isPortBusy } from './helpers';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import _ from 'lodash';
 

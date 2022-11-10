@@ -2,16 +2,19 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { DeviceModel } from '../../src/data-service/db';
-
 import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
 
+const cliArgs = {
+  platform: 'android',
+  deviceTypes: 'both',
+  cliArgs: {
+    port: 4723,
+    plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'], skipChromeDownload: true } },
+  },
+};
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
-    const deviceManager = new DeviceFarmManager({
-      platform: 'android',
-      deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-    });
+    const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -29,11 +32,7 @@ describe('Android Test', () => {
   });
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
-    const deviceManager = new DeviceFarmManager({
-      platform: 'android',
-      deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-    });
+    const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -51,11 +50,7 @@ describe('Android Test', () => {
   });
 
   it('Finding a device should throw error when all devices are busy', async () => {
-    const deviceManager = new DeviceFarmManager({
-      platform: 'android',
-      deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-    });
+    const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {

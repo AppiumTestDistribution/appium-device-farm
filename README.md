@@ -53,11 +53,12 @@ appium server -ka 800 --use-plugins=device-farm --config ./server-config.json -p
 These arguments are set when you launch the Appium server, with this plugin installed.
 
 
-|Argument|Required|Description|Default|Options|
-|----|---|----------|------|-------|
-|`plugin-device-farm-platform`| Yes | Platform to run tests against for parallel execution | None | `both`,`ios`,`android` |
-|`plugin-device-farm-device-types`| No | Types of devices to include | `both` |`both`,`simulated`,`real`|
-|`plugin-device-farm-remote`| No | Whether or not to include simulators/real devices from remote machine | None |`remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]`|
+| Argument             |Required| Description                                                           | Default | Options                                                                                                                                                                   |
+|----------------------|---|-----------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plugin-device-farm-platform` | Yes | Platform to run tests against for parallel execution                  | None    | `both`,`ios`,`android`                                                                                                                                                    |
+| `plugin-device-farm-device-types` | No | Types of devices to include                                           | `both`  | `both`,`simulated`,`real`                                                                                                                                                 |
+| `plugin-device-farm-skip-chrome-download` | No | Downloads require chromedriver for web testing                        | `true`  | `false` <br/>Setting to false will download required chromedriver for web testing on chrome                                                                                    |
+| `plugin-device-farm-remote` | No | Whether or not to include simulators/real devices from remote machine | None    | `remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]` |
 
 ## Capabilities
 
@@ -70,6 +71,12 @@ These arguments are set when you launch the Appium server, with this plugin inst
 | appium:udids                     | Comma separated list of device udid's to execute tests only on specific devices `appium:udids: device1UDID,device2UDID` |
 | appium:minSDK                    | This capability is used to filter devices/simulators based on SDK. Devices/Simulators with SDK greater then or equal to minSDK would only be considered for test run. `appium:minSDK` is optional argument. ex: `'appium:minSDK': 15`   |
 
+# Custom chrome binary url
+set the new URL to `CHROMEDRIVER_CDNURL` environment variable:
+
+```bash
+CHROMEDRIVER_CDNURL=http://npm.taobao.org/mirrors/chromedriver appium server -ka 800 --use-plugins=device-farm --config ./server-config.json -pa /wd/hub
+```
 
 ## Notes
 1. If there is no activity on a session for more then 100 seconds, device allocated to respective session would be unblocked and made available for new session requests.

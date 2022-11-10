@@ -28,6 +28,7 @@ import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
 import { hubUrl } from './helpers';
 import Cloud from './enums/Cloud';
+import ChromeDriverManager from './device-managers/ChromeDriverManager';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
@@ -47,11 +48,13 @@ class DevicePlugin extends BasePlugin {
     let platform;
     let deviceTypes;
     let remote;
+    let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
       deviceTypes = cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both';
       remote = cliArgs.plugin['device-farm'].remote;
+      skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
     expressApp.use('/device-farm', router);
     if (!platform)
@@ -59,6 +62,11 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
+    if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+    const chromeDriverManager =
+      cliArgs.plugin['device-farm'].skipChromeDownload === false
+        ? await ChromeDriverManager.getInstance()
+        : undefined;
     deviceTypes = DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
     const deviceManager = new DeviceFarmManager({
       platform,
@@ -66,6 +74,7 @@ class DevicePlugin extends BasePlugin {
       cliArgs,
     });
     Container.set(DeviceFarmManager, deviceManager);
+    if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
