@@ -7,6 +7,7 @@ import _, { isObject } from 'lodash';
 import { fs } from '@appium/support';
 import { DeviceFactory } from './factory/DeviceFactory';
 import ChromeDriverManager from './ChromeDriverManager';
+import { Container } from 'typedi';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -59,10 +60,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
   ) {
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices();
-    const chromeDriverManager =
-      cliArgs.plugin['device-farm'].skipChromeDownload === false
-        ? await ChromeDriverManager.getInstance()
-        : undefined;
     await asyncForEach(connectedDevices, async (device: IDevice) => {
       if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
         const existingDevice = existingDeviceDetails.find(
@@ -81,7 +78,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
             this.getDeviceName(device.udid),
-            this.getChromeVersion(device.udid, cliArgs, chromeDriverManager),
+            this.getChromeVersion(device.udid, cliArgs),
           ]);
 
           deviceState.push({
@@ -120,13 +117,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await (await this.getAdb()).getConnectedDevices();
   }
 
-  public async getChromeVersion(udid: string, cliArgs: any, chromeDriverManager: any) {
+  public async getChromeVersion(udid: string, cliArgs: any) {
     if (cliArgs.plugin['device-farm'].skipChromeDownload) {
       log.warn('skipChromeDownload server arg is set; skipping Chromedriver installation.');
       log.warn('Android web/hybrid testing will not be possible without Chromedriver.');
       return;
     }
     log.debug('Getting package info for chrome');
+    const chromeDriverManager = Container.get(ChromeDriverManager);
     let versionName = '';
     try {
       const stdout = await (

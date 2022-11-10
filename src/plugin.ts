@@ -28,6 +28,7 @@ import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
 import { hubUrl } from './helpers';
 import Cloud from './enums/Cloud';
+import ChromeDriverManager from './device-managers/ChromeDriverManager';
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
@@ -62,6 +63,10 @@ class DevicePlugin extends BasePlugin {
       );
     if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+    const chromeDriverManager =
+      cliArgs.plugin['device-farm'].skipChromeDownload === false
+        ? await ChromeDriverManager.getInstance()
+        : undefined;
     deviceTypes = DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
     const deviceManager = new DeviceFarmManager({
       platform,
@@ -69,6 +74,7 @@ class DevicePlugin extends BasePlugin {
       cliArgs,
     });
     Container.set(DeviceFarmManager, deviceManager);
+    if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );

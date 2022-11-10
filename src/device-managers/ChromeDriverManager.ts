@@ -22,13 +22,14 @@ export default class ChromeDriverManager {
   }
 
   public static async getInstance() {
+    const shouldParseNotes = true;
     if (!ChromeDriverManager.instance) {
       const tmpRoot = getModuleRoot();
       const osInfo = await getOsInfo();
       const client = new ChromedriverStorageClient({
         chromedriverDir: await getChromedriverBinaryPath(tmpRoot),
       });
-      const mapping = await client.retrieveMapping();
+      const mapping = await client.retrieveMapping(shouldParseNotes);
       return new ChromeDriverManager(client, osInfo, mapping, tmpRoot);
     }
     return Promise.resolve(ChromeDriverManager.instance);
