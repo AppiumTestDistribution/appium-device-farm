@@ -1,5 +1,5 @@
-rm -rf /tmp/some-temp-dir
-export APPIUM_HOME=/tmp/some-temp-dir
+rm -rf /tmp/device-farm
+export APPIUM_HOME=/tmp/device-farm
 echo 'Building Plugin'
 npm run build
 echo 'Uninstall Plugin'
@@ -9,3 +9,6 @@ echo 'Install Plugin'
 
 echo 'Plugin List'
 ./node_modules/.bin/appium plugin list
+
+echo 'Installing UIAutomator2 driver'
+./node_modules/.bin/appium driver install uiautomator2

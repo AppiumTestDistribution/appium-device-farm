@@ -12,11 +12,13 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
 
 export async function androidCapabilities(
   caps: ISessionCapability,
-  freeDevice: { udid: any; name: string; systemPort: number }
+  freeDevice: { udid: any; name: string; systemPort: number; chromeDriverPath?: any }
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
+  if (freeDevice.chromeDriverPath)
+    caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }

@@ -7,6 +7,7 @@ import { IDevice } from './interfaces/IDevice';
 import _ from 'lodash';
 import log from './logger';
 
+const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
   array: string | any[],
   callback: {
@@ -72,29 +73,40 @@ function isStandardCap(cap: any) {
 // If the 'appium:' prefix was provided and it's a valid capability, strip out the prefix (see https://www.w3.org/TR/webdriver/#dfn-extension-capabilities)
 // (NOTE: Method is destructive and mutates contents of caps)
 export function stripAppiumPrefixes(caps: any) {
-  const prefix = 'appium:';
-  const prefixedCaps = _.filter(_.keys(caps), (cap) => `${cap}`.startsWith(prefix));
-  const badPrefixedCaps: any = [];
+  // split into prefixed and non-prefixed.
+  // non-prefixed should be standard caps at this point
+  const [prefixedCaps, nonPrefixedCaps] = _.partition(_.keys(caps), (cap) =>
+    String(cap).startsWith(APPIUM_VENDOR_PREFIX)
+  );
+
+  // initialize this with the k/v pairs of the non-prefixed caps
+  const strippedCaps = /** @type {import('@appium/types').Capabilities<C>} */ _.pick(
+    caps,
+    nonPrefixedCaps
+  );
+  const badPrefixedCaps = [];
+
   // Strip out the 'appium:' prefix
   for (const prefixedCap of prefixedCaps) {
-    const strippedCapName = prefixedCap.substr(prefix.length);
+    const strippedCapName =
+      /** @type {import('type-fest').StringKeyOf<import('@appium/types').Capabilities<C>>} */ prefixedCap.substring(
+        APPIUM_VENDOR_PREFIX.length
+      );
+
     // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
     if (isStandardCap(strippedCapName)) {
       badPrefixedCaps.push(strippedCapName);
-      if (_.isNil(caps[strippedCapName])) {
-        caps[strippedCapName] = caps[prefixedCap];
+      if (_.isNil(strippedCaps[strippedCapName])) {
+        strippedCaps[strippedCapName] = caps[prefixedCap];
       } else {
         log.warn(
           `Ignoring capability '${prefixedCap}=${caps[prefixedCap]}' and ` +
-            `using capability '${strippedCapName}=${caps[strippedCapName]}'`
+            `using capability '${strippedCapName}=${strippedCaps[strippedCapName]}'`
         );
       }
     } else {
-      caps = prefixedCap;
+      strippedCaps[strippedCapName] = caps[prefixedCap];
     }
-
-    // Strip out the prefix
-    delete caps[prefixedCap];
   }
 
   // If we found standard caps that were incorrectly prefixed, throw an exception (e.g.: don't accept 'appium:platformName', only accept just 'platformName')
@@ -105,5 +117,5 @@ export function stripAppiumPrefixes(caps: any) {
       )} are standard capabilities and do not require "appium:" prefix`
     );
   }
-  return caps;
+  return strippedCaps;
 }
