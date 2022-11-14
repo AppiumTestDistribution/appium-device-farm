@@ -47,7 +47,7 @@ export default class ChromeDriverManager {
       return acc;
     }, {});
     const versions = Object.keys(synchronizedDriversMapping);
-    const latestVersion = versions[versions.length - 1];
+    const latestVersion = `v${versions[versions.length - 1]}`;
     return `${await getChromedriverBinaryPath(this.tempDirectory)}/chromedriver_${
       this.osInfo.name
     }${this.osInfo.arch}_${latestVersion}`;
