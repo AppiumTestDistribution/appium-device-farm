@@ -51,8 +51,8 @@ class DevicePlugin extends BasePlugin {
     let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
-      platform = cliArgs.plugin['device-farm'].platform.toLowerCase();
-      deviceTypes = cliArgs.plugin['device-farm'].deviceTypes.toLowerCase() || 'both';
+      platform = cliArgs.plugin['device-farm'].platform;
+      deviceTypes = cliArgs.plugin['device-farm'].deviceTypes || 'both';
       remote = cliArgs.plugin['device-farm'].remote;
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
