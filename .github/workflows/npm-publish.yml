@@ -1,23 +1,49 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
-name: Node.js Package
-
+name: release
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
+    tags:
+      - '*.*.*'
+  pull_request:
+    types:
+      - labeled
 
-jobs: 
-  publish-npm:
+jobs:
+  release:
+    if: github.event.action != 'labeled'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - name: Post bumpr status comment
+        uses: haya14busa/action-bumpr@v1
+
+      # Get tag name.
+      - id: tag
+        uses: haya14busa/action-cond@v1
         with:
-          node-version: 16
-          registry-url: https://registry.npmjs.org/
-      - run: echo "//registry.npmjs.org/:_authToken=${{secrets.npm_token}}" > .npmrc 
-      - run: npm ci 
-      - run: npm publish
+          cond: "${{ startsWith(github.ref, 'refs/tags/') }}"
+          if_true: ${{ github.ref }}
+          if_false: ${{ steps.bumpr.outputs.next_version }}
+
+      - name: Release
+        uses: justincy/github-action-npm-release@2.0.2
+        id: release
+      - uses: actions/setup-node@v1
+        if: steps.release.outputs.released == 'true'
+        with:
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish
+        if: steps.release.outputs.released == 'true'
+        run: echo "//registry.npmjs.org/:_authToken=${{secrets.npm_token}}" > .npmrc && npm ci && npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+
+
+  release-check:
+    if: github.event.action == 'labeled'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Post bumpr status comment
+        uses: haya14busa/action-bumpr@v1

@@ -9,7 +9,7 @@ describe('IOS Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'iOS',
       deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: '' },
+      cliArgs: { plugin: { 'device-farm': { port: 4723, plugin: '', remote: ['127.0.0.1'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();

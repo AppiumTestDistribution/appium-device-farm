@@ -1,5 +1,5 @@
 import Simctl from 'node-simctl';
-import { flatten, isObject } from 'lodash';
+import { flatten, isObject, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
@@ -158,10 +158,18 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   public async fetchLocalSimulators(simulators: IDevice[], cliArgs: any) {
-    const flattenValued: Array<IDevice> = flatten(
-      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
-    );
-    await asyncForEach(flattenValued, async (device: IDevice) => {
+    const flattenValued: Array<IDevice> = await this.getLocalSims();
+    let filteredSimulators: Array<IDevice> = [];
+    const hasUserGivenSimulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'simulators');
+    if (hasUserGivenSimulators) {
+      filteredSimulators = flattenValued.filter((device) =>
+        cliArgs.plugin['device-farm'].simulators.some(
+          (simulator: IDevice) => device.name === simulator.name && device.sdk === simulator.sdk
+        )
+      );
+    }
+    const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
+    await asyncForEach(buildSimulators, async (device: IDevice) => {
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
       simulators.push(
@@ -183,5 +191,11 @@ export default class IOSDeviceManager implements IDeviceManager {
         })
       );
     });
+  }
+
+  private async getLocalSims() {
+    return flatten(
+      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
+    );
   }
 }

@@ -18,14 +18,14 @@ export class DeviceFarmManager {
     deviceTypes: string | 'both';
     cliArgs: any;
   }) {
-    this.deviceTypes = deviceTypes;
+    this.deviceTypes = deviceTypes.toLowerCase();
     this.cliArgs = cliArgs;
-    if (platform === 'both') {
+    if (platform.toLowerCase() === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());
       this.deviceManagers.push(new IOSDeviceManager());
-    } else if (platform === 'android') {
+    } else if (platform.toLowerCase() === 'android') {
       this.deviceManagers.push(new AndroidDeviceManager());
-    } else if (platform === 'ios') {
+    } else if (platform.toLowerCase() === 'ios') {
       this.deviceManagers.push(new IOSDeviceManager());
     }
   }
