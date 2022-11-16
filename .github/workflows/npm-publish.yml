@@ -29,10 +29,11 @@ jobs:
       - name: Release
         uses: justincy/github-action-npm-release@2.0.2
         id: release
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         if: steps.release.outputs.released == 'true'
         with:
           registry-url: 'https://registry.npmjs.org'
+          node-version: 16
       - name: Publish
         if: steps.release.outputs.released == 'true'
         run: echo "//registry.npmjs.org/:_authToken=${{secrets.npm_token}}" > .npmrc && npm ci && npm publish
