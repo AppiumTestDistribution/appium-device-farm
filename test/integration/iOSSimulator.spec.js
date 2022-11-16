@@ -6,6 +6,7 @@ import { updateDeviceList, allocateDeviceForSession } from '../../src/device-uti
 import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
+import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -15,7 +16,14 @@ describe('IOS Simulator Test', () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
+      cliArgs: {
+        port: 4723,
+        plugin: {
+          'device-farm': {
+            remote: ['http://127.0.0.1:4723'],
+          },
+        },
+      },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -76,7 +84,7 @@ describe('Boot simulator test', async () => {
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } }, 
+      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();

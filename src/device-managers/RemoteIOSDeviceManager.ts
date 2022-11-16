@@ -27,20 +27,4 @@ export default class RemoteIOSDeviceManager {
       }
     });
   }
-
-  private async getSimulators(host: string, simulators: IDevice[]) {
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-    remoteDevices.filter((device: any) => {
-      if (device.deviceType === 'simulator') {
-        delete device['meta'];
-        delete device['$loki'];
-        simulators.push(
-          Object.assign({
-            ...device,
-            host: `${host}`,
-          })
-        );
-      }
-    });
-  }
 }
