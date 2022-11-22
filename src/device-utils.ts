@@ -20,6 +20,9 @@ import logger from './logger';
 import CapabilityFactory from './device-managers/factory/CapabilityFactory';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -34,6 +37,7 @@ const customCapability = {
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
+let storage: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -111,6 +115,43 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
     const capabilities = CapabilityFactory.getCapability(capability, device);
     return capabilities.getCapability();
   }
+}
+
+
+export async function initlializeStorage() {
+  storage = require("node-persist");
+  let basePath = path.join(os.homedir(), ".cache", "appium-device-farm", "storage");
+  fs.mkdirSync(basePath, { recursive: true });
+  await storage.init({dir: basePath});
+}
+
+/**
+ * Gets utlization time for a device from storage
+ * Returns 0 if the device has not been used an thus utilization time has not been saved
+ * @param udid
+ * @returns number
+ */
+export async function getUtilizationTime(udid: string) {
+  if (storage === undefined) {
+    await initlializeStorage();
+  }
+  const value = await storage.getItem(udid);
+  if (value !== undefined) {
+    return value;
+  }
+  return 0;
+}
+
+/**
+ * Sets utilization time for a device to storage
+ * @param udid 
+ * @param utilizationTime 
+ */
+export async function setUtilizationTime(udid: string, utilizationTime: number) {
+  if (storage === undefined) {
+    await initlializeStorage();
+  }
+  await storage.setItem(udid, utilizationTime);
 }
 
 /**

@@ -8,6 +8,7 @@ import { fs } from '@appium/support';
 import { DeviceFactory } from './factory/DeviceFactory';
 import ChromeDriverManager from './ChromeDriverManager';
 import { Container } from 'typedi';
+import { getUtilizationTime } from '../device-utils';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -74,6 +75,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         } else {
           log.info(`Android Device details for ${device.udid} not available. So querying now.`);
           const systemPort = await getFreePort();
+          const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
           const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
             this.getDeviceVersion(device.udid),
             this.isRealDevice(device.udid),
@@ -92,7 +94,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             platform: 'android',
             deviceType: realDevice ? 'real' : 'emulator',
             host: `http://127.0.0.1:${cliArgs.port}`,
-            totalUtilizationTimeMilliSec: 0,
+            totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
             sessionStartTime: 0,
             chromeDriverPath,
           });

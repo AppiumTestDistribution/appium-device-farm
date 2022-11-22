@@ -2,6 +2,7 @@ import { DeviceModel } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
+import { setUtilizationTime } from '../device-utils';
 
 export function saveDevices(devices: Array<IDevice>): any {
   const connectedDeviceIds = new Set(devices.map((device) => device.udid));
@@ -115,6 +116,7 @@ export function unblockDevice(sessionId: string) {
   const currentTime = new Date().getTime();
   const utilization = currentTime - sessionStart;
   const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+  setUtilizationTime(device.udid, totalUtilization);
   DeviceModel.chain()
     .find({
       session_id: sessionId,
