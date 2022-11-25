@@ -23,6 +23,7 @@ import _ from 'lodash';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import { LocalStorage } from 'node-persist';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -37,7 +38,6 @@ const customCapability = {
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
-let storage: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -117,13 +117,23 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
   }
 }
 
-
+/**
+ * Sets up node-persist storage in local cache
+ * @returns storage
+ */
 export async function initlializeStorage() {
-  storage = require("node-persist");
-  let basePath = path.join(os.homedir(), ".cache", "appium-device-farm", "storage");
-  fs.mkdirSync(basePath, { recursive: true });
-  await storage.init({dir: basePath});
+  const basePath = path.join(os.homedir(), ".cache", "appium-device-farm", "storage");
+  await fs.promises.mkdir(basePath, { recursive: true });
+  const storage = require('node-persist');
+  const localStorage = storage.create({dir: basePath});
+  await localStorage.init();
+  Container.set('LocalStorage', localStorage);
 }
+
+function getStorage() {
+  return Container.get('LocalStorage') as LocalStorage;
+}
+
 
 /**
  * Gets utlization time for a device from storage
@@ -132,10 +142,7 @@ export async function initlializeStorage() {
  * @returns number
  */
 export async function getUtilizationTime(udid: string) {
-  if (storage === undefined) {
-    await initlializeStorage();
-  }
-  const value = await storage.getItem(udid);
+  const value = await getStorage().getItem(udid);
   if (value !== undefined) {
     return value;
   }
@@ -148,10 +155,7 @@ export async function getUtilizationTime(udid: string) {
  * @param utilizationTime 
  */
 export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  if (storage === undefined) {
-    await initlializeStorage();
-  }
-  await storage.setItem(udid, utilizationTime);
+  await getStorage().setItem(udid, utilizationTime);
 }
 
 /**
