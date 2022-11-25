@@ -1,4 +1,14 @@
+
+
 # appium-device-farm 
+
+<h1 align="center">
+	<br>
+	<img src="assets/DeviceFarm-Logo.jpg" alt="DeviceFarm">
+	<br>
+	<br>
+	<br>
+</h1>
 
 [![Build Status](https://dev.azure.com/saikrishna321/ATD/_apis/build/status/AppiumTestDistribution.appium-device-farm?branchName=main)](https://dev.azure.com/saikrishna321/ATD/_build/latest?definitionId=11&branchName=main)    [![npm version](https://badge.fury.io/js/appium-device-farm.svg)](https://badge.fury.io/js/appium-device-farm)
 
