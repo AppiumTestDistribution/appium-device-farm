@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
+import { updateDeviceList, allocateDeviceForSession, initlializeStorage } from '../../src/device-utils';
 import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
@@ -13,6 +13,7 @@ const name = 'My Device Name';
 
 describe('IOS Simulator Test', () => {
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
@@ -46,6 +47,7 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
@@ -81,6 +83,7 @@ describe('Boot simulator test', async () => {
   });
 
   it('Should pick Booted simulator when app path has .app', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
