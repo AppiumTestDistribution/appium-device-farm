@@ -2,6 +2,7 @@ import ip from 'ip';
 import Sinon from 'sinon';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
+import * as DeviceUtils from '../../src/device-utils';
 import { expect } from 'chai';
 import axios from 'axios';
 import os from 'os';
@@ -71,6 +72,7 @@ describe('Remote IOS', () => {
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox
       .stub(iosDevices, 'fetchLocalSimulators')
       .withArgs(simulators, cliArgs)

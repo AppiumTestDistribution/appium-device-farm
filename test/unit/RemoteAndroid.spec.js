@@ -1,6 +1,7 @@
 import Sinon from 'sinon';
 import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 import * as Helper from '../../src/helpers';
+import * as DeviceUtils from '../../src/device-utils';
 import { expect } from 'chai';
 import axios from 'axios';
 const firstNode = 'http://192.168.0.103';
@@ -55,6 +56,7 @@ describe('Remote Android', () => {
     sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     sandbox.stub(androidDevices, 'isRealDevice').returns(false);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     const expected = [
       {
