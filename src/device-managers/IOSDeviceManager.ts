@@ -10,6 +10,7 @@ import axios from 'axios';
 import { DeviceFactory } from './factory/DeviceFactory';
 import os from 'os';
 import path from 'path';
+import { getUtilizationTime } from '../device-utils';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -97,6 +98,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.info(`IOS Device details for ${udid} not available. So querying now.`);
         const wdaLocalPort = await getFreePort();
         const mjpegServerPort = await getFreePort();
+        const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
         const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
         deviceState.push(
           Object.assign({
@@ -110,7 +112,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             deviceType: 'real',
             platform: 'ios',
             host: `http://127.0.0.1:${cliArgs.port}`,
-            totalUtilizationTimeMilliSec: 0,
+            totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
             sessionStartTime: 0,
             derivedDataPath: path.join(
               os.homedir(),
@@ -172,6 +174,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     await asyncForEach(buildSimulators, async (device: IDevice) => {
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
+      const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
       simulators.push(
         Object.assign({
           ...device,
@@ -182,7 +185,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           platform: 'ios',
           deviceType: 'simulator',
           host: `http://127.0.0.1:${cliArgs.port}`,
-          totalUtilizationTimeMilliSec: 0,
+          totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
           derivedDataPath: path.join(
             os.homedir(),

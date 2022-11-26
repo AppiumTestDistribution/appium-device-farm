@@ -2,6 +2,7 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 import * as Helper from '../../src/helpers';
+import * as DeviceUtils from '../../src/device-utils';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -32,6 +33,7 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
@@ -82,6 +84,7 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices('simulated', [], {
       port: 4723,
       plugin: cliArgs,
@@ -120,6 +123,7 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54322);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices('real', [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {

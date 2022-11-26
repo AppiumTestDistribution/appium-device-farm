@@ -20,6 +20,10 @@ import logger from './logger';
 import CapabilityFactory from './device-managers/factory/CapabilityFactory';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
+import { LocalStorage } from 'node-persist';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -111,6 +115,47 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
     const capabilities = CapabilityFactory.getCapability(capability, device);
     return capabilities.getCapability();
   }
+}
+
+/**
+ * Sets up node-persist storage in local cache
+ * @returns storage
+ */
+export async function initlializeStorage() {
+  const basePath = path.join(os.homedir(), ".cache", "appium-device-farm", "storage");
+  await fs.promises.mkdir(basePath, { recursive: true });
+  const storage = require('node-persist');
+  const localStorage = storage.create({dir: basePath});
+  await localStorage.init();
+  Container.set('LocalStorage', localStorage);
+}
+
+function getStorage() {
+  return Container.get('LocalStorage') as LocalStorage;
+}
+
+
+/**
+ * Gets utlization time for a device from storage
+ * Returns 0 if the device has not been used an thus utilization time has not been saved
+ * @param udid
+ * @returns number
+ */
+export async function getUtilizationTime(udid: string) {
+  const value = await getStorage().getItem(udid);
+  if (value !== undefined) {
+    return value;
+  }
+  return 0;
+}
+
+/**
+ * Sets utilization time for a device to storage
+ * @param udid 
+ * @param utilizationTime 
+ */
+export async function setUtilizationTime(udid: string, utilizationTime: number) {
+  await getStorage().setItem(udid, utilizationTime);
 }
 
 /**

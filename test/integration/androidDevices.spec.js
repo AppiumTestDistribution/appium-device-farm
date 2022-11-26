@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { DeviceModel } from '../../src/data-service/db';
-import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
+import { updateDeviceList, allocateDeviceForSession, initlializeStorage } from '../../src/device-utils';
 
 const cliArgs = {
   platform: 'android',
@@ -14,6 +14,7 @@ const cliArgs = {
 };
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -32,6 +33,7 @@ describe('Android Test', () => {
   });
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
@@ -50,6 +52,7 @@ describe('Android Test', () => {
   });
 
   it('Finding a device should throw error when all devices are busy', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();

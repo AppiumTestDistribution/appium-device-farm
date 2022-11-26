@@ -2,10 +2,11 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 
-import { updateDeviceList, allocateDeviceForSession } from '../../src/device-utils';
+import { updateDeviceList, allocateDeviceForSession, initlializeStorage } from '../../src/device-utils';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
+    await initlializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'iOS',
       deviceTypes: 'both',
