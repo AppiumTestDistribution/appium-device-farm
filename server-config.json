@@ -3,9 +3,8 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "ios",
-        "skipChromeDownload": true,
-        "deviceTypes": "real"
+        "platform": "android",
+        "skipChromeDownload": false
       }
     }
   }
