@@ -45,8 +45,13 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   caps.firstMatch[0]['appium:derivedDataPath'] = freeDevice.derivedDataPath;
-  deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
-  deleteAlwaysMatch(caps, 'appium:udid');
-  deleteAlwaysMatch(caps, 'appium:deviceName');
-  deleteAlwaysMatch(caps, 'appium:wdaLocalPort');
+  const deleteMatch = [
+    'appium:derivedDataPath',
+    'appium:platformVersion',
+    'appium:wdaLocalPort',
+    'appium:mjpegServerPort',
+    'appium:udid',
+    'appium:deviceName',
+  ];
+  deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
 }
