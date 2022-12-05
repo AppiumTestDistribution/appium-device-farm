@@ -80,11 +80,22 @@ apiRouter.get('/devices/android', (req, res) => {
 });
 
 apiRouter.get('/devices/ios', (req, res) => {
-  res.json(
-    DeviceModel.find({
-      platform: 'ios',
-    })
-  );
+  const devices = DeviceModel.find({
+    platform: 'ios',
+  });
+  if (req.query.deviceType === 'real') {
+    const realDevices = devices.filter((value) => value.deviceType === 'real');
+    res.json(realDevices);
+  } else if (req.query.deviceType === 'simulated') {
+    const simulators = devices.filter((value) => value.deviceType === 'simulator');
+    if (Object.hasOwn(req.query, 'booted')) {
+      res.json(simulators.filter((value) => value.state === 'Booted'));
+    } else {
+      res.json(simulators);
+    }
+  } else {
+    res.json(devices);
+  }
 });
 
 router.use('/api', apiRouter);
