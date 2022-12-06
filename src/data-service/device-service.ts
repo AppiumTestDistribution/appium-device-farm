@@ -70,6 +70,10 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     busy: filterOptions.busy,
   } as any;
 
+  if (filterOptions.platformVersion) {
+    filter.sdk = filterOptions.platformVersion;
+  }
+
   if (filterOptions.udid) {
     filter.udid = { $in: filterOptions.udid };
   }
