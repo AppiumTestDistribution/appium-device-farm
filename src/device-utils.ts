@@ -122,10 +122,10 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * @returns storage
  */
 export async function initlializeStorage() {
-  const basePath = path.join(os.homedir(), ".cache", "appium-device-farm", "storage");
+  const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm', 'storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   const storage = require('node-persist');
-  const localStorage = storage.create({dir: basePath});
+  const localStorage = storage.create({ dir: basePath });
   await localStorage.init();
   Container.set('LocalStorage', localStorage);
 }
@@ -133,7 +133,6 @@ export async function initlializeStorage() {
 function getStorage() {
   return Container.get('LocalStorage') as LocalStorage;
 }
-
 
 /**
  * Gets utlization time for a device from storage
@@ -151,8 +150,8 @@ export async function getUtilizationTime(udid: string) {
 
 /**
  * Sets utilization time for a device to storage
- * @param udid 
- * @param utilizationTime 
+ * @param udid
+ * @param utilizationTime
  */
 export async function setUtilizationTime(udid: string, utilizationTime: number) {
   await getStorage().setItem(udid, utilizationTime);
