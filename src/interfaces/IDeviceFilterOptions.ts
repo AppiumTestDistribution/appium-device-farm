@@ -3,6 +3,7 @@ import { DeviceType } from '../types/DeviceType';
 
 export interface IDeviceFilterOptions {
   platform?: Platform;
+  platformVersion?: string;
   name?: string;
   busy?: boolean;
   offline?: boolean;

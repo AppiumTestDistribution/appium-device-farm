@@ -86,4 +86,40 @@ describe('Get device', () => {
     const device = getDevice(filterOptions);
     expect(parseFloat(device.sdk)).to.be.gte(14.1);
   });
+
+  it('Get android device based on filter with platformVersion', () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: "10",
+    };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eql('10');
+  });
+
+  it('Get ios simulator based on filter with platformVersion', () => {
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, platformVersion: "14.0" };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eql('14.0');
+  });
+
+  it('Get android device returns undefined based on filter with platformVersion', () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: "9",
+    };
+    const device = getDevice(filterOptions);
+    expect(device).to.be.undefined;
+  });
+
+  it('Get ios simulator returns undefined based on filter with platformVersion', () => {
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, platformVersion: "16.0" };
+    const device = getDevice(filterOptions);
+    expect(device).to.be.undefined;
+  });
 });

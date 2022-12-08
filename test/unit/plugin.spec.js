@@ -8,6 +8,7 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.ipa',
         'appium:iPhoneOnly': true,
+        'appium:platformVersion': '14.0'
       },
       firstMatch: [{}],
     };
@@ -15,6 +16,7 @@ describe('Device filter tests', () => {
     const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
+      platformVersion: '14.0',
       name: 'iPhone',
       deviceType: 'real',
       udid: undefined,
@@ -29,6 +31,7 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
         'appium:iPhoneOnly': true,
+        'appium:platformVersion': '14.0'
       },
       firstMatch: [{}],
     };
@@ -36,6 +39,7 @@ describe('Device filter tests', () => {
     const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
+      platformVersion: '14.0',
       name: 'iPhone',
       deviceType: 'simulator',
       udid: undefined,
@@ -58,6 +62,7 @@ describe('Device filter tests', () => {
     const filter = getDeviceFiltersFromCapability(firstMatch);
     expect(filter).to.deep.equal({
       platform: 'ios',
+      platformVersion: undefined,
       name: 'iPhone',
       deviceType: 'simulator',
       udid: undefined,

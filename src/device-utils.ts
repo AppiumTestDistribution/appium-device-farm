@@ -185,6 +185,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
   }
   return {
     platform,
+    platformVersion: capability['appium:platformVersion'] ? capability['appium:platformVersion'] : undefined,
     name,
     deviceType,
     udid: udids?.length ? udids : undefined,
