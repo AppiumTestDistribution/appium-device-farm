@@ -3,8 +3,9 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "android",
-        "skipChromeDownload": false
+        "platform": "both",
+        "skipChromeDownload": true,
+        "maxSessions": 3
       }
     }
   }

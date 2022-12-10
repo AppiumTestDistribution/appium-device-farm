@@ -43,4 +43,8 @@ export class DeviceFarmManager {
     }
     return devices;
   }
+
+  public getMaxSessionCount(): number {
+    return this.cliArgs.plugin['device-farm'].maxSessions;
+  }
 }

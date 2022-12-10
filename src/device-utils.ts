@@ -87,6 +87,11 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   try {
     await waitUntil(
       async () => {
+        const maxSessions = await getDeviceManager().getMaxSessionCount();
+        if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
+          logger.info(`Waiting for session available, already at max session count of: ${maxSessions}`)
+          return false
+        } else
         logger.info('Waiting for free device');
         return (await getDevice(filters)) != undefined;
       },
@@ -199,6 +204,13 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
  */
 function getDeviceManager() {
   return Container.get(DeviceFarmManager) as DeviceFarmManager;
+}
+
+export async function getBusyDevicesCount() {
+  const allDevices = await getAllDevices();
+  return allDevices.filter((device) => {
+    return device.busy === true;
+  }).length;
 }
 
 export async function updateDeviceList() {

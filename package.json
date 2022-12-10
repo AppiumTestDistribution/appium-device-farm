@@ -131,6 +131,9 @@
         },
         "skipChromeDownload": {
           "type": "boolean"
+        },
+        "maxSessions": {
+          "type": "number"
         }
       },
       "title": "Appium device farm plugin",
