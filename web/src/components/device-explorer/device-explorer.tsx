@@ -10,6 +10,7 @@ import { IDevice } from '../../interfaces/IDevice';
 interface IDeviceExplorerState {
   filter: IDeviceFilter;
   devices: IDevice[];
+  activeSessionsCount: number;
   pendingSessionsCount: number;
 }
 const DEFAULT_FILTER: IDeviceFilter = {
@@ -32,6 +33,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
     super(props);
     this.state = {
       devices: [],
+      activeSessionsCount: 0,
       pendingSessionsCount: 0,
       filter: DEFAULT_FILTER,
     };
@@ -54,11 +56,19 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
   async fetchDevices() {
     try {
       const devices = await DeviceFarmApiService.getDevices();
+      const activeSessionsCount = await this.getBusyDevicesCount(devices);
       const pendingSessionsCount = await DeviceFarmApiService.getPendingSessionsCount();
-      this.setState({ devices, pendingSessionsCount });
+      this.setState({ devices, activeSessionsCount, pendingSessionsCount });
     } catch (error) {
       console.log(error);
     }
+  }
+
+  getBusyDevicesCount(devices: Array<IDevice>) {
+    const filters = [(d: IDevice) => d.busy];
+    return filters.reduce((devices: Array<IDevice>, predicate: (d: IDevice) => boolean) => {
+      return devices.filter(predicate);
+    }, devices).length;
   }
 
   getFilteredDevice() {
@@ -210,6 +220,10 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
             </div>
           </div>
           <div className="device-explorer-header-right-container">
+            <div className="device-explorer-header-filter-count">
+              <span>{this.state.activeSessionsCount}</span>
+              Active session{this.state.activeSessionsCount > 1 ? 's' : ''}
+            </div>
             <div className="device-explorer-header-filter-count">
               <span>{this.state.pendingSessionsCount}</span>
               Pending session{this.state.pendingSessionsCount > 1 ? 's' : ''}
