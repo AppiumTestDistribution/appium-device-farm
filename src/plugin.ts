@@ -31,6 +31,7 @@ import { hubUrl } from './helpers';
 import Cloud from './enums/Cloud';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import { LocalStorage } from 'node-persist';
+import { addCLIArgs } from './data-service/pluginArgs';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -78,6 +79,7 @@ class DevicePlugin extends BasePlugin {
     });
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
+    await addCLIArgs(cliArgs);
     await initlializeStorage();
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
