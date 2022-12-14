@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import log from './logger';
 import { DeviceModel, PendingSessionsModel } from './data-service/db';
+import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
@@ -69,6 +70,10 @@ apiRouter.get('/devices', async (req, res) => {
 
 apiRouter.get('/queue', (req, res) => {
   res.json(PendingSessionsModel.chain().find().data().length);
+});
+
+apiRouter.get('/cliArgs', (req, res) => {
+  res.json(getCLIArgs());
 });
 
 apiRouter.get('/devices/android', (req, res) => {
