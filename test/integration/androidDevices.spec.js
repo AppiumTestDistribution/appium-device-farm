@@ -2,7 +2,11 @@ import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { DeviceModel } from '../../src/data-service/db';
-import { updateDeviceList, allocateDeviceForSession, initlializeStorage } from '../../src/device-utils';
+import {
+  updateDeviceList,
+  allocateDeviceForSession,
+  initlializeStorage,
+} from '../../src/device-utils';
 
 const cliArgs = {
   platform: 'android',
