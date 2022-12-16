@@ -30,7 +30,8 @@ import ora from 'ora';
 import { hubUrl } from './helpers';
 import Cloud from './enums/Cloud';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
-import { LocalStorage } from 'node-persist';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
 
 const commandsQueueGuard = new AsyncLock();
