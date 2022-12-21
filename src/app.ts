@@ -44,6 +44,10 @@ apiRouter.use(async (req, res, next) => {
 
 apiRouter.get('/devices', async (req, res) => {
   let devices = DeviceModel.find();
+  console.log(devices, req.query.sessionId);
+  if (req.query.sessionId) {
+    return res.json(devices.find((value) => value.session_id === req.query.sessionId));
+  }
   /* dashboard-plugin-url is the base url for opening the appium-dashboard-plugin
    * This value will be attached to all express request via middleware
    */
@@ -65,7 +69,7 @@ apiRouter.get('/devices', async (req, res) => {
       return d;
     });
   }
-  res.json(devices);
+  return res.json(devices);
 });
 
 apiRouter.get('/queue', (req, res) => {
