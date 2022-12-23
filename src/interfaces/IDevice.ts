@@ -22,4 +22,5 @@ export interface IDevice {
   cloud?: any;
   derivedDataPath?: string;
   chromeDriverPath?: any;
+  capability?: any;
 }
