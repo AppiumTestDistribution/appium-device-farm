@@ -44,7 +44,6 @@ apiRouter.use(async (req, res, next) => {
 
 apiRouter.get('/devices', async (req, res) => {
   let devices = DeviceModel.find();
-  console.log(devices, req.query.sessionId);
   if (req.query.sessionId) {
     return res.json(devices.find((value) => value.session_id === req.query.sessionId));
   }

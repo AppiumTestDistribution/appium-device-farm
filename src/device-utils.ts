@@ -17,13 +17,13 @@ import {
   getDevice,
 } from './data-service/device-service';
 import logger from './logger';
-import CapabilityFactory from './device-managers/factory/CapabilityFactory';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { LocalStorage } from 'node-persist';
+import CapabilityManager from './device-managers/cloud/CapabilityManager';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -75,7 +75,7 @@ export function isDeviceConfigPathAbsolute(path: string) {
  */
 export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-
+  console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   logger.info(JSON.stringify(filters));
 
@@ -89,10 +89,11 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
       async () => {
         const maxSessions = await getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
-          logger.info(`Waiting for session available, already at max session count of: ${maxSessions}`)
-          return false
-        } else
-        logger.info('Waiting for free device');
+          logger.info(
+            `Waiting for session available, already at max session count of: ${maxSessions}`
+          );
+          return false;
+        } else logger.info('Waiting for free device');
         return (await getDevice(filters)) != undefined;
       },
       { timeout, intervalBetweenAttempts }
@@ -117,8 +118,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
     }
   } else {
     logger.info('Updating cloud Capability for Device');
-    const capabilities = CapabilityFactory.getCapability(capability, device);
-    return capabilities.getCapability();
+    return new CapabilityManager(capability, device).getCapability();
   }
 }
 

@@ -165,6 +165,7 @@ class DevicePlugin extends BasePlugin {
       const remoteUrl = hubUrl(device);
       let sessionDetails: any;
       try {
+        logger.info('Creating cloud session');
         sessionDetails = //change to give the entire URL
           (
             await axios.post(remoteUrl, {

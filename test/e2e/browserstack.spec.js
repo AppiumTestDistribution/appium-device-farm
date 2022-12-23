@@ -8,17 +8,19 @@ describe('Browserstack Devices', () => {
       .data;
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
-    expect(androidDevices[0]).to.include({
-      device: 'Google Pixel 3',
+    console.log(androidDevices[0])
+    expect(androidDevices[0]).to.deep.equal({
+      deviceName: 'Google Pixel 3',
       os_version: '9.0',
       platform: 'android',
-      host: 'http://hub-cloud.browserstack.com',
+      host: 'http://hub-cloud.browserstack.com/wd/hub',
       busy: false,
       deviceType: 'real',
+      capability: { deviceName: 'Google Pixel 3', os_version: '9.0', platform: 'android' },
+      cloud: 'browserstack',
       name: 'Google Pixel 3',
       sdk: '9.0',
       udid: 'Google Pixel 3',
-      cloud: 'browserstack',
       offline: false,
     });
   });
@@ -32,17 +34,22 @@ describe('Browserstack Devices', () => {
     let iosDevics = (await axios.get('http://localhost:31337/device-farm/api/devices/ios')).data;
     delete iosDevics[0].meta;
     delete iosDevics[0]['$loki'];
-    expect(iosDevics[0]).to.include({
-      device: 'iPhone 11 Pro',
+    expect(iosDevics[0]).to.deep.equal({
+      deviceName: 'iPhone 11 Pro',
       os_version: '15',
       platform: 'ios',
-      host: 'http://hub-cloud.browserstack.com',
+      host: 'http://hub-cloud.browserstack.com/wd/hub',
       busy: false,
       deviceType: 'real',
+      capability: {
+        deviceName: 'iPhone 11 Pro',
+        os_version: '15',
+        platform: 'ios',
+      },
+      cloud: 'browserstack',
       name: 'iPhone 11 Pro',
       sdk: '15',
       udid: 'iPhone 11 Pro',
-      cloud: 'browserstack',
       offline: false,
     });
   });
