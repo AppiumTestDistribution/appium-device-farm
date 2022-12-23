@@ -75,7 +75,7 @@ export function isDeviceConfigPathAbsolute(path: string) {
  */
 export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  console.log(firstMatch)
+  console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   logger.info(JSON.stringify(filters));
 
