@@ -105,7 +105,7 @@ jobs:
         npm run test-e2e-browserstack
       displayName: 'E2E Test'
 
-  - job: E2EPluginPCloudy
+ - job: E2EPluginPCloudy
    pool:
      vmImage: 'macOS-latest'
 
