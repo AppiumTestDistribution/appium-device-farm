@@ -95,7 +95,7 @@ class DevicePlugin extends BasePlugin {
       (v: any) => typeof v === 'object'
     );
     if (cloudExists.length > 0)
-      cloudExists[0].cloudName === Cloud.BROWSERSTACK ? (deviceTypes = 'real') : true;
+      cloudExists[0].hasOwnProperty('cloudName') ? (deviceTypes = 'real') : true;
     if (deviceTypes === 'real') logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     return deviceTypes;
   }

@@ -5,11 +5,11 @@ import { isObject } from 'lodash';
 import Cloud from '../../enums/Cloud';
 import { CloudArgs } from '../../types/CloudArgs';
 import DevicePlatform from '../../enums/Platform';
-import Devices from '../cloud/browserstack/Devices';
+import Devices from '../cloud/Devices';
 
 export class DeviceFactory {
   public static deviceInstance(host: CloudArgs, deviceState: IDevice[], platform: string) {
-    if (isObject(host) && host.cloudName === Cloud.BROWSERSTACK) {
+    if (isObject(host) && host.cloudName) {
       return new Devices(host, deviceState, platform);
     } else if (platform == DevicePlatform.ANDROID) {
       return new RemoteAndroidDeviceManager(host, deviceState);

@@ -36,6 +36,8 @@ export async function getFreePort() {
 export function hubUrl(device: IDevice) {
   if (device.hasOwnProperty('cloud') && device.cloud === 'browserstack') {
     return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
+  } else if (device.hasOwnProperty('cloud') && device.cloud === 'pCloudy') {
+    return 'https://device.pcloudy.com/appiumcloud/wd/hub/session';
   }
   return `${device.host}/wd/hub/session`;
 }
