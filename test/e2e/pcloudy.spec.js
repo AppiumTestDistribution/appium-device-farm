@@ -9,17 +9,21 @@ describe('Browserstack Devices', () => {
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0]).to.deep.equal({
-      deviceName: 'Google Pixel 3',
-      os_version: '9.0',
       platform: 'android',
-      host: 'http://hub-cloud.browserstack.com/wd/hub',
+      host: 'https://device.pcloudy.com/appiumcloud/wd/hub',
       busy: false,
       deviceType: 'real',
-      capability: { deviceName: 'Google Pixel 3', os_version: '9.0', platform: 'android' },
-      cloud: 'browserstack',
-      name: 'Google Pixel 3',
-      sdk: '9.0',
-      udid: 'Google Pixel 3',
+      capability: {
+        pCloudy_DeviceManufacturer: 'GOOGLE',
+        pCloudy_DeviceVersion: '11.0',
+        platform: 'android',
+      },
+      cloud: 'pCloudy',
+      pCloudy_DeviceManufacturer: 'GOOGLE',
+      pCloudy_DeviceVersion: '11.0',
+      name: 'GOOGLE',
+      sdk: '11.0',
+      udid: 'GOOGLE',
       offline: false,
     });
   });
@@ -34,21 +38,21 @@ describe('Browserstack Devices', () => {
     delete iosDevics[0].meta;
     delete iosDevics[0]['$loki'];
     expect(iosDevics[0]).to.deep.equal({
-      deviceName: 'iPhone 11 Pro',
-      os_version: '15',
       platform: 'ios',
-      host: 'http://hub-cloud.browserstack.com/wd/hub',
+      host: 'https://device.pcloudy.com/appiumcloud/wd/hub',
       busy: false,
       deviceType: 'real',
       capability: {
-        deviceName: 'iPhone 11 Pro',
-        os_version: '15',
+        pCloudy_DeviceManufacturer: 'APPLE',
+        pCloudy_DeviceVersion: '15.1',
         platform: 'ios',
       },
-      cloud: 'browserstack',
-      name: 'iPhone 11 Pro',
-      sdk: '15',
-      udid: 'iPhone 11 Pro',
+      cloud: 'pCloudy',
+      pCloudy_DeviceManufacturer: 'APPLE',
+      pCloudy_DeviceVersion: '15.1',
+      name: 'APPLE',
+      sdk: '15.1',
+      udid: 'APPLE',
       offline: false,
     });
   });

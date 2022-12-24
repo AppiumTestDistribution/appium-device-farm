@@ -1,0 +1,28 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "device-farm": {
+        "platform": "both",
+        "remote": [
+          {
+            "cloudName": "pCloudy",
+            "url": "https://device.pcloudy.com/appiumcloud/wd/hub",
+            "devices": [
+              {
+                "pCloudy_DeviceManufacturer": "GOOGLE",
+                "pCloudy_DeviceVersion": "11.0",
+                "platform": "android"
+              },
+              {
+                "pCloudy_DeviceManufacturer": "APPLE",
+                "pCloudy_DeviceVersion": "15.1",
+                "platform": "ios"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@
     "test-parallel-ios": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
     "test-e2e": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/plugin.spec.js --timeout 999999",
     "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --timeout 999999",
+    "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/iOS*.spec.js --timeout 260000 --exit",
     "build": "npx tsc && npm run copy-files",

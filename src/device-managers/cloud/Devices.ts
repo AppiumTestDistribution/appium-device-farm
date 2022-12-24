@@ -1,6 +1,7 @@
 /* eslint-disable no-prototype-builtins */
-import { IDevice } from '../../../interfaces/IDevice';
-import { CloudArgs } from '../../../types/CloudArgs';
+import Cloud from '../../enums/Cloud';
+import { IDevice } from '../../interfaces/IDevice';
+import { CloudArgs } from '../../types/CloudArgs';
 export default class Devices {
   private host: any;
   private deviceState: any;
@@ -16,11 +17,18 @@ export default class Devices {
     const devicesByPlatform = devices.filter((value: any) => value.platform === this.platform);
     let cloudDeviceProperties: any;
     const result = devicesByPlatform.map((d: any) => {
-      if (this.host.cloudName.toLowerCase() === 'browserstack') {
+      if (this.host.cloudName.toLowerCase() === Cloud.BROWSERSTACK) {
         cloudDeviceProperties = {
           name: d.deviceName,
           sdk: d['os_version'],
           udid: d.deviceName,
+        };
+      }
+      if (this.host.cloudName.toLowerCase() === Cloud.PCLOUDY) {
+        cloudDeviceProperties = {
+          name: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,
+          sdk: d?.pCloudy_DeviceVersion || d?.platformVersion,
+          udid: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,
         };
       }
       return Object.assign({}, ...devicesByPlatform, {
