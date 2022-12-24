@@ -119,7 +119,7 @@ jobs:
         export APPIUM_HOME=/tmp/device-farm
         ./node_modules/.bin/appium plugin install --source=local .
         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/pcloudy-config.json &
-        npm run test-e2e-pcloudy
+        npm run test-e2e-pCloudy
       displayName: 'E2E Test'
 
  - job: BrowserStack
