@@ -10,8 +10,8 @@
             "url": "https://device.pcloudy.com/appiumcloud/wd/hub",
             "devices": [
               {
-                "pCloudy_DeviceManufacturer": "GOOGLE",
-                "pCloudy_DeviceVersion": "11.0",
+                "pCloudy_DeviceManufacturer": "ONEPLUS",
+                "pCloudy_DeviceVersion": "10.0.0",
                 "platform": "android"
               },
               {
