@@ -58,6 +58,25 @@ You can also pass all the arguments in a config file. Refer [here](https://githu
 appium server -ka 800 --use-plugins=device-farm --config ./server-config.json -pa /wd/hub
 ```
 
+## Cloud Execution
+
+Plugin currently supports pCloudy and BrowserStack
+
+### BrowserStack
+
+```
+BS_USERNAME="username" BS_PASSWORD="password" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/bs-config.json -pa /wd/hub
+```
+Refer on BroswerStack config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/bs-config.json)
+
+### pCloudy
+
+```
+BS_USERNAME="username" BS_PASSWORD="password" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/bs-config.json -pa /wd/hub
+```
+Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/pcloudy-config.json)
+
+
 ### Argument options
 
 These arguments are set when you launch the Appium server, with this plugin installed.
