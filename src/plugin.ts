@@ -164,29 +164,33 @@ class DevicePlugin extends BasePlugin {
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
       let sessionDetails: any;
-      try {
-        logger.info('Creating cloud session');
-        sessionDetails = //change to give the entire URL
-          (
-            await axios.post(remoteUrl, {
-              capabilities: caps,
-            })
-          ).data;
-        if (sessionDetails.value.error) throw new Error(`Failed ❌ ${sessionDetails.value.error}`);
-
-        session = {
-          protocol: 'W3C',
-          value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
-        };
-      } catch (err: any) {
-        await updateDevice(device, { busy: false });
-        logger.info(
-          `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
-        );
-        throw new Error(
-          `${err}, Please check the remote appium server log to know the reason for failure`
-        );
-      }
+      logger.info('Creating cloud session');
+      var config = {
+        method: 'post',
+        url: remoteUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { capabilities: caps },
+      };
+      await axios(config)
+        .then(function (response) {
+          sessionDetails = response.data;
+        })
+        .catch(async function (error) {
+          console.log('Inside Error', error);
+          await updateDevice(device, { busy: false });
+          logger.info(
+            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
+          );
+          throw new Error(
+            `${error.response.data.value.message}, Please check the remote appium server log to know the reason for failure`
+          );
+        });
+      session = {
+        protocol: 'W3C',
+        value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
+      };
     } else {
       session = await next();
     }

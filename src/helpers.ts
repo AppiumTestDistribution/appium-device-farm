@@ -6,6 +6,7 @@ import getPort from 'get-port';
 import { IDevice } from './interfaces/IDevice';
 import _ from 'lodash';
 import log from './logger';
+import Cloud from './enums/Cloud';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -36,7 +37,7 @@ export async function getFreePort() {
 export function hubUrl(device: IDevice) {
   if (device.hasOwnProperty('cloud') && device.cloud === 'browserstack') {
     return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
-  } else if (device.hasOwnProperty('cloud') && device.cloud === 'pCloudy') {
+  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.PCLOUDY) {
     return 'https://device.pcloudy.com/appiumcloud/wd/hub/session';
   }
   return `${device.host}/wd/hub/session`;
