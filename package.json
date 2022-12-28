@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -67,6 +67,7 @@
     "node-persist": "^3.1.0",
     "node-schedule": "^2.0.0",
     "node-simctl": "^7.0.0",
+    "normalize-url": "6.1.0",
     "ora": "5.4.1",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
