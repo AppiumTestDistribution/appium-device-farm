@@ -163,6 +163,7 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
+      logger.info(`Remote Host URL - ${remoteUrl}`)
       let sessionDetails: any;
       logger.info('Creating cloud session');
       var config = {
