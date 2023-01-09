@@ -72,11 +72,7 @@ Refer on BroswerStack config [here](https://github.com/AppiumTestDistribution/ap
 ### pCloudy
 
 ```
-<<<<<<< HEAD
-PCLOUDY_APIKEY="apiKey" PCLOUDY_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/pcloudy-config.json -pa /wd/hub
-=======
 BS_USERNAME="username" BS_PASSWORD="password" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/bs-config.json -pa /wd/hub
->>>>>>> 6bc0880 (updated readMe and bump version)
 ```
 Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/pcloudy-config.json)
 
