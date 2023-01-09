@@ -36,9 +36,11 @@ export async function getFreePort() {
 }
 
 export function hubUrl(device: IDevice) {
-  const host = normalizeUrl(device.host, {removeTrailingSlash: false});
+  const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud') && device.cloud === 'browserstack') {
     return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
+  } else if (device.hasOwnProperty('cloud') && device.cloud === 'sauce') {
+    return `https://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_PASSWORD}@ondemand.eu-central-1.saucelabs.com:443/wd/hub/session`;
   } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.PCLOUDY) {
     return `${host}/session`;
   }

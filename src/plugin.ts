@@ -163,10 +163,9 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
-      logger.info(`Remote Host URL - ${remoteUrl}`)
       let sessionDetails: any;
       logger.info('Creating cloud session');
-      var config = {
+      const config = {
         method: 'post',
         url: remoteUrl,
         headers: {
@@ -179,7 +178,6 @@ class DevicePlugin extends BasePlugin {
           sessionDetails = response.data;
         })
         .catch(async function (error) {
-          console.log('Inside Error', error);
           await updateDevice(device, { busy: false });
           logger.info(
             `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`

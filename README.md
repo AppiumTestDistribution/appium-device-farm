@@ -76,6 +76,13 @@ PCLOUDY_APIKEY="apiKey" PCLOUDY_USERNAME="useremail" appium server -ka 800 --use
 ```
 Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/pcloudy-config.json)
 
+### SauceLabs
+
+```
+SAUCE_PASSWORD="apiKey" SAUCE_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/sauce-config.json -pa /wd/hub
+```
+Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/sauce-config.json)
+
 
 ### Argument options
 
