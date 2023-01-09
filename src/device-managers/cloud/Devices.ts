@@ -24,6 +24,13 @@ export default class Devices {
           udid: d.deviceName,
         };
       }
+      if (this.host.cloudName.toLowerCase() === Cloud.SAUCELABS) {
+        cloudDeviceProperties = {
+          name: d.deviceName,
+          sdk: d.platformVersion,
+          udid: d.deviceName,
+        };
+      }
       if (this.host.cloudName.toLowerCase() === Cloud.PCLOUDY) {
         cloudDeviceProperties = {
           name: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,

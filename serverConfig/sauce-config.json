@@ -1,0 +1,23 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "device-farm": {
+        "platform": "android",
+        "remote": [
+          {
+            "cloudName": "sauce",
+            "url": "https://ondemand.eu-central-1.saucelabs.com/wd/hub",
+            "devices": [
+              {
+                "platformVersion": "12.0",
+                "deviceName": "Android GoogleAPI Emulator",
+                "platform": "android"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

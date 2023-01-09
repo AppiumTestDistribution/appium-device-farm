@@ -2,7 +2,6 @@ import { IDevice } from '../../interfaces/IDevice';
 import RemoteAndroidDeviceManager from '../RemoteAndroidDeviceManager';
 import RemoteIOSDeviceManager from '../RemoteIOSDeviceManager';
 import { isObject } from 'lodash';
-import Cloud from '../../enums/Cloud';
 import { CloudArgs } from '../../types/CloudArgs';
 import DevicePlatform from '../../enums/Platform';
 import Devices from '../cloud/Devices';
