@@ -11,6 +11,7 @@ import { DeviceFactory } from './factory/DeviceFactory';
 import os from 'os';
 import path from 'path';
 import { getUtilizationTime } from '../device-utils';
+import fs from 'fs-extra';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -80,6 +81,25 @@ export default class IOSDeviceManager implements IDeviceManager {
     return devices?.getDevices();
   }
 
+  private derivedDataPath(cliArgs: any, udid: string, realDevice: boolean) {
+    const derivedDataPath = cliArgs.plugin['device-farm'].derivedDataPath;
+    if (derivedDataPath) {
+      if (typeof derivedDataPath !== 'object')
+        throw new Error('DerivedData Path should be able Object');
+      const tmpPath = path.join(
+        os.homedir(),
+        `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
+      );
+      if (!fs.existsSync(tmpPath)) fs.mkdirSync(tmpPath);
+      realDevice
+        ? fs.copySync(derivedDataPath.device, tmpPath)
+        : fs.copySync(derivedDataPath.simulator, tmpPath);
+      return tmpPath;
+    } else {
+      return path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`);
+    }
+  }
+
   private async fetchLocalIOSDevices(
     existingDeviceDetails: IDevice[],
     deviceState: IDevice[],
@@ -100,6 +120,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         const mjpegServerPort = await getFreePort();
         const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
         const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
+
         deviceState.push(
           Object.assign({
             wdaLocalPort,
@@ -114,10 +135,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
             sessionStartTime: 0,
-            derivedDataPath: path.join(
-              os.homedir(),
-              `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
-            ),
+            derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
           })
         );
       }
@@ -187,10 +205,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           host: `http://127.0.0.1:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
-          derivedDataPath: path.join(
-            os.homedir(),
-            `Library/Developer/Xcode/DerivedData/WebDriverAgent-${device.udid}`
-          ),
+          derivedDataPath: this.derivedDataPath(cliArgs, device.udid, false),
         })
       );
     });

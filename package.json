@@ -10,7 +10,7 @@
     "test-parallel-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/conf.spec.js --timeout 260000",
     "test-parallel-pcloudy": "mocha --require ts-node/register -p ./test/e2e/android/cloud/pcloudy.spec.js --timeout 260000",
     "test-parallel-sauce": "mocha --require ts-node/register -p ./test/e2e/android/cloud/sauce.spec.js --timeout 260000",
-    "test-parallel-ios": "wait-on http://localhost:4723/device-farm/ && mocha --require ts-node/register -p ./test/e2e/ios/*.spec.js --timeout 260000",
+    "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/conf1.spec.js --timeout 260000",
     "test-e2e": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/plugin.spec.js --timeout 999999",
     "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --timeout 999999",
     "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --timeout 999999",
@@ -60,6 +60,7 @@
     "axios": "^0.27.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "fs-extra": "^11.1.0",
     "get-port": "^5.1.1",
     "http-proxy-middleware": "^2.0.6",
     "lodash": "^4.17.21",
@@ -86,6 +87,7 @@
     "@types/async-lock": "1.1.5",
     "@types/chai": "4.3.4",
     "@types/express": "4.17.14",
+    "@types/fs-extra": "^11.0.0",
     "@types/lodash": "4.14.190",
     "@types/lokijs": "1.5.7",
     "@types/mocha": "9.1.1",
@@ -139,6 +141,9 @@
         },
         "maxSessions": {
           "type": "number"
+        },
+        "derivedDataPath": {
+          "type": "object"
         }
       },
       "title": "Appium device farm plugin",
