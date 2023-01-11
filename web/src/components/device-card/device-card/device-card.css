@@ -117,6 +117,7 @@
 .device-info-card-container__body_row_value {
   font-size: 12px;
   font-weight: 600;
+  word-break: break-all;
   color: rgb(61, 59, 59);
 }
 

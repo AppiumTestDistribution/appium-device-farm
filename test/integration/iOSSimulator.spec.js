@@ -129,6 +129,31 @@ describe('IOS Simulator Test', () => {
     expect(foundSimulator.name).to.match(/^iPad/);
     expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
   });
+
+  it('Should find free Apple TV simulator and set busy status to true', async () => {
+    await initlializeStorage();
+    const deviceManager = new DeviceFarmManager({
+      platform: 'ios',
+      deviceTypes: 'both',
+      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
+    });
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList();
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'tvOS',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+      },
+      firstMatch: [{}],
+    };
+    const device = await allocateDeviceForSession(capabilities);
+    const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
+    const foundSimulator = allocatedSimulator[0];
+    expect(foundSimulator.busy).to.be.true;
+    expect(foundSimulator.name).to.match(/^Apple TV/);
+    expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
+  });
 });
 
 describe('Boot simulator test', async () => {

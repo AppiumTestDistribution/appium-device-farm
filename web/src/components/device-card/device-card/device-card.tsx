@@ -48,7 +48,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className="device-info-card-container__title_wrapper">
-          {platform == 'ios' ? (
+          {['ios', 'tvos'].includes(platform) ? (
             <AppleIcon className="device-info-card-container__device-icon" />
           ) : (
             <AndroidIcon className="device-info-card-container__device-icon" />
