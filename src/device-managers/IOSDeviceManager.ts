@@ -90,7 +90,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         os.homedir(),
         `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
       );
-      if (!fs.existsSync(tmpPath)) fs.mkdirSync(tmpPath);
+      if (!fs.existsSync(tmpPath)) fs.mkdirSync(tmpPath, { recursive: true });
       realDevice
         ? fs.copySync(derivedDataPath.device, tmpPath)
         : fs.copySync(derivedDataPath.simulator, tmpPath);
