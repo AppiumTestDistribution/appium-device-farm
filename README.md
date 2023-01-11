@@ -72,7 +72,7 @@ Refer on BroswerStack config [here](https://github.com/AppiumTestDistribution/ap
 ### pCloudy
 
 ```
-BS_USERNAME="username" BS_PASSWORD="password" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/bs-config.json -pa /wd/hub
+PCLOUDY_APIKEY="apiKey" PCLOUDY_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/pcloudy-config.json -pa /wd/hub
 ```
 Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/pcloudy-config.json)
 
@@ -81,7 +81,7 @@ Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-
 ```
 SAUCE_PASSWORD="apiKey" SAUCE_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/sauce-config.json -pa /wd/hub
 ```
-Refer on pCloudy config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/sauce-config.json)
+Refer on sauce config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/sauce-config.json)
 
 
 ### Argument options

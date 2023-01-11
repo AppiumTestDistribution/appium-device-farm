@@ -28,11 +28,12 @@ import { stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
 import { hubUrl } from './helpers';
-import Cloud from './enums/Cloud';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
+import { DeviceModel } from './data-service/db';
+import fs from 'fs-extra';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -163,7 +164,7 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
-      logger.info(`Remote Host URL - ${remoteUrl}`)
+      logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
       logger.info('Creating cloud session');
       const config = {
