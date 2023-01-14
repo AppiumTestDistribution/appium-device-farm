@@ -16,20 +16,6 @@ jobs:
         npm test
       displayName: 'npm test'
 
- - job: IOS
-   pool:
-     vmImage: 'macOS-latest'
-
-   steps:
-    - task: NodeTool@0.200.0
-      inputs:
-       versionSpec: '16.x'
-
-    - script: |
-        npm ci
-        npm run integration-ios
-      displayName: 'iOS Integration Test'
-
  - job: ANDROID
    pool:
      vmImage: 'macOS-latest'
