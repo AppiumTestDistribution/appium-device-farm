@@ -203,3 +203,7 @@ Server logs will be as below:
 	<a href= "https://www.browserstack.com"><img src="https://maddyness-uk.twic.pics/2021/06/Screenshot-2021-06-21-at-20.14.46.png?twic=v1/resize=630" alt="ATD" width="45%" align="top"></a>
 </h3>
 
+<h3>
+	<a href= "https://www.lambdatest.com"><img src="./assets/lt.png" alt="ATD" width="45%" align="top"></a>
+</h3>
+
