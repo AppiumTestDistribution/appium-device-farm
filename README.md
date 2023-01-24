@@ -83,19 +83,27 @@ SAUCE_PASSWORD="apiKey" SAUCE_USERNAME="useremail" appium server -ka 800 --use-p
 ```
 Refer on sauce config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/sauce-config.json)
 
+### LambdaTest
+
+```
+LT_PASSWORD="apiKey" LT_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/lt-config.json -pa /wd/hub
+```
+Make sure all `appiumVersion: 2.0` in your capabilities.
+Refer on LambdaTest config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/lt-config.json)
 
 ### Argument options
 
 These arguments are set when you launch the Appium server, with this plugin installed.
 
 
-| Argument             |Required| Description                                                           | Default | Options                                                                                                                                                                   |
-|----------------------|---|-----------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `plugin-device-farm-platform` | Yes | Platform to run tests against for parallel execution                  | None    | `both`,`ios`,`android`                                                                                                                                                    |
-| `plugin-device-farm-device-types` | No | Types of devices to include                                           | `both`  | `both`,`simulated`,`real`                                                                                                                                                 |
-| `plugin-device-farm-skip-chrome-download` | No | Downloads require chromedriver for web testing                        | `true`  | `false` <br/>Setting to false will download required chromedriver for web testing on chrome                                                                                    |
-| `plugin-device-farm-remote` | No | Whether or not to include simulators/real devices from remote machine | None    | `remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]` |
-| `plugin-device-farm-max-sessions`  | No |  Limit how many sessions can be active at a time. This is useful when you need limit sessions based on host machine resource availability. | None  |  `<number>` e.g. `8`  |
+| Argument             |Required| Description                                                                                                                               | Default | Options                                                                                                                                                                         |
+|----------------------|---|-------------------------------------------------------------------------------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `plugin-device-farm-platform` | Yes | Platform to run tests against for parallel execution                                                                                      | None    | `both`,`ios`,`android`                                                                                                                                                          |
+| `plugin-device-farm-device-types` | No | Types of devices to include                                                                                                               | `both`  | `both`,`simulated`,`real`                                                                                                                                                       |
+| `plugin-device-farm-skip-chrome-download` | No | Downloads require chromedriver for web testing                                                                                            | `true`  | `false` <br/>Setting to false will download required chromedriver for web testing on chrome                                                                                     |
+| `plugin-device-farm-remote` | No | Whether or not to include simulators/real devices from remote machine                                                                     | None    | `remote: ["http://remotehost:remoteport"]`, If you want to run tests distributed across remote and local machine `remote: ["http://remotehost:remoteport", "http://127.0.0.1"]` |
+| `plugin-device-farm-max-sessions`  | No | Limit how many sessions can be active at a time. This is useful when you need limit sessions based on host machine resource availability. | None  | `<number>` e.g. `8`                                                                                                                                                             |
+| `plugin-device-farm-derived-data-path`  | No | DriveDataPath of WDA to speed iOS test run.                                                                                               | None  | `{'simulator': 'PathtoDrivedDataPath', 'device': 'PathtoDrivedDataPath'}`                                                                                                                             |
 
 ## Capabilities
 
@@ -202,5 +210,9 @@ Server logs will be as below:
 ## Big thanks to the following organizations for their support to the project with their open source licenses:
 <h3>
 	<a href= "https://www.browserstack.com"><img src="https://maddyness-uk.twic.pics/2021/06/Screenshot-2021-06-21-at-20.14.46.png?twic=v1/resize=630" alt="ATD" width="45%" align="top"></a>
+</h3>
+
+<h3>
+	<a href= "https://www.lambdatest.com"><img src="./assets/lt.png" alt="ATD" width="45%" align="top"></a>
 </h3>
 

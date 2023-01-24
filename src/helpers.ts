@@ -37,10 +37,14 @@ export async function getFreePort() {
 
 export function hubUrl(device: IDevice) {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
-  if (device.hasOwnProperty('cloud') && device.cloud === 'browserstack') {
+  if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.BROWSERSTACK) {
     return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
-  } else if (device.hasOwnProperty('cloud') && device.cloud === 'sauce') {
+  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.SAUCELABS) {
     return `https://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_PASSWORD}@${
+      new URL(device.host).host
+    }/wd/hub/session`;
+  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
+    return `https://${process.env.LT_USERNAME}:${process.env.LT_PASSWORD}@${
       new URL(device.host).host
     }/wd/hub/session`;
   } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.PCLOUDY) {

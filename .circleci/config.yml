@@ -1,0 +1,27 @@
+# .circleci/config.yml
+version: 2.1
+orbs:
+  macos: circleci/macos@2
+
+jobs:
+  iOS:
+    macos:
+      xcode: 14.1.0
+    steps:
+      - checkout
+      - run:
+          name: Node Version
+          command: |
+            nvm install v16.18.1 && nvm alias default 16.18.1
+      - run:
+          name: Run iOS Test
+          command: |
+            nvm install v16.18.1 && nvm alias default 16.18.1
+            node -v 
+            npm ci
+            npm run integration-ios
+
+workflows:
+  build:
+    jobs:
+      - iOS
