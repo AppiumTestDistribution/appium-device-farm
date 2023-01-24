@@ -23,4 +23,6 @@ export interface IDevice {
   derivedDataPath?: string;
   chromeDriverPath?: any;
   capability?: any;
+  adbRemoteHost: string;
+  adbPort: number;
 }
