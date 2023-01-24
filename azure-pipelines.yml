@@ -16,20 +16,6 @@ jobs:
         npm test
       displayName: 'npm test'
 
- - job: IOS
-   pool:
-     vmImage: 'macOS-latest'
-
-   steps:
-    - task: NodeTool@0.200.0
-      inputs:
-       versionSpec: '16.x'
-
-    - script: |
-        npm ci
-        npm run integration-ios
-      displayName: 'iOS Integration Test'
-
  - job: ANDROID
    pool:
      vmImage: 'macOS-latest'
@@ -154,4 +140,21 @@ jobs:
          ./node_modules/.bin/appium plugin install --source=local .
          nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/sauce-config.json &
          npm run test-parallel-sauce
+       displayName: 'E2E Test'
+
+ - job: LambdaTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+     - task: NodeTool@0.200.0
+       inputs:
+         versionSpec: '16.x'
+
+     - script: |
+         npm ci
+         export APPIUM_HOME=/tmp/device-farm
+         ./node_modules/.bin/appium plugin install --source=local .
+         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/lt-config.json &
+         npm run test-parallel-lt
        displayName: 'E2E Test'

@@ -10,12 +10,15 @@ const WDIO_PARAMS = {
   logLevel: 'info',
 };
 const capabilities = {
-  platformName: 'android',
-  'appium:app': 'bs://0e16d8783f4879cc11678b99a4800e8ec4970b6c',
-  'bstack:options': {
-    projectName: 'Login',
-    buildName: '1.1',
-    sessionName: 'LoginTest',
+  platformName: 'Android',
+  'appium:isRealMobile': true,
+  'appium:appiumVersion': '2.0',
+  'appium:app': 'lt://APP10160531401673528314460178',
+  'appium:build': 'ATDDevs',
+  'appium:name': 'Device-Farm Plugin',
+  'appium:project': 'Appium Device Farm',
+  'lt:options': {
+    w3c: true,
   },
 };
 let driver;

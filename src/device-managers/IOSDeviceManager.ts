@@ -12,6 +12,7 @@ import os from 'os';
 import path from 'path';
 import { getUtilizationTime } from '../device-utils';
 import fs from 'fs-extra';
+import logger from '../logger';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -87,6 +88,21 @@ export default class IOSDeviceManager implements IDeviceManager {
 
   private derivedDataPath(cliArgs: any, udid: string, realDevice: boolean) {
     const derivedDataPath = cliArgs.plugin['device-farm'].derivedDataPath;
+
+    function derivedPathExtracted(tmpPath: string, derivedDataPath: any) {
+      if (derivedDataPath !== undefined) {
+        fs.copySync(derivedDataPath, tmpPath);
+      } else {
+        if (!fs.existsSync(tmpPath)) {
+          logger.info(`DerivedDataPath for UDID ${udid} not set, so falling back to ${tmpPath}`);
+          logger.info(
+            `WDA will be build once and will use WDA Runner from path ${tmpPath}, second test run will skip the build process`
+          );
+          fs.mkdirSync(tmpPath, { recursive: true });
+        }
+      }
+    }
+
     if (derivedDataPath) {
       if (typeof derivedDataPath !== 'object')
         throw new Error('DerivedData Path should be able Object');
@@ -94,10 +110,11 @@ export default class IOSDeviceManager implements IDeviceManager {
         os.homedir(),
         `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
       );
-      if (!fs.existsSync(tmpPath)) fs.mkdirSync(tmpPath, { recursive: true });
-      realDevice
-        ? fs.copySync(derivedDataPath.device, tmpPath)
-        : fs.copySync(derivedDataPath.simulator, tmpPath);
+      if (realDevice) {
+        derivedPathExtracted(tmpPath, derivedDataPath.device);
+      } else {
+        derivedPathExtracted(tmpPath, derivedDataPath.simulator);
+      }
       return tmpPath;
     } else {
       return path.join(os.homedir(), `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`);

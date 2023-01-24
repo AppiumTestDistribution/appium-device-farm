@@ -34,6 +34,7 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import { addCLIArgs } from './data-service/pluginArgs';
 import { DeviceModel } from './data-service/db';
 import fs from 'fs-extra';
+import Cloud from './enums/Cloud';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -164,6 +165,12 @@ class DevicePlugin extends BasePlugin {
     let session;
     if (!device.host.includes('127.0.0.1')) {
       const remoteUrl = hubUrl(device);
+      let capabilitiesToCreateSession = { capabilities: caps };
+      if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
+        capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
+          desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
+        });
+      }
       logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
       logger.info('Creating cloud session');
@@ -173,7 +180,7 @@ class DevicePlugin extends BasePlugin {
         headers: {
           'Content-Type': 'application/json',
         },
-        data: { capabilities: caps },
+        data: capabilitiesToCreateSession,
       };
       await axios(config)
         .then(function (response) {
