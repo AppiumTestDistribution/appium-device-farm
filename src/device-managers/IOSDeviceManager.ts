@@ -216,9 +216,12 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private async getLocalSims() {
-    return flatten([
-      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>),
+    const iosSimulators = flatten(
+      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
+    );
+    const tvosSimulators = flatten(
       Object.values((await new Simctl().getDevicesByParsing('tvOS')) as Array<IDevice>)
-    ]);
+    );
+    return [...iosSimulators, ...tvosSimulators]
   }
 }
