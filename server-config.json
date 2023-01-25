@@ -5,7 +5,6 @@
       "device-farm": {
         "platform": "android",
         "skipChromeDownload": true,
-        "adbRemote": ["192.168.0.104"],
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"
         }
