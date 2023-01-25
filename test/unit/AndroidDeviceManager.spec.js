@@ -28,7 +28,6 @@ describe('Android Device Manager', function () {
     return await adb.clone({
       remoteAdbHost: '192.168.0.104',
       adbPort: 5037,
-      sdkRoot: '/Users/saikrishna/Library/Android/sdk',
       udid: null,
       appDeviceReadyTimeout: null,
       useKeystore: null,
@@ -36,15 +35,9 @@ describe('Android Device Manager', function () {
       keystorePassword: null,
       keyAlias: null,
       keyPassword: null,
-      executable: {
-        path: '/Users/saikrishna/Library/Android/sdk/platform-tools/adb',
-        defaultArgs: [Array],
-      },
-      tmpDir: '/var/folders/fr/l_lyyktd2l3dq2yq3x3qdmbw0000gn/T',
       curDeviceId: null,
       emulatorPort: null,
       logcat: null,
-      binaries: { adb: '/Users/saikrishna/Library/Android/sdk/platform-tools/adb' },
       instrumentProc: null,
       suppressKillServer: null,
       jars: {},
