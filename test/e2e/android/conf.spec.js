@@ -1,7 +1,7 @@
 import { remote } from 'webdriverio';
 
 const APPIUM_HOST = '127.0.0.1';
-const APPIUM_PORT = 4723;
+const APPIUM_PORT = 31337;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,
   hostname: APPIUM_HOST,
@@ -13,7 +13,6 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:remoteAdbHost': '192.168.0.103',
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };
