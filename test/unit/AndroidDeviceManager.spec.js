@@ -3,6 +3,8 @@ import { expect } from 'chai';
 import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
+import { getAdbOriginal } from './GetAdbOriginal';
+
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -13,17 +15,57 @@ const cliArgs = {
     skipChromeDownload: true,
   },
 };
+let adb;
+let cloneAdb;
+
 describe('Android Device Manager', function () {
   this.timeout(500000);
   afterEach(function () {
     sandbox.restore();
   });
+
+  async function getCloneAdb() {
+    return await adb.clone({
+      remoteAdbHost: '192.168.0.104',
+      adbPort: 5037,
+      sdkRoot: '/Users/saikrishna/Library/Android/sdk',
+      udid: null,
+      appDeviceReadyTimeout: null,
+      useKeystore: null,
+      keystorePath: null,
+      keystorePassword: null,
+      keyAlias: null,
+      keyPassword: null,
+      executable: {
+        path: '/Users/saikrishna/Library/Android/sdk/platform-tools/adb',
+        defaultArgs: [Array],
+      },
+      tmpDir: '/var/folders/fr/l_lyyktd2l3dq2yq3x3qdmbw0000gn/T',
+      curDeviceId: null,
+      emulatorPort: null,
+      logcat: null,
+      binaries: { adb: '/Users/saikrishna/Library/Android/sdk/platform-tools/adb' },
+      instrumentProc: null,
+      suppressKillServer: null,
+      jars: {},
+      adbHost: '192.168.0.104',
+      adbExecTimeout: 20000,
+      remoteAppsCacheLimit: 10,
+      buildToolsVersion: null,
+      allowOfflineDevices: false,
+      allowDelayAdb: true,
+    });
+  }
+
   it('Android Device List to have added state', async () => {
     const androidDevices = new AndroidDeviceManager();
-    sandbox.stub(androidDevices, 'getConnectedDevices').returns([
-      { udid: 'emulator-5554', state: 'device' },
-      { udid: 'emulator-5555', state: 'device' },
-    ]);
+    const deviceList = new Map();
+    adb = await getAdbOriginal();
+    cloneAdb = await getCloneAdb();
+    deviceList.set(adb, [{ udid: 'emulator-5554', state: 'device' }]);
+    deviceList.set(cloneAdb, [{ udid: 'emulator-5555', state: 'device' }]);
+
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
@@ -38,6 +80,8 @@ describe('Android Device Manager', function () {
     expect(devices).to.deep.equal([
       {
         busy: false,
+        adbRemoteHost: null,
+        adbPort: 5037,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
@@ -53,6 +97,8 @@ describe('Android Device Manager', function () {
       },
       {
         busy: false,
+        adbRemoteHost: '192.168.0.104',
+        adbPort: 5037,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'real',
@@ -61,7 +107,7 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54321,
-        host: 'http://127.0.0.1:4723',
+        host: 'http://192.168.0.104:4723',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -71,10 +117,13 @@ describe('Android Device Manager', function () {
 
   it('Android Device List to have added state - Only emulators', async () => {
     const androidDevices = new AndroidDeviceManager();
-    sandbox.stub(androidDevices, 'getConnectedDevices').returns([
+    const deviceList = new Map();
+    adb = await getAdbOriginal();
+    deviceList.set(adb, [
       { udid: 'emulator-5554', state: 'device' },
       { udid: 'emulator-5555', state: 'device' },
     ]);
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
     sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -92,6 +141,8 @@ describe('Android Device Manager', function () {
     expect(devices).to.deep.equal([
       {
         busy: false,
+        adbPort: 5037,
+        adbRemoteHost: null,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
@@ -110,10 +161,13 @@ describe('Android Device Manager', function () {
 
   it('Android Device List to have added state - Only real devices', async () => {
     const androidDevices = new AndroidDeviceManager();
-    sandbox.stub(androidDevices, 'getConnectedDevices').returns([
+    const deviceList = new Map();
+    adb = await getAdbOriginal();
+    deviceList.set(adb, [
       { udid: 'emulator-5554', state: 'device' },
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
     const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
     sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -129,6 +183,8 @@ describe('Android Device Manager', function () {
       {
         busy: false,
         name: 'Nexus 6',
+        adbPort: 5037,
+        adbRemoteHost: null,
         state: 'device',
         deviceType: 'real',
         sdk: '13',

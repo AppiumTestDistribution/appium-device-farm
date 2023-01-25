@@ -13,7 +13,6 @@ import { getUtilizationTime } from '../device-utils';
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
-  private clone: any;
 
   async getDevices(
     deviceTypes: string,
@@ -64,7 +63,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const connectedDevices = await this.getConnectedDevices(cliArgs);
     for (const [adbInstance, devices] of connectedDevices) {
       await asyncForEach(devices, async (device: IDevice) => {
-        if (!deviceState.find((devicestate) => devicestate.udid === device.udid)) {
+        device.adbRemoteHost =
+          adbInstance.adbRemoteHost === null ? '127.0.0.1' : adbInstance.adbRemoteHost;
+        if (
+          !deviceState.find(
+            (devicestate) =>
+              devicestate.udid === device.udid && devicestate.adbRemoteHost === device.adbRemoteHost
+          )
+        ) {
           const existingDevice = existingDeviceDetails.find(
             (dev) => dev.udid === device.udid && dev.host.includes('127.0.0.1')
           );
@@ -85,26 +91,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
               this.getChromeVersion(adbInstance, device.udid, cliArgs),
             ]);
             const host = adbInstance.adbHost != null ? adbInstance.adbHost : '127.0.0.1';
-            console.log({
-              adbRemoteHost: adbInstance.adbHost,
-              adbPort: adbInstance.adbPort,
-              systemPort,
-              sdk,
-              realDevice,
-              name,
-              busy: false,
-              state: device.state,
-              udid: device.udid,
-              platform: 'android',
-              deviceType: realDevice ? 'real' : 'emulator',
-              host: `http://${host}:${cliArgs.port}`,
-              totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-              sessionStartTime: 0,
-              chromeDriverPath,
-            })
             deviceState.push({
               adbRemoteHost: adbInstance.adbHost,
-              adbPort: adbInstance.port,
+              adbPort: adbInstance.adbPort,
               systemPort,
               sdk,
               realDevice,
@@ -142,7 +131,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const originalADB = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
     const adbRemote = cliArgs.plugin['device-farm'].adbRemote;
-    if (adbRemote.length > 0) {
+    if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
         const adbRemoteValue = value.split(':');
         console.log(adbRemoteValue, value);
