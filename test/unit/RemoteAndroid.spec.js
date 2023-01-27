@@ -3,6 +3,7 @@ import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
 import { expect } from 'chai';
+import { getAdbOriginal } from './GetAdbOriginal';
 import axios from 'axios';
 const firstNode = 'http://192.168.0.103';
 const secondNode = 'http://192.168.0.104';
@@ -19,6 +20,8 @@ describe('Remote Android', () => {
     data: [
       {
         busy: false,
+        adbPort: 5037,
+        adbRemoteHost: null,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
@@ -48,9 +51,10 @@ describe('Remote Android', () => {
 
     stub = Sinon.stub(axios, 'get').resolves(stubResponse);
     const androidDevices = new AndroidDeviceManager();
-    sandbox
-      .stub(androidDevices, 'getConnectedDevices')
-      .returns([{ udid: 'emulator-5554', state: 'device' }]);
+    const deviceList = new Map();
+    const adb = await getAdbOriginal();
+    deviceList.set(adb, [{ udid: 'emulator-5554', state: 'device' }]);
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
     sandbox.stub(androidDevices, 'getDeviceVersion').returns('9');
     sandbox.stub(androidDevices, 'getDeviceName').returns('sdk_phone_x86');
     sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
@@ -61,6 +65,8 @@ describe('Remote Android', () => {
     const expected = [
       {
         busy: false,
+        adbPort: 5037,
+        adbRemoteHost: null,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
@@ -74,6 +80,8 @@ describe('Remote Android', () => {
       },
       {
         busy: false,
+        adbPort: 5037,
+        adbRemoteHost: null,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
@@ -87,6 +95,8 @@ describe('Remote Android', () => {
       },
       {
         busy: false,
+        adbPort: 5037,
+        adbRemoteHost: null,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'emulator',
