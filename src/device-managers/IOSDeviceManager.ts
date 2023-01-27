@@ -56,6 +56,10 @@ export default class IOSDeviceManager implements IDeviceManager {
     return await IOSUtils.getDeviceName(udid);
   }
 
+  private getDevicePlatformName(name: string) {
+    return (name.toLowerCase().includes("tv") ? "tvos" : "ios");
+  }
+
   /**
    * Method to get all ios real devices
    *
@@ -148,7 +152,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             busy: false,
             realDevice: true,
             deviceType: 'real',
-            platform: 'ios',
+            platform: this.getDevicePlatformName(name),
             host: `http://127.0.0.1:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
             sessionStartTime: 0,
@@ -217,7 +221,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           mjpegServerPort,
           busy: false,
           realDevice: false,
-          platform: 'ios',
+          platform: this.getDevicePlatformName(device.name),
           deviceType: 'simulator',
           host: `http://127.0.0.1:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
@@ -229,8 +233,12 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private async getLocalSims() {
-    return flatten(
+    const iosSimulators = flatten(
       Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
     );
+    const tvosSimulators = flatten(
+      Object.values((await new Simctl().getDevicesByParsing('tvOS')) as Array<IDevice>)
+    );
+    return [...iosSimulators, ...tvosSimulators]
   }
 }

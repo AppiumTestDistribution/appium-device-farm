@@ -60,6 +60,17 @@ describe('Get device', () => {
         realDevice: false,
         deviceType: 'simulator',
       },
+      {
+        name: 'Apple TV',
+        udid: '8617129A-C477-44A4-9B62-319B56987CC5',
+        state: 'Shutdown',
+        sdk: '15.0',
+        platform: 'tvos',
+        busy: false,
+        offline: false,
+        realDevice: false,
+        deviceType: 'simulator',
+      },
     ];
 
     devices.forEach(function (device) {
@@ -121,5 +132,11 @@ describe('Get device', () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, platformVersion: "16.0" };
     const device = getDevice(filterOptions);
     expect(device).to.be.undefined;
+  });
+
+  it('Get apple tv simulator based on filter with platformName', () => {
+    const filterOptions = { platform: 'tvos', name: '', busy: false, offline: false };
+    const device = getDevice(filterOptions);
+    expect(parseFloat(device.sdk)).to.be.gte(14.1);
   });
 });

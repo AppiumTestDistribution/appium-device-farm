@@ -75,7 +75,9 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
     const { ready, busy, offline } = this.state.filter.state;
     const { ios, android } = this.state.filter.platform;
     const filters = [
-      (d: IDevice) => (ios && d.platform == 'ios') || (android && d.platform == 'android'),
+      (d: IDevice) =>
+        (ios && (d.platform == 'ios' || d.platform == 'tvos')) ||
+        (android && d.platform == 'android'),
       (d: IDevice) =>
         (ready && !d.busy && !d.offline) || (busy && d.busy) || (offline && d.offline),
     ];
