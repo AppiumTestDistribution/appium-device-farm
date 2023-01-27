@@ -1,12 +1,12 @@
 {
   "name": "appium-device-farm",
-  "version": "3.16.0",
+  "version": "3.17.0",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit --timeout=10000",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel-android": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/*.spec.js --timeout 260000",
+    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/conf.spec.js --timeout 260000",
     "test-parallel-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/conf.spec.js --timeout 260000",
     "test-parallel-pcloudy": "mocha --require ts-node/register -p ./test/e2e/android/cloud/pcloudy.spec.js --timeout 260000",
     "test-parallel-sauce": "mocha --require ts-node/register -p ./test/e2e/android/cloud/sauce.spec.js --timeout 260000",
@@ -135,6 +135,9 @@
           "default": "both"
         },
         "remote": {
+          "type": "array"
+        },
+        "adbRemote": {
           "type": "array"
         },
         "skipChromeDownload": {
