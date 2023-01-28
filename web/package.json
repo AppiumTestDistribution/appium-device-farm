@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "babel-jest": "26.6.3",
+    "babel-jest": "29.4.1",
     "caniuse-lite": "^1.0.30001439",
     "pretty-ms": "^8.0.0",
     "react": "17.0.2",
@@ -35,7 +35,7 @@
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "11.2.7",
     "@testing-library/user-event": "12.8.3",
-    "@types/jest": "26.0.24",
+    "@types/jest": "29.4.0",
     "@types/node": "12.20.55",
     "@types/react": "17.0.52",
     "@types/react-dom": "18.0.9",
