@@ -41,6 +41,6 @@
     "@types/react-dom": "18.0.9",
     "@types/react-router-dom": "5.3.3",
     "@types/styled-components": "5.1.26",
-    "eslint-config-react-app": "6.0.0"
+    "eslint-config-react-app": "7.0.1"
   }
 }
