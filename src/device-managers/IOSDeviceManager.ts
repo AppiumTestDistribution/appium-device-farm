@@ -21,16 +21,16 @@ export default class IOSDeviceManager implements IDeviceManager {
    * @returns {Promise<Array<IDevice>>}
    */
   async getDevices(
-    deviceTypes: string,
+    deviceTypes: { iosDeviceType: string },
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<IDevice[]> {
     if (!isMac()) {
       return [];
     } else {
-      if (deviceTypes === 'real') {
+      if (deviceTypes.iosDeviceType === 'real') {
         return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
-      } else if (deviceTypes === 'simulated') {
+      } else if (deviceTypes.iosDeviceType === 'simulated') {
         return flatten(await Promise.all([this.getSimulators(cliArgs)]));
         // return both real and simulated devices
       } else {
@@ -57,7 +57,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private getDevicePlatformName(name: string) {
-    return (name.toLowerCase().includes("tv") ? "tvos" : "ios");
+    return name.toLowerCase().includes('tv') ? 'tvos' : 'ios';
   }
 
   /**
@@ -199,11 +199,11 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   public async fetchLocalSimulators(simulators: IDevice[], cliArgs: any) {
-    const flattenValued: Array<IDevice> = await this.getLocalSims();
+    const flattenValued: any = await this.getLocalSims();
     let filteredSimulators: Array<IDevice> = [];
     const hasUserGivenSimulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'simulators');
     if (hasUserGivenSimulators) {
-      filteredSimulators = flattenValued.filter((device) =>
+      filteredSimulators = flattenValued.filter((device: IDevice) =>
         cliArgs.plugin['device-farm'].simulators.some(
           (simulator: IDevice) => device.name === simulator.name && device.sdk === simulator.sdk
         )
@@ -233,12 +233,32 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private async getLocalSims() {
-    const iosSimulators = flatten(
-      Object.values((await new Simctl().getDevicesByParsing('iOS')) as Array<IDevice>)
-    );
-    const tvosSimulators = flatten(
-      Object.values((await new Simctl().getDevicesByParsing('tvOS')) as Array<IDevice>)
-    );
-    return [...iosSimulators, ...tvosSimulators]
+    try {
+      const simctl = await new Simctl();
+      const iOSSimulators = Object.keys(await simctl.getDevices(null, 'iOS')).length;
+      const tvSimulators = Object.keys(await simctl.getDevices(null, 'tvOS')).length;
+
+      let iosSimulators: any = [];
+      let tvosSimulators: any = [];
+      if (iOSSimulators) {
+        iosSimulators = flatten(
+          Object.values((await simctl.getDevicesByParsing('iOS')) as Array<IDevice>)
+        );
+      } else {
+        console.log('No iOS simulators found!');
+      }
+
+      if (tvSimulators) {
+        tvosSimulators = flatten(
+          Object.values((await simctl.getDevicesByParsing('tvOS')) as Array<IDevice>)
+        );
+      } else {
+        console.log('No tvOS simulators found!');
+      }
+
+      return [...iosSimulators, ...tvosSimulators];
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

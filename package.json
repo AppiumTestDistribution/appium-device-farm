@@ -130,7 +130,11 @@
         "platform": {
           "type": "string"
         },
-        "deviceTypes": {
+        "androidDeviceType": {
+          "type": "string",
+          "default": "both"
+        },
+        "iosDeviceType": {
           "type": "string",
           "default": "both"
         },

@@ -127,7 +127,7 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54321);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    const devices = await androidDevices.getDevices('simulated', [], {
+    const devices = await androidDevices.getDevices({ androidDeviceType: 'simulated' }, [], {
       port: 4723,
       plugin: cliArgs,
     });
@@ -171,7 +171,10 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54322);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    const devices = await androidDevices.getDevices('real', [], { port: 4723, plugin: cliArgs });
+    const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, [], {
+      port: 4723,
+      plugin: cliArgs,
+    });
     expect(devices).to.deep.equal([
       {
         busy: false,

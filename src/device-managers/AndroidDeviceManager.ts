@@ -15,7 +15,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adbAvailable = true;
 
   async getDevices(
-    deviceTypes: string,
+    deviceTypes: { androidDeviceType: string },
     existingDeviceDetails: Array<IDevice>,
     cliArgs: any
   ): Promise<any> {
@@ -32,11 +32,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
           await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
         }
       }
-      if (deviceTypes === 'real') {
+      if (deviceTypes.androidDeviceType === 'real') {
         return deviceState.filter((device) => {
           return device.deviceType === 'real';
         });
-      } else if (deviceTypes === 'simulated') {
+      } else if (deviceTypes.androidDeviceType === 'simulated') {
         return deviceState.filter((device) => {
           return device.deviceType === 'emulator';
         });

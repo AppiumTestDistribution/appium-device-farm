@@ -6,7 +6,7 @@ import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: Array<IDeviceManager> = [];
-  private deviceTypes: string;
+  private deviceTypes: { androidDeviceType: string; iosDeviceType: string };
   private cliArgs: any;
 
   constructor({
@@ -15,10 +15,10 @@ export class DeviceFarmManager {
     cliArgs,
   }: {
     platform: Platform | 'both';
-    deviceTypes: string | 'both';
+    deviceTypes: { androidDeviceType: string; iosDeviceType: string };
     cliArgs: any;
   }) {
-    this.deviceTypes = deviceTypes.toLowerCase();
+    this.deviceTypes = deviceTypes;
     this.cliArgs = cliArgs;
     if (platform.toLowerCase() === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager());

@@ -53,13 +53,15 @@ class DevicePlugin extends BasePlugin {
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
     let platform;
-    let deviceTypes;
+    let androidDeviceType;
+    let iosDeviceType;
     let remote;
     let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
-      deviceTypes = cliArgs.plugin['device-farm'].deviceTypes || 'both';
+      androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
+      iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       remote = cliArgs.plugin['device-farm'].remote;
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
@@ -74,7 +76,8 @@ class DevicePlugin extends BasePlugin {
       cliArgs.plugin['device-farm'].skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
         : undefined;
-    deviceTypes = DevicePlugin.setIncludeSimulatorState(cliArgs, deviceTypes);
+    iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
+    const deviceTypes = { androidDeviceType, iosDeviceType };
     const deviceManager = new DeviceFarmManager({
       platform,
       deviceTypes,
