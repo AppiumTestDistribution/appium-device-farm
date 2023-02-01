@@ -5,6 +5,8 @@
       "device-farm": {
         "platform": "android",
         "skipChromeDownload": true,
+        "androidDeviceType": "real",
+        "iosDeviceType": "simulated",
         "adbRemote": ["192.168.0.1:5037", "192.168.0.2:5037"],
         "remote": ["http://firstMachineIP:appiumPort", "http://secondMachineIP:appiumPort"],
         "maxSessions": 2,

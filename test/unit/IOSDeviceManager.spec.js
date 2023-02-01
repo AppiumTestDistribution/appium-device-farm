@@ -211,7 +211,10 @@ describe('IOS Device Manager', () => {
         host: 'http://127.0.0.1:4723',
       },
     ]);
-    const devices = await iosDevices.getDevices('simulated', [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices({ iosDeviceType: 'simulated' }, [], {
+      port: 4723,
+      plugin: cliArgs,
+    });
     expect(devices).to.deep.equal([
       {
         name: 'iPad Air (3rd generation)',
@@ -241,7 +244,10 @@ describe('IOS Device Manager', () => {
         host: 'http://127.0.0.1:4723',
       },
     ]);
-    const devices = await iosDevices.getDevices('real', [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices({ iosDeviceType: 'real' }, [], {
+      port: 4723,
+      plugin: cliArgs,
+    });
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
