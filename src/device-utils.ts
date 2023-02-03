@@ -225,9 +225,9 @@ export async function refreshDeviceList() {
     clearInterval(timer);
   }
   await updateDeviceList();
-  timer = setInterval(async () => {
-    await updateDeviceList();
-  }, 10000);
+  // timer = setInterval(async () => {
+  //   await updateDeviceList();
+  // }, 10000);
 }
 
 export async function releaseBlockedDevices() {

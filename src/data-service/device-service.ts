@@ -4,9 +4,11 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function saveDevices(devices: Array<IDevice>): any {
-  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
-  const devicesInDB = DeviceModel.chain().find().data();
+export function removeDevice(
+  connectedDeviceIds: Set<string>,
+  devicesInDB: any[],
+  devices: Array<IDevice>
+) {
   /**
    * Previously connected devices which are not identified remove.
    */
@@ -25,10 +27,13 @@ export function saveDevices(devices: Array<IDevice>): any {
       DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
     }
   });
+}
 
+export function addNewDevice(devices: Array<IDevice>, devicesInDB: any[]) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
+  console.log('Inside---', devices);
   devices.forEach(function (device) {
     const isDeviceAlreadyPresent = devicesInDB.find(
       (d: IDevice) => d.udid === device.udid && device.host === d.host
@@ -40,6 +45,14 @@ export function saveDevices(devices: Array<IDevice>): any {
       });
     }
   });
+}
+
+export function saveDevices(devices: Array<IDevice>): any {
+  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
+  const devicesInDB = DeviceModel.chain().find().data();
+  removeDevice(connectedDeviceIds, devicesInDB, devices);
+
+  addNewDevice(devices, devicesInDB);
 
   /**
    * Update the Latest Simulator state in DB

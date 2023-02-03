@@ -32,8 +32,7 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
-import { DeviceModel } from './data-service/db';
-import fs from 'fs-extra';
+import Adb from '@devicefarmer/adbkit';
 import Cloud from './enums/Cloud';
 
 const commandsQueueGuard = new AsyncLock();
@@ -92,7 +91,7 @@ class DevicePlugin extends BasePlugin {
     );
     await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
     await refreshDeviceList();
-    await cronReleaseBlockedDevices();
+    //await cronReleaseBlockedDevices();
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {

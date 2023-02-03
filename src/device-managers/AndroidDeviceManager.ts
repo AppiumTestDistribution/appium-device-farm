@@ -9,10 +9,32 @@ import { DeviceFactory } from './factory/DeviceFactory';
 import ChromeDriverManager from './ChromeDriverManager';
 import { Container } from 'typedi';
 import { getUtilizationTime } from '../device-utils';
+import Adb from '@devicefarmer/adbkit';
+import { DeviceModel } from '../data-service/db';
+import { AbortController } from 'node-abort-controller';
+import asyncWait from 'async-wait-until';
+import logger from '../logger';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
+  private abortControl: Map<string, AbortController> = new Map();
+
+  private initiateAbortControl(deviceUdid: string) {
+    const control = new AbortController();
+    this.abortControl.set(deviceUdid, control);
+    return control;
+  }
+
+  private abort(deviceUdid: string) {
+    this.abortControl.get(deviceUdid)?.abort();
+  }
+
+  private cancelAbort(deviceUdid: string) {
+    if (this.abortControl.has(deviceUdid)) {
+      this.abortControl.delete(deviceUdid);
+    }
+  }
 
   async getDevices(
     deviceTypes: { androidDeviceType: string },
@@ -22,8 +44,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     if (!this.adbAvailable) {
       return [];
     }
-    const deviceState: Array<IDevice> = [];
     const hosts = cliArgs.plugin['device-farm'].remote;
+    const deviceState: Array<IDevice> = [];
     try {
       for (const host of hosts) {
         if (!isObject(host) && host.includes('127.0.0.1')) {
@@ -82,37 +104,70 @@ export default class AndroidDeviceManager implements IDeviceManager {
             });
           } else {
             log.info(`Android Device details for ${device.udid} not available. So querying now.`);
-            const systemPort = await getFreePort();
-            const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
-            const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
-              this.getDeviceVersion(adbInstance, device.udid),
-              this.isRealDevice(adbInstance, device.udid),
-              this.getDeviceName(adbInstance, device.udid),
-              this.getChromeVersion(adbInstance, device.udid, cliArgs),
-            ]);
-            const host = adbInstance.adbHost != null ? adbInstance.adbHost : '127.0.0.1';
-            deviceState.push({
-              adbRemoteHost: adbInstance.adbHost,
-              adbPort: adbInstance.adbPort,
-              systemPort,
-              sdk,
-              realDevice,
-              name,
-              busy: false,
-              state: device.state,
-              udid: device.udid,
-              platform: 'android',
-              deviceType: realDevice ? 'real' : 'emulator',
-              host: `http://${host}:${cliArgs.port}`,
-              totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-              sessionStartTime: 0,
-              chromeDriverPath,
-            });
+            await this.deviceInfo(device, adbInstance, cliArgs, deviceState);
           }
         }
       });
     }
     return deviceState;
+  }
+
+  private async deviceInfo(device: any, adbInstance: any, cliArgs: any, deviceState: IDevice[]) {
+    const systemPort = await getFreePort();
+    const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
+    const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
+      this.getDeviceVersion(adbInstance, device.udid),
+      this.isRealDevice(adbInstance, device.udid),
+      this.getDeviceName(adbInstance, device.udid),
+      this.getChromeVersion(adbInstance, device.udid, cliArgs),
+    ]);
+    const host = adbInstance.adbHost != null ? adbInstance.adbHost : '127.0.0.1';
+    deviceState.push({
+      adbRemoteHost: adbInstance.adbHost,
+      adbPort: adbInstance.adbPort,
+      systemPort,
+      sdk,
+      realDevice,
+      name,
+      busy: false,
+      state: device.state,
+      udid: device.udid,
+      platform: 'android',
+      deviceType: realDevice ? 'real' : 'emulator',
+      host: `http://${host}:${cliArgs.port}`,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      chromeDriverPath,
+    });
+  }
+
+  private async deviceInfoTracker(device: any, adbInstance: any, cliArgs: any) {
+    const systemPort = await getFreePort();
+    const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
+    const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
+      this.getDeviceVersion(adbInstance, device.udid),
+      this.isRealDevice(adbInstance, device.udid),
+      this.getDeviceName(adbInstance, device.udid),
+      this.getChromeVersion(adbInstance, device.udid, cliArgs),
+    ]);
+    const host = adbInstance.adbHost != null ? adbInstance.adbHost : '127.0.0.1';
+    return {
+      adbRemoteHost: adbInstance.adbHost,
+      adbPort: adbInstance.adbPort,
+      systemPort,
+      sdk,
+      realDevice,
+      name,
+      busy: false,
+      state: device.state,
+      udid: device.udid,
+      platform: 'android',
+      deviceType: realDevice ? 'real' : 'emulator',
+      host: `http://${host}:${cliArgs.port}`,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      chromeDriverPath,
+    };
   }
 
   private async getAdb(): Promise<any> {
@@ -126,15 +181,77 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return this.adb;
   }
 
+  async waitBootComplete(originalADB: any, udid: string) {
+    return await asyncWait(
+      async () => {
+        try {
+          const bootStatus = (await this.getDeviceProperty(
+            originalADB,
+            udid,
+            'init.svc.bootanim'
+          )) as any;
+          if (!_.isNil(bootStatus) && !_.isEmpty(bootStatus) && bootStatus == 'stopped') {
+            console.log('Boot Completed!', udid);
+            return true;
+          }
+        } catch (err) {
+          return false;
+        }
+      },
+      {
+        intervalBetweenAttempts: 2000,
+        timeout: 60 * 1000,
+      }
+    );
+  }
+
   public async getConnectedDevices(cliArgs: any) {
+    console.log('----------');
     const deviceList = new Map();
     const originalADB = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
+    const client = Adb.createClient({ port: originalADB.getAdbServerPort() });
+    const originalADBTracking = async () => {
+      try {
+        const tracker = await client.trackDevices();
+        tracker.on('add', async (device: any) => {
+          Object.assign(device, { udid: device['id'], state: device['type'] });
+          delete device['type'];
+          delete device['id'];
+          if (device.state != 'offline') {
+            this.initiateAbortControl(device.udid);
+            await this.waitBootComplete(originalADB, device.udid);
+            this.cancelAbort(device.udid);
+            console.log('Device added', device);
+            const trackedDevice = await this.deviceInfoTracker(device, originalADB, cliArgs);
+            console.log('Device added', device);
+            logger.info(`Adding device ${device.udid} to list!`);
+            DeviceModel.insert({
+              ...trackedDevice,
+              offline: false,
+            });
+          }
+        });
+        tracker.on('remove', (device) => {
+          console.log('Remove device', device);
+          logger.warn(
+            `Removing device ${device.udid || device.id} from list as the device was unplugged!`
+          );
+          DeviceModel.chain()
+            .find({ udid: device.udid || device.id })
+            .remove();
+          this.abort(device.udid);
+        });
+        tracker.on('end', () => console.log('Tracking stopped'));
+      } catch (err: any) {
+        console.error('Something went wrong:', err.stack);
+      }
+    };
+    originalADBTracking();
     const adbRemote = cliArgs.plugin['device-farm'].adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
         const adbRemoteValue = value.split(':');
-        console.log(adbRemoteValue, value);
         const adbHost = adbRemoteValue[0];
         const adbPort = adbRemoteValue[1] || 5037;
         const cloneAdb = originalADB.clone({
