@@ -111,10 +111,10 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
   if (!device.hasOwnProperty('cloud')) {
-    if (device.platform.toLowerCase() == DevicePlatform.IOS) {
-      await iOSCapabilities(capability, device);
-    } else {
+    if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
       await androidCapabilities(capability, device);
+    } else {
+      await iOSCapabilities(capability, device);
     }
   } else {
     logger.info('Updating cloud Capability for Device');
