@@ -37,14 +37,11 @@ export function addNewDevice(devices: Array<IDevice>, devicesInDB: any[]) {
     const isDeviceAlreadyPresent = devicesInDB.find(
       (d: IDevice) => d.udid === device.udid && device.host === d.host
     );
-    console.log('----', isDeviceAlreadyPresent);
     if (!isDeviceAlreadyPresent) {
-      console.log('Inserting ----', device);
       DeviceModel.insert({
         ...device,
         offline: false,
       });
-      console.log('Success');
     }
   });
 }
@@ -71,7 +68,6 @@ export function setSimulatorState(devices: Array<IDevice>) {
 export function saveDevices(devices: Array<IDevice>): any {
   const connectedDeviceIds = new Set(devices.map((device) => device.udid));
   const devicesInDB = DeviceModel.chain().find().data();
-  console.log(connectedDeviceIds, devicesInDB);
   removeDevice(connectedDeviceIds, devicesInDB, devices);
   addNewDevice(devices, devicesInDB);
   setSimulatorState(devices);
