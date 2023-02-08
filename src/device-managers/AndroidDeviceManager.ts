@@ -46,14 +46,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     const hosts = cliArgs.plugin['device-farm'].remote;
     const deviceState: Array<IDevice> = [];
+    //await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
     try {
-      for (const host of hosts) {
-        if (!isObject(host) && host.includes('127.0.0.1')) {
-          await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
-        } else {
-          await this.fetchRemoteAndroidDevices(host, deviceState, 'android');
-        }
-      }
+      await this.fetchLocalAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
       if (deviceTypes.androidDeviceType === 'real') {
         return deviceState.filter((device) => {
           return device.deviceType === 'real';
@@ -206,7 +201,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   public async getConnectedDevices(cliArgs: any) {
-    console.log('----------');
     const deviceList = new Map();
     const originalADB = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
@@ -222,9 +216,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(device.udid);
             await this.waitBootComplete(originalADB, device.udid);
             this.cancelAbort(device.udid);
-            console.log('Device added', device);
             const trackedDevice = await this.deviceInfoTracker(device, originalADB, cliArgs);
-            console.log('Device added', device);
             logger.info(`Adding device ${device.udid} to list!`);
             DeviceModel.insert({
               ...trackedDevice,
@@ -233,7 +225,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
           }
         });
         tracker.on('remove', (device) => {
-          console.log('Remove device', device);
           logger.warn(
             `Removing device ${device.udid || device.id} from list as the device was unplugged!`
           );

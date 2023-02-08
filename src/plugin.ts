@@ -12,10 +12,11 @@ import {
   removePendingSession,
 } from './data-service/pending-sessions-service';
 import {
-  refreshDeviceList,
   cronReleaseBlockedDevices,
   allocateDeviceForSession,
   initlializeStorage,
+  updateDeviceList,
+  refreshDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -32,7 +33,6 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
-import Adb from '@devicefarmer/adbkit';
 import Cloud from './enums/Cloud';
 
 const commandsQueueGuard = new AsyncLock();
@@ -75,7 +75,7 @@ class DevicePlugin extends BasePlugin {
       cliArgs.plugin['device-farm'].skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
         : undefined;
-    iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
+    //iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
     const deviceManager = new DeviceFarmManager({
       platform,
@@ -89,8 +89,9 @@ class DevicePlugin extends BasePlugin {
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
-    await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
-    await refreshDeviceList();
+    // await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
+    await updateDeviceList(remote);
+    //await refreshDeviceList(cliArgs);
     //await cronReleaseBlockedDevices();
   }
 
@@ -154,7 +155,7 @@ class DevicePlugin extends BasePlugin {
     const device = await commandsQueueGuard.acquire(
       DEVICE_MANAGER_LOCK_NAME,
       async (): Promise<IDevice> => {
-        await refreshDeviceList();
+        //await refreshDeviceList();
         try {
           const device: IDevice = await allocateDeviceForSession(caps);
           return device;

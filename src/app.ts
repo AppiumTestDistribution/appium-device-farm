@@ -6,6 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
+import { saveDevices } from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -85,6 +86,13 @@ apiRouter.get('/devices/android', (req, res) => {
       platform: 'android',
     })
   );
+});
+
+apiRouter.post('/register', (req, res) => {
+  const requestBody = req.body;
+  console.log(requestBody);
+  saveDevices(requestBody);
+  res.json('200');
 });
 
 apiRouter.get('/devices/ios', (req, res) => {

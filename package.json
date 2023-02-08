@@ -141,7 +141,7 @@
           "default": "both"
         },
         "remote": {
-          "type": "array"
+          "type": "string"
         },
         "adbRemote": {
           "type": "array"

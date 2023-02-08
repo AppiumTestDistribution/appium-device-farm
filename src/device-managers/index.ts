@@ -47,4 +47,8 @@ export class DeviceFarmManager {
   public getMaxSessionCount(): number {
     return this.cliArgs.plugin['device-farm'].maxSessions;
   }
+
+  public async deviceInstances() {
+    return this.deviceManagers;
+  }
 }

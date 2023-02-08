@@ -11,19 +11,10 @@ export default class RemoteAndroidDeviceManager {
     this.host = host;
     this.deviceState = deviceState;
   }
-  async getDevices() {
+
+  //Needs rename
+  async getDevices(options: any = {}) {
     log.info('Fetching remote android devices');
-    const remoteDevices = (await axios.get(`${this.host}/device-farm/api/devices/android`)).data;
-    remoteDevices.filter((device: any) => {
-      delete device['meta'];
-      delete device['$loki'];
-      this.deviceState.push(
-        Object.assign({
-          ...device,
-          host: `${this.host}`,
-        })
-      );
-    });
-    return this.deviceState;
+    await axios.post(`${this.host}/device-farm/api/register`, options);
   }
 }

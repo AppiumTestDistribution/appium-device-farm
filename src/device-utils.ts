@@ -15,6 +15,7 @@ import {
   saveDevices,
   getAllDevices,
   getDevice,
+  setSimulatorState,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -24,6 +25,8 @@ import fs from 'fs';
 import path from 'path';
 import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
+import IOSDeviceManager from './device-managers/IOSDeviceManager';
+import NodeDevices from './device-managers/NodeDevices';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -215,19 +218,24 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList() {
-  const devices = await getDeviceManager().getDevices(getAllDevices());
-  saveDevices(devices);
+export async function updateDeviceList(hub: any) {
+  const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
+  if (hub) {
+    const nodeDevices = new NodeDevices(hub);
+    await nodeDevices.postDevicesToHub(devices);
+  } else {
+    saveDevices(devices);
+  }
 }
 
-export async function refreshDeviceList() {
+export async function refreshDeviceList(cliArgs: ServerCLI) {
   if (timer) {
     clearInterval(timer);
   }
-  await updateDeviceList();
-  // timer = setInterval(async () => {
-  //   await updateDeviceList();
-  // }, 10000);
+  timer = setInterval(async () => {
+    const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
+    await setSimulatorState(simulators);
+  }, 10000);
 }
 
 export async function releaseBlockedDevices() {

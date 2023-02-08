@@ -33,12 +33,13 @@ export function addNewDevice(devices: Array<IDevice>, devicesInDB: any[]) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-  console.log('Inside---', devices);
   devices.forEach(function (device) {
     const isDeviceAlreadyPresent = devicesInDB.find(
       (d: IDevice) => d.udid === device.udid && device.host === d.host
     );
+    console.log('----', isDeviceAlreadyPresent);
     if (!isDeviceAlreadyPresent) {
+      console.log('Inserting ----', device);
       DeviceModel.insert({
         ...device,
         offline: false,
@@ -47,13 +48,7 @@ export function addNewDevice(devices: Array<IDevice>, devicesInDB: any[]) {
   });
 }
 
-export function saveDevices(devices: Array<IDevice>): any {
-  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
-  const devicesInDB = DeviceModel.chain().find().data();
-  removeDevice(connectedDeviceIds, devicesInDB, devices);
-
-  addNewDevice(devices, devicesInDB);
-
+export function setSimulatorState(devices: Array<IDevice>) {
   /**
    * Update the Latest Simulator state in DB
    */
@@ -70,6 +65,15 @@ export function saveDevices(devices: Array<IDevice>): any {
       }
     }
   });
+}
+
+export function saveDevices(devices: Array<IDevice>): any {
+  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
+  const devicesInDB = DeviceModel.chain().find().data();
+  console.log(connectedDeviceIds, devicesInDB);
+  removeDevice(connectedDeviceIds, devicesInDB, devices);
+  addNewDevice(devices, devicesInDB);
+  setSimulatorState(devices);
 }
 
 export function getAllDevices(): Array<IDevice> {

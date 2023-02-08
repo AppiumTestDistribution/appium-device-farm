@@ -168,7 +168,7 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
+  public async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
     const hosts = cliArgs.plugin['device-farm'].remote;
     const simulators: Array<IDevice> = [];
     for (const host of hosts) {
