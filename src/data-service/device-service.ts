@@ -44,6 +44,7 @@ export function addNewDevice(devices: Array<IDevice>, devicesInDB: any[]) {
         ...device,
         offline: false,
       });
+      console.log('Success');
     }
   });
 }

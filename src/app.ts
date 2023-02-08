@@ -69,6 +69,7 @@ apiRouter.get('/devices', async (req, res) => {
       return d;
     });
   }
+  console.log(devices);
   return res.json(devices);
 });
 
