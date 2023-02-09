@@ -34,6 +34,7 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
+import ip from 'ip';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -69,7 +70,7 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
-    if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
+    if (!remote) cliArgs.plugin['device-farm'].remote = ip.address();
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false

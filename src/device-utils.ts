@@ -222,7 +222,7 @@ export async function updateDeviceList(hub: any) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
   if (hub) {
     const nodeDevices = new NodeDevices(hub);
-    await nodeDevices.postDevicesToHub(devices);
+    await nodeDevices.postDevicesToHub(devices, 'add');
   } else {
     saveDevices(devices);
   }

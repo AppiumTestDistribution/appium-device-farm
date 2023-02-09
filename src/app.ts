@@ -6,7 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
-import {addNewDevice, saveDevices} from './data-service/device-service';
+import {addNewDevice, removeDevice, saveDevices} from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -69,7 +69,6 @@ apiRouter.get('/devices', async (req, res) => {
       return d;
     });
   }
-  console.log(devices);
   return res.json(devices);
 });
 
@@ -91,8 +90,11 @@ apiRouter.get('/devices/android', (req, res) => {
 
 apiRouter.post('/register', (req, res) => {
   const requestBody = req.body;
-  const devicesInDB = DeviceModel.chain().find().data();
-  addNewDevice(requestBody, devicesInDB);
+  if (req.query.type === 'add') {
+    addNewDevice(requestBody);
+  } else if (req.query.type === 'remove') {
+    removeDevice(requestBody);
+  }
   res.json('200');
 });
 

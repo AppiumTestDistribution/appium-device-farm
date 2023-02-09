@@ -9,8 +9,12 @@ export default class NodeDevices {
     this.host = host;
   }
 
-  async postDevicesToHub(data: any) {
+  async postDevicesToHub(data: any, arg: string) {
     log.info(`Fetching remote android devices ${this.host}/device-farm/api/register`);
-    await axios.post(`${this.host}/device-farm/api/register`, data);
+    await axios.post(`${this.host}/device-farm/api/register`, data, {
+      params: {
+        type: arg,
+      },
+    });
   }
 }
