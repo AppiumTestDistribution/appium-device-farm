@@ -195,7 +195,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             if (!cliArgs.plugin['device-farm'].remote.includes(ip.address())) {
               logger.info(`Updating Hub with device ${clonedDevice.udid}`);
               const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].remote);
-              await nodeDevices.postDevicesToHub([trackedDevice], 'add');
+              await nodeDevices.postDevicesToHub(trackedDevice, 'add');
             } else {
               addNewDevice(trackedDevice);
             }
@@ -209,12 +209,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
           if (!cliArgs.plugin['device-farm'].remote.includes(ip.address())) {
             logger.info(`Removing device from Hub with device ${clonedDevice.udid}`);
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].remote);
-            await nodeDevices.postDevicesToHub([deviceToRemove], 'remove');
+            await nodeDevices.postDevicesToHub(deviceToRemove, 'remove');
           } else {
             logger.warn(
               `Removing device ${clonedDevice.udid} from list as the device was unplugged!`
             );
-            removeDevice([deviceToRemove]);
+            removeDevice(deviceToRemove);
             this.abort(clonedDevice.udid);
           }
         });

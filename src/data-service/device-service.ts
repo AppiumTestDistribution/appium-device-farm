@@ -4,20 +4,8 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function removeDevice(devices: any) {
-  const devicesInDB = DeviceModel.chain().find().data();
-
-  /**
-   * Check if the device is disconnected and remove from the DB instance.
-   */
-  devicesInDB.forEach((device: IDevice) => {
-    const isDeviceConneted = devices.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host
-    );
-    if (isDeviceConneted) {
-      DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
-    }
-  });
+export function removeDevice(device: any) {
+  DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
 }
 
 export function addNewDevice(devices: Array<IDevice>) {
@@ -58,7 +46,6 @@ export function setSimulatorState(devices: Array<IDevice>) {
 }
 
 export function saveDevices(devices: Array<IDevice>): any {
-  removeDevice(devices);
   addNewDevice(devices);
   setSimulatorState(devices);
 }
