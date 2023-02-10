@@ -181,8 +181,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
         tracker.on('add', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], state: clonedDevice['type'] });
-          console.log('Added', device);
           if (device.state != 'offline') {
+            logger.info(`Device ${device.udid} was plugged`);
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
