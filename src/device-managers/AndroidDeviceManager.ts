@@ -182,7 +182,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], state: clonedDevice['type'] });
           if (device.state != 'offline') {
-            logger.info(`Device ${device.udid} was plugged`);
+            logger.info(`Device ${clonedDevice.udid} was plugged`);
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
@@ -204,17 +204,15 @@ export default class AndroidDeviceManager implements IDeviceManager {
         tracker.on('remove', async (device) => {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], host: ip.address() });
-          const devicesInDB = DeviceModel.chain().find().data();
-          const deviceToRemove = devicesInDB.find((d: IDevice) => d.udid === clonedDevice.udid);
           if (!cliArgs.plugin['device-farm'].remote.includes(ip.address())) {
             logger.info(`Removing device from Hub with device ${clonedDevice.udid}`);
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].remote);
-            await nodeDevices.postDevicesToHub(deviceToRemove, 'remove');
+            await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
           } else {
             logger.warn(
               `Removing device ${clonedDevice.udid} from list as the device was unplugged!`
             );
-            removeDevice(deviceToRemove);
+            removeDevice(clonedDevice);
             this.abort(clonedDevice.udid);
           }
         });

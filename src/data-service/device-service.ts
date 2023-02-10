@@ -5,7 +5,9 @@ import logger from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
 export function removeDevice(device: any) {
-  DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
+  DeviceModel.chain()
+    .find({ udid: device.udid, host: { $contains: device.host } })
+    .remove();
 }
 
 export function addNewDevice(devices: Array<IDevice>) {

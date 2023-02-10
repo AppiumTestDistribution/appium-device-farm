@@ -10,11 +10,18 @@ export default class NodeDevices {
   }
 
   async postDevicesToHub(data: any, arg: string) {
-    log.info(`Fetching remote android devices ${this.host}/device-farm/api/register`);
-    await axios.post(`${this.host}/device-farm/api/register`, data, {
-      params: {
-        type: arg,
-      },
-    });
+    log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
+    const status = (
+      await axios.post(`${this.host}/device-farm/api/register`, data, {
+        params: {
+          type: arg,
+        },
+      })
+    ).status;
+    if (status === 200) {
+      log.info(`Pushed devices to hub ${data}`);
+    } else {
+      log.warn('Something went wrong!!');
+    }
   }
 }
