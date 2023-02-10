@@ -19,7 +19,11 @@ export default class NodeDevices {
       })
     ).status;
     if (status === 200) {
-      log.info(`Pushed devices to hub ${data}`);
+      if (arg === 'add') {
+        log.info(`Pushed devices to hub ${JSON.stringify(data)}`);
+      } else {
+        log.info(`Removed device and pushed information to hub ${JSON.stringify(data)}`);
+      }
     } else {
       log.warn('Something went wrong!!');
     }

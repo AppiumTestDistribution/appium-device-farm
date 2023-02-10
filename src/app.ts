@@ -6,7 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
-import {addNewDevice, removeDevice, saveDevices} from './data-service/device-service';
+import { addNewDevice, removeDevice, saveDevices } from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -92,8 +92,12 @@ apiRouter.post('/register', (req, res) => {
   const requestBody = req.body;
   if (req.query.type === 'add') {
     addNewDevice(requestBody);
+    log.info(`Adding device ${requestBody.udid} from host ${requestBody.host} to list!`);
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
+    log.info(
+      `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`
+    );
   }
   res.json('200');
 });
