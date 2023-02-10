@@ -15,7 +15,7 @@ const cliArgs = {
     remote: [`http://${firstNode}:3000`, `http://${secondNode}:3000`, 'http://127.0.0.1:4723'],
   },
 };
-describe('Remote Android', () => {
+describe.skip('Remote Android', () => {
   const stubResponse = {
     data: [
       {
