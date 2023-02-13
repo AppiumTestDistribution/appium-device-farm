@@ -12,7 +12,6 @@ const cliArgs = {
   'device-farm': {
     platform: 'android',
     'device-types': 'both',
-    remote: ['http://127.0.0.1:4723'],
     skipChromeDownload: true,
   },
 };

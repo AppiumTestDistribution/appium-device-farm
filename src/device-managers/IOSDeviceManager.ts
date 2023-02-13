@@ -1,18 +1,19 @@
 import Simctl from 'node-simctl';
-import { flatten, isObject, isEmpty } from 'lodash';
+import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { getFreePort, isMac } from '../helpers';
+import { getFreePort, isCloud, isHub, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
-import axios from 'axios';
-import { DeviceFactory } from './factory/DeviceFactory';
 import os from 'os';
 import path from 'path';
 import { getUtilizationTime } from '../device-utils';
 import fs from 'fs-extra';
 import logger from '../logger';
+import Devices from './cloud/Devices';
+import ip from 'ip';
+import NodeDevices from './NodeDevices';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -70,20 +71,13 @@ export default class IOSDeviceManager implements IDeviceManager {
     cliArgs: any
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    const hosts = cliArgs.plugin['device-farm'].hub;
-    for (const host of hosts) {
-      if (!isObject(host) && host.includes('127.0.0.1')) {
-        await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
-      } else {
-        await this.fetchRemoteIOSDevices(host, deviceState, 'ios');
-      }
+    if (isCloud(cliArgs)) {
+      const cloud = new Devices(cliArgs.plugin['device-farm'].cloud, deviceState, 'ios');
+      return await cloud.getDevices();
+    } else {
+      await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
     }
     return deviceState;
-  }
-
-  private async fetchRemoteIOSDevices(host: any, deviceState: IDevice[], platform: string) {
-    const devices = DeviceFactory.deviceInstance(host, deviceState, platform);
-    return devices?.getDevices();
   }
 
   private derivedDataPath(cliArgs: any, udid: string, realDevice: boolean) {
@@ -153,7 +147,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             realDevice: true,
             deviceType: 'real',
             platform: this.getDevicePlatformName(name),
-            host: `http://127.0.0.1:${cliArgs.port}`,
+            host: `http://${ip.address()}:${cliArgs.port}`,
             totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
             sessionStartTime: 0,
             derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
@@ -169,33 +163,16 @@ export default class IOSDeviceManager implements IDeviceManager {
    * @returns {Promise<Array<IDevice>>}
    */
   public async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
-    const hosts = cliArgs.plugin['device-farm'].hub;
     const simulators: Array<IDevice> = [];
-    for (const host of hosts) {
-      if (!isObject(host) && host.includes('127.0.0.1')) {
-        await this.fetchLocalSimulators(simulators, cliArgs);
-      } else {
-        await this.fetchRemoteSimulators(host, simulators);
-      }
-    }
+    const hubExists = isHub(cliArgs);
+    await this.fetchLocalSimulators(simulators, cliArgs);
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
+    if (hubExists) {
+      logger.info('Updating Hub with Simulators');
+      const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+      await nodeDevices.postDevicesToHub(simulators, 'add');
+    }
     return simulators;
-  }
-
-  private async fetchRemoteSimulators(host: string, simulators: IDevice[]) {
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-    remoteDevices.filter((device: any) => {
-      if (device.deviceType === 'simulator') {
-        delete device['meta'];
-        delete device['$loki'];
-        simulators.push(
-          Object.assign({
-            ...device,
-            host: `${host}`,
-          })
-        );
-      }
-    });
   }
 
   public async fetchLocalSimulators(simulators: IDevice[], cliArgs: any) {
@@ -223,7 +200,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: this.getDevicePlatformName(device.name),
           deviceType: 'simulator',
-          host: `http://127.0.0.1:${cliArgs.port}`,
+          host: `http://${ip.address()}:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
           derivedDataPath: this.derivedDataPath(cliArgs, device.udid, false),

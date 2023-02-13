@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute } from './helpers';
+import {isMac, checkIfPathIsAbsolute, isHub} from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -27,6 +27,7 @@ import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
+import ip from 'ip';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -212,17 +213,16 @@ function getDeviceManager() {
 }
 
 export async function getBusyDevicesCount() {
-  const allDevices = await getAllDevices();
+  const allDevices = getAllDevices();
   return allDevices.filter((device) => {
-    return device.busy === true;
+    return device.busy;
   }).length;
 }
 
 export async function updateDeviceList(cliArgs: any) {
-  const hub = cliArgs.plugin['device-farm'].hub;
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
-  if (hub) {
-    const nodeDevices = new NodeDevices(hub);
+  if (isHub(cliArgs)) {
+    const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
     await nodeDevices.postDevicesToHub(devices, 'add');
   } else {
     saveDevices(devices);
@@ -240,9 +240,9 @@ export async function refreshDeviceList(cliArgs: ServerCLI) {
 }
 
 export async function releaseBlockedDevices() {
-  const allDevices = await getAllDevices();
+  const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy === true && device.host.includes('127.0.0.1');
+    return device.busy && device.host.includes(ip.address());
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();

@@ -11,7 +11,6 @@ import {
 import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
-import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -21,7 +20,7 @@ const cliArgs = {
   deviceTypes: { androidDeviceType: '', iosDeviceType: 'simulated' },
   cliArgs: {
     port: 4723,
-    plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'], maxSessions: 1 } },
+    plugin: { 'device-farm': { maxSessions: 1 } },
   },
 };
 describe('Max sessions CLI argument test', () => {
@@ -30,7 +29,7 @@ describe('Max sessions CLI argument test', () => {
     const deviceManager = new DeviceFarmManager(cliArgs);
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(cliArgs);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -51,7 +50,7 @@ describe('Max sessions CLI argument test', () => {
     const deviceManager = new DeviceFarmManager(cliArgs);
     expect(await getBusyDevicesCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(cliArgs);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -89,7 +88,7 @@ describe('IOS Simulator Test', () => {
       },
     });
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(cliArgs);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -116,7 +115,7 @@ describe('IOS Simulator Test', () => {
       cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(cliArgs);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -144,7 +143,7 @@ describe('IOS Simulator Test', () => {
         cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
       });
       Container.set(DeviceFarmManager, deviceManager);
-      await updateDeviceList();
+      await updateDeviceList(cliArgs);
       const capabilities = {
         alwaysMatch: {
           platformName: 'tvOS',
@@ -181,7 +180,7 @@ describe('Boot simulator test', async () => {
       cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
     });
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(cliArgs);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',

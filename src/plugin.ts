@@ -89,14 +89,16 @@ class DevicePlugin extends BasePlugin {
     );
     if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
     await updateDeviceList(cliArgs);
-    //await refreshDeviceList(cliArgs);
-    //await cronReleaseBlockedDevices();
+    await refreshDeviceList(cliArgs);
+    await cronReleaseBlockedDevices();
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
     const cloudExists = _.has(cliArgs, 'server.plugin["device-farm"].cloud');
-    if (cloudExists) deviceTypes = 'real';
-    if (deviceTypes === 'real') logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    if (cloudExists) {
+      deviceTypes = 'real';
+      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    }
     return deviceTypes;
   }
 

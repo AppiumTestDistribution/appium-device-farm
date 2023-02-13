@@ -37,6 +37,9 @@ export function setSimulatorState(devices: Array<IDevice>) {
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
+        logger.info(
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
+        );
         DeviceModel.chain()
           .find({ udid: device.udid })
           .update(function (d: IDevice) {

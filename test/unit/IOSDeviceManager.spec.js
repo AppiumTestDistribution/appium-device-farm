@@ -34,7 +34,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -42,7 +42,7 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
@@ -58,7 +58,7 @@ describe('IOS Device Manager', () => {
         wdaLocalPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
           'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
@@ -71,7 +71,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -79,7 +79,7 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
   });
@@ -88,8 +88,6 @@ describe('IOS Device Manager', () => {
     const cliArgs = {
       'device-farm': {
         platform: 'iOS',
-        'device-types': 'both',
-        remote: ['http://127.0.0.1:4723'],
         simulators: [
           {
             name: 'iPhone 14',
@@ -119,7 +117,7 @@ describe('IOS Device Manager', () => {
     const cliArgs = {
       'device-farm': {
         platform: 'iOS',
-        'device-types': 'simulator',
+        iosDeviceType: 'simulated',
         remote: ['http://127.0.0.1:4723'],
         simulators: [
           {
@@ -160,7 +158,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
@@ -174,7 +172,7 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
           'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
@@ -189,7 +187,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
   });
@@ -208,7 +206,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices({ iosDeviceType: 'simulated' }, [], {
@@ -222,7 +220,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
   });
@@ -241,7 +239,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices({ iosDeviceType: 'real' }, [], {
@@ -260,7 +258,7 @@ describe('IOS Device Manager', () => {
         wdaLocalPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
           'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
