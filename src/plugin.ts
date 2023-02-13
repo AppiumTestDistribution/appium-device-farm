@@ -23,8 +23,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { isObject } from 'lodash';
-import { stripAppiumPrefixes } from './helpers';
+import { isHub, stripAppiumPrefixes } from './helpers';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
@@ -35,6 +34,7 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
+import _ from 'lodash';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -55,14 +55,12 @@ class DevicePlugin extends BasePlugin {
     let platform;
     let androidDeviceType;
     let iosDeviceType;
-    let remote;
     let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
-      remote = cliArgs.plugin['device-farm'].remote;
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
     expressApp.use('/device-farm', router);
@@ -70,13 +68,12 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
-    if (!remote) cliArgs.plugin['device-farm'].remote = ip.address();
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
         : undefined;
-    //iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
+    iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
     const deviceManager = new DeviceFarmManager({
       platform,
@@ -90,44 +87,36 @@ class DevicePlugin extends BasePlugin {
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
-    // await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
-    await updateDeviceList(remote);
+    if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
+    await updateDeviceList(cliArgs);
     //await refreshDeviceList(cliArgs);
     //await cronReleaseBlockedDevices();
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
-      (v: any) => typeof v === 'object'
-    );
-    if (cloudExists.length > 0)
-      cloudExists[0].hasOwnProperty('cloudName') ? (deviceTypes = 'real') : true;
+    const cloudExists = _.has(cliArgs, 'server.plugin["device-farm"].cloud');
+    if (cloudExists) deviceTypes = 'real';
     if (deviceTypes === 'real') logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     return deviceTypes;
   }
 
-  private static async waitForRemoteServerToBeRunning(cliArgs: any) {
-    await Promise.all(
-      cliArgs.plugin['device-farm'].remote.map(async (url: any) => {
-        if (!isObject(url) && !url.includes('127.0.0.1')) {
-          await spinWith(
-            `Waiting for node server ${url} to be up and running\n`,
-            async () => {
-              await axios({
-                method: 'get',
-                url: `${url}/device-farm`,
-                timeout: 30000,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-            },
-            (msg: any) => {
-              throw new Error(`Failed: ${msg}`);
-            }
-          );
-        }
-      })
+  private static async waitForRemoteHubServerToBeRunning(cliArgs: any) {
+    const hub = cliArgs.plugin['device-farm'].hub;
+    await spinWith(
+      `Waiting for node server ${hub} to be up and running\n`,
+      async () => {
+        await axios({
+          method: 'get',
+          url: `${hub}/device-farm`,
+          timeout: 30000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      },
+      (msg: any) => {
+        throw new Error(`Failed: ${msg}`);
+      }
     );
   }
 

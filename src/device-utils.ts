@@ -218,7 +218,8 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(hub: any) {
+export async function updateDeviceList(cliArgs: any) {
+  const hub = cliArgs.plugin['device-farm'].hub;
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
   if (hub) {
     const nodeDevices = new NodeDevices(hub);

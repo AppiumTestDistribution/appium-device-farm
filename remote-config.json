@@ -4,7 +4,7 @@
       "plugin": {
         "device-farm": {
           "platform": "android",
-          "remote": "http://11.11.1.1:31337"
+          "hub": "http://11.11.1.1:31337"
         }
       }
     }

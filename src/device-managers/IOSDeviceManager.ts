@@ -70,7 +70,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     cliArgs: any
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    const hosts = cliArgs.plugin['device-farm'].remote;
+    const hosts = cliArgs.plugin['device-farm'].hub;
     for (const host of hosts) {
       if (!isObject(host) && host.includes('127.0.0.1')) {
         await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
@@ -169,7 +169,7 @@ export default class IOSDeviceManager implements IDeviceManager {
    * @returns {Promise<Array<IDevice>>}
    */
   public async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
-    const hosts = cliArgs.plugin['device-farm'].remote;
+    const hosts = cliArgs.plugin['device-farm'].hub;
     const simulators: Array<IDevice> = [];
     for (const host of hosts) {
       if (!isObject(host) && host.includes('127.0.0.1')) {

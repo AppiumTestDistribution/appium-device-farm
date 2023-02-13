@@ -3,8 +3,8 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "both",
-        "remote": [
+        "platform": "android",
+        "cloud":
           {
             "cloudName": "browserstack",
             "url": "http://hub-cloud.browserstack.com/wd/hub",
@@ -21,7 +21,6 @@
               }
             ]
           }
-        ]
       }
     }
   }

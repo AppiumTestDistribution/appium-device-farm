@@ -141,7 +141,7 @@
           "type": "string",
           "default": "both"
         },
-        "remote": {
+        "hub": {
           "type": "string"
         },
         "adbRemote": {
@@ -152,6 +152,9 @@
         },
         "maxSessions": {
           "type": "number"
+        },
+        "cloud": {
+          "type": "object"
         },
         "derivedDataPath": {
           "type": "object"
