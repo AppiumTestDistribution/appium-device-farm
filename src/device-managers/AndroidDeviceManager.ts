@@ -270,13 +270,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
             tracker.on('remove', async (device) => {
               const clonedDevice = _.cloneDeep(device);
               Object.assign(clonedDevice, { udid: clonedDevice['id'], host: adbHost });
-
               logger.warn(
                 `Removing device ${clonedDevice.udid} from ${adbHost} list as the device was unplugged!`
               );
-              const devicesInDB = DeviceModel.chain().find().data();
-              console.log(devicesInDB);
-              console.log(clonedDevice);
               removeDevice(clonedDevice);
               this.abort(clonedDevice.udid);
             });
