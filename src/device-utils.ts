@@ -146,10 +146,17 @@ function getStorage() {
  * @returns number
  */
 export async function getUtilizationTime(udid: string) {
-  const value = await getStorage().getItem(udid);
-  if (value !== undefined) {
-    return value;
+  try {
+    const value = await getStorage().getItem(udid);
+    if (value !== undefined && value && !isNaN(value)) {
+      return value;
+    } else {
+      throw `Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`;
+    }
+  } catch (err) {
+    logger.error(`Failed to fetch Utilization Time \n ${err}`);
   }
+
   return 0;
 }
 
