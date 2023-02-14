@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import {isMac, checkIfPathIsAbsolute, isHub} from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -55,8 +55,15 @@ export function isAndroid(cliArgs: ServerCLI) {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
-export function isIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.IOS;
+export function deviceType(cliArgs: any, device: string) {
+  const iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType;
+  if (_.has(cliArgs, 'plugin["device-farm"].iosDeviceType')) {
+    return iosDeviceType === device || iosDeviceType === 'both';
+  }
+}
+
+export function isIOS(cliArgs: any) {
+  return isMac() && cliArgs.plugin['device-farm'].platform.toLowerCase() === DevicePlatform.IOS;
 }
 
 export function isAndroidAndIOS(cliArgs: ServerCLI) {
@@ -229,7 +236,7 @@ export async function updateDeviceList(cliArgs: any) {
   }
 }
 
-export async function refreshDeviceList(cliArgs: ServerCLI) {
+export async function refreshSimulatorState(cliArgs: ServerCLI) {
   if (timer) {
     clearInterval(timer);
   }

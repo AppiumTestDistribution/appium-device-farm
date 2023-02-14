@@ -16,7 +16,7 @@ import {
   allocateDeviceForSession,
   initlializeStorage,
   updateDeviceList,
-  refreshDeviceList,
+  refreshSimulatorState, isIOS, deviceType,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -89,7 +89,7 @@ class DevicePlugin extends BasePlugin {
     );
     if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
     await updateDeviceList(cliArgs);
-    await refreshDeviceList(cliArgs);
+    if (isIOS(cliArgs) && deviceType(cliArgs, iosDeviceType)) await refreshSimulatorState(cliArgs);
     await cronReleaseBlockedDevices();
   }
 

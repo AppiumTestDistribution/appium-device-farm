@@ -16,6 +16,7 @@ import ip from 'ip';
 import NodeDevices from './NodeDevices';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
+import { DeviceModel } from '../data-service/db';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -239,6 +240,52 @@ export default class AndroidDeviceManager implements IDeviceManager {
           adbPort,
         });
         deviceList.set(cloneAdb, await cloneAdb.getConnectedDevices());
+        const remoteAdb = Adb.createClient({
+          host: adbHost,
+          port: adbPort,
+        });
+        const remoteAdbTracking = async () => {
+          try {
+            const tracker = await remoteAdb.trackDevices();
+            tracker.on('add', async (device: any) => {
+              const clonedDevice = _.cloneDeep(device);
+              Object.assign(clonedDevice, {
+                udid: clonedDevice['id'],
+                state: clonedDevice['type'],
+              });
+              if (device.state != 'offline') {
+                logger.info(`Device ${clonedDevice.udid} was plugged in host ${adbHost}`);
+                this.initiateAbortControl(clonedDevice.udid);
+                await this.waitBootComplete(cloneAdb, clonedDevice.udid);
+                this.cancelAbort(clonedDevice.udid);
+                const trackedDevice: Array<IDevice> = await this.deviceInfo(
+                  clonedDevice,
+                  cloneAdb,
+                  cliArgs
+                );
+                logger.info(`Adding device ${clonedDevice.udid} to list!`);
+                addNewDevice(trackedDevice);
+              }
+            });
+            tracker.on('remove', async (device) => {
+              const clonedDevice = _.cloneDeep(device);
+              Object.assign(clonedDevice, { udid: clonedDevice['id'], host: adbHost });
+
+              logger.warn(
+                `Removing device ${clonedDevice.udid} from ${adbHost} list as the device was unplugged!`
+              );
+              const devicesInDB = DeviceModel.chain().find().data();
+              console.log(devicesInDB);
+              console.log(clonedDevice);
+              removeDevice(clonedDevice);
+              this.abort(clonedDevice.udid);
+            });
+            tracker.on('end', () => console.log('Tracking stopped'));
+          } catch (err: any) {
+            console.error('Something went wrong:', err.stack);
+          }
+        };
+        remoteAdbTracking();
       });
     }
     return deviceList;
