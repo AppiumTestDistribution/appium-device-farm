@@ -14,6 +14,8 @@ import logger from '../logger';
 import Devices from './cloud/Devices';
 import ip from 'ip';
 import NodeDevices from './NodeDevices';
+import { GoIosTracker } from './iOSTracker';
+import { addNewDevice, removeDevice } from '../data-service/device-service';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -130,30 +132,43 @@ export default class IOSDeviceManager implements IDeviceManager {
           busy: false,
         });
       } else {
-        log.info(`IOS Device details for ${udid} not available. So querying now.`);
-        const wdaLocalPort = await getFreePort();
-        const mjpegServerPort = await getFreePort();
-        const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
-        const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
-
-        deviceState.push(
-          Object.assign({
-            wdaLocalPort,
-            mjpegServerPort,
-            udid,
-            sdk,
-            name,
-            busy: false,
-            realDevice: true,
-            deviceType: 'real',
-            platform: this.getDevicePlatformName(name),
-            host: `http://${ip.address()}:${cliArgs.port}`,
-            totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-            sessionStartTime: 0,
-            derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
-          })
-        );
+        const deviceInfo = await this.getDeviceInfo(udid, cliArgs);
+        deviceState.push(deviceInfo);
       }
+    });
+    const goIosTracker = new GoIosTracker();
+    await goIosTracker.start();
+    goIosTracker.on('device-connected', async (message) => {
+      logger.info(`iOS device with udid ${message.id} plugged! updating device list...`);
+      const deviceAttached = [await this.getDeviceInfo(message.id, cliArgs)];
+      addNewDevice(deviceAttached);
+    });
+    goIosTracker.on('device-removed', (message) => {
+      const deviceAttached: any = { udid: message.id, host: ip.address() };
+      logger.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
+      removeDevice(deviceAttached);
+    });
+  }
+
+  private async getDeviceInfo(udid: string, cliArgs: any) {
+    const wdaLocalPort = await getFreePort();
+    const mjpegServerPort = await getFreePort();
+    const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
+    const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
+    return Object.assign({
+      wdaLocalPort,
+      mjpegServerPort,
+      udid,
+      sdk,
+      name,
+      busy: false,
+      realDevice: true,
+      deviceType: 'real',
+      platform: this.getDevicePlatformName(name),
+      host: `http://${ip.address()}:${cliArgs.port}`,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
     });
   }
 

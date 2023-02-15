@@ -234,6 +234,7 @@ export async function updateDeviceList(cliArgs: any) {
   } else {
     saveDevices(devices);
   }
+  return devices;
 }
 
 export async function refreshSimulatorState(cliArgs: ServerCLI) {

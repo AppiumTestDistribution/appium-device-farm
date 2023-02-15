@@ -52,7 +52,6 @@ export function setSimulatorState(devices: Array<IDevice>) {
 
 export function saveDevices(devices: Array<IDevice>): any {
   addNewDevice(devices);
-  setSimulatorState(devices);
 }
 
 export function getAllDevices(): Array<IDevice> {

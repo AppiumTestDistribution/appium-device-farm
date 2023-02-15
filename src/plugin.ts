@@ -6,7 +6,7 @@ import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import { updateDevice, unblockDevice } from './data-service/device-service';
+import {updateDevice, unblockDevice, setSimulatorState} from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
@@ -16,7 +16,9 @@ import {
   allocateDeviceForSession,
   initlializeStorage,
   updateDeviceList,
-  refreshSimulatorState, isIOS, deviceType,
+  refreshSimulatorState,
+  isIOS,
+  deviceType,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -88,8 +90,11 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
     if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
-    await updateDeviceList(cliArgs);
-    if (isIOS(cliArgs) && deviceType(cliArgs, iosDeviceType)) await refreshSimulatorState(cliArgs);
+    const devicesUpdates = await updateDeviceList(cliArgs);
+    if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
+      await setSimulatorState(devicesUpdates);
+      await refreshSimulatorState(cliArgs);
+    }
     await cronReleaseBlockedDevices();
   }
 
