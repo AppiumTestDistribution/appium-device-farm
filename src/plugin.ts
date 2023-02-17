@@ -6,7 +6,7 @@ import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import {updateDevice, unblockDevice, setSimulatorState} from './data-service/device-service';
+import { updateDevice, unblockDevice, setSimulatorState } from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
@@ -163,7 +163,7 @@ class DevicePlugin extends BasePlugin {
       }
     );
     let session;
-    if (!device.host.includes('127.0.0.1')) {
+    if (!device.host.includes(ip.address())) {
       const remoteUrl = hubUrl(device);
       let capabilitiesToCreateSession = { capabilities: caps };
       if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
@@ -216,7 +216,7 @@ class DevicePlugin extends BasePlugin {
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (!device.host.includes('127.0.0.1')) {
+      if (!device.host.includes(ip.address())) {
         addProxyHandler(sessionId, device.host);
       }
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
