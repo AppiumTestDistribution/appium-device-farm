@@ -238,9 +238,9 @@ export async function updateDeviceList(cliArgs: any) {
   if (isHub(cliArgs)) {
     const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
     await nodeDevices.postDevicesToHub(devices, 'add');
-  } else {
-    addNewDevice(devices);
   }
+  addNewDevice(devices);
+
   return devices;
 }
 

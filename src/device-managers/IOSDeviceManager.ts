@@ -241,8 +241,8 @@ export default class IOSDeviceManager implements IDeviceManager {
   private async getLocalSims() {
     try {
       const simctl = await new Simctl();
-      const iOSSimulators = Object.keys(await simctl.getDevices(null, 'iOS')).length;
-      const tvSimulators = Object.keys(await simctl.getDevices(null, 'tvOS')).length;
+      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
+      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 1;
 
       let iosSimulators: any = [];
       let tvosSimulators: any = [];
@@ -261,7 +261,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       } else {
         console.log('No tvOS simulators found!');
       }
-
       return [...iosSimulators, ...tvosSimulators];
     } catch (error) {
       console.error(error);

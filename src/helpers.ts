@@ -64,7 +64,7 @@ export async function isPortBusy(port: number) {
 }
 
 export function isHub(cliArgs: any) {
-  return _.has(cliArgs, 'server.plugin["device-farm"].hub');
+  return _.has(cliArgs, 'plugin["device-farm"].hub');
 }
 
 export function isCloud(cliArgs: any) {
