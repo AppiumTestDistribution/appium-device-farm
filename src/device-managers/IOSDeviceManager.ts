@@ -139,14 +139,28 @@ export default class IOSDeviceManager implements IDeviceManager {
     const goIosTracker = new GoIosTracker();
     await goIosTracker.start();
     goIosTracker.on('device-connected', async (message) => {
-      logger.info(`iOS device with udid ${message.id} plugged! updating device list...`);
       const deviceAttached = [await this.getDeviceInfo(message.id, cliArgs)];
-      addNewDevice(deviceAttached);
+      const hubExists = isHub(cliArgs);
+      if (hubExists) {
+        logger.info(`Updating Hub with iOS device ${message.id}`);
+        const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+        await nodeDevices.postDevicesToHub(deviceAttached, 'add');
+      } else {
+        logger.info(`iOS device with udid ${message.id} plugged! updating device list...`);
+        addNewDevice(deviceAttached);
+      }
     });
-    goIosTracker.on('device-removed', (message) => {
-      const deviceAttached: any = { udid: message.id, host: ip.address() };
-      logger.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
-      removeDevice(deviceAttached);
+    goIosTracker.on('device-removed', async (message) => {
+      const deviceRemoved: any = { udid: message.id, host: ip.address() };
+      const hubExists = isHub(cliArgs);
+      if (hubExists) {
+        logger.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
+        const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+        await nodeDevices.postDevicesToHub(deviceRemoved, 'remove');
+      } else {
+        logger.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
+        removeDevice(deviceRemoved);
+      }
     });
   }
 

@@ -50,10 +50,6 @@ export function setSimulatorState(devices: Array<IDevice>) {
   });
 }
 
-export function saveDevices(devices: Array<IDevice>): any {
-  addNewDevice(devices);
-}
-
 export function getAllDevices(): Array<IDevice> {
   return DeviceModel.chain().find().data();
 }
@@ -90,15 +86,25 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 }
 
 export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
-  DeviceModel.chain()
-    .find({
-      udid: device.udid,
-    })
-    .update(function (device: IDevice) {
+  const filterDevice = DeviceModel.chain().find({
+    udid: device.udid,
+  });
+  if (filterDevice.data().length > 1) {
+    const find = filterDevice.data().find((d) => d.busy === false);
+    DeviceModel.chain()
+      .find({ udid: find.udid, host: find.host })
+      .update(function (device: IDevice) {
+        Object.assign(device, {
+          ...updateData,
+        });
+      });
+  } else {
+    filterDevice.update(function (device: IDevice) {
       Object.assign(device, {
         ...updateData,
       });
     });
+  }
 }
 
 export function updateCmdExecutedTime(sessionId: string) {

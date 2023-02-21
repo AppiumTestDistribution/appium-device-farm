@@ -6,7 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
-import { addNewDevice, removeDevice, saveDevices } from './data-service/device-service';
+import { addNewDevice, removeDevice } from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();

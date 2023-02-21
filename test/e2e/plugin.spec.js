@@ -43,7 +43,6 @@ describe('Basic Plugin Test', () => {
     updatedDeviceList.find((d) => d.udid === 'emulator-5552').should.to.be.an('object');
   });
 
-  // Needs a fix
   it('Remove Android devices from node to hub', async () => {
     let nodeDevices = new NodeDevices('http://localhost:31337');
     const devices = (await axios.get('http://localhost:31337/device-farm/api/devices')).data;

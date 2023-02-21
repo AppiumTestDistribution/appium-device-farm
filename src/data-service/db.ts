@@ -5,4 +5,4 @@ const DeviceModel = db.addCollection('devices');
 const PendingSessionsModel = db.addCollection('pending-sessions');
 const CLIArgs = db.addCollection('cliArgs');
 
-export { DeviceModel, PendingSessionsModel, CLIArgs };
+export { DeviceModel, PendingSessionsModel, CLIArgs, db };

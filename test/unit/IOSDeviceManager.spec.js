@@ -6,6 +6,7 @@ import * as DeviceUtils from '../../src/device-utils';
 import os from 'os';
 import path from 'path';
 import { deviceMock } from './fixtures/devices';
+import ip from 'ip';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {

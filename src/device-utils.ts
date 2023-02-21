@@ -12,10 +12,10 @@ import { DeviceFarmManager } from './device-managers';
 import {
   updateDevice,
   unblockDevice,
-  saveDevices,
   getAllDevices,
   getDevice,
   setSimulatorState,
+  addNewDevice,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -98,7 +98,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   try {
     await waitUntil(
       async () => {
-        const maxSessions = await getDeviceManager().getMaxSessionCount();
+        const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
           logger.info(
             `Waiting for session available, already at max session count of: ${maxSessions}`
@@ -239,7 +239,7 @@ export async function updateDeviceList(cliArgs: any) {
     const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
     await nodeDevices.postDevicesToHub(devices, 'add');
   } else {
-    saveDevices(devices);
+    addNewDevice(devices);
   }
   return devices;
 }
