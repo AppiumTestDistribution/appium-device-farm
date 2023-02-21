@@ -6,30 +6,34 @@ import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import { updateDevice, unblockDevice, setSimulatorState } from './data-service/device-service';
+import {
+  setSimulatorState,
+  unblockDevice,
+  updatedAllocatedDevice,
+  updateDevice,
+} from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
 import {
-  cronReleaseBlockedDevices,
   allocateDeviceForSession,
-  initlializeStorage,
-  updateDeviceList,
-  refreshSimulatorState,
-  isIOS,
+  cronReleaseBlockedDevices,
   deviceType,
+  initlializeStorage,
+  isIOS,
+  refreshSimulatorState,
+  updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { isHub, stripAppiumPrefixes } from './helpers';
+import { hubUrl, isHub, stripAppiumPrefixes } from './helpers';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
-import { hubUrl } from './helpers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -154,8 +158,7 @@ class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
-          const device: IDevice = await allocateDeviceForSession(caps);
-          return device;
+          return await allocateDeviceForSession(caps);
         } catch (err) {
           await removePendingSession(pendingSessionId);
           throw err;
@@ -187,7 +190,7 @@ class DevicePlugin extends BasePlugin {
           sessionDetails = response.data;
         })
         .catch(async function (error) {
-          await updateDevice(device, { busy: false });
+          await updatedAllocatedDevice(device, { busy: false });
           logger.info(
             `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
           );
@@ -206,11 +209,11 @@ class DevicePlugin extends BasePlugin {
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
-      await updateDevice(device, { busy: false });
+      await updatedAllocatedDevice(device, { busy: false });
       logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
       const sessionId = session.value[0];
-      await updateDevice(device, {
+      await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),

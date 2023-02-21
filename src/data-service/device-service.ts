@@ -85,6 +85,15 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   return DeviceModel.chain().find(filter).data()[0];
 }
 
+export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
+  DeviceModel.chain()
+    .find({ udid: device.udid, host: device.host })
+    .update(function (device: IDevice) {
+      Object.assign(device, {
+        ...updateData,
+      });
+    });
+}
 export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
   const filterDevice = DeviceModel.chain().find({
     udid: device.udid,
