@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { EventEmitter } from 'stream';
 import { SubProcess } from 'teen_process';
+import fs from 'fs';
+import os from 'os';
 
 export class GoIosTracker extends EventEmitter {
   private deviceMap: Map<number, string> = new Map();
@@ -12,7 +14,9 @@ export class GoIosTracker extends EventEmitter {
       return;
     }
 
-    this.process = new SubProcess('ios', ['listen']);
+    const files = fs.readdirSync('./node_modules/go-ios/dist/');
+    const goIOS = files.find((value) => value.includes(os.type().toLowerCase()));
+    this.process = new SubProcess(`./node_modules/go-ios/dist/${goIOS}/ios`, ['listen']);
 
     this.process.on('lines-stdout', (out) => {
       const parsedOutput = this.parseOutput(out);

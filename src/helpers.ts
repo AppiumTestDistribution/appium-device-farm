@@ -27,6 +27,10 @@ export function isMac() {
   return os.type() === 'Darwin';
 }
 
+export function isWindows() {
+  return os.type() === 'win32';
+}
+
 export function checkIfPathIsAbsolute(configPath: string) {
   return path.isAbsolute(configPath);
 }
