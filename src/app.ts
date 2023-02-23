@@ -92,7 +92,9 @@ apiRouter.post('/register', (req, res) => {
   const requestBody = req.body;
   if (req.query.type === 'add') {
     addNewDevice(requestBody);
-    log.info(`Adding device ${requestBody.udid} from host ${requestBody.host} to list!`);
+    requestBody.forEach((device: any) => {
+      return log.info(`Adding device ${device.udid} from host ${device.host} to list!`);
+    });
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
     log.info(
