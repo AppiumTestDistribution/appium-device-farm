@@ -103,7 +103,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = _.has(cliArgs, 'server.plugin["device-farm"].cloud');
+    const cloudExists = _.has(cliArgs, 'plugin["device-farm"].cloud');
     if (cloudExists) {
       deviceTypes = 'real';
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
