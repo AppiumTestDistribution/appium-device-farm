@@ -10,7 +10,6 @@ import {
   setSimulatorState,
   unblockDevice,
   updatedAllocatedDevice,
-  updateDevice,
 } from './data-service/device-service';
 import {
   addNewPendingSession,
@@ -41,6 +40,7 @@ import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
+import asyncWait from 'async-wait-until';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -237,16 +237,23 @@ class DevicePlugin extends BasePlugin {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
   const spinner = ora(msg).start();
-  let res;
-  try {
-    res = await fn();
-    spinner.succeed();
-    return res;
-  } catch (err) {
-    spinner.fail();
-    spinner.color = 'red';
-    if (callback) callback(msg);
-  }
+  await asyncWait(
+    async () => {
+      try {
+        await fn();
+        spinner.succeed();
+        return true;
+      } catch (err) {
+        spinner.fail();
+        if (callback) callback(msg);
+        return false;
+      }
+    },
+    {
+      intervalBetweenAttempts: 2000,
+      timeout: 60 * 1000,
+    }
+  );
 }
 
 Object.assign(DevicePlugin.prototype, commands);
