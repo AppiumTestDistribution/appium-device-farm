@@ -8,7 +8,7 @@
         "androidDeviceType": "real",
         "iosDeviceType": "simulated",
         "adbRemote": ["192.168.0.1:5037", "192.168.0.2:5037"],
-        "remote": ["http://firstMachineIP:appiumPort", "http://secondMachineIP:appiumPort"],
+        "hub": "https://hubip:port",
         "maxSessions": 2,
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test",

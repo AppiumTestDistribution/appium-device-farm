@@ -27,6 +27,10 @@ export function isMac() {
   return os.type() === 'Darwin';
 }
 
+export function isWindows() {
+  return os.type() === 'win32';
+}
+
 export function checkIfPathIsAbsolute(configPath: string) {
   return path.isAbsolute(configPath);
 }
@@ -63,6 +67,13 @@ export async function isPortBusy(port: number) {
   }
 }
 
+export function isHub(cliArgs: any) {
+  return _.has(cliArgs, 'plugin["device-farm"].hub');
+}
+
+export function isCloud(cliArgs: any) {
+  return _.has(cliArgs, 'plugin["device-farm"].cloud');
+}
 // Standard, non-prefixed capabilities (see https://www.w3.org/TR/webdriver/#dfn-table-of-standard-capabilities)
 const STANDARD_CAPS = [
   'browserName',

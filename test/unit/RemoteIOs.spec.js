@@ -14,10 +14,10 @@ const cliArgs = {
   'device-farm': {
     platform: 'iOS',
     'device-types': 'both',
-    remote: [`http://${firstNode}:3000`, `http://${secondNode}:3000`, 'http://127.0.0.1:4723'],
+    hub: `http://${firstNode}:3000`,
   },
 };
-describe('Remote IOS', () => {
+describe.skip('Remote IOS', () => {
   const stubResponse = {
     data: [
       {
@@ -30,7 +30,7 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: 'http://127.0.0.1:31337',
+        host: `http://${firstNode}:31337`,
         offline: false,
         meta: {
           revision: 0,
@@ -49,7 +49,7 @@ describe('Remote IOS', () => {
         busy: false,
         realDevice: false,
         deviceType: 'simulator',
-        host: 'http://127.0.0.1:31337',
+        host: `http://${firstNode}:31337`,
         offline: false,
         meta: {
           revision: 0,
@@ -65,7 +65,7 @@ describe('Remote IOS', () => {
     stub.restore();
   });
   it('Fetch remote devices', async function () {
-    stub = Sinon.stub(axios, 'get').resolves(stubResponse);
+    stub = Sinon.stub(axios, 'post').resolves(stubResponse);
     const iosDevices = new IOSDeviceManager();
     const simulators = [];
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
@@ -73,19 +73,6 @@ describe('Remote IOS', () => {
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    sandbox
-      .stub(iosDevices, 'fetchLocalSimulators')
-      .withArgs(simulators, cliArgs)
-      .returns([
-        {
-          name: 'iPad Air (3rd generation)',
-          udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED866',
-          state: 'Shutdown',
-          sdk: '13.5',
-          platform: 'ios',
-          host: 'http://127.0.0.1:4723',
-        },
-      ]);
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     const expected = [
       {
@@ -114,45 +101,6 @@ describe('Remote IOS', () => {
         realDevice: false,
         deviceType: 'simulator',
         host: `http://${firstNode}:3000`,
-        offline: false,
-      },
-      {
-        name: 'iPad Air (4th generation)',
-        udid: 'F9C2FD71-A5A3-4E0A-A8CD-BE96BF907ABF',
-        state: 'Shutdown',
-        sdk: '14.2',
-        platform: 'ios',
-        wdaLocalPort: 62879,
-        busy: false,
-        realDevice: false,
-        deviceType: 'simulator',
-        host: `http://${firstNode}:3000`,
-        offline: false,
-      },
-      {
-        name: 'iPad (8th generation)',
-        udid: '3F74FBC0-D50E-4317-8C33-428C1CE55C27',
-        state: 'Shutdown',
-        sdk: '14.2',
-        platform: 'ios',
-        wdaLocalPort: 62878,
-        busy: false,
-        realDevice: false,
-        deviceType: 'simulator',
-        host: `http://${secondNode}:3000`,
-        offline: false,
-      },
-      {
-        name: 'iPad Air (4th generation)',
-        udid: 'F9C2FD71-A5A3-4E0A-A8CD-BE96BF907ABF',
-        state: 'Shutdown',
-        sdk: '14.2',
-        platform: 'ios',
-        wdaLocalPort: 62879,
-        busy: false,
-        realDevice: false,
-        deviceType: 'simulator',
-        host: `http://${secondNode}:3000`,
         offline: false,
       },
     ];

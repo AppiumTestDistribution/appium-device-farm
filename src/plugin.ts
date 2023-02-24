@@ -6,35 +6,41 @@ import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
-import { updateDevice, unblockDevice } from './data-service/device-service';
+import {
+  setSimulatorState,
+  unblockDevice,
+  updatedAllocatedDevice,
+} from './data-service/device-service';
 import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
 import {
-  refreshDeviceList,
-  cronReleaseBlockedDevices,
   allocateDeviceForSession,
+  cronReleaseBlockedDevices,
+  deviceType,
   initlializeStorage,
+  isIOS,
+  refreshSimulatorState,
+  updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { isObject } from 'lodash';
-import { stripAppiumPrefixes } from './helpers';
+import { hubUrl, isHub, stripAppiumPrefixes } from './helpers';
 
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ora from 'ora';
-import { hubUrl } from './helpers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
-import { DeviceModel } from './data-service/db';
-import fs from 'fs-extra';
 import Cloud from './enums/Cloud';
+import ip from 'ip';
+import _ from 'lodash';
+import asyncWait from 'async-wait-until';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -55,14 +61,12 @@ class DevicePlugin extends BasePlugin {
     let platform;
     let androidDeviceType;
     let iosDeviceType;
-    let remote;
     let skipChromeDownload;
     registerProxyMiddlware(expressApp);
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
-      remote = cliArgs.plugin['device-farm'].remote;
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
     expressApp.use('/device-farm', router);
@@ -70,7 +74,6 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
-    if (!remote) cliArgs.plugin['device-farm'].remote = ['http://127.0.0.1'];
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false
@@ -90,43 +93,41 @@ class DevicePlugin extends BasePlugin {
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
-    await DevicePlugin.waitForRemoteServerToBeRunning(cliArgs);
-    await refreshDeviceList();
+    if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
+    const devicesUpdates = await updateDeviceList(cliArgs);
+    if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
+      await setSimulatorState(devicesUpdates);
+      await refreshSimulatorState(cliArgs);
+    }
     await cronReleaseBlockedDevices();
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = cliArgs.plugin['device-farm'].remote.filter(
-      (v: any) => typeof v === 'object'
-    );
-    if (cloudExists.length > 0)
-      cloudExists[0].hasOwnProperty('cloudName') ? (deviceTypes = 'real') : true;
-    if (deviceTypes === 'real') logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    const cloudExists = _.has(cliArgs, 'plugin["device-farm"].cloud');
+    if (cloudExists) {
+      deviceTypes = 'real';
+      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+    }
     return deviceTypes;
   }
 
-  private static async waitForRemoteServerToBeRunning(cliArgs: any) {
-    await Promise.all(
-      cliArgs.plugin['device-farm'].remote.map(async (url: any) => {
-        if (!isObject(url) && !url.includes('127.0.0.1')) {
-          await spinWith(
-            `Waiting for node server ${url} to be up and running\n`,
-            async () => {
-              await axios({
-                method: 'get',
-                url: `${url}/device-farm`,
-                timeout: 30000,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-            },
-            (msg: any) => {
-              throw new Error(`Failed: ${msg}`);
-            }
-          );
-        }
-      })
+  private static async waitForRemoteHubServerToBeRunning(cliArgs: any) {
+    const hub = cliArgs.plugin['device-farm'].hub;
+    await spinWith(
+      `Waiting for node server ${hub} to be up and running\n`,
+      async () => {
+        await axios({
+          method: 'get',
+          url: `${hub}/device-farm`,
+          timeout: 30000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      },
+      (msg: any) => {
+        throw new Error(`Failed: ${msg}`);
+      }
     );
   }
 
@@ -155,10 +156,9 @@ class DevicePlugin extends BasePlugin {
     const device = await commandsQueueGuard.acquire(
       DEVICE_MANAGER_LOCK_NAME,
       async (): Promise<IDevice> => {
-        await refreshDeviceList();
+        //await refreshDeviceList();
         try {
-          const device: IDevice = await allocateDeviceForSession(caps);
-          return device;
+          return await allocateDeviceForSession(caps);
         } catch (err) {
           await removePendingSession(pendingSessionId);
           throw err;
@@ -166,7 +166,7 @@ class DevicePlugin extends BasePlugin {
       }
     );
     let session;
-    if (!device.host.includes('127.0.0.1')) {
+    if (!device.host.includes(ip.address())) {
       const remoteUrl = hubUrl(device);
       let capabilitiesToCreateSession = { capabilities: caps };
       if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
@@ -190,7 +190,7 @@ class DevicePlugin extends BasePlugin {
           sessionDetails = response.data;
         })
         .catch(async function (error) {
-          await updateDevice(device, { busy: false });
+          await updatedAllocatedDevice(device, { busy: false });
           logger.info(
             `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
           );
@@ -209,17 +209,17 @@ class DevicePlugin extends BasePlugin {
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
-      await updateDevice(device, { busy: false });
+      await updatedAllocatedDevice(device, { busy: false });
       logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
       const sessionId = session.value[0];
-      await updateDevice(device, {
+      await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (!device.host.includes('127.0.0.1')) {
+      if (!device.host.includes(ip.address())) {
         addProxyHandler(sessionId, device.host);
       }
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
@@ -237,16 +237,23 @@ class DevicePlugin extends BasePlugin {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
   const spinner = ora(msg).start();
-  let res;
-  try {
-    res = await fn();
-    spinner.succeed();
-    return res;
-  } catch (err) {
-    spinner.fail();
-    spinner.color = 'red';
-    if (callback) callback(msg);
-  }
+  await asyncWait(
+    async () => {
+      try {
+        await fn();
+        spinner.succeed();
+        return true;
+      } catch (err) {
+        spinner.fail();
+        if (callback) callback(msg);
+        return false;
+      }
+    },
+    {
+      intervalBetweenAttempts: 2000,
+      timeout: 60 * 1000,
+    }
+  );
 }
 
 Object.assign(DevicePlugin.prototype, commands);

@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -12,9 +12,10 @@ import { DeviceFarmManager } from './device-managers';
 import {
   updateDevice,
   unblockDevice,
-  saveDevices,
   getAllDevices,
   getDevice,
+  setSimulatorState,
+  addNewDevice,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -24,6 +25,9 @@ import fs from 'fs';
 import path from 'path';
 import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
+import IOSDeviceManager from './device-managers/IOSDeviceManager';
+import NodeDevices from './device-managers/NodeDevices';
+import ip from 'ip';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -51,8 +55,15 @@ export function isAndroid(cliArgs: ServerCLI) {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
-export function isIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.IOS;
+export function deviceType(cliArgs: any, device: string) {
+  const iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType;
+  if (_.has(cliArgs, 'plugin["device-farm"].iosDeviceType')) {
+    return iosDeviceType === device || iosDeviceType === 'both';
+  }
+}
+
+export function isIOS(cliArgs: any) {
+  return isMac() && cliArgs.plugin['device-farm'].platform.toLowerCase() === DevicePlatform.IOS;
 }
 
 export function isAndroidAndIOS(cliArgs: ServerCLI) {
@@ -87,7 +98,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   try {
     await waitUntil(
       async () => {
-        const maxSessions = await getDeviceManager().getMaxSessionCount();
+        const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
           logger.info(
             `Waiting for session available, already at max session count of: ${maxSessions}`
@@ -148,16 +159,12 @@ function getStorage() {
 export async function getUtilizationTime(udid: string) {
   try {
     const value = await getStorage().getItem(udid);
-    if (value !== undefined && value && !isNaN(value)) {
+    if (value !== undefined) {
       return value;
-    } else {
-      throw `Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`;
     }
   } catch (err) {
-    logger.error(`Failed to fetch Utilization Time \n ${err}`);
+    return 0;
   }
-
-  return 0;
 }
 
 /**
@@ -216,31 +223,37 @@ function getDeviceManager() {
 }
 
 export async function getBusyDevicesCount() {
-  const allDevices = await getAllDevices();
+  const allDevices = getAllDevices();
   return allDevices.filter((device) => {
-    return device.busy === true;
+    return device.busy;
   }).length;
 }
 
-export async function updateDeviceList() {
-  const devices = await getDeviceManager().getDevices(getAllDevices());
-  saveDevices(devices);
+export async function updateDeviceList(cliArgs: any) {
+  const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
+  if (isHub(cliArgs)) {
+    const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+    await nodeDevices.postDevicesToHub(devices, 'add');
+  }
+  addNewDevice(devices);
+
+  return devices;
 }
 
-export async function refreshDeviceList() {
+export async function refreshSimulatorState(cliArgs: ServerCLI) {
   if (timer) {
     clearInterval(timer);
   }
-  await updateDeviceList();
   timer = setInterval(async () => {
-    await updateDeviceList();
+    const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
+    await setSimulatorState(simulators);
   }, 10000);
 }
 
 export async function releaseBlockedDevices() {
-  const allDevices = await getAllDevices();
+  const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy === true && device.host.includes('127.0.0.1');
+    return device.busy && device.host.includes(ip.address());
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();

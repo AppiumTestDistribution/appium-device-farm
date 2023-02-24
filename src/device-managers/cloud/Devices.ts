@@ -4,18 +4,19 @@ import { IDevice } from '../../interfaces/IDevice';
 import { CloudArgs } from '../../types/CloudArgs';
 
 export default class Devices {
-  private host: any;
+  private devices: any;
   private deviceState: any;
   private platform: any;
+  private cloud: any;
 
-  constructor(host: CloudArgs, deviceState: IDevice[], platform: any) {
-    this.host = host;
+  constructor(cloudArgs: CloudArgs, deviceState: IDevice[], platform: any) {
+    this.devices = cloudArgs.devices;
     this.deviceState = deviceState;
     this.platform = platform;
+    this.cloud = cloudArgs;
   }
   async getDevices() {
-    const devices = this.host.devices;
-    const devicesByPlatform = devices.filter((value: any) => value.platform === this.platform);
+    const devicesByPlatform = this.devices.filter((value: any) => value.platform === this.platform);
     let cloudDeviceProperties: any;
     const result = devicesByPlatform.map((d: any) => {
       if (this.isBrowserStack()) {
@@ -40,11 +41,11 @@ export default class Devices {
         };
       }
       return Object.assign({}, ...devicesByPlatform, {
-        host: this.host.url,
+        host: this.cloud.url,
         busy: false,
         deviceType: 'real',
         capability: d,
-        cloud: this.host.cloudName,
+        cloud: this.cloud.cloudName,
         ...cloudDeviceProperties,
       });
     });
@@ -53,18 +54,18 @@ export default class Devices {
   }
 
   private isBrowserStack() {
-    return this.host.cloudName.toLowerCase() === Cloud.BROWSERSTACK;
+    return this.cloud.cloudName.toLowerCase() === Cloud.BROWSERSTACK;
   }
 
   private isPCloudy() {
-    return this.host.cloudName.toLowerCase() === Cloud.PCLOUDY;
+    return this.cloud.cloudName.toLowerCase() === Cloud.PCLOUDY;
   }
 
   private isLambdaTest() {
-    return this.host.cloudName.toLowerCase() === Cloud.LAMBDATEST;
+    return this.cloud.cloudName.toLowerCase() === Cloud.LAMBDATEST;
   }
 
   private isSauceLabs() {
-    return this.host.cloudName.toLowerCase() === Cloud.SAUCELABS;
+    return this.cloud.cloudName.toLowerCase() === Cloud.SAUCELABS;
   }
 }

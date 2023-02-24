@@ -1,18 +1,21 @@
 import Simctl from 'node-simctl';
-import { flatten, isObject, isEmpty } from 'lodash';
+import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { getFreePort, isMac } from '../helpers';
+import { getFreePort, isCloud, isHub, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
-import axios from 'axios';
-import { DeviceFactory } from './factory/DeviceFactory';
 import os from 'os';
 import path from 'path';
 import { getUtilizationTime } from '../device-utils';
 import fs from 'fs-extra';
 import logger from '../logger';
+import Devices from './cloud/Devices';
+import ip from 'ip';
+import NodeDevices from './NodeDevices';
+import { GoIosTracker } from './iOSTracker';
+import { addNewDevice, removeDevice } from '../data-service/device-service';
 
 export default class IOSDeviceManager implements IDeviceManager {
   /**
@@ -70,20 +73,13 @@ export default class IOSDeviceManager implements IDeviceManager {
     cliArgs: any
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    const hosts = cliArgs.plugin['device-farm'].remote;
-    for (const host of hosts) {
-      if (!isObject(host) && host.includes('127.0.0.1')) {
-        await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
-      } else {
-        await this.fetchRemoteIOSDevices(host, deviceState, 'ios');
-      }
+    if (isCloud(cliArgs)) {
+      const cloud = new Devices(cliArgs.plugin['device-farm'].cloud, deviceState, 'ios');
+      return await cloud.getDevices();
+    } else {
+      await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, cliArgs);
     }
     return deviceState;
-  }
-
-  private async fetchRemoteIOSDevices(host: any, deviceState: IDevice[], platform: string) {
-    const devices = DeviceFactory.deviceInstance(host, deviceState, platform);
-    return devices?.getDevices();
   }
 
   private derivedDataPath(cliArgs: any, udid: string, realDevice: boolean) {
@@ -136,30 +132,57 @@ export default class IOSDeviceManager implements IDeviceManager {
           busy: false,
         });
       } else {
-        log.info(`IOS Device details for ${udid} not available. So querying now.`);
-        const wdaLocalPort = await getFreePort();
-        const mjpegServerPort = await getFreePort();
-        const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
-        const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
-
-        deviceState.push(
-          Object.assign({
-            wdaLocalPort,
-            mjpegServerPort,
-            udid,
-            sdk,
-            name,
-            busy: false,
-            realDevice: true,
-            deviceType: 'real',
-            platform: this.getDevicePlatformName(name),
-            host: `http://127.0.0.1:${cliArgs.port}`,
-            totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-            sessionStartTime: 0,
-            derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
-          })
-        );
+        const deviceInfo = await this.getDeviceInfo(udid, cliArgs);
+        deviceState.push(deviceInfo);
       }
+    });
+    const goIosTracker = new GoIosTracker();
+    await goIosTracker.start();
+    goIosTracker.on('device-connected', async (message) => {
+      const deviceAttached = [await this.getDeviceInfo(message.id, cliArgs)];
+      const hubExists = isHub(cliArgs);
+      if (hubExists) {
+        logger.info(`Updating Hub with iOS device ${message.id}`);
+        const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+        await nodeDevices.postDevicesToHub(deviceAttached, 'add');
+      } else {
+        logger.info(`iOS device with udid ${message.id} plugged! updating device list...`);
+        addNewDevice(deviceAttached);
+      }
+    });
+    goIosTracker.on('device-removed', async (message) => {
+      const deviceRemoved: any = { udid: message.id, host: ip.address() };
+      const hubExists = isHub(cliArgs);
+      if (hubExists) {
+        logger.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
+        const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+        await nodeDevices.postDevicesToHub(deviceRemoved, 'remove');
+      } else {
+        logger.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
+        removeDevice(deviceRemoved);
+      }
+    });
+  }
+
+  private async getDeviceInfo(udid: string, cliArgs: any) {
+    const wdaLocalPort = await getFreePort();
+    const mjpegServerPort = await getFreePort();
+    const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
+    const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
+    return Object.assign({
+      wdaLocalPort,
+      mjpegServerPort,
+      udid,
+      sdk,
+      name,
+      busy: false,
+      realDevice: true,
+      deviceType: 'real',
+      platform: this.getDevicePlatformName(name),
+      host: `http://${ip.address()}:${cliArgs.port}`,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
     });
   }
 
@@ -168,34 +191,17 @@ export default class IOSDeviceManager implements IDeviceManager {
    *
    * @returns {Promise<Array<IDevice>>}
    */
-  private async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
-    const hosts = cliArgs.plugin['device-farm'].remote;
+  public async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
     const simulators: Array<IDevice> = [];
-    for (const host of hosts) {
-      if (!isObject(host) && host.includes('127.0.0.1')) {
-        await this.fetchLocalSimulators(simulators, cliArgs);
-      } else {
-        await this.fetchRemoteSimulators(host, simulators);
-      }
-    }
+    const hubExists = isHub(cliArgs);
+    await this.fetchLocalSimulators(simulators, cliArgs);
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
+    if (hubExists) {
+      logger.info('Updating Hub with Simulators');
+      const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+      await nodeDevices.postDevicesToHub(simulators, 'add');
+    }
     return simulators;
-  }
-
-  private async fetchRemoteSimulators(host: string, simulators: IDevice[]) {
-    const remoteDevices = (await axios.get(`${host}/device-farm/api/devices/ios`)).data;
-    remoteDevices.filter((device: any) => {
-      if (device.deviceType === 'simulator') {
-        delete device['meta'];
-        delete device['$loki'];
-        simulators.push(
-          Object.assign({
-            ...device,
-            host: `${host}`,
-          })
-        );
-      }
-    });
   }
 
   public async fetchLocalSimulators(simulators: IDevice[], cliArgs: any) {
@@ -223,7 +229,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: this.getDevicePlatformName(device.name),
           deviceType: 'simulator',
-          host: `http://127.0.0.1:${cliArgs.port}`,
+          host: `http://${ip.address()}:${cliArgs.port}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
           derivedDataPath: this.derivedDataPath(cliArgs, device.udid, false),
@@ -235,8 +241,8 @@ export default class IOSDeviceManager implements IDeviceManager {
   private async getLocalSims() {
     try {
       const simctl = await new Simctl();
-      const iOSSimulators = Object.keys(await simctl.getDevices(null, 'iOS')).length;
-      const tvSimulators = Object.keys(await simctl.getDevices(null, 'tvOS')).length;
+      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
+      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 1;
 
       let iosSimulators: any = [];
       let tvosSimulators: any = [];
@@ -255,7 +261,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       } else {
         console.log('No tvOS simulators found!');
       }
-
       return [...iosSimulators, ...tvosSimulators];
     } catch (error) {
       console.error(error);

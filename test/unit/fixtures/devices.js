@@ -2,7 +2,7 @@ export const deviceMock = [
   {
     busy: true,
     state: 'device',
-    udid: 'emulator-5555',
+    udid: 'emulator-5570',
     platform: 'android',
     offline: false,
     host: '127.0.0.1',

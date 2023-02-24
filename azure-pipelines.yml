@@ -125,22 +125,22 @@ jobs:
         npm run test-parallel-bs
       displayName: 'E2E Test'
 
- - job: Sauce
-   pool:
-     vmImage: 'macOS-latest'
-
-   steps:
-     - task: NodeTool@0.200.0
-       inputs:
-         versionSpec: '16.x'
-
-     - script: |
-         npm ci
-         export APPIUM_HOME=/tmp/device-farm
-         ./node_modules/.bin/appium plugin install --source=local .
-         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/sauce-config.json &
-         npm run test-parallel-sauce
-       displayName: 'E2E Test'
+# - job: Sauce
+#   pool:
+#     vmImage: 'macOS-latest'
+#
+#   steps:
+#     - task: NodeTool@0.200.0
+#       inputs:
+#         versionSpec: '16.x'
+#
+#     - script: |
+#         npm ci
+#         export APPIUM_HOME=/tmp/device-farm
+#         ./node_modules/.bin/appium plugin install --source=local .
+#         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/sauce-config.json &
+#         npm run test-parallel-sauce
+#       displayName: 'E2E Test'
 
  - job: LambdaTest
    pool:

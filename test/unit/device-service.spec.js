@@ -104,14 +104,20 @@ describe('Get device', () => {
       name: '',
       busy: false,
       offline: false,
-      platformVersion: "10",
+      platformVersion: '10',
     };
     const device = getDevice(filterOptions);
     expect(device.sdk).to.be.eql('10');
   });
 
   it('Get ios simulator based on filter with platformVersion', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, platformVersion: "14.0" };
+    const filterOptions = {
+      platform: 'ios',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '14.0',
+    };
     const device = getDevice(filterOptions);
     expect(device.sdk).to.be.eql('14.0');
   });
@@ -122,14 +128,20 @@ describe('Get device', () => {
       name: '',
       busy: false,
       offline: false,
-      platformVersion: "9",
+      platformVersion: '9',
     };
     const device = getDevice(filterOptions);
     expect(device).to.be.undefined;
   });
 
   it('Get ios simulator returns undefined based on filter with platformVersion', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, platformVersion: "16.0" };
+    const filterOptions = {
+      platform: 'ios',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '16.0',
+    };
     const device = getDevice(filterOptions);
     expect(device).to.be.undefined;
   });

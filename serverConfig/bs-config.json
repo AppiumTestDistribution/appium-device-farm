@@ -4,7 +4,7 @@
     "plugin": {
       "device-farm": {
         "platform": "both",
-        "remote": [
+        "cloud":
           {
             "cloudName": "browserstack",
             "url": "http://hub-cloud.browserstack.com/wd/hub",
@@ -21,7 +21,6 @@
               }
             ]
           }
-        ]
       }
     }
   }

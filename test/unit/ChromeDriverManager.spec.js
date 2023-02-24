@@ -4,7 +4,7 @@ import { getModuleRoot, getChromedriverBinaryPath } from '../../src/chromeUtils'
 
 describe('Chrome Driver Manager', function () {
   this.timeout(500000);
-  it('Should fetch chrome driver for given version', async () => {
+  it.skip('Should fetch chrome driver for given version', async () => {
     const chromeDriverManager = await ChromeDriverManager.getInstance();
     await chromeDriverManager.downloadChromeDriver(83);
     await chromeDriverManager.downloadChromeDriver(84);

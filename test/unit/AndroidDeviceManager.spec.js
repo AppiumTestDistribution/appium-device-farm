@@ -4,6 +4,7 @@ import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
 import { getAdbOriginal } from './GetAdbOriginal';
+import ip from 'ip';
 
 var sandbox = sinon.createSandbox();
 
@@ -11,7 +12,6 @@ const cliArgs = {
   'device-farm': {
     platform: 'android',
     'device-types': 'both',
-    remote: ['http://127.0.0.1:4723'],
     skipChromeDownload: true,
   },
 };
@@ -83,7 +83,7 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -144,7 +144,7 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -188,7 +188,7 @@ describe('Android Device Manager', function () {
         udid: 'YOGAA1BBB4124',
         platform: 'android',
         systemPort: 54322,
-        host: 'http://127.0.0.1:4723',
+        host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',

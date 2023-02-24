@@ -4,31 +4,17 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function saveDevices(devices: Array<IDevice>): any {
-  const connectedDeviceIds = new Set(devices.map((device) => device.udid));
-  const devicesInDB = DeviceModel.chain().find().data();
-  /**
-   * Previously connected devices which are not identified remove.
-   */
+export function removeDevice(device: any) {
   DeviceModel.chain()
-    .find({ udid: { $nin: [...connectedDeviceIds] } }) // $nin => not in condition
+    .find({ udid: device.udid, host: { $contains: device.host } })
     .remove();
+}
 
-  /**
-   * Check if the device is disconnected and remove from the DB instance.
-   */
-  devicesInDB.forEach((device: IDevice) => {
-    const isDeviceConneted = devices.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host
-    );
-    if (!isDeviceConneted) {
-      DeviceModel.chain().find({ udid: device.udid, host: device.host }).remove();
-    }
-  });
-
+export function addNewDevice(devices: Array<IDevice>) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
+  const devicesInDB = DeviceModel.chain().find().data();
   devices.forEach(function (device) {
     const isDeviceAlreadyPresent = devicesInDB.find(
       (d: IDevice) => d.udid === device.udid && device.host === d.host
@@ -40,7 +26,9 @@ export function saveDevices(devices: Array<IDevice>): any {
       });
     }
   });
+}
 
+export function setSimulatorState(devices: Array<IDevice>) {
   /**
    * Update the Latest Simulator state in DB
    */
@@ -49,6 +37,9 @@ export function saveDevices(devices: Array<IDevice>): any {
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
+        logger.info(
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
+        );
         DeviceModel.chain()
           .find({ udid: device.udid })
           .update(function (d: IDevice) {
@@ -94,16 +85,35 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   return DeviceModel.chain().find(filter).data()[0];
 }
 
-export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
+export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
   DeviceModel.chain()
-    .find({
-      udid: device.udid,
-    })
+    .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
       Object.assign(device, {
         ...updateData,
       });
     });
+}
+export function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
+  const filterDevice = DeviceModel.chain().find({
+    udid: device.udid,
+  });
+  if (filterDevice.data().length > 1) {
+    const find = filterDevice.data().find((d) => d.busy === false);
+    DeviceModel.chain()
+      .find({ udid: find.udid, host: find.host })
+      .update(function (device: IDevice) {
+        Object.assign(device, {
+          ...updateData,
+        });
+      });
+  } else {
+    filterDevice.update(function (device: IDevice) {
+      Object.assign(device, {
+        ...updateData,
+      });
+    });
+  }
 }
 
 export function updateCmdExecutedTime(sessionId: string) {
