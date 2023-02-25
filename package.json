@@ -91,7 +91,7 @@
   "devDependencies": {
     "@appium/fake-driver": "^5.1.5",
     "@appium/plugin-test-support": "^0.3.7",
-    "@babel/core": "7.20.12",
+    "@babel/core": "7.21.0",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@types/async-lock": "1.1.5",
     "@types/chai": "4.3.4",
