@@ -52,7 +52,7 @@
   },
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
-    "@appium/base-plugin": "1.10.5",
+    "@appium/base-plugin": "2.2.2",
     "@appium/types": "0.10.0",
     "@devicefarmer/adbkit": "^3.2.3",
     "@types/node-persist": "^3.1.3",
