@@ -11,6 +11,7 @@ export interface IDevice {
   platform: Platform;
   deviceType: string;
   busy: boolean;
+  userBlocked: boolean;
   realDevice: boolean;
   session_id?: string;
   offline?: boolean;

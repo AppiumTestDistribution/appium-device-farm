@@ -8,4 +8,14 @@ export default class DeviceFarmApiService {
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue', {});
   }
+
+  public static blockDevice(
+    sdk: string,
+    platform: string,
+    udid: string,
+    busy: boolean,
+    offline: boolean
+  ) {
+    return apiClient.makePOSTRequest('/block', {}, { platform, udid, minSDK: sdk, busy, offline });
+  }
 }

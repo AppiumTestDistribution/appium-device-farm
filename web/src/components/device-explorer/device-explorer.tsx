@@ -58,6 +58,8 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
       const devices = await DeviceFarmApiService.getDevices();
       const activeSessionsCount = await this.getBusyDevicesCount(devices);
       const pendingSessionsCount = await DeviceFarmApiService.getPendingSessionsCount();
+      console.log(devices);
+
       this.setState({ devices, activeSessionsCount, pendingSessionsCount });
     } catch (error) {
       console.log(error);

@@ -5,6 +5,7 @@ import { ReactComponent as AppleIcon } from '../../../assets/apple-new-icon.svg'
 import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
+import DeviceFarmApiService from '../../../api-service';
 
 interface IDeviceCardProps {
   device: IDevice;
@@ -42,7 +43,11 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       total_session_count,
       host,
       totalUtilizationTimeMilliSec,
+      userBlocked,
+      busy,
     } = this.props.device;
+    console.log(sdk);
+
     const deviceState = this.getDeviceState();
     const hostName = host.split(':')[1].replace('//', '');
     return (
@@ -81,6 +86,20 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               </div>
             </div>
           )}
+          <button
+            className="device-info-card__body_block-device"
+            onClick={() =>
+              DeviceFarmApiService.blockDevice(
+                sdk,
+                platform,
+                udid,
+                deviceState === 'busy',
+                deviceState === 'offline'
+              )
+            }
+          >
+            {busy && userBlocked ? 'Unblock' : 'Block'} Device
+          </button>
         </div>
         <div className="device-info-card-container__footer_wrapper">
           {dashboard_link && !!total_session_count && total_session_count > 0 && (

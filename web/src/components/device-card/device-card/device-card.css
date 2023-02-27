@@ -7,6 +7,7 @@
   margin: auto;
   border-radius: 5px;
   cursor: pointer;
+  position: relative;
   /* box-shadow: 0 0 3px rgba(33, 33, 33, 0.2); */
 }
 
@@ -119,6 +120,13 @@
   font-weight: 600;
   word-break: break-all;
   color: rgb(61, 59, 59);
+}
+
+.device-info-card__body_block-device {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  z-index: 10;
 }
 
 /* footer */

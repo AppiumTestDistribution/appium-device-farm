@@ -23,6 +23,7 @@ export function addNewDevice(devices: Array<IDevice>) {
       DeviceModel.insert({
         ...device,
         offline: false,
+        userBlocked: false,
       });
     }
   });

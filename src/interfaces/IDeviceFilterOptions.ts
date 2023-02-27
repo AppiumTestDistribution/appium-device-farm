@@ -7,6 +7,7 @@ export interface IDeviceFilterOptions {
   name?: string;
   busy?: boolean;
   offline?: boolean;
+  userBlocked?: boolean;
   udid?: any[];
   deviceType?: DeviceType;
   minSDK: number;
