@@ -5,9 +5,11 @@ import { ReactComponent as AppleIcon } from '../../../assets/apple-new-icon.svg'
 import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
+import DeviceFarmApiService from '../../../api-service';
 
 interface IDeviceCardProps {
   device: IDevice;
+  reloadDevices: () => void;
 }
 
 export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
@@ -31,6 +33,30 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     }
   }
 
+  blockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
+    DeviceFarmApiService.blockDevice(
+      sdk,
+      platform,
+      udid,
+      deviceState === 'busy',
+      deviceState === 'offline'
+    );
+
+    this.props.reloadDevices();
+  }
+
+  unblockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
+    DeviceFarmApiService.unblockDevice(
+      sdk,
+      platform,
+      udid,
+      deviceState === 'busy',
+      deviceState === 'offline'
+    );
+
+    this.props.reloadDevices();
+  }
+
   render() {
     const {
       name,
@@ -42,7 +68,10 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       total_session_count,
       host,
       totalUtilizationTimeMilliSec,
+      userBlocked,
+      busy,
     } = this.props.device;
+
     const deviceState = this.getDeviceState();
     const hostName = host.split(':')[1].replace('//', '');
     return (
@@ -80,6 +109,22 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
                 {prettyMilliseconds(totalUtilizationTimeMilliSec)}
               </div>
             </div>
+          )}
+          {busy && userBlocked && (
+            <button
+              className="device-info-card__body_unblock-device"
+              onClick={() => this.unblockDevice(sdk, platform, udid, deviceState)}
+            >
+              Unblock Device
+            </button>
+          )}
+          {!busy && (
+            <button
+              className="device-info-card__body_block-device"
+              onClick={() => this.blockDevice(sdk, platform, udid, deviceState)}
+            >
+              Block Device
+            </button>
           )}
         </div>
         <div className="device-info-card-container__footer_wrapper">

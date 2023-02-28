@@ -43,6 +43,7 @@ export default class Devices {
       return Object.assign({}, ...devicesByPlatform, {
         host: this.cloud.url,
         busy: false,
+        userBlocked: false,
         deviceType: 'real',
         capability: d,
         cloud: this.cloud.cloudName,

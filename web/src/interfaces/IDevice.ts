@@ -5,6 +5,7 @@ export interface IDevice {
   sdk: string;
   deviceType: 'simulator' | 'emulator' | 'real';
   offline: boolean;
+  userBlocked: boolean;
   busy: boolean;
   platform: 'ios' | 'tvos' | 'android';
   realDevice: boolean;

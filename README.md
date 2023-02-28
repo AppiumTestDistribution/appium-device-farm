@@ -21,12 +21,17 @@ This is an Appium plugin designed to manage and create driver session on connect
 - Updates the device pool with a new device during test execution.
 - Allocates random ports for parallel execution.
 - Remote execution
+- Asyc lockup for device changes.
 
 ## Device UI
 
 - Navigate to localhost:4723/device-farm once the appium server is started.
 
 <img src="./assets/demo.gif">
+
+User can block/unblock devices from Dashboard manually. These devices will not be picked up for automation. 
+
+Once automation picks the device user cannot manually unblock, its responsbile of the automation script. 
 
 ## Prerequisite
 
