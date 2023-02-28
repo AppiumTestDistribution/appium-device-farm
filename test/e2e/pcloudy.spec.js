@@ -24,6 +24,7 @@ describe('Browserstack Devices', () => {
       name: 'GOOGLE',
       sdk: '11.0',
       udid: 'GOOGLE',
+      userBlocked: false,
       offline: false,
     });
   });
