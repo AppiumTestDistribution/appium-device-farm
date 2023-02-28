@@ -41,6 +41,7 @@ describe('Browserstack Devices', () => {
       platform: 'ios',
       host: 'https://device.pcloudy.com/appiumcloud/wd/hub',
       busy: false,
+      userBlocked: false,
       deviceType: 'real',
       capability: {
         pCloudy_DeviceManufacturer: 'APPLE',

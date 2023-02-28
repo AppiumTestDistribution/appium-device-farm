@@ -74,7 +74,7 @@ describe('Android Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","name":"","busy":false}'
+          'No device found for filters: {"platform":"android","name":"","busy":false,"userBlocked":false}'
         )
     );
   });
