@@ -18,4 +18,18 @@ export default class DeviceFarmApiService {
   ) {
     return apiClient.makePOSTRequest('/block', {}, { platform, udid, minSDK: sdk, busy, offline });
   }
+
+  public static unblockDevice(
+    sdk: string,
+    platform: string,
+    udid: string,
+    busy: boolean,
+    offline: boolean
+  ) {
+    return apiClient.makePOSTRequest(
+      '/unblock',
+      {},
+      { platform, udid, minSDK: sdk, busy, offline }
+    );
+  }
 }

@@ -108,12 +108,7 @@ apiRouter.post('/block', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  console.log(device);
-
   updateDevice(device, { busy: true, userBlocked: true });
-
-  const updatedDevice = getDevice(requestBody);
-  console.log(updatedDevice);
 
   res.json('200');
 });
@@ -122,7 +117,7 @@ apiRouter.post('/unblock', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  updateDevice(device, { busy: false });
+  updateDevice(device, { busy: false, userBlocked: false });
 
   res.json('200');
 });

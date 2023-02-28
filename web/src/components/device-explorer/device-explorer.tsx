@@ -53,10 +53,17 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
     }
   }
 
+  getBusyDevicesCount(devices: Array<IDevice>) {
+    const filters = [(d: IDevice) => d.busy];
+    return filters.reduce((devices: Array<IDevice>, predicate: (d: IDevice) => boolean) => {
+      return devices.filter(predicate);
+    }, devices).length;
+  }
+
   async fetchDevices() {
     try {
       const devices = await DeviceFarmApiService.getDevices();
-      const activeSessionsCount = await this.getBusyDevicesCount(devices);
+      const activeSessionsCount = this.getBusyDevicesCount(devices);
       const pendingSessionsCount = await DeviceFarmApiService.getPendingSessionsCount();
       console.log(devices);
 
@@ -64,13 +71,6 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
     } catch (error) {
       console.log(error);
     }
-  }
-
-  getBusyDevicesCount(devices: Array<IDevice>) {
-    const filters = [(d: IDevice) => d.busy];
-    return filters.reduce((devices: Array<IDevice>, predicate: (d: IDevice) => boolean) => {
-      return devices.filter(predicate);
-    }, devices).length;
   }
 
   getFilteredDevice() {
@@ -234,7 +234,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
             </div>
           </div>
         </div>
-        <CardView devices={devices} />
+        <CardView devices={devices} reloadDevices={() => this.fetchDevices()} />
       </div>
     );
   }

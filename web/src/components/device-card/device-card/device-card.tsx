@@ -9,6 +9,7 @@ import DeviceFarmApiService from '../../../api-service';
 
 interface IDeviceCardProps {
   device: IDevice;
+  reloadDevices: () => void;
 }
 
 export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
@@ -32,6 +33,30 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     }
   }
 
+  blockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
+    DeviceFarmApiService.blockDevice(
+      sdk,
+      platform,
+      udid,
+      deviceState === 'busy',
+      deviceState === 'offline'
+    );
+
+    this.props.reloadDevices();
+  }
+
+  unblockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
+    DeviceFarmApiService.unblockDevice(
+      sdk,
+      platform,
+      udid,
+      deviceState === 'busy',
+      deviceState === 'offline'
+    );
+
+    this.props.reloadDevices();
+  }
+
   render() {
     const {
       name,
@@ -46,7 +71,6 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       userBlocked,
       busy,
     } = this.props.device;
-    console.log(sdk);
 
     const deviceState = this.getDeviceState();
     const hostName = host.split(':')[1].replace('//', '');
@@ -86,20 +110,22 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               </div>
             </div>
           )}
-          <button
-            className="device-info-card__body_block-device"
-            onClick={() =>
-              DeviceFarmApiService.blockDevice(
-                sdk,
-                platform,
-                udid,
-                deviceState === 'busy',
-                deviceState === 'offline'
-              )
-            }
-          >
-            {busy && userBlocked ? 'Unblock' : 'Block'} Device
-          </button>
+          {busy && userBlocked && (
+            <button
+              className="device-info-card__body_unblock-device"
+              onClick={() => this.unblockDevice(sdk, platform, udid, deviceState)}
+            >
+              Unblock Device
+            </button>
+          )}
+          {!busy && (
+            <button
+              className="device-info-card__body_block-device"
+              onClick={() => this.blockDevice(sdk, platform, udid, deviceState)}
+            >
+              Block Device
+            </button>
+          )}
         </div>
         <div className="device-info-card-container__footer_wrapper">
           {dashboard_link && !!total_session_count && total_session_count > 0 && (

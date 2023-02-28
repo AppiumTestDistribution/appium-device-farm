@@ -122,11 +122,23 @@
   color: rgb(61, 59, 59);
 }
 
-.device-info-card__body_block-device {
+.device-info-card__body_block-device,
+.device-info-card__body_unblock-device {
   position: absolute;
   bottom: 20px;
   right: 10px;
   z-index: 10;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.device-info-card__body_unblock-device {
+  background: rgb(213, 238, 213);
+  border: 1px solid rgb(123, 207, 123);
+}
+.device-info-card__body_block-device {
+  background: rgb(238, 213, 213);
+  border: 1px solid rgb(207, 123, 123);
 }
 
 /* footer */
