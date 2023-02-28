@@ -8,7 +8,7 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.ipa',
         'appium:iPhoneOnly': true,
-        'appium:platformVersion': '14.0'
+        'appium:platformVersion': '14.0',
       },
       firstMatch: [{}],
     };
@@ -22,6 +22,7 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: undefined,
       busy: false,
+      userBlocked: false,
     });
   });
 
@@ -31,7 +32,7 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
         'appium:iPhoneOnly': true,
-        'appium:platformVersion': '14.0'
+        'appium:platformVersion': '14.0',
       },
       firstMatch: [{}],
     };
@@ -45,6 +46,7 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: undefined,
       busy: false,
+      userBlocked: false,
     });
   });
 
@@ -68,6 +70,7 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: 10.2,
       busy: false,
+      userBlocked: false,
     });
   });
 });
