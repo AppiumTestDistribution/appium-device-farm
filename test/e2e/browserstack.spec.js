@@ -14,6 +14,7 @@ describe('Browserstack Devices', () => {
       platform: 'android',
       host: 'http://hub-cloud.browserstack.com/wd/hub',
       busy: false,
+      userBlocked: false,
       deviceType: 'real',
       capability: { deviceName: 'Google Pixel 3', os_version: '9.0', platform: 'android' },
       cloud: 'browserstack',
@@ -39,6 +40,7 @@ describe('Browserstack Devices', () => {
       platform: 'ios',
       host: 'http://hub-cloud.browserstack.com/wd/hub',
       busy: false,
+      userBlocked: false,
       deviceType: 'real',
       capability: {
         deviceName: 'iPhone 11 Pro',

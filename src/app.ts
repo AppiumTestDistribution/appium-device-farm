@@ -6,7 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
-import { addNewDevice, removeDevice } from './data-service/device-service';
+import { addNewDevice, getDevice, removeDevice, updateDevice } from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -101,6 +101,24 @@ apiRouter.post('/register', (req, res) => {
       `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`
     );
   }
+  res.json('200');
+});
+
+apiRouter.post('/block', (req, res) => {
+  const requestBody = req.body;
+
+  const device = getDevice(requestBody);
+  updateDevice(device, { busy: true, userBlocked: true });
+
+  res.json('200');
+});
+
+apiRouter.post('/unblock', (req, res) => {
+  const requestBody = req.body;
+
+  const device = getDevice(requestBody);
+  updateDevice(device, { busy: false, userBlocked: false });
+
   res.json('200');
 });
 

@@ -5,6 +5,7 @@ import './card-view.css';
 
 interface IProps {
   devices: Array<IDevice>;
+  reloadDevices: () => void;
 }
 
 export default class CardView extends React.Component<IProps, any> {
@@ -12,7 +13,9 @@ export default class CardView extends React.Component<IProps, any> {
     return (
       <div className="device-explorer-card-container">
         {React.Children.toArray(
-          this.props.devices.map((device, i) => <DeviceCard device={device} />)
+          this.props.devices.map((device, i) => (
+            <DeviceCard device={device} reloadDevices={this.props.reloadDevices} />
+          ))
         )}
       </div>
     );

@@ -211,6 +211,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     deviceType,
     udid: udids?.length ? udids : undefined,
     busy: false,
+    userBlocked: false,
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
   };
 }
