@@ -125,13 +125,13 @@ export function updateCmdExecutedTime(sessionId: string) {
     });
 }
 
-export function unblockDevice(sessionId: string) {
+export async function unblockDevice(sessionId: string) {
   const device = DeviceModel.chain().find({ session_id: sessionId }).data()[0];
   const sessionStart = device.sessionStartTime;
   const currentTime = new Date().getTime();
   const utilization = currentTime - sessionStart;
   const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-  setUtilizationTime(device.udid, totalUtilization);
+  await setUtilizationTime(device.udid, totalUtilization);
   DeviceModel.chain()
     .find({
       session_id: sessionId,

@@ -28,6 +28,7 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
+import { getCLIArgs } from './data-service/pluginArgs';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -89,7 +90,6 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   logger.info(JSON.stringify(filters));
-
   const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
@@ -159,12 +159,16 @@ function getStorage() {
 export async function getUtilizationTime(udid: string) {
   try {
     const value = await getStorage().getItem(udid);
-    if (value !== undefined) {
+    if (value !== undefined && value && !isNaN(value)) {
       return value;
+    } else {
+      //logger.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
     }
   } catch (err) {
-    return 0;
+    logger.error(`Failed to fetch Utilization Time \n ${err}`);
   }
+
+  return 0;
 }
 
 /**
@@ -196,6 +200,22 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     platform == DevicePlatform.IOS && isMac()
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
+  if (
+    deviceType?.startsWith('sim') &&
+    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
+  ) {
+    throw new Error(
+      'iosDeviceType value is set to "real" but app provided is not suitable for real device.'
+    );
+  }
+  if (
+    deviceType?.startsWith('real') &&
+    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
+  ) {
+    throw new Error(
+      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
+    );
+  }
   let name = '';
   if (capability[customCapability.ipadOnly]) {
     name = 'iPad';

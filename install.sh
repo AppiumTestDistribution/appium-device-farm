@@ -12,6 +12,6 @@ echo 'Plugin List'
 
 echo 'Installing UIAutomator2 driver'
 ./node_modules/.bin/appium driver install uiautomator2
-#
-#echo 'Installing XCUIDriver driver'
-#./node_modules/.bin/appium driver install xcuitest
+
+echo 'Installing XCUIDriver driver'
+./node_modules/.bin/appium driver install xcuitest
