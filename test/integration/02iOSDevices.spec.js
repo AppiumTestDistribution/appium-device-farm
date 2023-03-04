@@ -8,7 +8,6 @@ import {
   initlializeStorage,
 } from '../../src/device-utils';
 import { CLIArgs } from '../../src/data-service/db';
-import { serverCliArgs } from './cliArgs';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
