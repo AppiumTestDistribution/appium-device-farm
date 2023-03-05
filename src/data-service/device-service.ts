@@ -68,7 +68,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     });
   }
 
-  if (semver.coerce(filterOptions.maxSDK) !== null) {
+  if (semver.coerce(filterOptions.maxSDK)) {
     results = results.where(function(obj: IDevice) {
       if (semver.coerce(obj.sdk)) {
         return semver.lte(semver.coerce(obj.sdk), semver.coerce(filterOptions.maxSDK));
