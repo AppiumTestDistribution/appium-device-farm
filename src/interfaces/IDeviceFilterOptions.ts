@@ -10,5 +10,6 @@ export interface IDeviceFilterOptions {
   userBlocked?: boolean;
   udid?: any[];
   deviceType?: DeviceType;
-  minSDK: number;
+  minSDK: string;
+  maxSDK: string;
 }

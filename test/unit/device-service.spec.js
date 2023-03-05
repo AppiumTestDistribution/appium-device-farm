@@ -86,16 +86,53 @@ describe('Get device', () => {
       name: '',
       busy: false,
       offline: false,
-      minSDK: 10.8,
+      minSDK: '10.0.1',
     };
     const device = getDevice(filterOptions);
-    expect(parseFloat(device.sdk)).to.be.gte(10.8);
+    expect(device.sdk).to.be.eq('11');
+  });
+
+  it('Get android device based on filter with minSDK and maxSDK', () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      minSDK: '10',
+      maxSDK: '10.0.1',
+    };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eq('10');
+  });
+
+  it('Get android device based on filter with maxSDK', () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      maxSDK: '10.0.1',
+    };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eq('10');
   });
 
   it('Get ios simulator based on filter with minSDK', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: 14.1 };
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' };
     const device = getDevice(filterOptions);
-    expect(parseFloat(device.sdk)).to.be.gte(14.1);
+    expect(device.sdk).to.be.eq('15.0');
+  });
+
+  it('Get ios simulator based on filter with maxSDK', () => {
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, maxSDK: '14.1.0' };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eq('14.0');
+  });
+
+  it('Get ios simulator based on filter with minSDK and maxSDK', () => {
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14', maxSDK: '14.1.0' };
+    const device = getDevice(filterOptions);
+    expect(device.sdk).to.be.eq('14.0');
   });
 
   it('Get android device based on filter with platformVersion', () => {

@@ -30,6 +30,7 @@ describe('Device filter tests', () => {
       deviceType: 'real',
       udid: undefined,
       minSDK: undefined,
+      maxSDK: undefined,
       busy: false,
       userBlocked: false,
     });
@@ -59,6 +60,7 @@ describe('Device filter tests', () => {
       deviceType: 'simulator',
       udid: undefined,
       minSDK: undefined,
+      maxSDK: undefined,
       busy: false,
       userBlocked: false,
     });
@@ -70,7 +72,7 @@ describe('Device filter tests', () => {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
         'appium:iPhoneOnly': true,
-        'appium:minSDK': 10.2,
+        'appium:minSDK': '10.2.0',
       },
       firstMatch: [{}],
     };
@@ -82,7 +84,8 @@ describe('Device filter tests', () => {
       name: 'iPhone',
       deviceType: 'simulator',
       udid: undefined,
-      minSDK: 10.2,
+      minSDK: '10.2.0',
+      maxSDK: undefined,
       busy: false,
       userBlocked: false,
     });

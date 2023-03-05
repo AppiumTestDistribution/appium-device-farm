@@ -68,6 +68,7 @@
     "get-port": "^5.1.1",
     "go-ios": "^1.0.101",
     "http-proxy-middleware": "^2.0.6",
+    "ip": "^1.1.8",
     "lodash": "^4.17.21",
     "lokijs": "^1.5.12",
     "node-abort-controller": "^3.1.1",
@@ -80,11 +81,11 @@
     "ora": "5.4.1",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
+    "semver": "^7.3.8",
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
-    "yargs": "^17.5.1",
-    "ip": "^1.1.8"
+    "yargs": "^17.5.1"
   },
   "peerDependencies": {
     "appium": "^2.0.0-beta.44"
