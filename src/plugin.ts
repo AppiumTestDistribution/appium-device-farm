@@ -36,7 +36,7 @@ import ora from 'ora';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs } from './data-service/pluginArgs';
+import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';

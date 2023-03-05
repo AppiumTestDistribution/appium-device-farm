@@ -4,3 +4,5 @@ lib/
 .DS_Store
 .history
 .vscode
+local_appium_home/
+.nyc_output/
