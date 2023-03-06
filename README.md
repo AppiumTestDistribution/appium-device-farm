@@ -126,6 +126,7 @@ Above cli arguments can also be set from config.json file Refer [here](https://g
 | appium:platformName              | Requests asession for the provided platform name. Valid options are `iOS`, `tvOS`, or `Android`, ex: `'appium:platformName': tvOS`   |
 | appium:platformVersion           | This capability is used to filter devices/simulators based on SDK. Only devices/simulators that are an exact match with the platformVerson would be considered for test run. `appium:platformVersion` is optional argument. ex: `'appium:platformVersion': 16.1.1`   |
 | appium:minSDK                    | This capability is used to filter devices/simulators based on SDK. Devices/Simulators with SDK greater then or equal to minSDK would only be considered for test run. `appium:minSDK` is optional argument. ex: `'appium:minSDK': 15`   |
+| appium:maxSDK                    | This capability is used to filter devices/simulators based on SDK. Devices/Simulators with SDK less then or equal to maxSDK would only be considered for test run. `appium:maxSDK` is optional argument. ex: `'appium:maxSDK': 15`   |
 
 # Custom chrome binary url
 set the new URL to `CHROMEDRIVER_CDNURL` environment variable:

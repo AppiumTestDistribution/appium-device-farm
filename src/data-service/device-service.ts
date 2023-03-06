@@ -56,6 +56,27 @@ export function getAllDevices(): Array<IDevice> {
 }
 
 export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
+  const semver = require('semver');
+  var results = DeviceModel.chain();
+
+  if (semver.coerce(filterOptions.minSDK)) {
+    results = results.where(function(obj: IDevice) {
+      if (semver.coerce(obj.sdk)) {
+        return semver.gte(semver.coerce(obj.sdk), semver.coerce(filterOptions.minSDK));
+      }
+      return false;
+    });
+  }
+
+  if (semver.coerce(filterOptions.maxSDK)) {
+    results = results.where(function(obj: IDevice) {
+      if (semver.coerce(obj.sdk)) {
+        return semver.lte(semver.coerce(obj.sdk), semver.coerce(filterOptions.maxSDK));
+      }
+      return false;
+    });
+  }
+
   const filter = {
     platform: filterOptions.platform,
     name: { $contains: filterOptions.name || '' },
@@ -70,20 +91,17 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     filter.udid = { $in: filterOptions.udid };
   }
 
-  if (filterOptions.minSDK) {
-    filter.sdk = { $gte: filterOptions.minSDK };
-  }
-
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
-    if (DeviceModel.chain().find(filter).data()[0] != undefined) {
+    if (results.find(filter).data()[0] != undefined) {
       logger.info('Picking up booted simulator');
-      return DeviceModel.chain().find(filter).data()[0];
+      return results.find(filter).data()[0];
     } else {
       filter.state = 'Shutdown';
     }
-  }
-  return DeviceModel.chain().find(filter).data()[0];
+  }  
+
+  return results.find(filter).data()[0];
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
