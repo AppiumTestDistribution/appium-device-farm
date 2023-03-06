@@ -93,7 +93,8 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
-    if (results.find(filter).data()[0] != undefined) {
+    const results_copy = results.copy();
+    if (results_copy.find(filter).data()[0] != undefined) {
       logger.info('Picking up booted simulator');
       return results.find(filter).data()[0];
     } else {
