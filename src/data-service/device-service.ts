@@ -146,21 +146,25 @@ export function updateCmdExecutedTime(sessionId: string) {
 
 export async function unblockDevice(sessionId: string) {
   const device = DeviceModel.chain().find({ session_id: sessionId }).data()[0];
-  const sessionStart = device.sessionStartTime;
-  const currentTime = new Date().getTime();
-  const utilization = currentTime - sessionStart;
-  const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-  await setUtilizationTime(device.udid, totalUtilization);
-  DeviceModel.chain()
-    .find({
-      session_id: sessionId,
-    })
-    .update(function (device: IDevice) {
-      device.session_id = undefined;
-      device.busy = false;
-      device.lastCmdExecutedAt = undefined;
-      device.sessionStartTime = 0;
-      device.totalUtilizationTimeMilliSec = totalUtilization;
-      device.newCommandTimeout = undefined;
-    });
+  if (device !== undefined) {
+    const sessionStart = device.sessionStartTime;
+    const currentTime = new Date().getTime();
+    const utilization = currentTime - sessionStart;
+    const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+    await setUtilizationTime(device.udid, totalUtilization);
+    DeviceModel.chain()
+      .find({
+        session_id: sessionId,
+      })
+      .update(function (device: IDevice) {
+        device.session_id = undefined;
+        device.busy = false;
+        device.lastCmdExecutedAt = undefined;
+        device.sessionStartTime = 0;
+        device.totalUtilizationTimeMilliSec = totalUtilization;
+        device.newCommandTimeout = undefined;
+      });
+    } else {
+      logger.info(`Tried unblocked device mapped to sessionId ${sessionId} but could not find device.`)
+    }
 }
