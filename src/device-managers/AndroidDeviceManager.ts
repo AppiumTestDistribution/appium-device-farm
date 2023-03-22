@@ -352,5 +352,19 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private getDeviceName = async (adbInstance: any, udid: string) =>
-    await this.getDeviceProperty(adbInstance, udid, 'ro.product.name');
+    await (
+      await adbInstance
+    ).adbExec([
+      '-s',
+      udid,
+      'shell',
+      'dumpsys',
+      'bluetooth_manager',
+      '|',
+      'grep',
+      'name:',
+      '|',
+      'cut',
+      '-c9-',
+    ]);
 }
