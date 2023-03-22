@@ -60,7 +60,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   var results = DeviceModel.chain();
 
   if (semver.coerce(filterOptions.minSDK)) {
-    results = results.where(function(obj: IDevice) {
+    results = results.where(function (obj: IDevice) {
       if (semver.coerce(obj.sdk)) {
         return semver.gte(semver.coerce(obj.sdk), semver.coerce(filterOptions.minSDK));
       }
@@ -69,7 +69,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   }
 
   if (semver.coerce(filterOptions.maxSDK)) {
-    results = results.where(function(obj: IDevice) {
+    results = results.where(function (obj: IDevice) {
       if (semver.coerce(obj.sdk)) {
         return semver.lte(semver.coerce(obj.sdk), semver.coerce(filterOptions.maxSDK));
       }
@@ -100,7 +100,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     } else {
       filter.state = 'Shutdown';
     }
-  }  
+  }
 
   return results.find(filter).data()[0];
 }
