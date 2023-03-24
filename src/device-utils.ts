@@ -39,7 +39,7 @@ const customCapability = {
   ipadOnly: 'appium:iPadOnly',
   udids: 'appium:udids',
   minSDK: 'appium:minSDK',
-  maxSDK: 'appium:maxSDK'
+  maxSDK: 'appium:maxSDK',
 };
 
 let timer: any;

@@ -118,7 +118,10 @@
 .device-info-card-container__body_row_value {
   font-size: 12px;
   font-weight: 600;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 190px;
   color: rgb(61, 59, 59);
 }
 
