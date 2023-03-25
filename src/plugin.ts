@@ -51,9 +51,13 @@ class DevicePlugin extends BasePlugin {
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
-    unblockDevice(driver.sessionId);
+    const deviceFilter = {
+      session_id: driver.sessionId  ? driver.sessionId : undefined,
+      udid: (driver.caps && driver.caps.udid) ?  driver.caps.udid : undefined
+    };
+    unblockDevice(deviceFilter);
     logger.info(
-      `Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`
+      `Unblocking device mapped with filter ${JSON.stringify(deviceFilter)} onUnexpectedShutdown from server`
     );
   }
 
@@ -228,7 +232,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
-    unblockDevice(sessionId);
+    unblockDevice({ session_id: sessionId });
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }

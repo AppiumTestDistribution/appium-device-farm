@@ -290,7 +290,7 @@ export async function releaseBlockedDevices() {
       );
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
-        unblockDevice(sessionId);
+        unblockDevice({ session_id: sessionId });
         logger.info(
           `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
         );
