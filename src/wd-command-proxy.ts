@@ -58,7 +58,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
       logger.info(
         `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`
       );
-      unblockDevice(sessionId);
+      unblockDevice({ session_id: sessionId });
       removeProxyHandler(sessionId);
     }
   } else {
