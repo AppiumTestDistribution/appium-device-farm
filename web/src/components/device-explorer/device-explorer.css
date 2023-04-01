@@ -57,10 +57,11 @@
 
 .device-explorer-header__device-state {
   font-size: 11px;
+  text-transform: uppercase;
   color: black;
   font-weight: 600;
   margin-right: 10px;
-  padding: 3px;
+  padding: 4px 8px;
   cursor: pointer;
 }
 
@@ -75,21 +76,21 @@
 }
 
 .device-explorer-header__device-state.ready::before {
-  background: green;
+  background: #0bb785;
 }
 
 .device-explorer-header__device-state.busy::before {
-  background: red;
+  background: #bc0000;
 }
 
 .device-explorer-header__device-state.offline::before {
-  background: grey;
+  background: #57606a;
 }
 
 img.device-explorer-header__device-platform.selected,
 .device-explorer-header__device-state.selected {
-  background: rgb(213, 238, 213);
-  border: 1px solid rgb(123, 207, 123);
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
   border-radius: 10%;
 }
 
@@ -109,8 +110,9 @@ img.device-explorer-header__device-platform.selected,
 img.device-explorer-header__device-platform {
   height: 20px;
   width: 20x;
-  margin-right: 10px;
+  margin-right: 10px;    
   padding: 3px;
+  border: 1px solid transparent;
   cursor: pointer;
 }
 
