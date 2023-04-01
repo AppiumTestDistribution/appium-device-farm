@@ -1,6 +1,7 @@
 .header-container {
   display: flex;
   flex-direction: row;
+  background-color: #15252b;
   height: 70px;
   width: 100%;
   border-bottom: 1px solid #ced8e1;
@@ -17,7 +18,7 @@
 }
 
 .header-logo {
-  color: #000000;
-  font-size: 19px;
-  font-weight: 600;
+  color: #fbfaff;
+  font-size: 20px;
+  font-weight: 700;
 }
