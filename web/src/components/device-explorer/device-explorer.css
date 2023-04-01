@@ -1,12 +1,9 @@
 .device-explorer-container {
   height: 100%;
-  width: 99%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-self: center;
-  margin-right: 20px;
-  margin-left: 20px;
-  margin-top: 10px;
 }
 
 .device-explorer-header-container {
@@ -46,9 +43,10 @@
 }
 
 .device-explorer-header-entry-header {
-  height: 15px;
-  font-size: 11px;
+  height: 16px;
+  font-size: 12px;
   font-weight: 600;
+  color: #11272e;
 }
 
 .device-explorer-header-value {
