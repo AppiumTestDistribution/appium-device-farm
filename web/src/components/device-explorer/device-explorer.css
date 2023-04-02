@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-self: center;
+  background-color: #f2f1f2;
 }
 
 .device-explorer-header-container {
