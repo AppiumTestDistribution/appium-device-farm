@@ -10,6 +10,7 @@
   cursor: pointer;
   position: relative;
   box-shadow: 0 0 3px rgba(33, 33, 33, 0.2);
+  border: 1px solid rgb(255, 255, 255);
 }
 
 /* Disabled mode */
@@ -27,7 +28,6 @@
 /* If the device is busy*/
 .device-info-card-container.busy {
   border: 1px solid rgb(238, 137, 137);
-  border-left: 5px solid rgb(238, 137, 137);
 }
 
 /* device card title */
@@ -135,7 +135,8 @@
 }
 
 .device-info-card__body_block-device,
-.device-info-card__body_unblock-device {
+.device-info-card__body_unblock-device,
+.device-info-card__body_block-device-disabled {
   width: 100%;
   padding: 8px 12px;
   cursor: pointer;
@@ -151,6 +152,12 @@
   background: #e6f8f3;
   border: 1px solid #0bb785;
   color: #0bb785;
+}
+.device-info-card__body_block-device-disabled {
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
+  color: #0bb785;
+  opacity: 0.3;
 }
 
 /* footer */

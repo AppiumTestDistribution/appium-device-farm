@@ -147,6 +147,9 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               Block Device
             </button>
           )}
+          {busy && !userBlocked && (
+            <button className="device-info-card__body_block-device-disabled">Block Device</button>
+          )}
         </div>
       </div>
     );
