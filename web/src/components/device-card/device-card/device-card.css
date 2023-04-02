@@ -1,7 +1,7 @@
 .device-info-card-container {
   background-color: white;
-  height: 220px;
-  width: 320px;
+  height: 265px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   margin: auto;
@@ -9,12 +9,8 @@
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  /* box-shadow: 0 0 3px rgba(33, 33, 33, 0.2); */
+  box-shadow: 0 0 3px rgba(33, 33, 33, 0.2);
 }
-
-/* .device-info-card-container:hover {
-  transform: scale(1.1);
-} */
 
 /* Disabled mode */
 
@@ -41,7 +37,7 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 10px 0;
+  padding: 20px 0 15px 0;
 }
 
 .device-info-card-container__title_wrapper {
@@ -116,7 +112,7 @@
 .device-info-card-container__body_row {
   display: flex;
   flex-direction: row;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   width: 100%;
   justify-content: space-between;
   align-items: flex-start;
@@ -142,7 +138,6 @@
 .device-info-card__body_unblock-device {
   width: 100%;
   padding: 8px 12px;
-  margin-top: 8px;
   cursor: pointer;
   border-radius: 3px;
 }
@@ -160,7 +155,7 @@
 
 /* footer */
 .device-info-card-container__footer_wrapper {
-  padding-top: 15px;
+  padding-top: 0px;
 }
 
 .dashboard-link-wrapper {
