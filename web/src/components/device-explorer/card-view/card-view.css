@@ -2,7 +2,7 @@
   border-top: 1px solid #aca8a8;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  grid-template-rows: repeat(auto-fill, minmax(295px, 1fr));
+  grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
   row-gap: 30px;
   column-gap: 15px;
   overflow: scroll;
