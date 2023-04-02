@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-self: center;
+  background-color: #f2f1f2;
 }
 
 .device-explorer-header-container {
@@ -110,7 +111,7 @@ img.device-explorer-header__device-platform.selected,
 img.device-explorer-header__device-platform {
   height: 20px;
   width: 20x;
-  margin-right: 10px;    
+  margin-right: 10px;
   padding: 3px;
   border: 1px solid transparent;
   cursor: pointer;
