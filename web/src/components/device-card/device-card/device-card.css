@@ -1,6 +1,6 @@
 .device-info-card-container {
   background-color: white;
-  height: 265px;
+  height: 250px;
   width: 280px;
   display: flex;
   flex-direction: column;
@@ -60,8 +60,10 @@
   font-size: 14px;
   font-weight: bold;
   color: #000000;
-  word-break: break-all;
-  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
   margin-right: auto;
 }
 

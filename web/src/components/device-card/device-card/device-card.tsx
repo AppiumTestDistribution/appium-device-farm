@@ -1,7 +1,7 @@
 import React from 'react';
 import './device-card.css';
 import { ReactComponent as AndroidIcon } from '../../../assets/android-icon.svg';
-import { ReactComponent as AppleIcon } from '../../../assets/apple-new-icon.svg';
+import { ReactComponent as AppleIcon } from '../../../assets/apple-icon.svg';
 import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
@@ -78,7 +78,9 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className={`device-state ${deviceState}`}>{deviceState}</div>
         <div className="device-info-card-container__title_wrapper">
-          <div className="code device-info-card-container__device-title">{udid}</div>
+          <div className="code device-info-card-container__device-title" title={udid}>
+            {udid}
+          </div>
           {['ios', 'tvos'].includes(platform) ? (
             <AppleIcon className="device-info-card-container__device-icon" />
           ) : (
