@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-Build date - Thu  6 Apr 2023 12:34:31 IST by gurleen.kaurthoughtworks.com
-=======
-Build date - Thu  6 Apr 2023 12:32:18 IST by keerthivasand
->>>>>>> 4b687a3 (Add device farm logo)
+Build date - Thu  6 Apr 2023 12:44:45 IST by keerthivasand
