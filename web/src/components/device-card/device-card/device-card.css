@@ -1,6 +1,6 @@
 .device-info-card-container {
   background-color: white;
-  height: 250px;
+  height: 260px;
   width: 280px;
   display: flex;
   flex-direction: column;
@@ -139,10 +139,12 @@
 .device-info-card__body_block-device,
 .device-info-card__body_unblock-device,
 .device-info-card__body_block-device-disabled {
-  width: 100%;
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 3px;
+  width: 280px;
+  position: absolute;
+  bottom: 15px;
 }
 
 .device-info-card__body_unblock-device {
@@ -172,6 +174,8 @@
   flex-direction: row;
   align-items: center;
   margin-right: 10px;
+  justify-content: center;
+  width: 100%;
 }
 
 .footer-icon {
