@@ -6,6 +6,8 @@ import { ReactComponent as SessionIcon } from '../../../assets/session-icon.svg'
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
 import DeviceFarmApiService from '../../../api-service';
+import CancelGreenIcon from '../../../assets/cancel-green-icon.svg';
+import CancelRedIcon from '../../../assets/cancel-red-icon.svg';
 
 interface IDeviceCardProps {
   device: IDevice;
@@ -138,6 +140,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               className="device-info-card__body_unblock-device"
               onClick={() => this.unblockDevice(sdk, platform, udid, deviceState)}
             >
+              <img src={CancelRedIcon} className="device-info-card__body_block-device-icon" />
               Unblock Device
             </button>
           )}
@@ -146,11 +149,15 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               className="device-info-card__body_block-device"
               onClick={() => this.blockDevice(sdk, platform, udid, deviceState)}
             >
+              <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
               Block Device
             </button>
           )}
           {busy && !userBlocked && (
-            <button className="device-info-card__body_block-device-disabled">Block Device</button>
+            <button className="device-info-card__body_block-device-disabled">
+              <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
+              Block Device
+            </button>
           )}
         </div>
       </div>

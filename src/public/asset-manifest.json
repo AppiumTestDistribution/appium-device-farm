@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/device-farm/static/css/main.ad2771b9.css",
-    "main.js": "/device-farm/static/js/main.57f7847a.js",
+    "main.css": "/device-farm/static/css/main.a78403f0.css",
+    "main.js": "/device-farm/static/js/main.e91c8661.js",
     "static/js/988.125737e1.chunk.js": "/device-farm/static/js/988.125737e1.chunk.js",
     "static/media/device-farm-logo.png": "/device-farm/static/media/device-farm-logo.90f2df7d84e57174f9c8.png",
     "static/media/android-nav-icon.svg": "/device-farm/static/media/android-nav-icon.4670118e9f775081ed597e634764f605.svg",
@@ -9,13 +9,15 @@
     "static/media/apple-icon.svg": "/device-farm/static/media/apple-icon.5112967f592a1aeff8323b26823c2bd8.svg",
     "static/media/android-icon.svg": "/device-farm/static/media/android-icon.ec560eea7ab9466df54aa91bbf1c8983.svg",
     "index.html": "/device-farm/index.html",
+    "static/media/cancel-green-icon.svg": "/device-farm/static/media/cancel-green-icon.71453b46237edaab5014a92125a3ed69.svg",
+    "static/media/cancel-red-icon.svg": "/device-farm/static/media/cancel-red-icon.52d51b858c8e96a30d4f9d79b52b92ea.svg",
     "static/media/session-icon.svg": "/device-farm/static/media/session-icon.de13b0401a71c8b2ee17117134dabd57.svg",
-    "main.ad2771b9.css.map": "/device-farm/static/css/main.ad2771b9.css.map",
-    "main.57f7847a.js.map": "/device-farm/static/js/main.57f7847a.js.map",
+    "main.a78403f0.css.map": "/device-farm/static/css/main.a78403f0.css.map",
+    "main.e91c8661.js.map": "/device-farm/static/js/main.e91c8661.js.map",
     "988.125737e1.chunk.js.map": "/device-farm/static/js/988.125737e1.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ad2771b9.css",
-    "static/js/main.57f7847a.js"
+    "static/css/main.a78403f0.css",
+    "static/js/main.e91c8661.js"
   ]
 }
