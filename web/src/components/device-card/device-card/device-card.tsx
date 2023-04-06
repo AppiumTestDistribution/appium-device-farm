@@ -123,8 +123,6 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               </div>
             </div>
           )}
-        </div>
-        <div className="device-info-card-container__footer_wrapper">
           {dashboard_link && !!total_session_count && total_session_count > 0 && (
             <div className="dashboard-link-wrapper">
               <SessionIcon className="footer-icon" />
@@ -133,6 +131,8 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               </a>
             </div>
           )}
+        </div>
+        <div className="device-info-card-container__footer_wrapper">
           {busy && userBlocked && (
             <button
               className="device-info-card__body_unblock-device"
