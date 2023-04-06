@@ -5,6 +5,10 @@
   height: fit-content;
   width: 100%;
   border-bottom: 1px solid #ced8e1;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
 }
 
 .header-logo-container {
