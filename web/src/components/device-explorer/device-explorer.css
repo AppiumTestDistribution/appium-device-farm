@@ -100,7 +100,7 @@ img.device-explorer-header__device-platform.selected,
 .device-explorer-header__device-state.selected {
   background: #e6f8f3;
   border: 1px solid #0bb785;
-  border-radius: 10%;
+  border-radius: 10px;
 }
 
 .device-explorer-header-text-filter {
