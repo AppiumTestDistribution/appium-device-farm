@@ -74,7 +74,7 @@
   text-transform: uppercase;
   align-self: center;
   padding: 4px 8px;
-  width: 60px;
+  width: 100px;
   text-align: center;
   background-color: #e5e5e5;
 }
@@ -145,6 +145,15 @@
   width: 280px;
   position: absolute;
   bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.device-info-card__body_block-device-icon {
+  width: 15px;
+  margin-top: -1.5px;
 }
 
 .device-info-card__body_unblock-device {
