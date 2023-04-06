@@ -19,6 +19,10 @@
   padding: 20px 10px;
 }
 
+.header-logo-image {
+  width: 50px;
+}
+
 .header-logo {
   color: #fbfaff;
   font-size: 20px;
