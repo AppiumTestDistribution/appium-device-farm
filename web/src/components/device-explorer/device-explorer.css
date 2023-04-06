@@ -95,9 +95,9 @@
 
 img.device-explorer-header__device-platform.selected,
 .device-explorer-header__device-state.selected {
-  background: rgb(213, 238, 213);
-  border: 1px solid rgb(123, 207, 123);
-  border-radius: 10%;
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
+  border-radius: 10px;
 }
 
 .device-explorer-header-text-filter {
