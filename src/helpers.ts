@@ -8,6 +8,8 @@ import _ from 'lodash';
 import log from './logger';
 import Cloud from './enums/Cloud';
 import normalizeUrl from 'normalize-url';
+import ora from 'ora';
+import asyncWait from 'async-wait-until';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -21,6 +23,28 @@ export async function asyncForEach(
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
+  const spinner = ora(msg).start();
+  await asyncWait(
+    async () => {
+      try {
+        await fn();
+        spinner.succeed();
+        return true;
+      } catch (err) {
+        spinner.fail();
+        if (callback) callback(msg);
+        return false;
+      }
+    },
+    {
+      intervalBetweenAttempts: 2000,
+      timeout: 60 * 1000,
+    }
+  );
 }
 
 export function isMac() {

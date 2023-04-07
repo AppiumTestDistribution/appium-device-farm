@@ -3,7 +3,7 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "android",
+        "platform": "iOS",
         "skipChromeDownload": true,
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"

@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub, asyncForEach } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -29,6 +29,7 @@ import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
+import { DevicePlugin } from './plugin';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -141,6 +142,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
 export async function initlializeStorage() {
   const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm', 'storage');
   await fs.promises.mkdir(basePath, { recursive: true });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const storage = require('node-persist');
   const localStorage = storage.create({ dir: basePath });
   await localStorage.init();
@@ -271,6 +273,23 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
     const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
     await setSimulatorState(simulators);
   }, 10000);
+}
+
+export async function checkNodeServerAvailability() {
+  const deviceHost = new Set();
+  setInterval(async () => {
+    const allDevices = getAllDevices();
+    allDevices.forEach((device: IDevice) => {
+      if (!device.host.includes(ip.address())) {
+        deviceHost.add(device.host);
+      }
+    });
+    const iterableSet = [...deviceHost];
+    const nodeConnections = iterableSet.map((host: any) =>
+      DevicePlugin.waitForRemoteHubServerToBeRunning(host)
+    );
+    await Promise.all(nodeConnections);
+  }, 5000);
 }
 
 export async function releaseBlockedDevices() {
