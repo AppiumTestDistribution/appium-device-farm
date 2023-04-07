@@ -16,6 +16,7 @@ import {
   getDevice,
   setSimulatorState,
   addNewDevice,
+  removeDevice,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -276,19 +277,20 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
 }
 
 export async function checkNodeServerAvailability() {
-  const deviceHost = new Set();
   setInterval(async () => {
+    const devices = new Set();
+
     const allDevices = getAllDevices();
     allDevices.forEach((device: IDevice) => {
       if (!device.host.includes(ip.address())) {
-        deviceHost.add(device.host);
+        devices.add(device);
       }
     });
 
-    const iterableSet = [...deviceHost];
-    const nodeConnections = iterableSet.map(async (host: any) => {
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(host);
-      return host;
+    const iterableSet = [...devices];
+    const nodeConnections = iterableSet.map(async (device: any) => {
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
+      return device.host;
     });
 
     const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
@@ -300,11 +302,12 @@ export async function checkNodeServerAvailability() {
     const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
 
     const nodeConnectionsFailureHostSet = new Set(
-      [...deviceHost].filter((host) => !nodeConnectionsSuccessHostSet.has(host))
+      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host))
     );
 
-    console.log('nodeConnectionsSuccessHostSet', nodeConnectionsSuccessHostSet);
-    console.log('nodeConnectionsFailureHostSet', nodeConnectionsFailureHostSet);
+    nodeConnectionsFailureHostSet.forEach((device: any) => {
+      removeDevice(device);
+    });
   }, 5000);
 }
 
