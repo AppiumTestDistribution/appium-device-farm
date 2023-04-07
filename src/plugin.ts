@@ -16,7 +16,8 @@ import {
   removePendingSession,
 } from './data-service/pending-sessions-service';
 import {
-  allocateDeviceForSession, checkNodeServerAvailability,
+  allocateDeviceForSession,
+  checkNodeServerAvailability,
   cronReleaseBlockedDevices,
   deviceType,
   initlializeStorage,
@@ -29,7 +30,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import {hubUrl, isHub, spinWith, stripAppiumPrefixes} from './helpers';
+import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
