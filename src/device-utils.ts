@@ -284,11 +284,27 @@ export async function checkNodeServerAvailability() {
         deviceHost.add(device.host);
       }
     });
+
     const iterableSet = [...deviceHost];
-    const nodeConnections = iterableSet.map((host: any) =>
-      DevicePlugin.waitForRemoteHubServerToBeRunning(host)
+    const nodeConnections = iterableSet.map(async (host: any) => {
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(host);
+      return host;
+    });
+
+    const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
+
+    const nodeConnectionsSuccess = nodeConnectionsResult.filter(
+      (result) => result.status === 'fulfilled'
     );
-    await Promise.all(nodeConnections);
+    const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
+    const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
+
+    const nodeConnectionsFailureHostSet = new Set(
+      [...deviceHost].filter((host) => !nodeConnectionsSuccessHostSet.has(host))
+    );
+
+    console.log('nodeConnectionsSuccessHostSet', nodeConnectionsSuccessHostSet);
+    console.log('nodeConnectionsFailureHostSet', nodeConnectionsFailureHostSet);
   }, 5000);
 }
 
