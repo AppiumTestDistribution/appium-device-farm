@@ -183,19 +183,22 @@
   flex-direction: row;
   align-items: center;
   margin-right: 10px;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
 }
 
-.footer-icon {
+.link-icon {
   height: 15px;
-  width: 15px;
   margin-right: 5px;
+}
+
+.dashboard-link {
+  display: flex;
 }
 
 .footer-deeplink {
   font-size: 12px;
-  color: #195ead;
+  color: #3b3b3b;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
