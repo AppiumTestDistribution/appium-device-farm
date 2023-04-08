@@ -64,19 +64,25 @@ class DevicePlugin extends BasePlugin {
     let androidDeviceType;
     let iosDeviceType;
     let skipChromeDownload;
+
     registerProxyMiddlware(expressApp);
+
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
+
     expressApp.use('/device-farm', router);
+
     if (!platform)
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
+
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
@@ -90,22 +96,29 @@ class DevicePlugin extends BasePlugin {
     });
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
+
     await addCLIArgs(cliArgs);
     await initlializeStorage();
+
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
+
     if (isHub(cliArgs)) {
       const hub = cliArgs.plugin['device-farm'].hub;
       await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
     }
+
     const devicesUpdates = await updateDeviceList(cliArgs);
     if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(cliArgs);
     }
     await cronReleaseBlockedDevices();
-    await checkNodeServerAvailability();
+
+    if (!isHub(cliArgs)) {
+      await checkNodeServerAvailability();
+    }
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
