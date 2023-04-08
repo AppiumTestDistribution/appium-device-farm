@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/device-farm/static/css/main.0bfd220d.css",
-    "main.js": "/device-farm/static/js/main.e91c8661.js",
+    "main.css": "/device-farm/static/css/main.d1a31cb8.css",
+    "main.js": "/device-farm/static/js/main.4862eae7.js",
     "static/js/988.125737e1.chunk.js": "/device-farm/static/js/988.125737e1.chunk.js",
     "static/media/device-farm-logo.png": "/device-farm/static/media/device-farm-logo.90f2df7d84e57174f9c8.png",
     "static/media/android-nav-icon.svg": "/device-farm/static/media/android-nav-icon.4670118e9f775081ed597e634764f605.svg",
@@ -11,13 +11,13 @@
     "index.html": "/device-farm/index.html",
     "static/media/cancel-green-icon.svg": "/device-farm/static/media/cancel-green-icon.71453b46237edaab5014a92125a3ed69.svg",
     "static/media/cancel-red-icon.svg": "/device-farm/static/media/cancel-red-icon.52d51b858c8e96a30d4f9d79b52b92ea.svg",
-    "static/media/session-icon.svg": "/device-farm/static/media/session-icon.de13b0401a71c8b2ee17117134dabd57.svg",
-    "main.0bfd220d.css.map": "/device-farm/static/css/main.0bfd220d.css.map",
-    "main.e91c8661.js.map": "/device-farm/static/js/main.e91c8661.js.map",
+    "static/media/link-icon.svg": "/device-farm/static/media/link-icon.7336176ff32688423a9800543c6ee9f8.svg",
+    "main.d1a31cb8.css.map": "/device-farm/static/css/main.d1a31cb8.css.map",
+    "main.4862eae7.js.map": "/device-farm/static/js/main.4862eae7.js.map",
     "988.125737e1.chunk.js.map": "/device-farm/static/js/988.125737e1.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.0bfd220d.css",
-    "static/js/main.e91c8661.js"
+    "static/css/main.d1a31cb8.css",
+    "static/js/main.4862eae7.js"
   ]
 }
