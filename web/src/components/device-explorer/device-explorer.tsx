@@ -1,6 +1,6 @@
 import React from 'react';
-import AndroidIcon from '../../assets/android-nav-icon.svg';
-import AppleIcon from '../../assets/apple-nav-icon.svg';
+import AndroidIcon from '../../assets/android-icon.svg';
+import AppleIcon from '../../assets/apple-icon.svg';
 import CardView from './card-view/card-view';
 import './device-explorer.css';
 import DeviceFarmApiService from '../../api-service';

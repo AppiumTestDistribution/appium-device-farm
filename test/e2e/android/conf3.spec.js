@@ -1,6 +1,6 @@
 import { remote } from 'webdriverio';
 
-const APPIUM_HOST = '127.0.0.1';
+const APPIUM_HOST = 'localhost';
 const APPIUM_PORT = 31337;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,
