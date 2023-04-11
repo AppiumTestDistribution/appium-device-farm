@@ -50,12 +50,14 @@ class DevicePlugin extends BasePlugin {
 
   onUnexpectedShutdown(driver: any, cause: any) {
     const deviceFilter = {
-      session_id: driver.sessionId  ? driver.sessionId : undefined,
-      udid: (driver.caps && driver.caps.udid) ?  driver.caps.udid : undefined
+      session_id: driver.sessionId ? driver.sessionId : undefined,
+      udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
     };
     unblockDevice(deviceFilter);
     logger.info(
-      `Unblocking device mapped with filter ${JSON.stringify(deviceFilter)} onUnexpectedShutdown from server`
+      `Unblocking device mapped with filter ${JSON.stringify(
+        deviceFilter
+      )} onUnexpectedShutdown from server`
     );
   }
 
@@ -107,6 +109,7 @@ class DevicePlugin extends BasePlugin {
     if (isHub(cliArgs)) {
       const hub = cliArgs.plugin['device-farm'].hub;
       await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
+      await checkNodeServerAvailability();
     }
 
     const devicesUpdates = await updateDeviceList(cliArgs);
@@ -115,10 +118,6 @@ class DevicePlugin extends BasePlugin {
       await refreshSimulatorState(cliArgs);
     }
     await cronReleaseBlockedDevices();
-
-    if (!isHub(cliArgs)) {
-      await checkNodeServerAvailability();
-    }
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
