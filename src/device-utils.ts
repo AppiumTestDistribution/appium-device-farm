@@ -277,18 +277,21 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
 }
 
 export async function checkNodeServerAvailability() {
+  const nodeChecked: Array<string> = [];
+
   setInterval(async () => {
     const devices = new Set();
 
     const allDevices = getAllDevices();
     allDevices.forEach((device: IDevice) => {
-      if (!device.host.includes(ip.address())) {
+      if (!device.host.includes(ip.address()) && !nodeChecked.includes(device.host)) {
         devices.add(device);
       }
     });
 
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
+      nodeChecked.push(device.host);
       await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
       return device.host;
     });
@@ -306,7 +309,9 @@ export async function checkNodeServerAvailability() {
     );
 
     nodeConnectionsFailureHostSet.forEach((device: any) => {
+      console.log(`Removing Device with udid (${device.udid}) because of it is not available`);
       removeDevice(device);
+      nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
   }, 5000);
 }
