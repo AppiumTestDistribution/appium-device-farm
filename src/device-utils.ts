@@ -309,7 +309,7 @@ export async function checkNodeServerAvailability() {
     );
 
     nodeConnectionsFailureHostSet.forEach((device: any) => {
-      console.log(`Removing Device with udid (${device.udid}) because of it is not available`);
+      logger.info(`Removing Device with udid (${device.udid}) because it is not available`);
       removeDevice(device);
       nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
