@@ -1,16 +1,18 @@
 .device-info-card-container {
-  background-color: white;
-  height: 260px;
-  width: 280px;
+  border: 1px solid #d0d7de;
+  height: 170px;
+  width: 310px;
   display: flex;
   flex-direction: column;
   margin: auto;
-  padding: 16px;
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 0 3px rgba(33, 33, 33, 0.2);
-  border: 1px solid rgb(255, 255, 255);
+  /* box-shadow: 0 0 3px rgba(33, 33, 33, 0.2); */
+}
+
+.device-info-card-container:hover {
+  transform: scale(1.1);
 }
 
 /* Disabled mode */
@@ -28,6 +30,7 @@
 /* If the device is busy*/
 .device-info-card-container.busy {
   border: 1px solid rgb(238, 137, 137);
+  border-left: 5px solid rgb(238, 137, 137);
 }
 
 /* device card title */
@@ -37,49 +40,38 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 20px 0 15px 0;
-}
-
-.device-info-card-container__title_wrapper {
-  border-bottom-color: #ecebf0;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
+  padding: 10px;
 }
 
 .device-info-card-container__device-icon {
   height: 16px;
   width: 16px;
+  margin-right: 10px;
 }
 
 .device-info-card-container__device-icon.ios {
   height: 20px;
   width: 20px;
+  margin-right: 10px;
 }
 
 .device-info-card-container__device-title {
   font-size: 14px;
   font-weight: bold;
-  color: #000000;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 250px;
+  color: #195ead;
+  word-break: break-all;
+  max-width: 200px;
   margin-right: auto;
 }
 
 .device-state {
-  color: #000000;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 9px;
   text-transform: uppercase;
-  align-self: center;
-  padding: 4px 8px;
-  width: 100px;
-  text-align: center;
-  background-color: #e5e5e5;
+  color: #939aa3;
+  font-weight: 600;
 }
 
-/* .device-state::before {
+.device-state::before {
   content: '';
   display: inline-block;
   font-size: 10px;
@@ -87,36 +79,33 @@
   width: 8px;
   border-radius: 50%;
   margin-right: 3px;
-} */
-
-.device-state.ready {
-  color: #00bc8f;
-  background-color: #e4f8f4;
 }
 
-.device-state.busy {
-  color: #bc0000;
-  background-color: #f8e5e5;
+.device-state.ready::before {
+  background: green;
 }
 
-/* .device-state.offline::before {
+.device-state.busy::before {
+  background: red;
+}
+
+.device-state.offline::before {
   background: grey;
-} */
+}
 
 /* body */
 .device-info-card-container__body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 10px 0;
+  padding: 5px;
 }
 
 .device-info-card-container__body_row {
+  margin-left: 8px;
+  margin-top: 5px;
   display: flex;
   flex-direction: row;
-  margin-bottom: 10px;
-  width: 100%;
-  justify-content: space-between;
   align-items: flex-start;
 }
 
@@ -132,50 +121,32 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 190px;
+  width: 190px;
   color: rgb(61, 59, 59);
 }
 
 .device-info-card__body_block-device,
-.device-info-card__body_unblock-device,
-.device-info-card__body_block-device-disabled {
-  padding: 8px 12px;
+.device-info-card__body_unblock-device {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  z-index: 10;
   cursor: pointer;
   border-radius: 3px;
-  width: 280px;
-  position: absolute;
-  bottom: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
-.device-info-card__body_block-device-icon {
-  width: 15px;
-  margin-top: -1.5px;
 }
 
 .device-info-card__body_unblock-device {
-  background: #f8e5e5;
-  border: 1px solid #bc0000;
-  color: #bc0000;
+  background: rgb(213, 238, 213);
+  border: 1px solid rgb(123, 207, 123);
 }
 .device-info-card__body_block-device {
-  background: #e6f8f3;
-  border: 1px solid #0bb785;
-  color: #0bb785;
-}
-.device-info-card__body_block-device-disabled {
-  background: #e6f8f3;
-  border: 1px solid #0bb785;
-  color: #0bb785;
-  opacity: 0.3;
+  background: rgb(238, 213, 213);
+  border: 1px solid rgb(207, 123, 123);
 }
 
 /* footer */
 .device-info-card-container__footer_wrapper {
-  padding-top: 0px;
+  padding-top: 15px;
 }
 
 .dashboard-link-wrapper {
@@ -183,22 +154,17 @@
   flex-direction: row;
   align-items: center;
   margin-right: 10px;
-  justify-content: space-between;
-  width: 100%;
 }
 
-.link-icon {
+.footer-icon {
   height: 15px;
+  width: 15px;
   margin-right: 5px;
-}
-
-.dashboard-link {
-  display: flex;
 }
 
 .footer-deeplink {
   font-size: 12px;
-  color: #3b3b3b;
+  color: #195ead;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
