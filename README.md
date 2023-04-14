@@ -21,7 +21,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 - Updates the device pool with a new device during test execution.
 - Allocates random ports for parallel execution.
 - Remote execution
-- Asyc lockup for device changes.
+- Async lockup for device changes.
 
 ## Device UI
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub, asyncForEach } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -16,6 +16,7 @@ import {
   getDevice,
   setSimulatorState,
   addNewDevice,
+  removeDevice,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -29,6 +30,7 @@ import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
+import { DevicePlugin } from './plugin';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -141,6 +143,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
 export async function initlializeStorage() {
   const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm', 'storage');
   await fs.promises.mkdir(basePath, { recursive: true });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const storage = require('node-persist');
   const localStorage = storage.create({ dir: basePath });
   await localStorage.init();
@@ -271,6 +274,46 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
     const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
     await setSimulatorState(simulators);
   }, 10000);
+}
+
+export async function checkNodeServerAvailability() {
+  const nodeChecked: Array<string> = [];
+
+  setInterval(async () => {
+    const devices = new Set();
+
+    const allDevices = getAllDevices();
+    allDevices.forEach((device: IDevice) => {
+      if (!device.host.includes(ip.address()) && !nodeChecked.includes(device.host)) {
+        devices.add(device);
+      }
+    });
+
+    const iterableSet = [...devices];
+    const nodeConnections = iterableSet.map(async (device: any) => {
+      nodeChecked.push(device.host);
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
+      return device.host;
+    });
+
+    const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
+
+    const nodeConnectionsSuccess = nodeConnectionsResult.filter(
+      (result) => result.status === 'fulfilled'
+    );
+    const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
+    const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
+
+    const nodeConnectionsFailureHostSet = new Set(
+      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host))
+    );
+
+    nodeConnectionsFailureHostSet.forEach((device: any) => {
+      logger.info(`Removing Device with udid (${device.udid}) because it is not available`);
+      removeDevice(device);
+      nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
+    });
+  }, 5000);
 }
 
 export async function releaseBlockedDevices() {
