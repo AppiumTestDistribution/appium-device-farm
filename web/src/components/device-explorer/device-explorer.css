@@ -15,7 +15,7 @@
   background-color: white;
   box-shadow: 0px 3px 6px #00000029;
   position: fixed;
-  top: 64px;
+  top: 87px;
   width: 100%;
   z-index: 100;
   align-items: center;
@@ -71,7 +71,7 @@
   color: black;
   font-weight: 600;
   margin-right: 10px;
-  padding: 3px;
+  padding: 4px 8px;
   cursor: pointer;
 }
 
