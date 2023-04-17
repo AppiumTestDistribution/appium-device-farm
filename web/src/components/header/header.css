@@ -2,9 +2,13 @@
   display: flex;
   flex-direction: row;
   background-color: #15252b;
-  height: 70px;
+  height: fit-content;
   width: 100%;
   border-bottom: 1px solid #ced8e1;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
 }
 
 .header-logo-container {
@@ -12,9 +16,12 @@
   align-self: flex-start;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding-right: 10px;
-  padding-left: 10px;
+  padding: 20px 10px;
+  padding-left: 22.5px;
+}
+
+.header-logo-image {
+  width: 50px;
 }
 
 .header-logo {

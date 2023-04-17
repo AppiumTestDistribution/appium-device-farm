@@ -7,5 +7,5 @@
 
 .app-body-container {
   display: flex;
-  height: 90%;
+  flex: 1;
 }

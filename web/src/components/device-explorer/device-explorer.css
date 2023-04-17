@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-self: center;
+  background-color: #f2f1f2;
 }
 
 .device-explorer-header-container {
@@ -11,6 +12,13 @@
   width: 100%;
   display: flex;
   flex-direction: row;
+  background-color: white;
+  box-shadow: 0px 3px 6px #00000029;
+  position: fixed;
+  top: 87px;
+  width: 100%;
+  z-index: 100;
+  align-items: center;
 }
 
 .device-explorer-header-left-container {
@@ -19,6 +27,7 @@
   align-items: center;
   height: 100%;
   padding-right: 10px;
+  padding-left: 20px;
 }
 
 .device-explorer-header-right-container {
@@ -26,7 +35,7 @@
   margin-left: auto;
   height: 100%;
   align-items: center;
-  padding-right: 10px;
+  padding-right: 17.5px;
 }
 
 .device-explorer-header-entry {
@@ -57,10 +66,12 @@
 
 .device-explorer-header__device-state {
   font-size: 11px;
+  border: 1px solid transparent;
+  text-transform: uppercase;
   color: black;
   font-weight: 600;
   margin-right: 10px;
-  padding: 3px;
+  padding: 4px 8px;
   cursor: pointer;
 }
 
@@ -88,9 +99,9 @@
 
 img.device-explorer-header__device-platform.selected,
 .device-explorer-header__device-state.selected {
-  background: rgb(213, 238, 213);
-  border: 1px solid rgb(123, 207, 123);
-  border-radius: 10%;
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
+  border-radius: 10px;
 }
 
 .device-explorer-header-text-filter {
@@ -108,7 +119,7 @@ img.device-explorer-header__device-platform.selected,
 
 img.device-explorer-header__device-platform {
   height: 20px;
-  width: 20x;
+  width: 20px;
   margin-right: 10px;
   padding: 3px;
   cursor: pointer;
@@ -120,7 +131,7 @@ img.device-explorer-header__device-platform.selected {
 
 .device-explorer-header-filter-count {
   font-size: 14px;
-  margin-right: 10px;
+  margin-right: 17.5px;
   padding: 3px;
   color: grey;
 }
