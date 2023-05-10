@@ -17,6 +17,7 @@ import {
 } from './data-service/pending-sessions-service';
 import {
   allocateDeviceForSession,
+  checkNodeServerAvailability,
   cronReleaseBlockedDevices,
   deviceType,
   initlializeStorage,
@@ -29,18 +30,15 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { hubUrl, isHub, stripAppiumPrefixes } from './helpers';
-
+import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
-import ora from 'ora';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs } from './data-service/pluginArgs';
+import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
-import asyncWait from 'async-wait-until';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -51,9 +49,15 @@ class DevicePlugin extends BasePlugin {
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
-    unblockDevice(driver.sessionId);
+    const deviceFilter = {
+      session_id: driver.sessionId ? driver.sessionId : undefined,
+      udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
+    };
+    unblockDevice(deviceFilter);
     logger.info(
-      `Unblocking device mapped with sessionId ${driver.sessionId} onUnexpectedShutdown from server`
+      `Unblocking device mapped with filter ${JSON.stringify(
+        deviceFilter
+      )} onUnexpectedShutdown from server`
     );
   }
 
@@ -62,19 +66,25 @@ class DevicePlugin extends BasePlugin {
     let androidDeviceType;
     let iosDeviceType;
     let skipChromeDownload;
+
     registerProxyMiddlware(expressApp);
+
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
     }
+
     expressApp.use('/device-farm', router);
+
     if (!platform)
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
+
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
@@ -88,12 +98,20 @@ class DevicePlugin extends BasePlugin {
     });
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
+
     await addCLIArgs(cliArgs);
     await initlializeStorage();
+
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
-    if (isHub(cliArgs)) await DevicePlugin.waitForRemoteHubServerToBeRunning(cliArgs);
+
+    if (isHub(cliArgs)) {
+      const hub = cliArgs.plugin['device-farm'].hub;
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
+      await checkNodeServerAvailability();
+    }
+
     const devicesUpdates = await updateDeviceList(cliArgs);
     if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
@@ -111,14 +129,13 @@ class DevicePlugin extends BasePlugin {
     return deviceTypes;
   }
 
-  private static async waitForRemoteHubServerToBeRunning(cliArgs: any) {
-    const hub = cliArgs.plugin['device-farm'].hub;
+  static async waitForRemoteHubServerToBeRunning(host: string) {
     await spinWith(
-      `Waiting for node server ${hub} to be up and running\n`,
+      `Waiting for node server ${host} to be up and running\n`,
       async () => {
         await axios({
           method: 'get',
-          url: `${hub}/device-farm`,
+          url: `${host}/device-farm`,
           timeout: 30000,
           headers: {
             'Content-Type': 'application/json',
@@ -228,32 +245,10 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
-    unblockDevice(sessionId);
+    unblockDevice({ session_id: sessionId });
     logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
-  const spinner = ora(msg).start();
-  await asyncWait(
-    async () => {
-      try {
-        await fn();
-        spinner.succeed();
-        return true;
-      } catch (err) {
-        spinner.fail();
-        if (callback) callback(msg);
-        return false;
-      }
-    },
-    {
-      intervalBetweenAttempts: 2000,
-      timeout: 60 * 1000,
-    }
-  );
 }
 
 Object.assign(DevicePlugin.prototype, commands);

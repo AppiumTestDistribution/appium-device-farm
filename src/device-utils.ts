@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub, asyncForEach } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -16,6 +16,7 @@ import {
   getDevice,
   setSimulatorState,
   addNewDevice,
+  removeDevice,
 } from './data-service/device-service';
 import logger from './logger';
 import DevicePlatform from './enums/Platform';
@@ -28,6 +29,8 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
+import { getCLIArgs } from './data-service/pluginArgs';
+import { DevicePlugin } from './plugin';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -38,6 +41,7 @@ const customCapability = {
   ipadOnly: 'appium:iPadOnly',
   udids: 'appium:udids',
   minSDK: 'appium:minSDK',
+  maxSDK: 'appium:maxSDK',
 };
 
 let timer: any;
@@ -89,7 +93,6 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   logger.info(JSON.stringify(filters));
-
   const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
@@ -140,6 +143,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
 export async function initlializeStorage() {
   const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm', 'storage');
   await fs.promises.mkdir(basePath, { recursive: true });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const storage = require('node-persist');
   const localStorage = storage.create({ dir: basePath });
   await localStorage.init();
@@ -159,12 +163,16 @@ function getStorage() {
 export async function getUtilizationTime(udid: string) {
   try {
     const value = await getStorage().getItem(udid);
-    if (value !== undefined) {
+    if (value !== undefined && value && !isNaN(value)) {
       return value;
+    } else {
+      //logger.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
     }
   } catch (err) {
-    return 0;
+    logger.error(`Failed to fetch Utilization Time \n ${err}`);
   }
+
+  return 0;
 }
 
 /**
@@ -196,6 +204,22 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     platform == DevicePlatform.IOS && isMac()
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
+  if (
+    deviceType?.startsWith('sim') &&
+    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
+  ) {
+    throw new Error(
+      'iosDeviceType value is set to "real" but app provided is not suitable for real device.'
+    );
+  }
+  if (
+    deviceType?.startsWith('real') &&
+    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
+  ) {
+    throw new Error(
+      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
+    );
+  }
   let name = '';
   if (capability[customCapability.ipadOnly]) {
     name = 'iPad';
@@ -213,6 +237,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     busy: false,
     userBlocked: false,
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
+    maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
   };
 }
 
@@ -251,6 +276,46 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
   }, 10000);
 }
 
+export async function checkNodeServerAvailability() {
+  const nodeChecked: Array<string> = [];
+
+  setInterval(async () => {
+    const devices = new Set();
+
+    const allDevices = getAllDevices();
+    allDevices.forEach((device: IDevice) => {
+      if (!device.host.includes(ip.address()) && !nodeChecked.includes(device.host)) {
+        devices.add(device);
+      }
+    });
+
+    const iterableSet = [...devices];
+    const nodeConnections = iterableSet.map(async (device: any) => {
+      nodeChecked.push(device.host);
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
+      return device.host;
+    });
+
+    const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
+
+    const nodeConnectionsSuccess = nodeConnectionsResult.filter(
+      (result) => result.status === 'fulfilled'
+    );
+    const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
+    const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
+
+    const nodeConnectionsFailureHostSet = new Set(
+      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host))
+    );
+
+    nodeConnectionsFailureHostSet.forEach((device: any) => {
+      logger.info(`Removing Device with udid (${device.udid}) because it is not available`);
+      removeDevice(device);
+      nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
+    });
+  }, 5000);
+}
+
 export async function releaseBlockedDevices() {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
@@ -268,7 +333,7 @@ export async function releaseBlockedDevices() {
       );
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
-        unblockDevice(sessionId);
+        unblockDevice({ session_id: sessionId });
         logger.info(
           `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
         );

@@ -8,9 +8,11 @@ import {
   initlializeStorage,
   getBusyDevicesCount,
 } from '../../src/device-utils';
-import { DeviceModel } from '../../src/data-service/db';
+import { CLIArgs, DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
+import { addCLIArgs } from '../../src/data-service/pluginArgs';
+import { serverCliArgs } from './cliArgs';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -24,6 +26,9 @@ const cliArgs = {
   },
 };
 describe('Max sessions CLI argument test', () => {
+  before('Add Args', async () => {
+    await addCLIArgs(serverCliArgs);
+  });
   it('Allocate first device without issue', async () => {
     await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
@@ -43,6 +48,32 @@ describe('Max sessions CLI argument test', () => {
     const devices = await allocateDeviceForSession(capabilities);
     const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
+  });
+
+  it('Should throw error if the app does not match with device type', async () => {
+    await initlializeStorage();
+    const deviceManager = new DeviceFarmManager(cliArgs);
+    expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
+    Container.set(DeviceFarmManager, deviceManager);
+    await updateDeviceList(cliArgs);
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'iOS',
+        'appium:app': '/Downloads/VodQA.ipa',
+        'appium:iPhoneOnly': true,
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+      },
+      firstMatch: [{}],
+    };
+    await allocateDeviceForSession(capabilities).catch((error) =>
+      expect(error)
+        .to.be.an('error')
+        .with.property(
+          'message',
+          'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
+        )
+    );
   });
 
   it('Throw error when all sessions occupied', async () => {
