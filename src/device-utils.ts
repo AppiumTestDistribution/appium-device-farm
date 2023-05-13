@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub, asyncForEach } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isHub, cachePath } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -141,7 +141,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * @returns storage
  */
 export async function initlializeStorage() {
-  const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm', 'storage');
+  const basePath = cachePath('storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const storage = require('node-persist');
