@@ -60,9 +60,10 @@
     "appium-chromedriver": "^5.2.1",
     "appium-ios-device": "^2.4.1",
     "async-lock": "^1.2.8",
-    "async-wait-until": "^2.0.5",
+    "async-wait-until": "^2.0.12",
     "axios": "^0.27.0",
     "cors": "^2.8.5",
+    "download": "^8.0.0",
     "express": "^4.17.1",
     "fs-extra": "^11.1.0",
     "get-port": "^5.1.1",
@@ -132,6 +133,9 @@
   "appium": {
     "pluginName": "device-farm",
     "mainClass": "DevicePlugin",
+    "scripts": {
+      "install-go-ios": "./lib/scripts/install-go-ios.js"
+    },
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema",
       "additionalProperties": false,

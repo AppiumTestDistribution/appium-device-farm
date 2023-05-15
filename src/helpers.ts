@@ -51,6 +51,9 @@ export function isMac() {
   return os.type() === 'Darwin';
 }
 
+export function cachePath(folder: string) {
+  return path.join(os.homedir(), '.cache', 'appium-device-farm', folder);
+}
 export function isWindows() {
   return os.type() === 'win32';
 }
