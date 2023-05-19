@@ -49,11 +49,11 @@ appium plugin install --source=npm appium-dashboard
 ### IOS Tracking
 * To track ios device events like device plugged and unplugged we use [go-ios](https://github.com/danielpaulus/go-ios) module.
 * We have to options to install go-ios module:
-  * OPTION_1 --> If you want device-farm to help you download go-ios module. Run command `` appium plugin run device-farm install-go-ios ``
-  * OPTION_2 --> You can install the go-ios module with `` npm install -g go-ios ``
+  * Option1 --> If you want device-farm to help you download go-ios module. Run command `` appium plugin run device-farm install-go-ios ``
+  * Option2 --> You can install the go-ios module with `` npm install -g go-ios ``
 * We need to set the environment variable.
-  * After installing with OPTION_1 --> `` GO_IOS="Users/{ USER NAME }/.cache/appium-device-farm/goIOS/ios" ``
-  * After installing with OPTION_2 --> `` GO_IOS="/usr/local/lib/node_modules/go-ios/dist/{ SELECT YOUR OS }/ios" ``
+  * After installing with Option1 --> `` GO_IOS="Users/{ USER NAME }/.cache/appium-device-farm/goIOS/ios" ``
+  * After installing with Option2 --> `` GO_IOS="/usr/local/lib/node_modules/go-ios/dist/{ SELECT YOUR OS }/ios" ``
 * 
 ## Installation - Client
 
