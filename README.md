@@ -31,7 +31,7 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 User can block/unblock devices from Dashboard manually. These devices will not be picked up for automation. 
 
-Once automation picks the device user cannot manually unblock, its responsbile of the automation script. 
+Once automation picks the device user cannot manually unblock, it's responsible for the automation script. 
 
 ## Prerequisite
 
@@ -47,8 +47,14 @@ appium plugin install --source=npm appium-dashboard
 ```
 
 ### IOS Tracking
-* To track ios device events like device plugged and unplugged we use [go-ios](https://github.com/danielpaulus/go-ios) module. If you have installed go-ios please set in environment variable as GO_IOS=path/to/go-ios.
-* If you want device-farm to help you download go-ios module. Run command `` appium plugin run device-farm install-go-ios ``
+* To track ios device events like device plugged and unplugged we use [go-ios](https://github.com/danielpaulus/go-ios) module.
+* We have to options to install go-ios module:
+  * OPTION_1 --> If you want device-farm to help you download go-ios module. Run command `` appium plugin run device-farm install-go-ios ``
+  * OPTION_2 --> You can install the go-ios module with `` npm install -g go-ios ``
+* We need to set the environment variable.
+  * After installing with OPTION_1 --> `` GO_IOS="Users/{ USER NAME }/.cache/appium-device-farm/goIOS/ios" ``
+  * After installing with OPTION_2 --> `` GO_IOS="/usr/local/lib/node_modules/go-ios/dist/{ SELECT YOUR OS }/ios" ``
+* 
 ## Installation - Client
 
 No special action is needed to make things work on the client side.
