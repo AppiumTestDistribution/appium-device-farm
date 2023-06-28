@@ -130,7 +130,7 @@
     "webdriverio": "8.5.1"
   },
   "appium": {
-    "pluginName": "appium-device-farm",
+    "pluginName": "device-farm",
     "mainClass": "DevicePlugin",
     "scripts": {
       "install-go-ios": "./lib/scripts/install-go-ios.js"
