@@ -121,7 +121,6 @@ jobs:
         npm ci
         export APPIUM_HOME=/tmp/device-farm
         export CLOUD_USERNAME=$BS_USERNAME
-        echo $CLOUD_USERNAME
         export CLOUD_KEY=$BS_PASSWORD
         ./node_modules/.bin/appium plugin install --source=local .
         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
@@ -158,7 +157,6 @@ jobs:
          npm ci
          export APPIUM_HOME=/tmp/device-farm
          export CLOUD_USERNAME=$LT_USERNAME
-         echo $CLOUD_USERNAME
          export CLOUD_KEY=$LT_PASSWORD
          ./node_modules/.bin/appium plugin install --source=local .
          nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/lt-config.json &
