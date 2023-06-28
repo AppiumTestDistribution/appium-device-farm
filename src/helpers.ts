@@ -68,21 +68,18 @@ export async function getFreePort() {
 
 export function hubUrl(device: IDevice) {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
-  if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.BROWSERSTACK) {
-    return `https://${process.env.BS_USERNAME}:${process.env.BS_PASSWORD}@hub.browserstack.com/wd/hub/session`;
-  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.SAUCELABS) {
-    return `https://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_PASSWORD}@${
-      new URL(device.host).host
-    }/wd/hub/session`;
-  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
-    return `https://${process.env.LT_USERNAME}:${process.env.LT_PASSWORD}@${
-      new URL(device.host).host
-    }/wd/hub/session`;
-  } else if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.PCLOUDY) {
-    return `${host}/session`;
+  if (device.hasOwnProperty('cloud')) {
+    if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
+      return `${host}/session`;
+    } else {
+      return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
+        new URL(device.host).host
+      }/wd/hub/session`;
+    }
   }
   return `${host}/wd/hub/session`;
 }
+
 export async function isPortBusy(port: number) {
   try {
     if (!port) {

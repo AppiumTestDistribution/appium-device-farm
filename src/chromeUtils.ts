@@ -111,6 +111,9 @@ const getOsInfo = _.memoize(async function getOsInfo() {
   };
 });
 
+// @ts-expect-error
+// error TS2345: Argument of type '{}' is not assignable to parameter of type 'DriverOpts<Readonly<Record<string, Constraint>>>'
+// Type '{}' is missing the following properties from type 'ServerArgs': address, allowCors, allowInsecure, basePath, and 26 more.
 const getBaseDriverInstance = _.memoize(() => new BaseDriver({}, false));
 
 /**
