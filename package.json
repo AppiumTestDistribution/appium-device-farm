@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "7.4.0",
+  "version": "8.0.0",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -88,7 +88,7 @@
     "yargs": "^17.5.1"
   },
   "peerDependencies": {
-    "appium": "^2.0.0-beta.44"
+    "appium": "^2.0.0-rc.3"
   },
   "devDependencies": {
     "@appium/fake-driver": "^5.1.5",
@@ -130,7 +130,7 @@
     "webdriverio": "8.5.1"
   },
   "appium": {
-    "pluginName": "device-farm",
+    "pluginName": "appium-device-farm",
     "mainClass": "DevicePlugin",
     "scripts": {
       "install-go-ios": "./lib/scripts/install-go-ios.js"
