@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.1.0",
+  "version": "8.2.0",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -84,6 +84,7 @@
     "semver": "^7.3.8",
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
+    "unzipper": "^0.10.14",
     "uuid": "^8.3.2",
     "yargs": "^17.5.1"
   },
