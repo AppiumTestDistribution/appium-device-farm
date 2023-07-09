@@ -78,7 +78,7 @@
     "node-simctl": "^7.0.0",
     "normalize-url": "6.1.0",
     "nyc": "^15.1.0",
-    "ora": "5.4.1",
+    "ora": "6.3.1",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
     "semver": "^7.3.8",
