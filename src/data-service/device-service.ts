@@ -147,7 +147,9 @@ export function updateCmdExecutedTime(sessionId: string) {
 export async function unblockDevice(filter: object) {
   const device = DeviceModel.chain().find(filter).data()[0];
   if (device !== undefined) {
-    console.log(`Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`);
+    console.log(
+      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`
+    );
     const sessionStart = device.sessionStartTime;
     const currentTime = new Date().getTime();
     const utilization = currentTime - sessionStart;

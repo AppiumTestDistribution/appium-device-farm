@@ -141,7 +141,7 @@ describe('Android Device Manager', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","name":"","busy":false,"userBlocked":false}'
+          'No device found for filters: {"platform":"android","name":"","udid":"emulator-5555","busy":false,"userBlocked":false}'
         )
     );
   });

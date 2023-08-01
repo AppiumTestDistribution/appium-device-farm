@@ -16,7 +16,6 @@ import ip from 'ip';
 import NodeDevices from './NodeDevices';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
-import { DeviceModel } from '../data-service/db';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
