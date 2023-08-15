@@ -37,7 +37,7 @@ appium server -ka 800 --use-plugins=device-farm --config ./server-config.json -p
 
 - Navigate to localhost:4723/device-farm once the appium server is started.
 
-<img src="./assets/images/demo.gif">
+<img src="https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/docs/assets/images/demo.gif?raw=true">
 
 User can block/unblock devices from Dashboard manually. These devices will not be picked up for automation.
 

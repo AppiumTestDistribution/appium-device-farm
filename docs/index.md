@@ -29,5 +29,5 @@ Use the navigation on the left or proceed to [Setup](setup.md)!
 </h3>
 
 <h3>
-	<a href= "https://www.lambdatest.com"><img src="./assets/lt.png" alt="ATD" width="45%" align="top"></a>
+	<a href= "https://www.lambdatest.com"><img src="assets/images/lt.png" alt="ATD" width="45%" align="top"></a>
 </h3>
