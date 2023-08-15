@@ -3,7 +3,6 @@
   "cleanOutputDir": true,
   "entryPointStrategy": "packages",
   "theme": "appium",
-  "entryPoints": ["."],
   "name": "appium-device-farm",
   "out": "docs/reference",
   "packageTitles": [
