@@ -4,9 +4,9 @@
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "build:docs": "appium-docs build",
+    "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
-    "install-docs-deps": "appium-docs init --no-mkdocs -e index.js",
+    "install-docs-deps": "appium-docs init --no-mkdocs -e ./lib/index.js",
     "coverage": "nyc npm run test",
     "test-remote": "mocha --require ts-node/register ./test/e2e/remote.spec.js --timeout 60000 --exit",
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit --timeout=10000",
@@ -56,9 +56,9 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "^2.2.15",
-    "@appium/types": "^0.13.2",
     "@devicefarmer/adbkit": "^3.2.3",
     "@types/node-persist": "^3.1.3",
+    "@types/chai-as-promised": "^7.1.5",
     "appium-adb": "^9.5.0",
     "appium-chromedriver": "^5.2.1",
     "appium-ios-device": "^2.4.1",
@@ -95,6 +95,8 @@
     "appium": "^2.0.0"
   },
   "devDependencies": {
+    "@appium/tsconfig": "^0.3.0",
+    "@appium/types": "^0.13.2",
     "@appium/docutils": "^0.4.3",
     "@appium/fake-driver": "^5.1.5",
     "@appium/plugin-test-support": "^0.3.7",
@@ -197,5 +199,8 @@
   },
   "files": [
     "lib"
-  ]
+  ],
+  "typedoc": {
+    "entryPoint": "./lib/index.js"
+  }
 }
