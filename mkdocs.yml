@@ -31,3 +31,4 @@ nav:
   - Reference:
       - server-args.md
       - capabilities.md
+      - reference/commands/sample.md
