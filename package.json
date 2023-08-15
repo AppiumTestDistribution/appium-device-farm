@@ -95,6 +95,7 @@
     "appium": "^2.0.0"
   },
   "devDependencies": {
+    "vite": "^4.3.9",
     "@appium/docutils": "^0.4.3",
     "@appium/fake-driver": "^5.1.5",
     "@appium/plugin-test-support": "^0.3.7",
