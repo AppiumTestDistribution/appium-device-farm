@@ -1,0 +1,17 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "cleanOutputDir": true,
+  "entryPointStrategy": "packages",
+  "theme": "appium",
+  "entryPoints": ["."],
+  "name": "appium-device-farm",
+  "out": "docs/reference",
+  "packageTitles": [
+    {
+      "name": "appium-device-farm",
+      "title": "Command Reference"
+    }
+  ],
+  "readme": "./README.md"
+}
+

@@ -6,3 +6,4 @@ lib/
 .vscode
 local_appium_home/
 .nyc_output/
+site
