@@ -120,7 +120,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const host = adbInstance.adbHost != null ? adbInstance.adbHost : ip.address();
     return [
       {
-        adbRemoteHost: adbInstance.adbHost,
+        adbRemoteHost: host,
         adbPort: adbInstance.adbPort,
         systemPort,
         sdk,
