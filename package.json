@@ -166,9 +166,6 @@
         "adbRemote": {
           "type": "array"
         },
-        "simulators": {
-          "type": "array"
-        },
         "skipChromeDownload": {
           "type": "boolean"
         },
