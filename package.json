@@ -153,6 +153,9 @@
           "type": "string",
           "default": "both"
         },
+        "simulators": {
+          "type": "array"
+        },
         "iosDeviceType": {
           "type": "string",
           "default": "both"
@@ -184,7 +187,7 @@
     }
   },
   "engines": {
-    "node": ">=18",
+    "node": "^14.17.0 || ^16.13.0 || >=18.0.0",
     "npm": ">=8"
   },
   "lint-staged": {
