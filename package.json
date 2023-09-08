@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.2.2",
+  "version": "8.2.3",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -153,6 +153,9 @@
           "type": "string",
           "default": "both"
         },
+        "simulators": {
+          "type": "array"
+        },
         "iosDeviceType": {
           "type": "string",
           "default": "both"
@@ -181,7 +184,7 @@
     }
   },
   "engines": {
-    "node": ">=18",
+    "node": "^14.17.0 || ^16.13.0 || >=18.0.0",
     "npm": ">=8"
   },
   "lint-staged": {
