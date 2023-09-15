@@ -117,7 +117,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
       this.getDeviceName(adbInstance, device.udid),
       this.getChromeVersion(adbInstance, device.udid, cliArgs),
     ]);
-    const host = adbInstance.adbHost != null ? adbInstance.adbHost : ip.address();
+    let host;
+    if (adbInstance.adbHost != null) {
+      host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
+    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    } else {
+      host = `http://${ip.address()}:${cliArgs.port}`;
+    }
     return [
       {
         adbRemoteHost: adbInstance.adbHost,
@@ -131,7 +138,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         udid: device.udid,
         platform: 'android',
         deviceType: realDevice ? 'real' : 'emulator',
-        host: `http://${host}:${cliArgs.port}`,
+        host,
         totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
         sessionStartTime: 0,
         chromeDriverPath,

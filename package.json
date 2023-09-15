@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.2.3",
+  "version": "8.2.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -161,6 +161,9 @@
           "default": "both"
         },
         "hub": {
+          "type": "string"
+        },
+        "proxyIP": {
           "type": "string"
         },
         "adbRemote": {
