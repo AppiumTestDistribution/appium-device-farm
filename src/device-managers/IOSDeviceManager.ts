@@ -165,6 +165,12 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private async getDeviceInfo(udid: string, cliArgs: any) {
+    let host;
+    if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    } else {
+      host = `http://${ip.address()}:${cliArgs.port}`;
+    }
     const wdaLocalPort = await getFreePort();
     const mjpegServerPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
@@ -179,7 +185,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       realDevice: true,
       deviceType: 'real',
       platform: this.getDevicePlatformName(name),
-      host: `http://${ip.address()}:${cliArgs.port}`,
+      host,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
       derivedDataPath: this.derivedDataPath(cliArgs, udid, true),
