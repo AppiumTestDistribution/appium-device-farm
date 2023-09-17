@@ -1,12 +1,12 @@
 {
   "name": "appium-device-farm",
-  "version": "8.2.2",
+  "version": "8.2.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
-    "build:docs": "appium-docs build",
+    "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
-    "install-docs-deps": "appium-docs init --no-mkdocs -e index.js",
+    "install-docs-deps": "appium-docs init --no-mkdocs -e lib/index.js",
     "coverage": "nyc npm run test",
     "test-remote": "mocha --require ts-node/register ./test/e2e/remote.spec.js --timeout 60000 --exit",
     "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit --timeout=10000",
@@ -102,23 +102,23 @@
     "@babel/core": "7.21.0",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@types/async-lock": "1.4.0",
-    "@types/chai": "4.3.4",
+    "@types/chai": "4.3.6",
     "@types/express": "4.17.17",
     "@types/fs-extra": "^11.0.0",
     "@types/ip": "^1.1.0",
-    "@types/lodash": "4.14.191",
-    "@types/lokijs": "1.5.7",
+    "@types/lodash": "4.14.198",
+    "@types/lokijs": "1.5.10",
     "@types/mocha": "9.1.1",
     "@types/node-schedule": "1.3.2",
-    "@types/tcp-port-used": "1.0.1",
+    "@types/tcp-port-used": "1.0.2",
     "@types/uuid": "8.3.4",
-    "@types/yargs": "17.0.22",
+    "@types/yargs": "17.0.24",
     "@typescript-eslint/eslint-plugin": "5.54.0",
     "@typescript-eslint/parser": "5.54.0",
     "appium-uiautomator2-driver": "^2.10.1",
     "appium-xcuitest-driver": "^4.12.4",
     "babel-eslint": "10.1.0",
-    "chai": "4.3.7",
+    "chai": "4.3.8",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-import": "2.27.5",
@@ -126,7 +126,7 @@
     "husky": "7.0.4",
     "lint-staged": "13.0.0",
     "mocha": "9.2.2",
-    "prettier": "2.8.4",
+    "prettier": "2.8.8",
     "ramda": "0.28.0",
     "sinon": "12.0.1",
     "sinon-chai": "^3.7.0",
@@ -153,11 +153,17 @@
           "type": "string",
           "default": "both"
         },
+        "simulators": {
+          "type": "array"
+        },
         "iosDeviceType": {
           "type": "string",
           "default": "both"
         },
         "hub": {
+          "type": "string"
+        },
+        "proxyIP": {
           "type": "string"
         },
         "adbRemote": {
@@ -181,7 +187,7 @@
     }
   },
   "engines": {
-    "node": ">=18",
+    "node": "^14.17.0 || ^16.13.0 || >=18.0.0",
     "npm": ">=8"
   },
   "lint-staged": {
@@ -198,5 +204,8 @@
   },
   "files": [
     "lib"
-  ]
+  ],
+  "typedoc": {
+    "entryPoint": "lib/index.js"
+  }
 }

@@ -1,4 +1,12 @@
-<img src="./assets/images/remote.jpg">
+---
+title: Remote Execution
+hide:
+  - navigation
+---
+
+<div style="text-align: center">
+  <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/docs/assets/images/remote.jpg" class="center"/>
+</div>
 
 ### HUB
 

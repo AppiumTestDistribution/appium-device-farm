@@ -3,6 +3,8 @@ import { Platform } from '../types/Platform';
 export interface IDevice {
   systemPort: number;
   host: string;
+  proxyPort?: number;
+  proxyHost?: string;
   wdaLocalPort?: number;
   name: string;
   udid: string;

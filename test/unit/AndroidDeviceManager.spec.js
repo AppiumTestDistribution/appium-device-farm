@@ -100,7 +100,7 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5555',
         platform: 'android',
         systemPort: 54321,
-        host: 'http://192.168.0.104:4723',
+        host: 'http://192.168.0.104:5037',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -189,6 +189,57 @@ describe('Android Device Manager', function () {
         platform: 'android',
         systemPort: 54322,
         host: `http://${ip.address()}:4723`,
+        sessionStartTime: 0,
+        totalUtilizationTimeMilliSec: 0,
+        chromeDriverPath: '/var/path/chromedriver',
+      },
+    ]);
+  });
+  it('Android Device List to have host as ProxyIP if provided', async () => {
+    const androidDevices = new AndroidDeviceManager();
+    const deviceList = new Map();
+    const cliArgs = {
+      'device-farm': {
+        platform: 'android',
+        'device-types': 'both',
+        skipChromeDownload: true,
+        proxyIP: 'http://10.1.1.1:3333',
+      },
+    };
+    adb = await getAdbOriginal();
+    deviceList.set(adb, [
+      { udid: 'emulator-5554', state: 'device' },
+      { udid: 'YOGAA1BBB4124', state: 'device' },
+    ]);
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
+    const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion');
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
+    getDeviceVersion.onFirstCall().returns('9');
+    getDeviceVersion.onSecondCall().returns('13');
+    sandbox.stub(androidDevices, 'getDeviceName').returns('Nexus 6');
+    const realDevice = sandbox.stub(androidDevices, 'isRealDevice');
+    realDevice.onFirstCall().returns(false);
+    realDevice.onSecondCall().returns(true);
+    sandbox.stub(Helper, 'getFreePort').returns(54322);
+    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
+    const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, [], {
+      port: 4723,
+      plugin: cliArgs,
+    });
+    expect(devices).to.deep.equal([
+      {
+        busy: false,
+        name: 'Nexus 6',
+        adbPort: 5037,
+        adbRemoteHost: null,
+        state: 'device',
+        deviceType: 'real',
+        sdk: '13',
+        realDevice: true,
+        udid: 'YOGAA1BBB4124',
+        platform: 'android',
+        systemPort: 54322,
+        host: 'http://10.1.1.1:3333',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
