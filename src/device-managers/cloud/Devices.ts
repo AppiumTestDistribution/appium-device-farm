@@ -2,6 +2,14 @@
 import Cloud from '../../enums/Cloud';
 import { IDevice } from '../../interfaces/IDevice';
 import { CloudArgs } from '../../types/CloudArgs';
+import {
+  browserStackSchema,
+  sauceOrLambdaSchema,
+  pCloudySchema,
+  defaultSchema,
+} from '../../types/CloudSchema';
+import logger from '../../logger';
+import { Schema, Validator } from 'jsonschema';
 
 export default class Devices {
   private devices: any;
@@ -14,12 +22,14 @@ export default class Devices {
     this.deviceState = deviceState;
     this.platform = platform;
     this.cloud = cloudArgs;
+    this.validateSchema(defaultSchema);
   }
   async getDevices() {
     const devicesByPlatform = this.devices.filter((value: any) => value.platform === this.platform);
     let cloudDeviceProperties: any;
     const result = devicesByPlatform.map((d: any) => {
       if (this.isBrowserStack()) {
+        this.validateSchema(browserStackSchema);
         cloudDeviceProperties = {
           name: d.deviceName,
           sdk: d['os_version'],
@@ -27,6 +37,7 @@ export default class Devices {
         };
       }
       if (this.isSauceLabs() || this.isLambdaTest()) {
+        this.validateSchema(sauceOrLambdaSchema);
         cloudDeviceProperties = {
           name: d.deviceName,
           sdk: d.platformVersion,
@@ -34,6 +45,7 @@ export default class Devices {
         };
       }
       if (this.isPCloudy()) {
+        this.validateSchema(pCloudySchema);
         cloudDeviceProperties = {
           name: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,
           sdk: d?.pCloudy_DeviceVersion || d?.platformVersion,
@@ -52,6 +64,14 @@ export default class Devices {
     });
     this.deviceState.push(...result);
     return this.deviceState;
+  }
+
+  private validateSchema(schema: Schema) {
+    const v = new Validator();
+    const validationResult = v.validate(this.cloud, schema);
+    if (validationResult.errors.length) {
+      throw new Error(`🔴 Invalid server config ${validationResult.errors} 🔴`);
+    } else logger.info('Loading devices from server config');
   }
 
   private isBrowserStack() {
