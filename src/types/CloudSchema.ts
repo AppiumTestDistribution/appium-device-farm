@@ -1,6 +1,6 @@
 export const browserStackSchema = {
   $schema: 'http://json-schema.org/draft-07/schema',
-  title: 'CloudConfig',
+  title: 'browserstackConfig',
   type: 'object',
   required: ['cloudName', 'url', 'devices'],
   properties: {
@@ -35,7 +35,7 @@ export const browserStackSchema = {
 
 export const sauceOrLambdaSchema = {
   $schema: 'http://json-schema.org/draft-07/schema',
-  title: 'CloudConfig',
+  title: 'sauceLabsOrLambdaConfig',
   type: 'object',
   required: ['cloudName', 'url', 'devices'],
   properties: {
@@ -70,7 +70,7 @@ export const sauceOrLambdaSchema = {
 
 export const pCloudySchema = {
   $schema: 'http://json-schema.org/draft-07/schema',
-  title: 'CloudConfig',
+  title: 'pCloudyConfig',
   type: 'object',
   required: ['cloudName', 'url', 'devices'],
   properties: {
@@ -105,13 +105,13 @@ export const pCloudySchema = {
 
 export const defaultSchema = {
   $schema: 'http://json-schema.org/draft-07/schema',
-  title: 'CloudConfig',
+  title: 'defaultCloudConfig',
   type: 'object',
   required: ['cloudName', 'url', 'devices'],
   properties: {
     cloudName: {
       type: 'string',
-      description: 'pCloudy',
+      description: 'cloudName',
     },
     url: {
       type: 'string',
