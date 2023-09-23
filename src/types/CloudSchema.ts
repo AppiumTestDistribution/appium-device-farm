@@ -6,7 +6,7 @@ export const browserStackSchema = {
   properties: {
     cloudName: {
       type: 'string',
-      description: 'Name of cloud browserstack/sauce/lambdatest/pCloudy',
+      description: 'specify cloudName as browserstack',
     },
     url: {
       type: 'string',
@@ -41,7 +41,7 @@ export const sauceOrLambdaSchema = {
   properties: {
     cloudName: {
       type: 'string',
-      description: 'sauce or lambdatest',
+      description: 'specify cloudName as sauce or lambdatest',
     },
     url: {
       type: 'string',
@@ -76,7 +76,7 @@ export const pCloudySchema = {
   properties: {
     cloudName: {
       type: 'string',
-      description: 'pCloudy',
+      description: 'specify cloudName as pCloudy',
     },
     url: {
       type: 'string',
@@ -110,12 +110,10 @@ export const defaultSchema = {
   required: ['cloudName', 'url', 'devices'],
   properties: {
     cloudName: {
-      type: 'string',
-      description: 'cloudName',
+      type: 'string'
     },
     url: {
-      type: 'string',
-      description: 'Url of cloud',
+      type: 'string'
     },
     devices: {
       type: 'array',
