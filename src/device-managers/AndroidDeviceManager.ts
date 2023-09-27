@@ -100,12 +100,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
             log.info(`Android Device details for ${device.udid} not available. So querying now.`);
             // device may have changed the status since the last time we queried
             // we want to avoid device with offline or unauthorized status
-            //if (device.state === 'device') {
+            if (device.state === 'device') {
               const deviceInfo = await this.deviceInfo(device, adbInstance, cliArgs);
               deviceState.push(deviceInfo);
-            //} else {
-            //  log.info(`Device ${device.udid} is not in "device" state. So ignoring.`);
-            //}
+            } else {
+              log.info(`Device ${device.udid} is not in "device" state. So ignoring.`);
+            }
           }
         }
       });
