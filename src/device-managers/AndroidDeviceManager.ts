@@ -127,7 +127,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     return [
       {
-        adbRemoteHost: adbInstance.adbHost,
+        adbRemoteHost: host,
         adbPort: adbInstance.adbPort,
         systemPort,
         sdk,
