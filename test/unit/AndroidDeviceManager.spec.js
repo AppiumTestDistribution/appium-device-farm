@@ -87,6 +87,7 @@ describe('Android Device Manager', function () {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
+        userBlocked: false,
       },
       {
         busy: false,
@@ -104,6 +105,7 @@ describe('Android Device Manager', function () {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
+        userBlocked: false,
       },
     ]);
   });
@@ -148,6 +150,7 @@ describe('Android Device Manager', function () {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
+        userBlocked: false,
       },
     ]);
   });
@@ -192,6 +195,7 @@ describe('Android Device Manager', function () {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
+        userBlocked: false,
       },
     ]);
   });
@@ -243,6 +247,7 @@ describe('Android Device Manager', function () {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
+        userBlocked: false,
       },
     ]);
   });
