@@ -39,13 +39,21 @@ import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
+import { SessionManager } from './sessions/SessionManager';
+import { LocalSession } from './sessions/LocalSession';
+import { CloudSession } from './sessions/CloudSession';
+import { RemoteSession } from './sessions/RemoteSession';
+import { ISession } from './interfaces/ISession';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
 class DevicePlugin extends BasePlugin {
+  private sessionManager: SessionManager;
+
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
+    this.sessionManager = new SessionManager();
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -184,7 +192,7 @@ class DevicePlugin extends BasePlugin {
     );
     let session;
     if (!device.host.includes(ip.address())) {
-      const remoteUrl = hubUrl(device);
+      const remoteUrl = `${hubUrl(device)}/session`;
       let capabilitiesToCreateSession = { capabilities: caps };
       if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
         capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
@@ -239,6 +247,19 @@ class DevicePlugin extends BasePlugin {
       if (!device.host.includes(ip.address())) {
         addProxyHandler(sessionId, device.host);
       }
+
+      let sessionInstance: ISession;
+
+      if (device.host.includes(ip.address())) {
+        sessionInstance = new LocalSession(sessionId);
+      } else if (device.hasOwnProperty('cloud')) {
+        sessionInstance = new CloudSession(hubUrl(device), sessionId);
+      } else {
+        sessionInstance = new RemoteSession(hubUrl(device), sessionId);
+      }
+
+      this.sessionManager.addSession(sessionId, sessionInstance);
+
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
