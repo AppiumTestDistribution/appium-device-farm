@@ -83,7 +83,7 @@ export function nodeUrl(device: IDevice): string {
     }
   }
   // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
-  return `${host}/wd/hub/session`;
+  return `${host}/wd/hub`;
 }
 
 export async function isPortBusy(port: number) {
@@ -138,14 +138,14 @@ export function stripAppiumPrefixes(caps: any) {
     caps,
     nonPrefixedCaps,
   );
-  const badPrefixedCaps = [];
+  const badPrefixedCaps: string[] = [];
 
   // Strip out the 'appium:' prefix
   for (const prefixedCap of prefixedCaps) {
     const strippedCapName =
       /** @type {import('type-fest').StringKeyOf<import('@appium/types').Capabilities<C>>} */ prefixedCap.substring(
         APPIUM_VENDOR_PREFIX.length,
-      );
+      ) as string;
 
     // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
     if (isStandardCap(strippedCapName)) {
