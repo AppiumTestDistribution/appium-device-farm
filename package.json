@@ -119,7 +119,7 @@
     "appium-uiautomator2-driver": "^2.10.1",
     "appium-xcuitest-driver": "^4.12.4",
     "babel-eslint": "10.1.0",
-    "chai": "4.3.9",
+    "chai": "4.3.10",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-import": "2.27.5",
