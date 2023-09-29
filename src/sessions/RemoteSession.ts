@@ -2,7 +2,7 @@ import SessionType from '../enums/SessionType';
 import { ISession } from '../interfaces/ISession';
 
 export class RemoteSession implements ISession {
-  constructor(private baseUrl, protected sessionId: string) {}
+  constructor(private baseUrl: string, protected sessionId: string) {}
 
   getType(): SessionType {
     return SessionType.CLOUD;
