@@ -24,10 +24,8 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
 
 async function proxyResponseInterceptor(responseBuffer: any, proxyRes: any, req: any, res: any) {
   const responseString: any = responseBuffer.toString('utf8');
-  const requestCacheEntry = ProxyRequestCache.get(req.request_id);
+  const requestCacheEntry = ProxyRequestCache.get(req.id);
   requestCacheEntry?.waitForResponse.resolve(responseString);
-  console.log('Response inside proxy');
-  console.log(responseString);
   await requestCacheEntry?.requestLock.promise;
   return responseString;
 }
