@@ -26,6 +26,8 @@ async function proxyResponseInterceptor(responseBuffer: any, proxyRes: any, req:
   const responseString: any = responseBuffer.toString('utf8');
   const requestCacheEntry = ProxyRequestCache.get(req.request_id);
   requestCacheEntry?.waitForResponse.resolve(responseString);
+  console.log('Response inside proxy');
+  console.log(responseString);
   await requestCacheEntry?.requestLock.promise;
   return responseString;
 }
