@@ -39,7 +39,7 @@ import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
-import { SessionManager } from './sessions/SessionManager';
+import { SESSION_MANAGER } from './sessions/SessionManager';
 import { LocalSession } from './sessions/LocalSession';
 import { CloudSession } from './sessions/CloudSession';
 import { RemoteSession } from './sessions/RemoteSession';
@@ -49,11 +49,8 @@ const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
 class DevicePlugin extends BasePlugin {
-  private sessionManager: SessionManager;
-
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
-    this.sessionManager = new SessionManager();
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -258,7 +255,7 @@ class DevicePlugin extends BasePlugin {
         sessionInstance = new RemoteSession(hubUrl(device), sessionId);
       }
 
-      this.sessionManager.addSession(sessionId, sessionInstance);
+      SESSION_MANAGER.addSession(sessionId, sessionInstance);
 
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
