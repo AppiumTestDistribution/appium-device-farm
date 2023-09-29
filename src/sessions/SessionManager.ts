@@ -7,7 +7,7 @@ export class SessionManager {
     this.sessionMap.set(sessionId, session);
   }
 
-  getSession(sessionId: string, session: ISession) {
+  getSession(sessionId: string) {
     this.sessionMap.get(sessionId);
   }
 }

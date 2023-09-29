@@ -75,11 +75,11 @@ export function nodeUrl(device: IDevice): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
-      return `${host}/wd/hub/session`;
+      return `${host}/wd/hub/`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
-      }/wd/hub/session`;
+      }/wd/hub`;
     }
   }
   // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
