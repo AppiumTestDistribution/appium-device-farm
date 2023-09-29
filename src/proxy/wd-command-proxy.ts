@@ -15,6 +15,7 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
       target: new URL(remoteHost).origin,
       logLevel: 'debug',
       changeOrigin: true,
+      selfHandleResponse: true,
       onProxyReq: fixRequestBody,
       onProxyRes: responseInterceptor(proxyResponseInterceptor),
     })
@@ -98,7 +99,8 @@ async function handleRemoteRequest(
   const { waitForResponse, requestLock } = ProxyRequestCache.add(req.id);
   remoteProxyMap.get(sessionId)(req, res, next);
   const response = await waitForResponse.promise;
-  //console.log(response);
+  console.log('Response from proxy');
+  console.log(response);
   // take screen shot and save logs to db
   requestLock.resolve();
 }
