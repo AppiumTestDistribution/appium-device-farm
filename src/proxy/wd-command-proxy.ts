@@ -15,9 +15,8 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
       target: new URL(remoteHost).origin,
       logLevel: 'debug',
       changeOrigin: true,
-      selfHandleResponse: true,
       onProxyReq: fixRequestBody,
-      onProxyRes: responseInterceptor(proxyResponseInterceptor),
+      //onProxyRes: responseInterceptor(proxyResponseInterceptor),
     })
   );
 }
@@ -48,8 +47,10 @@ async function handler(req: Request, res: Response, next: NextFunction) {
   if (!sessionId) {
     return next();
   }
+
   if (remoteProxyMap.has(sessionId)) {
-    handleRemoteRequest(sessionId, req, res, next);
+    handleLocalRequest(sessionId, req, res);
+    remoteProxyMap.get(sessionId)(req, res, next);
     if (req.method === 'DELETE') {
       logger.info(
         `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`
@@ -58,16 +59,12 @@ async function handler(req: Request, res: Response, next: NextFunction) {
       removeProxyHandler(sessionId);
     }
   } else {
-    handleLocalRequest(sessionId, req, res, next);
+    handleLocalRequest(sessionId, req, res);
+    next();
   }
 }
 
-async function handleLocalRequest(
-  sessionId: string,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function handleLocalRequest(sessionId: string, req: Request, res: Response) {
   const [oldWrite, oldEnd] = [res.write, res.end];
   const chunks: Buffer[] = [];
 
@@ -82,11 +79,12 @@ async function handleLocalRequest(
     }
     const body = Buffer.concat(chunks).toString('utf8');
     const statusCode = res.statusCode;
-    //console.log(new Date(), `  ↪ [${statusCode}]: ${body}`);
+    console.log(new Date(), `  ↪ [${statusCode}]: ${body}`);
     // take screen shot and save logs to db
+    console.log('Response from proxy');
+    //console.log(response);
     oldEnd.apply(res, args);
   };
-  next();
 }
 
 async function handleRemoteRequest(
