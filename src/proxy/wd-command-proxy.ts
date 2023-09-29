@@ -44,6 +44,8 @@ function getSessionIdFromUr(url: string) {
 
 async function handler(req: Request, res: Response, next: NextFunction) {
   const sessionId = getSessionIdFromUr(req.url);
+  // Hack to decode gzip responses in lambdatest
+  req.headers['accept-encoding'] = 'deflate';
   if (!sessionId) {
     return next();
   }
@@ -68,14 +70,15 @@ async function handleLocalRequest(sessionId: string, req: Request, res: Response
   const [oldWrite, oldEnd] = [res.write, res.end];
   const chunks: Buffer[] = [];
 
-  (res.write as unknown) = function (...args: any) {
-    chunks.push(Buffer.from(args[0]));
-    oldWrite.apply(res, args);
+  (res.write as unknown) = function (chunk: any) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    // eslint-disable-next-line prefer-rest-params
+    oldWrite.apply(res, arguments as any);
   };
 
-  (res.end as unknown) = async function (...args: any) {
-    if (args[0]) {
-      chunks.push(Buffer.from(args[0]));
+  (res.end as unknown) = async function (chunk: any) {
+    if (chunk) {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
     }
     const body = Buffer.concat(chunks).toString('utf8');
     const statusCode = res.statusCode;
@@ -83,7 +86,8 @@ async function handleLocalRequest(sessionId: string, req: Request, res: Response
     // take screen shot and save logs to db
     console.log('Response from proxy');
     //console.log(response);
-    oldEnd.apply(res, args);
+    // eslint-disable-next-line prefer-rest-params
+    oldEnd.apply(res, arguments as any);
   };
 }
 

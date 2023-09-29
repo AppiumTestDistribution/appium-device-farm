@@ -72,8 +72,6 @@ export function hubUrl(device: IDevice) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
       return `${host}`;
     } else {
-      console.log('*********** KEY ***********************');
-      process.env.CLOUD_KEY?.split('').forEach((k) => console.log(k));
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
       }/wd/hub`;
