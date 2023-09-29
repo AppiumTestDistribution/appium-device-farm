@@ -55,7 +55,7 @@ import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { PluginConfig, ServerArgs } from '@appium/types';
-import { SessionManager } from './sessions/SessionManager';
+import { SESSION_MANAGER } from './sessions/SessionManager';
 import { LocalSession } from './sessions/LocalSession';
 import { CloudSession } from './sessions/CloudSession';
 import { RemoteSession } from './sessions/RemoteSession';
@@ -341,7 +341,7 @@ class DevicePlugin extends BasePlugin {
         sessionInstance = new RemoteSession(hubUrl(device), sessionId);
       }
 
-      this.sessionManager.addSession(sessionId, sessionInstance);
+      SESSION_MANAGER.addSession(sessionId, sessionInstance);
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }

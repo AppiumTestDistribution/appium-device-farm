@@ -5,6 +5,7 @@ import { unblockDevice } from '../data-service/device-service';
 import logger from '../logger';
 import ProxyRequestCache from './ProxyRequestGaurd';
 import { v4 as uuid } from 'uuid';
+import { SESSION_MANAGER } from '../sessions/SessionManager';
 
 const remoteProxyMap: Map<string, any> = new Map();
 
@@ -46,7 +47,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
   const sessionId = getSessionIdFromUr(req.url);
   // Hack to decode gzip responses in lambdatest
   req.headers['accept-encoding'] = 'deflate';
-  if (!sessionId) {
+  if (!req.path.startsWith('/wd/hub') || !sessionId || !SESSION_MANAGER.isValidSession(sessionId)) {
     return next();
   }
 
