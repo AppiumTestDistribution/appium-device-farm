@@ -1,8 +1,24 @@
 import SessionType from '../enums/SessionType';
-import { ISession } from '../interfaces/ISession';
+import { RemoteSession } from './RemoteSession';
 
-export class LocalSession implements ISession {
-  constructor(private sessionId: string) {}
+function constructBasePath(path: string) {
+  if (!path || path == '') {
+    return '/wd-internal';
+  }
+  if (!path.startsWith('/')) {
+    path = `/${path}`;
+  }
+  if (path.endsWith('/')) {
+    path = path.substr(0, path.length - 2);
+  }
+  return `${path}/wd-internal`;
+}
+
+export class LocalSession extends RemoteSession {
+  constructor(sessionId: string, private driver: any) {
+    const { address, port, basePath } = driver.opts || driver;
+    super(sessionId, `http://${address}:${port}${constructBasePath(basePath)}`);
+  }
 
   getType(): SessionType {
     return SessionType.LOCAL;
@@ -10,10 +26,6 @@ export class LocalSession implements ISession {
 
   getId(): string {
     return this.sessionId;
-  }
-
-  getScreenShot(): string {
-    throw new Error('Method not implemented.');
   }
 
   getVideo(): string {

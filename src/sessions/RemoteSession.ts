@@ -1,8 +1,10 @@
+import axios from 'axios';
 import SessionType from '../enums/SessionType';
 import { ISession } from '../interfaces/ISession';
+import { response } from 'express';
 
 export class RemoteSession implements ISession {
-  constructor(private baseUrl: string, protected sessionId: string) {}
+  constructor(protected sessionId: string, private baseUrl: string) {}
 
   getType(): SessionType {
     return SessionType.CLOUD;
@@ -12,8 +14,11 @@ export class RemoteSession implements ISession {
     return this.sessionId;
   }
 
-  getScreenShot(): string {
-    throw new Error('Method not implemented.');
+  getScreenShot(): Promise<string> {
+    return axios({
+      method: 'get',
+      url: `${this.baseUrl}/session/${this.sessionId}/screenshot`,
+    }).then((response) => (response.data ? response.data.value : ''));
   }
 
   getVideo(): string {

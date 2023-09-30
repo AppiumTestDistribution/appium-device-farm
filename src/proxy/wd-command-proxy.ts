@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { createProxyMiddleware, fixRequestBody, responseInterceptor } from 'http-proxy-middleware';
+import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
 import _ from 'lodash';
 import { unblockDevice } from '../data-service/device-service';
 import logger from '../logger';
-import ProxyRequestCache from './ProxyRequestGaurd';
-import { v4 as uuid } from 'uuid';
 import { SESSION_MANAGER } from '../sessions/SessionManager';
-
+import { DASHBORD_EVENT_MANAGER } from '../dashboard/event-manager';
 const remoteProxyMap: Map<string, any> = new Map();
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
@@ -17,17 +15,8 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
       logLevel: 'debug',
       changeOrigin: true,
       onProxyReq: fixRequestBody,
-      //onProxyRes: responseInterceptor(proxyResponseInterceptor),
     })
   );
-}
-
-async function proxyResponseInterceptor(responseBuffer: any, proxyRes: any, req: any, res: any) {
-  const responseString: any = responseBuffer.toString('utf8');
-  const requestCacheEntry = ProxyRequestCache.get(req.id);
-  requestCacheEntry?.waitForResponse.resolve(responseString);
-  await requestCacheEntry?.requestLock.promise;
-  return responseString;
 }
 
 export function removeProxyHandler(sessionId: string) {
@@ -44,15 +33,25 @@ function getSessionIdFromUr(url: string) {
 }
 
 async function handler(req: Request, res: Response, next: NextFunction) {
-  const sessionId = getSessionIdFromUr(req.url);
-  // Hack to decode gzip responses in lambdatest
-  req.headers['accept-encoding'] = 'deflate';
-  if (!req.path.startsWith('/wd/hub') || !sessionId || !SESSION_MANAGER.isValidSession(sessionId)) {
+  if (new RegExp(/wd-internal\//).test(req.url)) {
+    req.url = req.originalUrl = req.url.replace('wd-internal/', '');
     return next();
   }
 
+  if (!req.path.startsWith('/wd/hub')) {
+    return next();
+  }
+
+  const sessionId = getSessionIdFromUr(req.url);
+  // Hack to decode gzip responses in lambdatest
+  req.headers['accept-encoding'] = 'deflate';
+  if (!sessionId || !SESSION_MANAGER.isValidSession(sessionId)) {
+    return next();
+  }
+
+  interceptResponse(sessionId, req, res);
+
   if (remoteProxyMap.has(sessionId)) {
-    handleLocalRequest(sessionId, req, res);
     remoteProxyMap.get(sessionId)(req, res, next);
     if (req.method === 'DELETE') {
       logger.info(
@@ -62,50 +61,37 @@ async function handler(req: Request, res: Response, next: NextFunction) {
       removeProxyHandler(sessionId);
     }
   } else {
-    handleLocalRequest(sessionId, req, res);
     next();
   }
 }
 
-async function handleLocalRequest(sessionId: string, req: Request, res: Response) {
-  const [oldWrite, oldEnd] = [res.write, res.end];
+async function interceptResponse(sessionId: string, req: Request, res: Response) {
+  const [originalWrite, originalSend, originalEnd] = [res.write, res.send, res.end];
   const chunks: Buffer[] = [];
 
-  (res.write as unknown) = function (chunk: any) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-    // eslint-disable-next-line prefer-rest-params
-    oldWrite.apply(res, arguments as any);
+  // (res.send as unknown) = function (...args: any) {
+  //   chunks.push(typeof args[0] === 'string' ? Buffer.from(args[0]) : args[0]);
+  //   originalSend.apply(res, args);
+  // };
+
+  (res.write as unknown) = function (...args: any) {
+    chunks.push(typeof args[0] === 'string' ? Buffer.from(args[0]) : args[0]);
+    originalWrite.apply(res, args);
   };
 
-  (res.end as unknown) = async function (chunk: any) {
-    if (chunk) {
-      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  (res.end as unknown) = async function (...args: any) {
+    if (args[0]) {
+      chunks.push(typeof args[0] === 'string' ? Buffer.from(args[0]) : args[0]);
     }
     const body = Buffer.concat(chunks).toString('utf8');
-    const statusCode = res.statusCode;
-    console.log(new Date(), `  ↪ [${statusCode}]: ${body}`);
-    // take screen shot and save logs to db
-    console.log('Response from proxy');
-    //console.log(response);
-    // eslint-disable-next-line prefer-rest-params
-    oldEnd.apply(res, arguments as any);
-  };
-}
+    if (req.method === 'DELETE') {
+      DASHBORD_EVENT_MANAGER.onSessionStoped();
+    } else {
+      DASHBORD_EVENT_MANAGER.onSessionCommand(sessionId, req, res, body);
+    }
 
-async function handleRemoteRequest(
-  sessionId: string,
-  req: Request & { id?: string },
-  res: Response,
-  next: NextFunction
-) {
-  req.id = uuid();
-  const { waitForResponse, requestLock } = ProxyRequestCache.add(req.id);
-  remoteProxyMap.get(sessionId)(req, res, next);
-  const response = await waitForResponse.promise;
-  console.log('Response from proxy');
-  console.log(response);
-  // take screen shot and save logs to db
-  requestLock.resolve();
+    originalEnd.apply(res, args);
+  };
 }
 
 export function registerProxyMiddlware(expressApp: any) {
