@@ -248,11 +248,11 @@ class DevicePlugin extends BasePlugin {
       let sessionInstance: ISession;
 
       if (device.host.includes(ip.address())) {
-        sessionInstance = new LocalSession(sessionId);
+        sessionInstance = new LocalSession(sessionId, driver);
       } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession(hubUrl(device), sessionId);
+        sessionInstance = new CloudSession(sessionId, hubUrl(device));
       } else {
-        sessionInstance = new RemoteSession(hubUrl(device), sessionId);
+        sessionInstance = new RemoteSession(sessionId, hubUrl(device));
       }
 
       SESSION_MANAGER.addSession(sessionId, sessionInstance);

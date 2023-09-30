@@ -57,7 +57,7 @@ export function getAllDevices(): Array<IDevice> {
 
 export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
   const semver = require('semver');
-  var results = DeviceModel.chain();
+  let results = DeviceModel.chain();
 
   if (semver.coerce(filterOptions.minSDK)) {
     results = results.where(function (obj: IDevice) {

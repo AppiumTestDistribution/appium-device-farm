@@ -11,7 +11,7 @@ export class CloudSession extends RemoteSession {
     return this.sessionId;
   }
 
-  getScreenShot(): string {
+  getScreenShot(): Promise<string> {
     throw new Error('Method not implemented.');
   }
 

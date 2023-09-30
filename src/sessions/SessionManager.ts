@@ -11,7 +11,7 @@ class SessionManager {
   }
 
   getSession(sessionId: string) {
-    this.sessionMap.get(sessionId);
+    return this.sessionMap.get(sessionId);
   }
 }
 
