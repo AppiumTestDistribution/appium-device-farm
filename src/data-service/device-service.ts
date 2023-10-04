@@ -3,6 +3,7 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import logger from '../logger';
 import { setUtilizationTime } from '../device-utils';
+import _ from 'lodash';
 
 export function removeDevice(device: any) {
   DeviceModel.chain()
@@ -15,6 +16,9 @@ export function addNewDevice(devices: Array<IDevice>) {
    * If the newly identified devices are not in the database, then add them to the database
    */
   const devicesInDB = DeviceModel.chain().find().data();
+  if (!_.isArray(devices)) {
+    devices = [devices];
+  }
   devices.forEach(function (device) {
     const isDeviceAlreadyPresent = devicesInDB.find(
       (d: IDevice) => d.udid === device.udid && device.host === d.host

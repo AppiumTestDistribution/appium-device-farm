@@ -28,4 +28,5 @@ export interface IDevice {
   capability?: any;
   adbRemoteHost: string;
   adbPort: number;
+  nodeId?: string;
 }

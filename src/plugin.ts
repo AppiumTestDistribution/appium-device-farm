@@ -37,7 +37,6 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // @ts-ignore
 import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
-import ip from 'ip';
 import _ from 'lodash';
 import { SESSION_MANAGER } from './sessions/SessionManager';
 import { LocalSession } from './sessions/LocalSession';
@@ -49,6 +48,8 @@ const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 
 class DevicePlugin extends BasePlugin {
+  public static NODE_ID: string;
+
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
   }
@@ -72,6 +73,7 @@ class DevicePlugin extends BasePlugin {
     let iosDeviceType;
     let skipChromeDownload;
 
+    DevicePlugin.NODE_ID = uuidv4();
     registerProxyMiddlware(expressApp);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
@@ -100,6 +102,7 @@ class DevicePlugin extends BasePlugin {
       platform,
       deviceTypes,
       cliArgs,
+      nodeId: DevicePlugin.NODE_ID,
     });
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
@@ -108,7 +111,7 @@ class DevicePlugin extends BasePlugin {
     await initlializeStorage();
 
     logger.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`
     );
 
     if (isHub(cliArgs)) {
@@ -188,7 +191,9 @@ class DevicePlugin extends BasePlugin {
       }
     );
     let session;
-    if (!device.host.includes(ip.address())) {
+    const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
+    // If the session is either remote or in cloud
+    if (isRemoteOrCloudSession) {
       const remoteUrl = `${hubUrl(device)}/session`;
       let capabilitiesToCreateSession = { capabilities: caps };
       if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
@@ -241,13 +246,13 @@ class DevicePlugin extends BasePlugin {
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (!device.host.includes(ip.address())) {
+      if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
 
       let sessionInstance: ISession;
 
-      if (device.host.includes(ip.address())) {
+      if (device.nodeId === DevicePlugin.NODE_ID) {
         sessionInstance = new LocalSession(sessionId, driver);
       } else if (device.hasOwnProperty('cloud')) {
         sessionInstance = new CloudSession(sessionId, hubUrl(device));
