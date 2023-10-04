@@ -62,11 +62,11 @@ export class ADTDatabase {
     log.debug(`Creating new database: ${ADTDatabase.dbname()}`);
 
     const db = await new Promise<loki>((resolve, reject) => {
-      const db = new loki(ADTDatabase.dbname(), {
-        autoload: true,
-        //autosave: true,
-        //autosaveInterval: 4000,
-      });
+
+        const db = new loki(ADTDatabase.dbname(), {
+            persistenceMethod: 'memory',
+            autosave: false,
+        });
 
       db.on('autoload', () => {
         log.info('Database autoloaded');

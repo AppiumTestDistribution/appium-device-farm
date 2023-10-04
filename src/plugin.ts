@@ -48,8 +48,6 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
-import ip from 'ip';
-import _ from 'lodash';
 import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
@@ -73,6 +71,7 @@ class DevicePlugin extends BasePlugin {
   private sessionManager: SessionManager;
   static nodeBasePath: string = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
+  public static NODE_ID: string;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -125,7 +124,7 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
-
+    DevicePlugin.NODE_ID = uuidv4();
     // I'm transferring the CLI Args to pluginArgs here.
     DevicePlugin.nodeBasePath = cliArgs.basePath;
 
@@ -168,7 +167,7 @@ class DevicePlugin extends BasePlugin {
       pluginArgs.skipChromeDownload === false ? await ChromeDriverManager.getInstance() : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(pluginArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
+    const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs, DevicePlugin.NODE_ID);
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
@@ -176,7 +175,7 @@ class DevicePlugin extends BasePlugin {
     await initializeStorage();
 
     log.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm`,
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
     );
 
     const hubArgument = pluginArgs.hub;
@@ -333,7 +332,7 @@ class DevicePlugin extends BasePlugin {
 
       let sessionInstance: ISession;
 
-      if (device.host.includes(ip.address())) {
+      if (device.nodeId === DevicePlugin.NODE_ID) {
         sessionInstance = new LocalSession(sessionId, driver);
       } else if (device.hasOwnProperty('cloud')) {
         sessionInstance = new CloudSession(sessionId, hubUrl(device));
