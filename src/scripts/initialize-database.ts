@@ -6,7 +6,7 @@ async function main() {
     ...process.env,
     DATABASE_URL: `file:${config.databasePath}`,
   };
-  execSync('npm run run-db-migration', {
+  execSync('prisma migrate deploy && prisma generate', {
     env,
     stdio: 'inherit',
   });
