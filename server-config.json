@@ -5,6 +5,7 @@
       "device-farm": {
         "platform": "android",
         "skipChromeDownload": true,
+        "emulators": ["nightwatch-android-11", "Pixel_3a_API_33_arm64-v8a"],
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"
         }

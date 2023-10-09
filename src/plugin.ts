@@ -39,6 +39,8 @@ import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
+import { ServerCLI } from './types/CLIArgs';
+import { ADB } from "appium-adb";
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -66,7 +68,7 @@ class DevicePlugin extends BasePlugin {
     let androidDeviceType;
     let iosDeviceType;
     let skipChromeDownload;
-
+    let emulators;
     registerProxyMiddlware(expressApp);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
@@ -74,6 +76,7 @@ class DevicePlugin extends BasePlugin {
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
+      emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
     }
 
     expressApp.use('/device-farm', router);
@@ -82,6 +85,16 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
+
+    if (emulators) {
+      logger.info('Emulators will be booted!!');
+      const adb = await ADB.createADB();
+      const array = cliArgs.plugin['device-farm'].emulators;
+      const promiseArray = array.map(async (arr: any) => {
+        await Promise.all([await adb.launchAVD(arr)]);
+      });
+      await Promise.all(promiseArray);
+    }
 
     if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
 
