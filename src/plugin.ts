@@ -253,11 +253,11 @@ class DevicePlugin extends BasePlugin {
       let sessionInstance: ISession;
 
       if (device.nodeId === DevicePlugin.NODE_ID) {
-        sessionInstance = new LocalSession(sessionId, driver);
+        sessionInstance = new LocalSession(sessionId, driver, device);
       } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession(sessionId, hubUrl(device));
+        sessionInstance = new CloudSession(sessionId, hubUrl(device), device);
       } else {
-        sessionInstance = new RemoteSession(sessionId, hubUrl(device));
+        sessionInstance = new RemoteSession(sessionId, hubUrl(device), device);
       }
 
       SESSION_MANAGER.addSession(sessionId, sessionInstance);

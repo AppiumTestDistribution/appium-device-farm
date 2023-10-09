@@ -1,4 +1,5 @@
 import SessionType from '../enums/SessionType';
+import { IDevice } from '../interfaces/IDevice';
 import { RemoteSession } from './RemoteSession';
 
 function constructBasePath(path: string) {
@@ -15,9 +16,9 @@ function constructBasePath(path: string) {
 }
 
 export class LocalSession extends RemoteSession {
-  constructor(sessionId: string, private driver: any) {
+  constructor(sessionId: string, private driver: any, device: IDevice) {
     const { address, port, basePath } = driver.opts || driver;
-    super(sessionId, `http://${address}:${port}${constructBasePath(basePath)}`);
+    super(sessionId, `http://${address}:${port}${constructBasePath(basePath)}`, device);
   }
 
   getType(): SessionType {
