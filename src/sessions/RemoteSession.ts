@@ -2,9 +2,10 @@ import axios from 'axios';
 import SessionType from '../enums/SessionType';
 import { ISession } from '../interfaces/ISession';
 import { response } from 'express';
+import { IDevice } from '../interfaces/IDevice';
 
 export class RemoteSession implements ISession {
-  constructor(protected sessionId: string, private baseUrl: string) {}
+  constructor(protected sessionId: string, private baseUrl: string, private device: IDevice) {}
 
   getType(): SessionType {
     return SessionType.CLOUD;
