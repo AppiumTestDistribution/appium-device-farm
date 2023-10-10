@@ -128,6 +128,8 @@ class DevicePlugin extends BasePlugin {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
     DevicePlugin.NODE_ID = uuidv4();
+    log.info('Cli Args: ' + JSON.stringify(cliArgs));
+
     // I'm transferring the CLI Args to pluginArgs here.
     DevicePlugin.nodeBasePath = cliArgs.basePath;
 
@@ -192,9 +194,8 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.sendNodeDevicesToHubIntervalMs,
       );
     } else {
-      log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
-    } else {
       DevicePlugin.IS_HUB = true;
+      log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
     // check for stale nodes

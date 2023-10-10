@@ -1,4 +1,5 @@
 import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { asyncForEach, getFreePort, hasCloud, hasHub } from '../helpers';
 import { asyncForEach, getFreePort } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';

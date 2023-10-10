@@ -42,8 +42,4 @@ export class LocalSession extends RemoteSession {
   getVideo(): string {
     throw new Error('Method not implemented.');
   }
-
-  startVideoRecording(): boolean {
-    return true;
-  }
 }

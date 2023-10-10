@@ -14,8 +14,6 @@ export interface Config {
 export const config = {
   cacheDir: basePath,
   databasePath: `${basePath}/device-farm.db`,
-  videoSavePath: path.join(basePath, 'videos'),
-  screenshotSavePath: path.join(basePath, 'screen-shots'),
-  logFilePath: path.join(basePath, 'appium-device-farm.log'),
+  sessionAssetsPath: path.join(basePath, 'session'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
 };

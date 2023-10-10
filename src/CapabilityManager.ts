@@ -6,8 +6,11 @@ import { IDevice } from './interfaces/IDevice';
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
   SESSION_NAME = 'name',
-  VIDEO_RECORDING = 'video_recording',
+
+  VIDEO_RECORDING = 'record_video',
+  VIDEO_RESOLUTION = 'video_resolution',
   LIVE_VIDEO = 'live_video',
+
   DEVICE_FARM_OPTIONS = 'df:options',
 }
 

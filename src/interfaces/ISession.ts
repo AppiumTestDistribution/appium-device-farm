@@ -4,7 +4,8 @@ export interface ISession {
   getId(): string;
   getCapabilities(): Record<string, any>;
   getScreenShot(): Promise<string>;
-  getVideo(): string;
-  startVideoRecording(): boolean;
+  stopVideoRecording(): Promise<string | null>;
+  startVideoRecording(options?: { resolution: string }): Promise<void>;
+  isVideoRecordingInProgress(): boolean;
   getType(): SessionType;
 }
