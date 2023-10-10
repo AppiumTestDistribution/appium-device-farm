@@ -8,17 +8,31 @@ generator client {
 }
 
 model Build {
-  id    String    @id @default(uuid())
-  name  String?
-  posts Session[]
+  id        String    @id @default(uuid())
+  name      String?
+  sessions  Session[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Session {
-  id           String   @id
-  buildId      String?
-  build        Build?   @relation(fields: [buildId], references: [id])
-  title        String
-  capabilities String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                   String    @id
+  build_id             String?
+  build                Build?    @relation(fields: [build_id], references: [id])
+  title                String?
+  desired_capabilities String
+  session_capabilities String
+  node_id              String
+  has_live_video       Boolean
+  has_session_video    Boolean
+  startTime            DateTime  @default(now())
+  endTime              DateTime?
+  //device properties
+  device_udid          String
+  device_platform      String
+  device_version       String
+  device_name          String?
+  // Timestamps
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }

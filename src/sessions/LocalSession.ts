@@ -16,9 +16,19 @@ function constructBasePath(path: string) {
 }
 
 export class LocalSession extends RemoteSession {
-  constructor(sessionId: string, private driver: any, device: IDevice) {
+  constructor(
+    sessionId: string,
+    driver: any,
+    device: IDevice,
+    sessionResponse: Record<string, any>
+  ) {
     const { address, port, basePath } = driver.opts || driver;
-    super(sessionId, `http://${address}:${port}${constructBasePath(basePath)}`, device);
+    super(
+      sessionId,
+      `http://${address}:${port}${constructBasePath(basePath)}`,
+      device,
+      sessionResponse
+    );
   }
 
   getType(): SessionType {

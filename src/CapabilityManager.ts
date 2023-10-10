@@ -3,6 +3,14 @@ import { ISessionCapability } from './interfaces/ISessionCapability';
 import _ from 'lodash';
 import { IDevice } from './interfaces/IDevice';
 
+export enum DEVICE_FARM_CAPABILITIES {
+  BUILD_NAME = 'build',
+  SESSION_NAME = 'name',
+  VIDEO_RECORDING = 'video_recording',
+  LIVE_VIDEO = 'live_video',
+  DEVICE_FARM_OPTIONS = 'df:options',
+}
+
 function isCapabilityAlreadyPresent(caps: ISessionCapability, capabilityName: string) {
   return _.has(caps.alwaysMatch, capabilityName) || _.has(caps.firstMatch[0], capabilityName);
 }
@@ -56,4 +64,20 @@ export async function iOSCapabilities(
     'appium:deviceName',
   ];
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
+}
+
+export function getDeviceFarmCapabilities(caps: ISessionCapability) {
+  const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
+  const deviceFarmOptions = mergedCapabilites[DEVICE_FARM_CAPABILITIES.DEVICE_FARM_OPTIONS] || {};
+
+  // Pick all capabilities that starts with df: and store it as a separate object
+  const individualCapabilities = Object.keys(mergedCapabilites)
+    .filter((key) => key.toLowerCase().trim().startsWith('df:'))
+    .reduce((acc: Record<string, any>, originalkey: string) => {
+      const strippedKey = originalkey.split(':')[1];
+      acc[strippedKey] = mergedCapabilites[originalkey];
+      return acc;
+    }, {} as Record<string, any>);
+
+  return _.merge(deviceFarmOptions, individualCapabilities);
 }

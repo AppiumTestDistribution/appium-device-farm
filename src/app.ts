@@ -7,7 +7,7 @@ import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
 import { addNewDevice, getDevice, removeDevice, updateDevice } from './data-service/device-service';
-
+import { prisma } from './prisma';
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
 let dashboardPluginUrl: any = null;
@@ -139,6 +139,11 @@ apiRouter.get('/devices/ios', (req, res) => {
   } else {
     res.json(devices);
   }
+});
+
+apiRouter.get('/sessions', async (req, res) => {
+  const sessions = await prisma.session.findMany();
+  return res.json(sessions);
 });
 
 router.use('/api', apiRouter);
