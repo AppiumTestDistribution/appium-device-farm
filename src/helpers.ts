@@ -91,11 +91,11 @@ export async function isPortBusy(port: number) {
   }
 }
 
-export function isHub(cliArgs: any) {
+export function hasHub(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].hub');
 }
 
-export function isCloud(cliArgs: any) {
+export function hasCloud(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].cloud');
 }
 // Standard, non-prefixed capabilities (see https://www.w3.org/TR/webdriver/#dfn-table-of-standard-capabilities)
@@ -166,4 +166,12 @@ export function stripAppiumPrefixes(caps: any) {
     );
   }
   return strippedCaps;
+}
+
+export function safeParseJson(jsonString: string) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (err) {
+    return jsonString;
+  }
 }

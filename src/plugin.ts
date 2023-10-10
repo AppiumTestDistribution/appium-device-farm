@@ -30,7 +30,7 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
+import { hubUrl, hasHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -77,7 +77,8 @@ class DevicePlugin extends BasePlugin {
     let skipChromeDownload;
 
     DevicePlugin.NODE_ID = uuidv4();
-    registerProxyMiddlware(expressApp);
+    logger.info('Cli Args: ' + JSON.stringify(cliArgs));
+    registerProxyMiddlware(expressApp, cliArgs);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
       platform = cliArgs.plugin['device-farm'].platform;
@@ -117,7 +118,7 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`
     );
 
-    if (isHub(cliArgs)) {
+    if (hasHub(cliArgs)) {
       const hub = cliArgs.plugin['device-farm'].hub;
       await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
       await checkNodeServerAvailability();

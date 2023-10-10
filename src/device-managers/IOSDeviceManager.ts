@@ -3,7 +3,7 @@ import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { getFreePort, isCloud, isHub, isMac } from '../helpers';
+import { getFreePort, hasCloud, hasHub, isMac } from '../helpers';
 import { asyncForEach } from '../helpers';
 import log from '../logger';
 import os from 'os';
@@ -73,7 +73,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     cliArgs: any
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
-    if (isCloud(cliArgs)) {
+    if (hasCloud(cliArgs)) {
       const cloud = new Devices(cliArgs.plugin['device-farm'].cloud, deviceState, 'ios');
       return await cloud.getDevices();
     } else {
@@ -140,7 +140,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     await goIosTracker.start();
     goIosTracker.on('device-connected', async (message) => {
       const deviceAttached = [await this.getDeviceInfo(message.id, cliArgs)];
-      const hubExists = isHub(cliArgs);
+      const hubExists = hasHub(cliArgs);
       if (hubExists) {
         logger.info(`Updating Hub with iOS device ${message.id}`);
         const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
@@ -152,7 +152,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     });
     goIosTracker.on('device-removed', async (message) => {
       const deviceRemoved: any = { udid: message.id, host: ip.address() };
-      const hubExists = isHub(cliArgs);
+      const hubExists = hasHub(cliArgs);
       if (hubExists) {
         logger.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
         const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
@@ -199,7 +199,7 @@ export default class IOSDeviceManager implements IDeviceManager {
    */
   public async getSimulators(cliArgs: any): Promise<Array<IDevice>> {
     const simulators: Array<IDevice> = [];
-    const hubExists = isHub(cliArgs);
+    const hubExists = hasHub(cliArgs);
     await this.fetchLocalSimulators(simulators, cliArgs);
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
     if (hubExists) {

@@ -1,6 +1,6 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort, isCloud, isHub } from '../helpers';
+import { asyncForEach, getFreePort, hasCloud, hasHub } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
 import _ from 'lodash';
@@ -47,7 +47,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     const deviceState: Array<IDevice> = [];
     try {
-      if (isCloud(cliArgs)) {
+      if (hasCloud(cliArgs)) {
         const cloud = new Devices(cliArgs.plugin['device-farm'].cloud, deviceState, 'android');
         return await cloud.getDevices();
       } else {
@@ -131,23 +131,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }
     return {
-        adbRemoteHost: adbInstance.adbHost,
-        adbPort: adbInstance.adbPort,
-        systemPort,
-        sdk,
-        realDevice,
-        name,
-        busy: false,
-        state: device.state,
-        udid: device.udid,
-        platform: 'android',
-        deviceType: realDevice ? 'real' : 'emulator',
-        host,
-        totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-        sessionStartTime: 0,
-        chromeDriverPath,
-        userBlocked: false
-      };
+      adbRemoteHost: adbInstance.adbHost,
+      adbPort: adbInstance.adbPort,
+      systemPort,
+      sdk,
+      realDevice,
+      name,
+      busy: false,
+      state: device.state,
+      udid: device.udid,
+      platform: 'android',
+      deviceType: realDevice ? 'real' : 'emulator',
+      host,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      chromeDriverPath,
+      userBlocked: false,
+    };
   }
 
   private async getAdb(): Promise<any> {
@@ -237,7 +237,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
               cliArgs
             );
             log.info(`Adding device ${clonedDevice.udid} to list!`);
-            const hubExists = isHub(cliArgs);
+            const hubExists = hasHub(cliArgs);
             if (hubExists) {
               log.info(`Updating Hub with device ${clonedDevice.udid}`);
               const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
@@ -250,15 +250,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
         tracker.on('remove', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], host: ip.address() });
-          const hubExists = isHub(cliArgs);
+          const hubExists = hasHub(cliArgs);
           if (hubExists) {
             log.info(`Removing device from Hub with device ${clonedDevice.udid}`);
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
             await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
           } else {
-            log.warn(
-              `Removing device ${clonedDevice.udid} from list as the device was unplugged!`
-            );
+            log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
             removeDevice(clonedDevice);
             this.abort(clonedDevice.udid);
           }

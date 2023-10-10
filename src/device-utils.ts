@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub, cachePath } from './helpers';
+import { isMac, checkIfPathIsAbsolute, hasHub, cachePath } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -257,7 +257,7 @@ export async function getBusyDevicesCount() {
 
 export async function updateDeviceList(cliArgs: any) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
-  if (isHub(cliArgs)) {
+  if (hasHub(cliArgs)) {
     const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
     await nodeDevices.postDevicesToHub(devices, 'add');
   }

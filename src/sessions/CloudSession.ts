@@ -1,5 +1,4 @@
 import SessionType from '../enums/SessionType';
-import { ISession } from '../interfaces/ISession';
 import { RemoteSession } from './RemoteSession';
 
 export class CloudSession extends RemoteSession {
@@ -19,7 +18,11 @@ export class CloudSession extends RemoteSession {
     throw new Error('Method not implemented.');
   }
 
-  startVideoRecording(): boolean {
+  async startVideoRecording() {
+    // no action
+  }
+
+  isVideoRecordingInProgress(): boolean {
     return false;
   }
 }
