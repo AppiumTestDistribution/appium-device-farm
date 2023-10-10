@@ -58,6 +58,8 @@ import { LocalSession } from './sessions/LocalSession';
 import { CloudSession } from './sessions/CloudSession';
 import { RemoteSession } from './sessions/RemoteSession';
 import { ISession } from './interfaces/ISession';
+import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
+import { getDeviceFarmCapabilities } from './CapabilityManager';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -72,6 +74,7 @@ class DevicePlugin extends BasePlugin {
   static nodeBasePath: string = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
   public static NODE_ID: string;
+  public static IS_HUB = false;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -190,6 +193,8 @@ class DevicePlugin extends BasePlugin {
       );
     } else {
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
+    } else {
+      DevicePlugin.IS_HUB = true;
     }
 
     // check for stale nodes
@@ -331,16 +336,24 @@ class DevicePlugin extends BasePlugin {
       }
 
       let sessionInstance: ISession;
-
+      const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
+      const sessionResponse = session.value[1];
       if (device.nodeId === DevicePlugin.NODE_ID) {
-        sessionInstance = new LocalSession(sessionId, driver, device);
+        sessionInstance = new LocalSession(sessionId, driver, device, sessionResponse);
       } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession(sessionId, hubUrl(device), device);
+        sessionInstance = new CloudSession(sessionId, hubUrl(device), device, sessionResponse);
       } else {
-        sessionInstance = new RemoteSession(sessionId, hubUrl(device), device);
+        sessionInstance = new RemoteSession(sessionId, hubUrl(device), device, sessionResponse);
       }
+      SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
 
-      SESSION_MANAGER.addSession(sessionId, sessionInstance);
+      if (DevicePlugin.IS_HUB) {
+        await DASHBORD_EVENT_MANAGER.onSessionStarted(
+          deviceFarmCapabilities,
+          sessionInstance,
+          device
+        );
+      }
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }

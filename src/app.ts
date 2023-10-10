@@ -13,7 +13,7 @@ import {
   removeDevice,
   userUnblockDevice,
 } from './data-service/device-service';
-
+import { prisma } from './prisma';
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
 let dashboardPluginUrl: any = null;
@@ -146,6 +146,11 @@ apiRouter.get('/devices/ios', async (req, res) => {
   } else {
     res.json(devices);
   }
+});
+
+apiRouter.get('/sessions', async (req, res) => {
+  const sessions = await prisma.session.findMany();
+  return res.json(sessions);
 });
 
 staticFilesRouter.use(express.static(path.join(__dirname, '..', 'public')));

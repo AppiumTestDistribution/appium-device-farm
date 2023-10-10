@@ -5,7 +5,16 @@ import { response } from 'express';
 import { IDevice } from '../interfaces/IDevice';
 
 export class RemoteSession implements ISession {
-  constructor(protected sessionId: string, private baseUrl: string, private device: IDevice) {}
+  constructor(
+    protected sessionId: string,
+    protected baseUrl: string,
+    private device: IDevice,
+    protected sessionResponse: Record<string, any>
+  ) {}
+
+  getCapabilities(): Record<string, any> {
+    return this.sessionResponse;
+  }
 
   getType(): SessionType {
     return SessionType.CLOUD;

@@ -49,6 +49,11 @@ async function handler(req: Request, res: Response, next: NextFunction) {
     return next();
   }
 
+  const shouldProceed = await DASHBORD_EVENT_MANAGER.beforeSessionCommand(sessionId, req, res);
+  if (!shouldProceed) {
+    return;
+  }
+
   interceptResponse(sessionId, req, res);
 
   if (remoteProxyMap.has(sessionId)) {
@@ -85,9 +90,9 @@ async function interceptResponse(sessionId: string, req: Request, res: Response)
     }
     const body = Buffer.concat(chunks).toString('utf8');
     if (req.method === 'DELETE') {
-      DASHBORD_EVENT_MANAGER.onSessionStoped();
+      await DASHBORD_EVENT_MANAGER.onSessionStoped(sessionId);
     } else {
-      DASHBORD_EVENT_MANAGER.onSessionCommand(sessionId, req, res, body);
+      await DASHBORD_EVENT_MANAGER.afterSessionCommand(sessionId, req, res, body);
     }
 
     originalEnd.apply(res, args);
