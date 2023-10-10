@@ -40,7 +40,7 @@ import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
 import { ServerCLI } from './types/CLIArgs';
-import { ADB } from "appium-adb";
+import { ADB } from 'appium-adb';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -86,12 +86,12 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
       );
 
-    if (emulators) {
+    if (emulators && cliArgs.plugin['device-farm'].platform.toLowerCase() === 'android') {
       logger.info('Emulators will be booted!!');
       const adb = await ADB.createADB();
       const array = cliArgs.plugin['device-farm'].emulators;
       const promiseArray = array.map(async (arr: any) => {
-        await Promise.all([await adb.launchAVD(arr)]);
+        await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
       });
       await Promise.all(promiseArray);
     }

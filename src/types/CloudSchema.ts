@@ -110,10 +110,10 @@ export const defaultSchema = {
   required: ['cloudName', 'url', 'devices'],
   properties: {
     cloudName: {
-      type: 'string'
+      type: 'string',
     },
     url: {
-      type: 'string'
+      type: 'string',
     },
     devices: {
       type: 'array',
