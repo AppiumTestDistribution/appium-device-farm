@@ -131,23 +131,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }
     return {
-        adbRemoteHost: adbInstance.adbHost,
-        adbPort: adbInstance.adbPort,
-        systemPort,
-        sdk,
-        realDevice,
-        name,
-        busy: false,
-        state: device.state,
-        udid: device.udid,
-        platform: 'android',
-        deviceType: realDevice ? 'real' : 'emulator',
-        host,
-        totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-        sessionStartTime: 0,
-        chromeDriverPath,
-        userBlocked: false
-      };
+      adbRemoteHost: adbInstance.adbHost,
+      adbPort: adbInstance.adbPort,
+      systemPort,
+      sdk,
+      realDevice,
+      name,
+      busy: false,
+      state: device.state,
+      udid: device.udid,
+      platform: 'android',
+      deviceType: realDevice ? 'real' : 'emulator',
+      host,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      chromeDriverPath,
+      userBlocked: false,
+    };
   }
 
   private async getAdb(): Promise<any> {
@@ -256,9 +256,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
             await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
           } else {
-            log.warn(
-              `Removing device ${clonedDevice.udid} from list as the device was unplugged!`
-            );
+            log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
             removeDevice(clonedDevice);
             this.abort(clonedDevice.udid);
           }
