@@ -4,11 +4,17 @@ import { ISession } from '../interfaces/ISession';
 import { IDevice } from '../interfaces/IDevice';
 import { prisma } from '../prisma';
 import logger from '../logger';
-import { getOrCreateNewBuild } from './services/session-service';
+import {
+  getOrCreateNewBuild,
+  getSessionById,
+  updateSessionDetails,
+} from './services/session-service';
 import { DEVICE_FARM_CAPABILITIES } from '../CapabilityManager';
 import _ from 'lodash';
 import { safeParseJson } from '../helpers';
 import { prepareDirectory, saveScreenShot, saveVideoRecording } from './asset-manager';
+import { dashboardCommands } from './commands';
+import { SessionStatus } from '../types/SessionStatus';
 export class DashboardEventManager {
   private SCREENSHOT_FOR_COMMANDS = ['click', 'setUrl', 'setValue', 'performActions'];
 
@@ -40,7 +46,6 @@ export class DashboardEventManager {
     createOptions['session_capabilities'] = JSON.stringify(_.omit(sessionResponse, 'desired'));
     createOptions['node_id'] = device.nodeId;
     createOptions['has_live_video'] = session.getLiveVideoUrl() !== null;
-    createOptions['has_session_video'] = false; // TODO
 
     //device properties
     createOptions['device_udid'] = device.udid;
@@ -56,14 +61,14 @@ export class DashboardEventManager {
   async onSessionStoped(sessionId: string) {
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {
-      await prisma.session.update({
-        where: {
-          id: sessionId,
-        },
-        data: {
-          endTime: new Date(),
-        },
-      });
+      const sessionEntry = await getSessionById(sessionId);
+      const updateData: any = {
+        endTime: new Date(),
+      };
+      if (sessionEntry?.status === SessionStatus.RUNNING) {
+        updateData['status'] = SessionStatus.UNMARKED;
+      }
+      await updateSessionDetails(sessionId, updateData);
     }
   }
 
@@ -79,22 +84,23 @@ export class DashboardEventManager {
       return false;
     }
 
-    if (commandName == 'deleteSession') {
-      if (session.isVideoRecordingInProgress()) {
-        const videoBase64 = await session.stopVideoRecording();
-        if (videoBase64) {
-          const videoPath = saveVideoRecording(session.getId(), videoBase64);
+    switch (commandName) {
+      case 'deleteSession':
+        if (session.isVideoRecordingInProgress()) {
+          const videoBase64 = await session.stopVideoRecording();
+          if (videoBase64) {
+            const videoPath = saveVideoRecording(session.getId(), videoBase64);
+            await updateSessionDetails(sessionId, { video_recording: videoPath });
+          }
         }
-      }
+        return false;
+      case 'execute':
+        if (request.body && dashboardCommands.isDashboardCommand(request.body.script)) {
+          await dashboardCommands.process(sessionId, request, response);
+          return true;
+        }
+        break;
     }
-
-    // if (session) {
-    //   if (commandName === 'execute') {
-    //     //do the parsing
-    //     response.status(200).json({ value: null });
-    //     return false;
-    //   }
-    // }
 
     return !!session;
   }
@@ -106,7 +112,6 @@ export class DashboardEventManager {
     response: Response,
     responseBody: string
   ) {
-    //TODO
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {
       const parsedBody: any = safeParseJson(responseBody) as any;
@@ -121,6 +126,7 @@ export class DashboardEventManager {
           screenShotPath = saveScreenShot(session.getId(), screenshot);
         }
       }
+      // Save the logs to DB
     }
   }
 }

@@ -17,3 +17,20 @@ export async function getOrCreateNewBuild(buildName: string) {
 
   return build;
 }
+
+export async function getSessionById(sessionId: string) {
+  return await prisma.session.findFirst({
+    where: {
+      id: sessionId,
+    },
+  });
+}
+
+export async function updateSessionDetails(sessionId: string, data: any) {
+  return await prisma.session.update({
+    where: {
+      id: sessionId,
+    },
+    data,
+  });
+}

@@ -13,23 +13,17 @@ export function prepareDirectory(sessionId: string) {
 }
 
 export function saveScreenShot(sessionId: string, screenshotBase64String: string) {
-  const filePath = path.join(
-    config.sessionAssetsPath,
-    sessionId,
-    SCREENSHOT_DIRECTORY,
-    `${uuidv4()}.jpg`
+  const assetPath = path.join(sessionId, SCREENSHOT_DIRECTORY, `${uuidv4()}.jpg`);
+  fs.writeFileSync(
+    path.join(config.sessionAssetsPath, assetPath),
+    screenshotBase64String,
+    'base64'
   );
-  fs.writeFileSync(filePath, screenshotBase64String, 'base64');
-  return filePath;
+  return assetPath;
 }
 
 export function saveVideoRecording(sessionId: string, videoBase64String: string) {
-  const filePath = path.join(
-    config.sessionAssetsPath,
-    sessionId,
-    VIDEO_DIRECTORY,
-    `${sessionId}.mp4`
-  );
-  fs.writeFileSync(filePath, videoBase64String, 'base64');
-  return filePath;
+  const assetPath = path.join(sessionId, VIDEO_DIRECTORY, `${sessionId}.mp4`);
+  fs.writeFileSync(path.join(config.sessionAssetsPath, assetPath), videoBase64String, 'base64');
+  return assetPath;
 }
