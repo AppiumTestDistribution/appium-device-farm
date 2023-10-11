@@ -10,6 +10,7 @@ import { addNewDevice, getDevice, removeDevice, updateDevice } from './data-serv
 import { prisma } from './prisma';
 import { MjpegProxy } from 'mjpeg-proxy';
 import { SESSION_MANAGER } from './sessions/SessionManager';
+import { config } from './config';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -178,5 +179,6 @@ apiRouter.get('/session/:sessionId/live_video', async (req, res) => {
 
 router.use('/api', apiRouter);
 router.use(express.static(path.join(__dirname, 'public')));
+router.use('/assets', express.static(config.sessionAssetsPath));
 
 export { router };

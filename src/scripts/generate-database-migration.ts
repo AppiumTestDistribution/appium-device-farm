@@ -1,7 +1,11 @@
 import { execSync } from 'node:child_process';
 import { config } from '../config';
+import * as fs from 'fs';
 
 async function main() {
+  if (!fs.existsSync(config.cacheDir)) {
+    fs.mkdirSync(config.cacheDir, { recursive: true });
+  }
   execSync('prisma migrate dev', {
     env: {
       ...process.env,
