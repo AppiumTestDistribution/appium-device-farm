@@ -8,4 +8,5 @@ export interface ISession {
   startVideoRecording(options?: { resolution: string }): Promise<void>;
   isVideoRecordingInProgress(): boolean;
   getType(): SessionType;
+  getLiveVideoUrl(): string | null;
 }

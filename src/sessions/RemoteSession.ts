@@ -74,4 +74,16 @@ export class RemoteSession implements ISession {
       this.isVideoAvailable = response.status === 200;
     });
   }
+
+  getLiveVideoUrl(): string | null {
+    const url = new URL(this.baseUrl);
+    if (
+      this.sessionResponse['mjpegServerPort'] &&
+      !isNaN(this.sessionResponse['mjpegServerPort'])
+    ) {
+      return `${url.origin}/device-farm/api/session/${this.sessionId}/live_video`;
+    } else {
+      return null;
+    }
+  }
 }

@@ -25,4 +25,8 @@ export class CloudSession extends RemoteSession {
   isVideoRecordingInProgress(): boolean {
     return false;
   }
+
+  getLiveVideoUrl() {
+    return null;
+  }
 }

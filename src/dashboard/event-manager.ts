@@ -39,7 +39,7 @@ export class DashboardEventManager {
     createOptions['desired_capabilities'] = JSON.stringify(sessionResponse.desired || {});
     createOptions['session_capabilities'] = JSON.stringify(_.omit(sessionResponse, 'desired'));
     createOptions['node_id'] = device.nodeId;
-    createOptions['has_live_video'] = false; // TODO
+    createOptions['has_live_video'] = session.getLiveVideoUrl() !== null;
     createOptions['has_session_video'] = false; // TODO
 
     //device properties

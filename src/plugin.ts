@@ -77,7 +77,6 @@ class DevicePlugin extends BasePlugin {
     let skipChromeDownload;
 
     DevicePlugin.NODE_ID = uuidv4();
-    logger.info('Cli Args: ' + JSON.stringify(cliArgs));
     registerProxyMiddlware(expressApp, cliArgs);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {

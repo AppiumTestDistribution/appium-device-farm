@@ -18,7 +18,7 @@ function constructBasePath(path: string) {
 export class LocalSession extends RemoteSession {
   constructor(
     sessionId: string,
-    driver: any,
+    private driver: any,
     device: IDevice,
     sessionResponse: Record<string, any>
   ) {
@@ -39,7 +39,15 @@ export class LocalSession extends RemoteSession {
     return this.sessionId;
   }
 
-  getVideo(): string {
-    throw new Error('Method not implemented.');
+  getLiveVideoUrl() {
+    const { address } = this.driver.opts || this.driver;
+    if (
+      this.sessionResponse['mjpegServerPort'] &&
+      !isNaN(this.sessionResponse['mjpegServerPort'])
+    ) {
+      return `http://${address}:${this.sessionResponse['mjpegServerPort']}`;
+    } else {
+      return null;
+    }
   }
 }
