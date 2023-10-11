@@ -14,6 +14,9 @@ import {
   userUnblockDevice,
 } from './data-service/device-service';
 import { prisma } from './prisma';
+import { MjpegProxy } from 'mjpeg-proxy';
+import { SESSION_MANAGER } from './sessions/SessionManager';
+
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
 let dashboardPluginUrl: any = null;
@@ -21,6 +24,8 @@ let dashboardPluginUrl: any = null;
 const router = express.Router(),
   apiRouter = express.Router(),
   staticFilesRouter = express.Router();
+
+const MJPEG_PROXY_CACHE: Map<string, any> = new Map();
 
 router.use(cors());
 apiRouter.use(cors());
@@ -148,9 +153,34 @@ apiRouter.get('/devices/ios', async (req, res) => {
   }
 });
 
-apiRouter.get('/sessions', async (req, res) => {
+apiRouter.get('/session', async (req, res) => {
   const sessions = await prisma.session.findMany();
   return res.json(sessions);
+});
+
+apiRouter.get('/session/:sessionId/live_video', async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const session = SESSION_MANAGER.getSession(req.params.sessionId);
+  if (!session) {
+    return res.status(404).send({
+      error: true,
+      message: `Sesssion with id ${sessionId} not found`,
+    });
+  }
+
+  const videoUrl = session.getLiveVideoUrl();
+  if (videoUrl) {
+    if (!MJPEG_PROXY_CACHE.has(sessionId)) {
+      MJPEG_PROXY_CACHE.set(sessionId, new MjpegProxy(videoUrl));
+    }
+
+    MJPEG_PROXY_CACHE.get(sessionId)?.proxyRequest(req, res);
+  } else {
+    return res.status(500).send({
+      error: true,
+      message: `Live video not available for session with id ${sessionId}`,
+    });
+  }
 });
 
 staticFilesRouter.use(express.static(path.join(__dirname, '..', 'public')));

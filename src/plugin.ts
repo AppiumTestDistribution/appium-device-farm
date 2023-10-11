@@ -151,7 +151,7 @@ class DevicePlugin extends BasePlugin {
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
     expressApp.use('/device-farm', router);
-    registerProxyMiddlware(expressApp);
+    registerProxyMiddlware(expressApp, cliArgs);
 
     if (!platform)
       throw new Error(

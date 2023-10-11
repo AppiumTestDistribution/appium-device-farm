@@ -38,7 +38,7 @@
     "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install xcuitest",
     "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm,appium-dashboard -pa /wd/hub --plugin-device-farm-platform=ios --plugin-device-farm-max-sessions=8",
-    "run-db-migration": "node lib/scripts/initialize-database.js",
+    "run-db-migration": "node lib/scripts/initialize-database.js || exit 0",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration"
   },
@@ -95,6 +95,7 @@
     "jsonschema": "1.4.1",
     "lodash": "^4.17.21",
     "lokijs": "^1.5.12",
+    "mjpeg-proxy": "^0.3.0",
     "node-abort-controller": "^3.1.1",
     "node-cache": "^5.1.2",
     "node-persist": "^3.1.3",
