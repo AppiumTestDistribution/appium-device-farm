@@ -222,7 +222,7 @@ class DevicePlugin extends BasePlugin {
         .catch(async function (error) {
           await updatedAllocatedDevice(device, { busy: false });
           logger.info(
-            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
+            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. ${error}`
           );
           throw new Error(
             `${error.response.data.value.message}, Please check the remote appium server log to know the reason for failure`
