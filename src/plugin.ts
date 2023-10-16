@@ -206,7 +206,9 @@ class DevicePlugin extends BasePlugin {
       }
       logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
-      logger.info(`Creating cloud session with desiredCapabilities: "${capabilitiesToCreateSession}"`);
+      logger.info(
+        `Creating cloud session with desiredCapabilities: "${capabilitiesToCreateSession}"`
+      );
       const config = {
         method: 'post',
         url: remoteUrl,
