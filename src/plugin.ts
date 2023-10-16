@@ -206,7 +206,9 @@ class DevicePlugin extends BasePlugin {
       }
       logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
-      logger.info('Creating cloud session');
+      logger.info(
+        `Creating cloud session with desiredCapabilities: "${capabilitiesToCreateSession}"`
+      );
       const config = {
         method: 'post',
         url: remoteUrl,
@@ -215,6 +217,7 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
+      logger.info(`with config: "${config}"`);
       await axios(config)
         .then(function (response) {
           sessionDetails = response.data;
@@ -222,10 +225,10 @@ class DevicePlugin extends BasePlugin {
         .catch(async function (error) {
           await updatedAllocatedDevice(device, { busy: false });
           logger.info(
-            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. ${error}`
+            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`
           );
           throw new Error(
-            `${error.response.data.value.message}, Please check the remote appium server log to know the reason for failure`
+            `"${error.response.data.value.message}", Please check the remote appium server log to know the reason for failure`
           );
         });
       session = {
