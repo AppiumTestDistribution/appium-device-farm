@@ -207,7 +207,9 @@ class DevicePlugin extends BasePlugin {
       logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
       logger.info(
-        `Creating cloud session with desiredCapabilities: "${capabilitiesToCreateSession}"`
+        `Creating cloud session with desiredCapabilities: "${JSON.stringify(
+          capabilitiesToCreateSession
+        )}"`
       );
       const config = {
         method: 'post',
@@ -217,7 +219,7 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
-      logger.info(`with config: "${config}"`);
+      logger.info(`with config: "${JSON.stringify(config)}"`);
       await axios(config)
         .then(function (response) {
           sessionDetails = response.data;
