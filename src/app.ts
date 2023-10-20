@@ -17,6 +17,7 @@ import { prisma } from './prisma';
 import { MjpegProxy } from 'mjpeg-proxy';
 import { SESSION_MANAGER } from './sessions/SessionManager';
 import { config } from './config';
+import _ from 'lodash';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -107,7 +108,7 @@ apiRouter.get('/devices/android', async (req, res) => {
 });
 
 apiRouter.post('/register', async (req, res) => {
-  const requestBody = req.body;
+  let requestBody = req.body;
   if (req.query.type === 'add') {
     const addedDevices = await addNewDevice(requestBody);
     if (addedDevices.length > 0) log.info(`Added new devices: ${JSON.stringify(addedDevices)}`);
@@ -155,8 +156,12 @@ apiRouter.get('/devices/ios', async (req, res) => {
 });
 
 apiRouter.get('/session', async (req, res) => {
-  const sessions = await prisma.session.findMany();
-  return res.json(sessions);
+  const sessions = await prisma.session.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return res.status(200).json(sessions);
 });
 
 apiRouter.get('/session/:sessionId/live_video', async (req, res) => {
