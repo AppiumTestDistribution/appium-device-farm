@@ -1,5 +1,5 @@
 export enum SessionStatus {
-  RUNNING = ' running',
+  RUNNING = 'running',
   SUCCESS = 'success',
   FAILED = 'failed',
   UNMARKED = 'unmarked',

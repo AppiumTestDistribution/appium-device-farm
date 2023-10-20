@@ -1,0 +1,27 @@
+.navbar-container {
+  display: flex;
+  flex-direction: row;
+  background-color: #15252b;
+  height: 100vh;
+  width: 70px;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-logo-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px 10px;
+  width: 100%;
+}
+
+.navbar-logo-image {
+  width: 50px;
+}
+
+.header-logo {
+  color: #fbfaff;
+  font-size: 20px;
+  font-weight: 700;
+}

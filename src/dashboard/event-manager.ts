@@ -64,8 +64,9 @@ export class DashboardEventManager {
       const sessionEntry = await getSessionById(sessionId);
       const updateData: any = {
         endTime: new Date(),
+        has_live_video: false,
       };
-      if (sessionEntry?.status === SessionStatus.RUNNING) {
+      if (sessionEntry?.status == SessionStatus.RUNNING) {
         updateData['status'] = SessionStatus.UNMARKED;
       }
       await updateSessionDetails(sessionId, updateData);
@@ -93,7 +94,7 @@ export class DashboardEventManager {
             await updateSessionDetails(sessionId, { video_recording: videoPath });
           }
         }
-        return false;
+        break;
       case 'execute':
         if (request.body && dashboardCommands.isDashboardCommand(request.body.script)) {
           await dashboardCommands.process(sessionId, request, response);

@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
 import DeviceExplorer from './components/device-explorer/device-explorer';
-import Header from './components/header/header';
+import NavBar from './components/navbar/navbar';
 
 function App() {
   return (
     <div className="app-container">
-      <Header />
+      <NavBar />
       <div className="app-body-container">
         <DeviceExplorer />
       </div>
