@@ -13,7 +13,7 @@ function goIOSZipExists(platform: string) {
 
 async function main() {
   const platform = isMac() ? 'mac' : 'linux';
-  const source = `https://github.com/danielpaulus/go-ios/releases/download/v1.0.112/go-ios-${platform}.zip`;
+  const source = `https://github.com/danielpaulus/go-ios/releases/download/v1.0.118/go-ios-${platform}.zip`;
 
   if (!fs.existsSync(basePath) || !goIOSZipExists(platform)) {
     console.log('goIOS not found, downloading..');
