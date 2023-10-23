@@ -220,19 +220,16 @@ class DevicePlugin extends BasePlugin {
         data: capabilitiesToCreateSession,
       };
       logger.info(`with config: "${JSON.stringify(config)}"`);
-      await axios(config)
-        .then(function (response) {
-          sessionDetails = response.data;
-        })
-        .catch(async function (error) {
-          await updatedAllocatedDevice(device, { busy: false });
-          logger.info(
-            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`
-          );
-          throw new Error(
-            `"${error.response.data.value.message}", Please check the remote appium server log to know the reason for failure`
-          );
-        });
+      try {
+        const response = await axios(config);
+        sessionDetails = response.data;
+        if (Object.hasOwn(sessionDetails.value, 'error')) {
+          this.unblockDeviceOnError(device, sessionDetails.value.error);
+        }
+      } catch (error: any) {
+        if (error != undefined) this.unblockDeviceOnError(device, error);
+      }
+
       session = {
         protocol: 'W3C',
         value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
@@ -260,6 +257,16 @@ class DevicePlugin extends BasePlugin {
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
+  }
+
+  private unblockDeviceOnError(device: IDevice, error: any) {
+    updatedAllocatedDevice(device, { busy: false });
+    logger.info(
+      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`
+    );
+    throw new Error(
+      `"${error}", Please check the remote appium server log to know the reason for failure`
+    );
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {

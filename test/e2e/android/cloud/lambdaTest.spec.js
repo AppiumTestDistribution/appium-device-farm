@@ -13,7 +13,7 @@ const capabilities = {
   platformName: 'Android',
   'appium:isRealMobile': true,
   'appium:appiumVersion': '2.0',
-  'appium:app': 'lt://APP10160382471694731324660677',
+  'appium:app': 'lt://APP10160361451697712441620971',
   'appium:build': 'ATDDevs',
   'appium:name': 'Device-Farm Plugin',
   'appium:project': 'Appium Device Farm',

@@ -11,7 +11,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'android',
-  'appium:app': 'bs://efba7654ed367932162a175b16910035eb284e26',
+  'appium:app': 'bs://b2b262df44bcb0b73d734b3a7529e38fe2fcb429',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
