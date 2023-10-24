@@ -44,6 +44,12 @@ import { ADB } from 'appium-adb';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
+let platform: any;
+let androidDeviceType: any;
+let iosDeviceType: any;
+let skipChromeDownload: any;
+let emulators: any;
+let proxy: any;
 
 class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, cliArgs: any) {
@@ -64,11 +70,6 @@ class DevicePlugin extends BasePlugin {
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
-    let platform;
-    let androidDeviceType;
-    let iosDeviceType;
-    let skipChromeDownload;
-    let emulators;
     registerProxyMiddlware(expressApp);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
@@ -76,6 +77,7 @@ class DevicePlugin extends BasePlugin {
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
+      proxy = cliArgs.plugin['device-farm'].proxy;
       emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
     }
 
@@ -214,6 +216,7 @@ class DevicePlugin extends BasePlugin {
       const config = {
         method: 'post',
         url: remoteUrl,
+        proxy,
         headers: {
           'Content-Type': 'application/json',
         },
