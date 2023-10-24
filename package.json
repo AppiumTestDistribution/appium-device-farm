@@ -188,6 +188,9 @@
         },
         "emulators": {
           "type": "array"
+        },
+        "proxy": {
+          "type": "object"
         }
       },
       "title": "Appium device farm plugin",
