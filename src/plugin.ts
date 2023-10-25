@@ -77,7 +77,9 @@ class DevicePlugin extends BasePlugin {
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
-      proxy = cliArgs.plugin['device-farm'].proxy;
+      if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
+        proxy = cliArgs.plugin['device-farm'].proxy;
+      }
       emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
     }
 
