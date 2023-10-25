@@ -218,7 +218,7 @@ class DevicePlugin extends BasePlugin {
           capabilitiesToCreateSession
         )}"`
       );
-      const config = {
+      const config: any = {
         method: 'post',
         url: remoteUrl,
         headers: {
