@@ -221,12 +221,17 @@ class DevicePlugin extends BasePlugin {
       const config = {
         method: 'post',
         url: remoteUrl,
-        proxy,
         headers: {
           'Content-Type': 'application/json',
         },
         data: capabilitiesToCreateSession,
       };
+      logger.info(`Add proxy to axios config only if it is set: ${proxy}`);
+      if (proxy) {
+        logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+        config.proxy = proxy;
+      }
+
       logger.info(`with config: "${JSON.stringify(config)}"`);
       try {
         const response = await axios(config);
