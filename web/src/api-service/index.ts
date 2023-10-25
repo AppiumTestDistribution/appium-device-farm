@@ -32,4 +32,16 @@ export default class DeviceFarmApiService {
       { platform, udid, minSDK: sdk, busy, offline }
     );
   }
+
+  public static getSessions(filter?: { buildId?: string }) {
+    return apiClient.makeGETRequest('/session', filter);
+  }
+
+  public static getBuilds() {
+    return apiClient.makeGETRequest('/build', {});
+  }
+
+  public static getLiveVideoUrl(sessionId: string) {
+    return apiClient.formatUrl(`/session/${sessionId}/live_video`);
+  }
 }

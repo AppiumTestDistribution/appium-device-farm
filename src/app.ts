@@ -152,12 +152,25 @@ apiRouter.get('/devices/ios', (req, res) => {
 });
 
 apiRouter.get('/session', async (req, res) => {
+  const buildId = req.query.buildId;
   const sessions = await prisma.session.findMany({
     orderBy: {
       createdAt: 'desc',
     },
+    where: {
+      build_id: buildId as any,
+    },
   });
   return res.status(200).json(sessions);
+});
+
+apiRouter.get('/build', async (req, res) => {
+  const builds = await prisma.build.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return res.status(200).json(builds);
 });
 
 apiRouter.get('/session/:sessionId/live_video', async (req, res) => {

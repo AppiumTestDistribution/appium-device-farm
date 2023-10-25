@@ -55,7 +55,7 @@ export class DashboardCommands {
     if (_.isArray(args)) {
       args = args[0];
     }
-    if (args.status && ['passed', 'failed'].indexOf(args.status) < 0) {
+    if (args.status && ['success', 'failed'].indexOf(args.status) < 0) {
       return this.sendSuccessResponse(response);
     }
     await updateSessionDetails(sessionId, {
