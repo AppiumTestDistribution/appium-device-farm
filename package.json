@@ -168,7 +168,7 @@
         "hub": {
           "type": "string"
         },
-        "proxyIP": {
+        "remoteMachineProxyIP": {
           "type": "string"
         },
         "adbRemote": {
