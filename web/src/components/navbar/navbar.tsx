@@ -82,6 +82,12 @@ const menuItems = [
     path: '/devices',
   },
   {
+    name: 'builds',
+    icon: 'build',
+    tooltip: 'Builds',
+    path: '/builds',
+  },
+  {
     name: 'sessions',
     icon: 'launch',
     tooltip: 'Sessions',

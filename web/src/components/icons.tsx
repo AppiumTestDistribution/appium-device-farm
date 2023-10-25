@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaAngleDown, FaAngleUp, FaCheckCircle, FaFilter } from 'react-icons/fa';
+import { FaAngleDown, FaAngleUp, FaCheckCircle, FaFilter, FaLayerGroup } from 'react-icons/fa';
 import { FcAndroidOs } from 'react-icons/fc';
 import { FaApple, FaTrash, FaPlay, FaChrome } from 'react-icons/fa';
 import { SiSafari } from 'react-icons/si';
@@ -148,7 +148,7 @@ export default function Icon(props: IconProps) {
       icon = <BsFileCode />;
       break;
     case 'build':
-      icon = <AiFillBuild />;
+      icon = <FaLayerGroup />;
       break;
     case 'launch':
       icon = <IoRocketOutline />;

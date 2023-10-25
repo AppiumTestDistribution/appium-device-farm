@@ -2,18 +2,29 @@ import React from 'react';
 import './App.css';
 import DeviceExplorer from './components/device-explorer/device-explorer';
 import NavBar from './components/navbar/navbar';
-import { HashRouter } from 'react-router-dom';
+import { Routes, Route, HashRouter, Navigate } from 'react-router-dom';
+import { SessionExplorer } from './components/session-explorer';
+import BuildsPage from './components/builds';
 
 function App() {
   return (
-    <HashRouter>
-      <div className="app-container">
+    <div className="app-container">
+      <HashRouter>
         <NavBar />
         <div className="app-body-container">
-          <DeviceExplorer />
+          <Routes>
+            {/* <Route exact path="/dashboard" component={Dashboard} /> */}
+            <Route path="*" element={<Navigate replace to="/devices" />} />
+            <Route path="/devices" element={<DeviceExplorer />} />
+            <Route path="/builds" element={<BuildsPage />} />
+            <Route path="/builds/:buildId" element={<BuildsPage />} />
+            <Route path="/builds/:buildId/sessions/:sessionId" element={<BuildsPage />} />
+            <Route path="/sessions" element={<SessionExplorer />} />
+            <Route path="/sessions/:sessionId" element={<SessionExplorer />} />
+          </Routes>
         </div>
-      </div>
-    </HashRouter>
+      </HashRouter>
+    </div>
   );
 }
 
