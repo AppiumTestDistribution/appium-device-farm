@@ -77,7 +77,12 @@ class DevicePlugin extends BasePlugin {
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
-      proxy = cliArgs.plugin['device-farm'].proxy;
+      if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
+        logger.info('Adding proxy');
+        proxy = cliArgs.plugin['device-farm'].proxy;
+      } else {
+        logger.info('proxy is not required');
+      }
       emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
     }
 
@@ -216,12 +221,17 @@ class DevicePlugin extends BasePlugin {
       const config = {
         method: 'post',
         url: remoteUrl,
-        proxy,
         headers: {
           'Content-Type': 'application/json',
         },
         data: capabilitiesToCreateSession,
       };
+      logger.info(`Add proxy to axios config only if it is set: ${proxy}`);
+      if (proxy) {
+        logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+        config.proxy = proxy;
+      }
+
       logger.info(`with config: "${JSON.stringify(config)}"`);
       try {
         const response = await axios(config);

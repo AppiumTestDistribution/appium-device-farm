@@ -125,8 +125,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     let host;
     if (adbInstance.adbHost != null) {
       host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
-    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
-      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'remoteMachineProxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].remoteMachineProxyIP}`;
     } else {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }
