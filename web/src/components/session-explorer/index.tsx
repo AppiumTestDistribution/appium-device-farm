@@ -5,6 +5,7 @@ import { SessionCard } from './session-card';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import FlexContainer from '../../layouts/flex-container';
+import SessionDetails from './session-details';
 
 const SessionListContainer = styled.div`
   height: 100vh;
@@ -76,19 +77,7 @@ export function SessionExplorer() {
           />
         ))}
       </SessionListContainer>
-      <SessionListContainer>
-        {selectedSession && selectedSession.has_live_video ? (
-          <img
-            src={DeviceFarmApiService.getLiveVideoUrl(selectedSession.id)}
-            style={{
-              width: '400px',
-              height: 'auto',
-            }}
-          />
-        ) : (
-          'No session selected'
-        )}
-      </SessionListContainer>
+      {selectedSession && <SessionDetails session={selectedSession} />}
     </FlexContainer>
   );
 }

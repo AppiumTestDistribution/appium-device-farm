@@ -44,4 +44,8 @@ export default class DeviceFarmApiService {
   public static getLiveVideoUrl(sessionId: string) {
     return apiClient.formatUrl(`/session/${sessionId}/live_video`);
   }
+
+  public static getAssetUrl(assetPath: string) {
+    return `http://localhost:31337/device-farm/assets/${assetPath}`;
+  }
 }
