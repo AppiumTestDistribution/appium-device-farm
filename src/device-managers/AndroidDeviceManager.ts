@@ -377,26 +377,30 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private getDeviceName = async (adbInstance: any, udid: string) => {
-    const deviceName = await (await adbInstance).adbExec([
+    let deviceName = await (await adbInstance).adbExec([
       '-s',
       udid,
       'shell',
       'getprop',
       'ro.product.name',
     ]);
-    // If previous command fails, try to get device name from bluetooth manager
-    return deviceName || await (await adbInstance).adbExec([
-      '-s',
-      udid,
-      'shell',
-      'dumpsys',
-      'bluetooth_manager',
-      '|',
-      'grep',
-      'name:',
-      '|',
-      'cut',
-      '-c9-',
-    ]);
+
+    if (!deviceName || deviceName.trim() === '') {
+      // If the device name is null or empty, try to get it from the Bluetooth manager.
+      deviceName = await (await adbInstance).adbExec([
+        '-s',
+        udid,
+        'shell',
+        'dumpsys',
+        'bluetooth_manager',
+        '|',
+        'grep',
+        'name:',
+        '|',
+        'cut',
+        '-c9-',
+      ]);
+    }
+    return deviceName;
   };
 }
