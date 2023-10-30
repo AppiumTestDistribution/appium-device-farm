@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.3.7",
+  "version": "8.3.8",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -51,6 +51,10 @@
     {
       "name": "Sudharsan Selvaraj",
       "email": "sudharsanselvaraj.c@gmail.com"
+    },
+    {
+      "name": "Anand Bagmar",
+      "email": "abagmar@gmail.com"
     }
   ],
   "license": "ISC",
@@ -94,7 +98,9 @@
     "typedi": "^0.10.0",
     "unzipper": "^0.10.14",
     "uuid": "^8.3.2",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "https-proxy-agent": "7.0.2",
+    "http-proxy-agent": "7.0.0"
   },
   "peerDependencies": {
     "appium": "^2.2.1"
