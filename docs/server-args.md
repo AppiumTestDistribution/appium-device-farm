@@ -29,3 +29,21 @@ These arguments are set when you launch the Appium server with device-farm plugi
 | env                 | Mapping of emulator [environment variables](https://developer.android.com/studio/command-line/variables).                                                                                                                                                                  |
 
 Above cli arguments can also be set from config.json file Refer [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/sample-config.json)
+
+### Proxy configuration for axios
+appium-device-farm will use the proxy provided and pass that to HttpAgent and HttpsAgent. 
+
+The proxy object definition will be as per the axios documentation available here - https://axios-http.com/docs/req_config
+
+Example:
+```
+  proxy: {
+    protocol: 'https',
+    host: '127.0.0.1',
+    port: 9000,
+    auth: {
+      username: 'mikeymike',
+      password: 'rapunz3l'
+    }
+  },
+```
