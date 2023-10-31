@@ -233,6 +233,7 @@ class DevicePlugin extends BasePlugin {
         logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
         config.httpsProxy = new HttpsProxyAgent.HttpsProxyAgent(proxy);
         config.httpProxy = new HttpProxyAgent.HttpProxyAgent(proxy);
+        config.proxy = false;
       }
 
       logger.info(`with config: "${JSON.stringify(config)}"`);
