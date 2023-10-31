@@ -4,7 +4,7 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
-        "proxyIP": "http://10.x.x.x:3333",
+        "remoteMachineProxyIP": "http://10.x.x.x:3333",
         "skipChromeDownload": true,
         "androidDeviceType": "real",
         "iosDeviceType": "simulated",

@@ -30,6 +30,8 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import HttpsProxyAgent from 'https-proxy-agent';
+import HttpProxyAgent from 'http-proxy-agent';
 import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -44,6 +46,12 @@ import { ADB } from 'appium-adb';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
+let platform: any;
+let androidDeviceType: any;
+let iosDeviceType: any;
+let skipChromeDownload: any;
+let emulators: any;
+let proxy: any;
 
 class DevicePlugin extends BasePlugin {
   constructor(pluginName: string, cliArgs: any) {
@@ -64,11 +72,6 @@ class DevicePlugin extends BasePlugin {
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
-    let platform;
-    let androidDeviceType;
-    let iosDeviceType;
-    let skipChromeDownload;
-    let emulators;
     registerProxyMiddlware(expressApp);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
@@ -76,6 +79,12 @@ class DevicePlugin extends BasePlugin {
       androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
+      if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
+        logger.info('Adding proxy');
+        proxy = cliArgs.plugin['device-farm'].proxy;
+      } else {
+        logger.info('proxy is not required');
+      }
       emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
     }
 
@@ -206,8 +215,12 @@ class DevicePlugin extends BasePlugin {
       }
       logger.info(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
-      logger.info('Creating cloud session');
-      const config = {
+      logger.info(
+        `Creating cloud session with desiredCapabilities: "${JSON.stringify(
+          capabilitiesToCreateSession
+        )}"`
+      );
+      const config: any = {
         method: 'post',
         url: remoteUrl,
         headers: {
@@ -215,19 +228,25 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
-      await axios(config)
-        .then(function (response) {
-          sessionDetails = response.data;
-        })
-        .catch(async function (error) {
-          await updatedAllocatedDevice(device, { busy: false });
-          logger.info(
-            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. ${error}`
-          );
-          throw new Error(
-            `${error.response.data.value.message}, Please check the remote appium server log to know the reason for failure`
-          );
-        });
+      logger.info(`Add proxy to axios config only if it is set: ${proxy}`);
+      if (proxy) {
+        logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+        config.httpsAgent = new HttpsProxyAgent.HttpsProxyAgent(proxy);
+        config.httpAgent = new HttpProxyAgent.HttpProxyAgent(proxy);
+        config.proxy = false;
+      }
+
+      logger.info(`with config: "${JSON.stringify(config)}"`);
+      try {
+        const response = await axios(config);
+        sessionDetails = response.data;
+        if (Object.hasOwn(sessionDetails.value, 'error')) {
+          this.unblockDeviceOnError(device, sessionDetails.value.error);
+        }
+      } catch (error: any) {
+        if (error != undefined) this.unblockDeviceOnError(device, error);
+      }
+
       session = {
         protocol: 'W3C',
         value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
@@ -255,6 +274,16 @@ class DevicePlugin extends BasePlugin {
       logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
+  }
+
+  private unblockDeviceOnError(device: IDevice, error: any) {
+    updatedAllocatedDevice(device, { busy: false });
+    logger.info(
+      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`
+    );
+    throw new Error(
+      `"${error}", Please check the remote appium server log to know the reason for failure`
+    );
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {

@@ -14,8 +14,8 @@ These arguments are set when you launch the Appium server with device-farm plugi
 | `--plugin-device-farm-max-sessions`         | No | Limit how many sessions can be active at a time. This is useful when you need limit sessions based on host machine resource availability. | None  | `<number>` e.g. `8`                                                                                                                                      |
 | `--plugin-device-farm-derived-data-path`    | No | DriveDataPath of WDA to speed iOS test run.                                                                                               | None  | `{'simulator': 'PathtoDrivedDataPath', 'device': 'PathtoDrivedDataPath'}`                                                                                |
 | `--plugin-device-farm-adb-remote`           | No | ADB Remote host and port as array                                                                                                         | None  | `["remoteMachine1IP:adbPort", "remoteMachine2IP:adbPort"]`                                                                                               |
-| `--plugin-device-farm-proxy-ip`             | No | For remote execution if the node machine is behing proxy                                                                                  | None  | `http://proxyIP:proxyPort`, For example: 'https://10.x.x.x:3333'                                                                                         |
-| `--plugin-device-farm-emulators`            | No | The name of Android emulator to run the test on. The names of currently installed emulators could be listed using avdmanager list avd command. If the emulator with the given name is not running then it is going to be launched on automated session startup.| None  | [{"avdName": "device1, launchTimeout: 200000 }] [Refer to Emulator (Android Virtual Device)]()| 
+| `--plugin-device-farm-proxy-ip`             | No | For remote execution if the node machine is behing proxy                                                                                  | None  | `http://remoteMachineProxyIP:proxyPort`, For example: 'https://10.x.x.x:3333'                                                                            |
+| `--plugin-device-farm-emulators`            | No | The name of Android emulator to run the test on. The names of currently installed emulators could be listed using avdmanager list avd command. If the emulator with the given name is not running then it is going to be launched on automated session startup.| None  | [{"avdName": "device1, launchTimeout: 200000 }] [Refer to Emulator (Android Virtual Device)]()                                                           | 
 
 
 ### Emulator (Android Virtual Device)
@@ -29,3 +29,21 @@ These arguments are set when you launch the Appium server with device-farm plugi
 | env                 | Mapping of emulator [environment variables](https://developer.android.com/studio/command-line/variables).                                                                                                                                                                  |
 
 Above cli arguments can also be set from config.json file Refer [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/sample-config.json)
+
+### Proxy configuration for axios
+appium-device-farm will use the proxy provided and pass that to HttpAgent and HttpsAgent. 
+
+The proxy object definition will be as per the axios documentation available here - https://axios-http.com/docs/req_config
+
+Example:
+```
+  proxy: {
+    protocol: 'https',
+    host: '127.0.0.1',
+    port: 9000,
+    auth: {
+      username: 'mikeymike',
+      password: 'rapunz3l'
+    }
+  },
+```

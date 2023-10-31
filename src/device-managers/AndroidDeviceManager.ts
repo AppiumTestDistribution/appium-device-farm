@@ -125,8 +125,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     let host;
     if (adbInstance.adbHost != null) {
       host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
-    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
-      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'remoteMachineProxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].remoteMachineProxyIP}`;
     } else {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }
@@ -376,20 +376,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return sdkRoot;
   }
 
-  private getDeviceName = async (adbInstance: any, udid: string) =>
-    await (
-      await adbInstance
-    ).adbExec([
-      '-s',
-      udid,
-      'shell',
-      'dumpsys',
-      'bluetooth_manager',
-      '|',
-      'grep',
-      'name:',
-      '|',
-      'cut',
-      '-c9-',
-    ]);
+  private getDeviceName = async (adbInstance: any, udid: string) => {
+    if (await this.isRealDevice(adbInstance, udid)) {
+      return await (await adbInstance).adbExec([
+        '-s',
+        udid,
+        'shell',
+        'dumpsys',
+        'bluetooth_manager',
+        '|',
+        'grep',
+        'name:',
+        '|',
+        'cut',
+        '-c9-',
+      ]);
+    } else {
+      return await this.getDeviceProperty(adbInstance, udid, 'ro.product.name');
+    }
+  };
 }

@@ -131,7 +131,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
       await iOSCapabilities(capability, device);
     }
   } else {
-    logger.info('Updating cloud Capability for Device');
+    logger.info('Updating cloud capability for Device');
     return new CapabilityManager(capability, device).getCapability();
   }
 }
