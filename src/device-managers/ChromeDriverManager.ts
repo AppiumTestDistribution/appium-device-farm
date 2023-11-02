@@ -1,4 +1,5 @@
 import {
+  findChromedriverFilePath,
   formatCdVersion,
   getChromedriverBinaryPath,
   getModuleRoot,
@@ -37,22 +38,7 @@ export default class ChromeDriverManager {
   }
 
   public async downloadChromeDriver(version: any) {
-    const osInfo1 = this.osInfo;
-    const synchronizedDrivers = await this.client.syncDrivers({
-      osInfo1,
-      minBrowserVersion: [await formatCdVersion(version)],
-    });
-    const synchronizedDriversMapping = synchronizedDrivers.reduce((acc: any, x: any) => {
-      const { version, minBrowserVersion } = this.mapping[x];
-      acc[version] = minBrowserVersion;
-      return acc;
-    }, {});
-    const versions = Object.keys(synchronizedDriversMapping);
-    const fallBackVersion = `v${versions[versions.length - 1]}`;
-    const newVersion = Object.keys(synchronizedDriversMapping).find(k => synchronizedDriversMapping[k] === version);
-    const latestVersion = (newVersion !== null && newVersion !== undefined) ? `v${newVersion}` : `v${fallBackVersion}`;
-    return `${await getChromedriverBinaryPath(this.tempDirectory)}/chromedriver_${
-      this.osInfo.name
-    }${this.osInfo.arch}_${latestVersion}`;
+    const filePath = await findChromedriverFilePath(`${await getChromedriverBinaryPath(this.tempDirectory)}`, version);
+    return filePath;
   }
 }

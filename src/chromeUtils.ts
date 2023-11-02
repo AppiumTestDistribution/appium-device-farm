@@ -127,6 +127,22 @@ function generateLogPrefix(obj: any, sessionId: string) {
   return getBaseDriverInstance().helpers.generateDriverLogPrefix(obj, sessionId);
 }
 
+async function findChromedriverFilePath(dirPath: string, version: string): Promise<string | null> {
+  try {
+    const files = await fs.readdir(dirPath);
+    for (const file of files) {
+      if (file.includes(`v${version}`)) {
+        return path.join(dirPath, file);
+      }
+    }
+  } catch (err) {
+    // Handle errors like directory not found or permission issues
+    console.error(err);
+  }
+
+  return null; // File not found
+}
+
 export {
   getChromeVersion,
   getChromedriverBinaryPath,
@@ -139,4 +155,5 @@ export {
   generateLogPrefix,
   formatCdVersion,
   getModuleRoot,
+  findChromedriverFilePath,
 };
