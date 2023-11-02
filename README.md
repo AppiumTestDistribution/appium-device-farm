@@ -45,4 +45,10 @@ npm run build:docs
 ```
 Navigate to site directory and open index.html to view the site locally.
 
+## Thanks to contributors 💙
+
+<a href="https://github.com/AppiumTestDistribution/appium-device-farm/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=AppiumTestDistribution/appium-device-farm" />
+</a>
+
 
