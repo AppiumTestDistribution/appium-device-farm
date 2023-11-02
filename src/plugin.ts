@@ -30,6 +30,8 @@ import { Container } from 'typedi';
 import logger from './logger';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -226,10 +228,12 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
-      logger.info(`Add proxy to axios config only if it is set: ${proxy}`);
+      logger.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
       if (proxy) {
         logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
-        config.proxy = proxy;
+        config.httpsAgent = new HttpsProxyAgent(proxy);
+        config.httpAgent = new HttpProxyAgent(proxy);
+        config.proxy = false;
       }
 
       logger.info(`with config: "${JSON.stringify(config)}"`);
