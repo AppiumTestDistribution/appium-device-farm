@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, HashRouter, Routes, useLocation } from 'react-router-dom';
-import { getSessionDetailsUrl } from '../../constants/routes';
+// import { getSessionDetailsUrl } from '../../constants/routes';
 import { APP_HEADER_HEIGHT } from '../../constants/ui';
 import { setSelectedSession } from '../../store/actions/session-actions';
 import { getSessions } from '../../store/selectors/entities/sessions-selector';
@@ -39,22 +39,13 @@ export default function DashboardTemplate() {
 
   return (
     <SerialLayout>
-      <Row height={`${APP_HEADER_HEIGHT}px`}>
-        <AppHeader />
-      </Row>
       <Row height={`calc(100vh - ${APP_HEADER_HEIGHT}px)`}>
         <ParallelLayout>
           <Column grid={2.5}>
             <SessionList />
           </Column>
           <Column grid={9.5}>
-            <HashRouter>
-              <Routes>
-                <Route>
-                  <SessionDetails />
-                </Route>
-              </Routes>
-            </HashRouter>
+            <SessionDetails />
           </Column>
         </ParallelLayout>
       </Row>
