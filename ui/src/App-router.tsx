@@ -1,12 +1,11 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import Dashboard from './components/pages/dashboard';
 import PageNotFound from './components/pages/page-not-found';
 import AppLoader from './components/UI/molecules/app-loader';
-import { BASE_URL } from './constants/routes';
 import { ThemeConfig } from './constants/themes';
 import { AppState } from './store';
 import ReduxActionTypes from './store/redux-action-types';
@@ -38,7 +37,7 @@ function AppRouter(props: PropsType) {
         {isAppInitialised ? (
           <Router>
             <Routes>
-              <Route path={BASE_URL} element={<Dashboard />} />
+              <Route path="/" element={<Dashboard />} />
               <Route element={<PageNotFound />} />
             </Routes>
           </Router>
