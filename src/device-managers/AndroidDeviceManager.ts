@@ -125,29 +125,29 @@ export default class AndroidDeviceManager implements IDeviceManager {
     let host;
     if (adbInstance.adbHost != null) {
       host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
-    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
-      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'remoteMachineProxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].remoteMachineProxyIP}`;
     } else {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }
     return {
-        adbRemoteHost: adbInstance.adbHost,
-        adbPort: adbInstance.adbPort,
-        systemPort,
-        sdk,
-        realDevice,
-        name,
-        busy: false,
-        state: device.state,
-        udid: device.udid,
-        platform: 'android',
-        deviceType: realDevice ? 'real' : 'emulator',
-        host,
-        totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
-        sessionStartTime: 0,
-        chromeDriverPath,
-        userBlocked: false
-      };
+      adbRemoteHost: adbInstance.adbHost,
+      adbPort: adbInstance.adbPort,
+      systemPort,
+      sdk,
+      realDevice,
+      name,
+      busy: false,
+      state: device.state,
+      udid: device.udid,
+      platform: 'android',
+      deviceType: realDevice ? 'real' : 'emulator',
+      host,
+      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      sessionStartTime: 0,
+      chromeDriverPath,
+      userBlocked: false,
+    };
   }
 
   private async getAdb(): Promise<any> {
@@ -256,9 +256,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
             await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
           } else {
-            log.warn(
-              `Removing device ${clonedDevice.udid} from list as the device was unplugged!`
-            );
+            log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
             removeDevice(clonedDevice);
             this.abort(clonedDevice.udid);
           }
@@ -378,20 +376,31 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return sdkRoot;
   }
 
-  private getDeviceName = async (adbInstance: any, udid: string) =>
-    await (
-      await adbInstance
-    ).adbExec([
+  private getDeviceName = async (adbInstance: any, udid: string) => {
+    let deviceName = await (await adbInstance).adbExec([
       '-s',
       udid,
       'shell',
-      'dumpsys',
-      'bluetooth_manager',
-      '|',
-      'grep',
-      'name:',
-      '|',
-      'cut',
-      '-c9-',
+      'getprop',
+      'ro.product.name',
     ]);
+
+    if (!deviceName || deviceName.trim() === '') {
+      // If the device name is null or empty, try to get it from the Bluetooth manager.
+      deviceName = await (await adbInstance).adbExec([
+        '-s',
+        udid,
+        'shell',
+        'dumpsys',
+        'bluetooth_manager',
+        '|',
+        'grep',
+        'name:',
+        '|',
+        'cut',
+        '-c9-',
+      ]);
+    }
+    return deviceName;
+  };
 }

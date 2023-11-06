@@ -199,7 +199,7 @@ describe('Android Device Manager', function () {
       },
     ]);
   });
-  it('Android Device List to have host as ProxyIP if provided', async () => {
+  it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
     const androidDevices = new AndroidDeviceManager();
     const deviceList = new Map();
     const cliArgs = {
@@ -207,7 +207,7 @@ describe('Android Device Manager', function () {
         platform: 'android',
         'device-types': 'both',
         skipChromeDownload: true,
-        proxyIP: 'http://10.1.1.1:3333',
+        remoteMachineProxyIP: 'http://10.1.1.1:3333',
       },
     };
     adb = await getAdbOriginal();

@@ -4,13 +4,26 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
-        "proxyIP": "http://10.x.x.x:3333",
+        "remoteMachineProxyIP": "http://10.x.x.x:3333",
         "skipChromeDownload": true,
         "androidDeviceType": "real",
         "iosDeviceType": "simulated",
-        "adbRemote": ["192.168.0.1:5037", "192.168.0.2:5037"],
+        "adbRemote": [
+          "192.168.0.1:5037",
+          "192.168.0.2:5037"
+        ],
         "hub": "https://hubip:port",
         "maxSessions": 2,
+        "emulators": [
+          {
+            "avdName": "Pixel_5_API_33",
+            "launchTimeout": 120000
+          },
+          {
+            "avdName": "nightwatch-android-11",
+            "launchTimeout": 10000
+          }
+        ],
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test",
           "device": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"

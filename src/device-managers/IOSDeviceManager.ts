@@ -166,8 +166,8 @@ export default class IOSDeviceManager implements IDeviceManager {
 
   private async getDeviceInfo(udid: string, cliArgs: any) {
     let host;
-    if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxyIP')) {
-      host = `${cliArgs.plugin['device-farm'].proxyIP}`;
+    if (Object.hasOwn(cliArgs.plugin['device-farm'], 'remoteMachineProxyIP')) {
+      host = `${cliArgs.plugin['device-farm'].remoteMachineProxyIP}`;
     } else {
       host = `http://${ip.address()}:${cliArgs.port}`;
     }

@@ -106,6 +106,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
+  logger.info(`Updating allocated device: "${JSON.stringify(device)}"`);
   DeviceModel.chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
