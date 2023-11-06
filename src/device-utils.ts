@@ -18,7 +18,7 @@ import {
   addNewDevice,
   removeDevice,
 } from './data-service/device-service';
-import logger from './logger';
+import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
 import os from 'os';
@@ -92,7 +92,7 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
-  logger.info(JSON.stringify(filters));
+  log.info(JSON.stringify(filters));
   const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
@@ -103,11 +103,11 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
       async () => {
         const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
-          logger.info(
+          log.info(
             `Waiting for session available, already at max session count of: ${maxSessions}`
           );
           return false;
-        } else logger.info('Waiting for free device');
+        } else log.info('Waiting for free device');
         return (await getDevice(filters)) != undefined;
       },
       { timeout, intervalBetweenAttempts }
@@ -116,9 +116,9 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
   const device = getDevice(filters);
-  logger.info(`📱 Device found: ${JSON.stringify(device)}`);
+  log.info(`📱 Device found: ${JSON.stringify(device)}`);
   updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
-  logger.info(`📱 Blocking device ${device.udid} for new session`);
+  log.info(`📱 Blocking device ${device.udid} for new session`);
   await updateCapabilityForDevice(capability, device);
   return device;
 }
@@ -131,7 +131,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
       await iOSCapabilities(capability, device);
     }
   } else {
-    logger.info('Updating cloud Capability for Device');
+    log.info('Updating cloud Capability for Device');
     return new CapabilityManager(capability, device).getCapability();
   }
 }
@@ -166,10 +166,10 @@ export async function getUtilizationTime(udid: string) {
     if (value !== undefined && value && !isNaN(value)) {
       return value;
     } else {
-      //logger.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
+      //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
     }
   } catch (err) {
-    logger.error(`Failed to fetch Utilization Time \n ${err}`);
+    log.error(`Failed to fetch Utilization Time \n ${err}`);
   }
 
   return 0;
@@ -309,7 +309,7 @@ export async function checkNodeServerAvailability() {
     );
 
     nodeConnectionsFailureHostSet.forEach((device: any) => {
-      logger.info(`Removing Device with udid (${device.udid}) because it is not available`);
+      log.info(`Removing Device with udid (${device.udid}) because it is not available`);
       removeDevice(device);
       nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
@@ -334,7 +334,7 @@ export async function releaseBlockedDevices() {
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
         unblockDevice({ session_id: sessionId });
-        logger.info(
+        log.info(
           `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
         );
       }
