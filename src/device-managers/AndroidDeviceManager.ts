@@ -104,7 +104,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
               const deviceInfo = await this.deviceInfo(device, adbInstance, cliArgs);
               deviceState.push(deviceInfo);
             } else {
-              log.info(`Device ${device.udid} is not in "device" state. So ignoring.`);
+              log.info(`Device ${device.udid} is not in "device" state. So, ignoring.`);
             }
           }
         }
@@ -153,7 +153,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async getAdb(): Promise<any> {
     try {
       if (!this.adb) {
-        this.adb = await ADB.createADB();
+        this.adb = await ADB.createADB({});
       }
     } catch (e) {
       this.adbAvailable = false;
@@ -241,7 +241,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             if (hubExists) {
               log.info(`Updating Hub with device ${clonedDevice.udid}`);
               const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
-              await nodeDevices.postDevicesToHub(trackedDevice, 'add');
+              await nodeDevices.postDevicesToHub([trackedDevice], 'add');
             } else {
               addNewDevice([trackedDevice]);
             }

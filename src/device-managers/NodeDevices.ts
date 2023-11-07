@@ -1,6 +1,7 @@
 import axios from 'axios';
 import log from '../logger';
 import { CloudArgs } from '../types/CloudArgs';
+import { IDevice } from '../interfaces/IDevice';
 
 export default class NodeDevices {
   private host: any;
@@ -9,10 +10,10 @@ export default class NodeDevices {
     this.host = host;
   }
 
-  async postDevicesToHub(data: any, arg: string) {
+  async postDevicesToHub(devices: Array<IDevice>, arg: string) {
     log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
     const status = (
-      await axios.post(`${this.host}/device-farm/api/register`, data, {
+      await axios.post(`${this.host}/device-farm/api/register`, devices, {
         params: {
           type: arg,
         },
@@ -20,9 +21,9 @@ export default class NodeDevices {
     ).status;
     if (status === 200) {
       if (arg === 'add') {
-        log.info(`Pushed devices to hub ${JSON.stringify(data)}`);
+        log.info(`Pushed devices to hub ${JSON.stringify(devices)}`);
       } else {
-        log.info(`Removed device and pushed information to hub ${JSON.stringify(data)}`);
+        log.info(`Removed device and pushed information to hub ${JSON.stringify(devices)}`);
       }
     } else {
       log.warn('Something went wrong!!');
