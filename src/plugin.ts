@@ -80,7 +80,7 @@ class DevicePlugin extends BasePlugin {
       iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
       skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
       if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
-        logger.info('Adding proxy');
+        logger.info(`Adding proxy: ${JSON.stringify(cliArgs.plugin['device-farm'].proxy)}`);
         proxy = cliArgs.plugin['device-farm'].proxy;
       } else {
         logger.info('proxy is not required');
