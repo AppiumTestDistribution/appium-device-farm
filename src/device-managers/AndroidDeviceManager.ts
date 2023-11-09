@@ -102,7 +102,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
             // we want to avoid device with offline or unauthorized status
             if (device.state === 'device') {
               const deviceInfo = await this.deviceInfo(device, adbInstance, cliArgs);
-              deviceState.push(deviceInfo);
+              if (!deviceInfo) {
+                log.info(`Cannot get device info for ${device.udid}. Skipping`);
+              } else {
+                deviceState.push(deviceInfo);
+              }
             } else {
               log.info(`Device ${device.udid} is not in "device" state. So, ignoring.`);
             }
@@ -113,15 +117,25 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return deviceState;
   }
 
-  private async deviceInfo(device: any, adbInstance: any, cliArgs: any): Promise<IDevice> {
+  private async deviceInfo(device: any, adbInstance: any, cliArgs: any): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
-    const [sdk, realDevice, name, chromeDriverPath] = await Promise.all([
-      this.getDeviceVersion(adbInstance, device.udid),
-      this.isRealDevice(adbInstance, device.udid),
-      this.getDeviceName(adbInstance, device.udid),
-      this.getChromeVersion(adbInstance, device.udid, cliArgs),
-    ]);
+    let deviceInfo
+
+    try {
+      deviceInfo = await Promise.all([
+        this.getDeviceVersion(adbInstance, device.udid),
+        this.isRealDevice(adbInstance, device.udid),
+        this.getDeviceName(adbInstance, device.udid),
+        this.getChromeVersion(adbInstance, device.udid, cliArgs),
+      ])
+    } catch (error) {
+      log.info(`Error while getting device info for ${device.udid}. Error: ${error}`)
+      return undefined
+    }
+
+    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo
+
     let host;
     if (adbInstance.adbHost != null) {
       host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
@@ -231,11 +245,17 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice: IDevice = await this.deviceInfo(
+            const trackedDevice = await this.deviceInfo(
               clonedDevice,
               originalADB,
               cliArgs
             );
+
+            if (!trackedDevice) {
+              log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
+              return
+            }
+
             log.info(`Adding device ${clonedDevice.udid} to list!`);
             const hubExists = isHub(cliArgs);
             if (hubExists) {
@@ -285,11 +305,17 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice: IDevice = await this.deviceInfo(
+            const trackedDevice = await this.deviceInfo(
               clonedDevice,
               originalADB,
               cliArgs
             );
+
+            if (!trackedDevice) {
+              log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
+              return
+            }
+
             log.info(`Adding device ${clonedDevice.udid} to list!`);
             addNewDevice([trackedDevice]);
           }
