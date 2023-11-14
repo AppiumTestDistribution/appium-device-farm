@@ -11,7 +11,7 @@ const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
 
 function getProxyServer() {
-  return process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+  return process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
 }
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
