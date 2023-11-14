@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
 import { unblockDevice } from './data-service/device-service';
 import logger from './logger';
 import axios from "axios";
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { HttpProxyAgent } from 'http-proxy-agent';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
