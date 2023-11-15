@@ -31,6 +31,7 @@ import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
 import { DevicePlugin } from './plugin';
+import { CloudArgs } from './types/CloudArgs';
 
 const DEVICE_AVAILABILITY_TIMEOUT = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
@@ -256,7 +257,7 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(hubArgument: any) {
+export async function updateDeviceList(hubArgument?: string) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
   if (hubArgument) {
     const nodeDevices = new NodeDevices(hubArgument);

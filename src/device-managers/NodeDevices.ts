@@ -1,12 +1,11 @@
 import axios from 'axios';
 import log from '../logger';
-import { CloudArgs } from '../types/CloudArgs';
 import { IDevice } from '../interfaces/IDevice';
 
 export default class NodeDevices {
-  private host: any;
+  private host: string;
 
-  constructor(host: CloudArgs) {
+  constructor(host: string) {
     this.host = host;
   }
 
