@@ -21,7 +21,8 @@ describe('Android Test', () => {
     await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList(cliArgs);
+    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -59,7 +60,8 @@ describe('Android Test', () => {
     await initlializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList(cliArgs);
+    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
