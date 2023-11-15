@@ -19,6 +19,7 @@ import {
   allocateDeviceForSession,
   checkNodeServerAvailability,
   cronReleaseBlockedDevices,
+  cronUpdateDeviceList,
   deviceType,
   initlializeStorage,
   isIOS,
@@ -32,7 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hubUrl, isHub, spinWith, stripAppiumPrefixes } from './helpers';
+import { hubUrl, hasHubArgument, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -128,18 +129,24 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
     );
 
-    if (isHub(cliArgs)) {
-      const hub = cliArgs.plugin['device-farm'].hub;
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
+    const hubArgument = cliArgs.plugin['device-farm'].hub
+
+    if (hubArgument) {
+      await DevicePlugin.waitForRemoteHubServerToBeRunning(hubArgument);
       await checkNodeServerAvailability();
     }
 
-    const devicesUpdates = await updateDeviceList(cliArgs);
+    const devicesUpdates = await updateDeviceList(hubArgument);
     if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(cliArgs);
     }
     await cronReleaseBlockedDevices();
+
+    // hub may have been restarted, so let's send device list regularly
+    if (hubArgument) {
+      await cronUpdateDeviceList(hubArgument);
+    }
   }
 
   private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {

@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isHub, cachePath } from './helpers';
+import { isMac, checkIfPathIsAbsolute, hasHubArgument, cachePath } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -46,6 +46,7 @@ const customCapability = {
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
+let cronTimerToUpdateDevices: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -255,10 +256,10 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(cliArgs: any) {
+export async function updateDeviceList(hubArgument: any) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
-  if (isHub(cliArgs)) {
-    const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+  if (hubArgument) {
+    const nodeDevices = new NodeDevices(hubArgument);
     await nodeDevices.postDevicesToHub(devices, 'add');
   }
   addNewDevice(devices);
@@ -350,4 +351,16 @@ export async function cronReleaseBlockedDevices() {
   cronTimerToReleaseBlockedDevices = setInterval(async () => {
     await releaseBlockedDevices();
   }, 30000);
+}
+
+export async function cronUpdateDeviceList(hubArgument: string) {
+  const intervalMs = 30000
+  if (cronTimerToUpdateDevices) {
+    clearInterval(cronTimerToUpdateDevices);
+  }
+  log.info(`This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`)
+  await updateDeviceList(hubArgument);
+  cronTimerToUpdateDevices = setInterval(async () => {
+    await updateDeviceList(hubArgument);
+  }, intervalMs);
 }

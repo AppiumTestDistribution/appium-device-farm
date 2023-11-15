@@ -1,6 +1,6 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort, isCloud, isHub } from '../helpers';
+import { asyncForEach, getFreePort, isCloud, hasHubArgument } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
 import _ from 'lodash';
@@ -257,7 +257,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             }
 
             log.info(`Adding device ${clonedDevice.udid} to list!`);
-            const hubExists = isHub(cliArgs);
+            const hubExists = hasHubArgument(cliArgs);
             if (hubExists) {
               log.info(`Updating Hub with device ${clonedDevice.udid}`);
               const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
@@ -270,7 +270,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         tracker.on('remove', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], host: ip.address() });
-          const hubExists = isHub(cliArgs);
+          const hubExists = hasHubArgument(cliArgs);
           if (hubExists) {
             log.info(`Removing device from Hub with device ${clonedDevice.udid}`);
             const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);

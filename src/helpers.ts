@@ -91,7 +91,7 @@ export async function isPortBusy(port: number) {
   }
 }
 
-export function isHub(cliArgs: any) {
+export function hasHubArgument(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].hub');
 }
 
