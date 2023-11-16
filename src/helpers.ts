@@ -10,6 +10,7 @@ import Cloud from './enums/Cloud';
 import normalizeUrl from 'normalize-url';
 import ora from 'ora';
 import asyncWait from 'async-wait-until';
+import axios from 'axios';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -166,4 +167,22 @@ export function stripAppiumPrefixes(caps: any) {
     );
   }
   return strippedCaps;
+}
+
+export async function isDeviceFarmRunning(host: string): Promise<boolean> {
+  try {
+    const result = await axios({
+      method: 'get',
+      url: `${host}/device-farm`,
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result.status == 200
+  } catch (error: any) {
+    return false
+  }
+  
 }
