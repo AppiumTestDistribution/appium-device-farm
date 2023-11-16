@@ -203,7 +203,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
    * Applicaple only for ios.
    */
   const deviceType =
-    platform == DevicePlatform.IOS && isMac()
+    platform == DevicePlatform.IOS
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
   if (
