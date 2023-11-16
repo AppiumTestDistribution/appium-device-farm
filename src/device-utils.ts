@@ -385,8 +385,10 @@ export async function cronRefreshNodeDevices() {
   if (cronTimerToUpdateNodeDevices) {
     clearInterval(cronTimerToUpdateNodeDevices);
   }
+  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`)
   
   cronTimerToUpdateNodeDevices = setInterval(async () => {
+    log.info("Scanning for stale nodes.")
     await checkNodeServerAvailability();
   }, intervalMs);
 }
