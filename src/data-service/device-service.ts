@@ -14,12 +14,11 @@ export function addNewDevice(devices: Array<IDevice>) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-  const devicesInDB = DeviceModel.chain().find().data();
   devices.forEach(function (device) {
-    const isDeviceAlreadyPresent = devicesInDB.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host
-    );
-    if (!isDeviceAlreadyPresent) {
+    const isDeviceAlreadyPresent = DeviceModel.chain().find(
+      { udid: device.udid, host: device.host }
+    ).data();
+    if (isDeviceAlreadyPresent.length === 0) {
       try {
         DeviceModel.insert({
           ...device,
@@ -29,6 +28,9 @@ export function addNewDevice(devices: Array<IDevice>) {
       } catch (error) {
         log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`)
       }
+    } else {
+      log.debug(`Device "${device.udid}" already exists in database`);
+      // log.debug(`Device found: ${JSON.stringify(isDeviceAlreadyPresent)}`)
     }
   });
 }
