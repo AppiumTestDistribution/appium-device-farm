@@ -11,7 +11,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'iOS',
-  'appium:app': 'bs://86d385b6352938556865bebe07c91ec554f6269f',
+  'appium:app': 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
@@ -26,7 +26,7 @@ describe('Plugin Test', () => {
 
   it('Vertical swipe test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-    var textButton = await driver.$('~Text Button');
+    let textButton = await driver.$('~Text Button');
     await textButton.waitForDisplayed({ timeout: 30000 });
     await textButton.click();
   });
