@@ -108,7 +108,7 @@ jobs:
         npm run test-e2e-pCloudy
       displayName: 'E2E Test'
 
- - job: BrowserStack-mac
+ - job: BrowserStack_mac
    pool:
      vmImage: 'macOS-latest'
 
@@ -127,7 +127,7 @@ jobs:
         npm run test-parallel-bs
       displayName: 'E2E Test'
 
- - job: BrowserStack-Linux
+ - job: BrowserStack_Linux
    pool:
      vmImage: 'ubuntu-latest'
 
