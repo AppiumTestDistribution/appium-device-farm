@@ -84,7 +84,7 @@ apiRouter.get('/devices/android', (req, res) => {
   res.json(
     DeviceModel.find({
       platform: 'android',
-    })
+    }),
   );
 });
 
@@ -98,7 +98,7 @@ apiRouter.post('/register', (req, res) => {
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
     log.info(
-      `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`
+      `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`,
     );
   }
   res.json('200');

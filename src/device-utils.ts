@@ -107,13 +107,13 @@ export async function allocateDeviceForSession(capability: ISessionCapability): 
         const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
           log.info(
-            `Waiting for session available, already at max session count of: ${maxSessions}`
+            `Waiting for session available, already at max session count of: ${maxSessions}`,
           );
           return false;
         } else log.info('Waiting for free device');
         return (await getDevice(filters)) != undefined;
       },
-      { timeout, intervalBetweenAttempts }
+      { timeout, intervalBetweenAttempts },
     );
   } catch (err) {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
@@ -212,7 +212,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
   ) {
     throw new Error(
-      'iosDeviceType value is set to "real" but app provided is not suitable for real device.'
+      'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
     );
   }
   if (
@@ -220,7 +220,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
     getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
   ) {
     throw new Error(
-      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
+      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
     );
   }
   let name = '';
@@ -265,9 +265,8 @@ export async function updateDeviceList(hubArgument?: string) {
     try {
       await nodeDevices.postDevicesToHub(devices, 'add');
     } catch (error) {
-      log.error(`Cannot send device list update. Reason: ${error}`)
+      log.error(`Cannot send device list update. Reason: ${error}`);
     }
-    
   }
   addNewDevice(devices);
 
@@ -307,13 +306,13 @@ export async function checkNodeServerAvailability() {
     const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
 
     const nodeConnectionsSuccess = nodeConnectionsResult.filter(
-      (result) => result.status === 'fulfilled'
+      (result) => result.status === 'fulfilled',
     );
     const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
     const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
 
     const nodeConnectionsFailureHostSet = new Set(
-      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host))
+      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host)),
     );
 
     nodeConnectionsFailureHostSet.forEach((device: any) => {
@@ -337,13 +336,13 @@ export async function releaseBlockedDevices() {
       (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
     ) {
       console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`
+        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`,
       );
       const sessionId = device.session_id;
       if (sessionId !== undefined) {
         unblockDevice({ session_id: sessionId });
         log.info(
-          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
+          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`,
         );
       }
     }
@@ -361,17 +360,19 @@ export async function cronReleaseBlockedDevices() {
 }
 
 export async function cronUpdateDeviceList(hubArgument: string) {
-  const intervalMs = 30000
+  const intervalMs = 30000;
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }
-  log.info(`This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`)
-  
+  log.info(
+    `This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`,
+  );
+
   cronTimerToUpdateDevices = setInterval(async () => {
     if (await isDeviceFarmRunning(hubArgument)) {
       await updateDeviceList(hubArgument);
     } else {
-      log.warn(`Not sending device update since hub ${hubArgument} is not running`)
+      log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
   }, intervalMs);
 }
@@ -381,14 +382,14 @@ export async function cronUpdateDeviceList(hubArgument: string) {
  * @param hubArgument host
  */
 export async function cronRefreshNodeDevices() {
-  const intervalMs = 1000 * 60 * 5 // 5 minutes
+  const intervalMs = 1000 * 60 * 5; // 5 minutes
   if (cronTimerToUpdateNodeDevices) {
     clearInterval(cronTimerToUpdateNodeDevices);
   }
-  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`)
-  
+  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`);
+
   cronTimerToUpdateNodeDevices = setInterval(async () => {
-    log.info("Scanning for stale nodes.")
+    log.info('Scanning for stale nodes.');
     await checkNodeServerAvailability();
   }, intervalMs);
 }

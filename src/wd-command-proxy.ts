@@ -5,7 +5,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
 import { unblockDevice } from './data-service/device-service';
 import logger from './logger';
-import axios from "axios";
+import axios from 'axios';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
@@ -16,7 +16,7 @@ function getProxyServer() {
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
   const proxyServer = getProxyServer();
-  logger.info(`proxyServer: ${JSON.stringify(proxyServer)}`)
+  logger.info(`proxyServer: ${JSON.stringify(proxyServer)}`);
   const config: any = {
     target: new URL(remoteHost).origin,
     logLevel: 'debug',
@@ -27,10 +27,7 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
     logger.info(`Added proxy to createProxyMiddleware: ${JSON.stringify(proxyServer)}`);
     config.agent = new HttpsProxyAgent(proxyServer);
   }
-  remoteProxyMap.set(
-    sessionId,
-    createProxyMiddleware(config)
-  );
+  remoteProxyMap.set(sessionId, createProxyMiddleware(config));
   remoteHostMap.set(sessionId, remoteHost);
 }
 
@@ -71,24 +68,24 @@ async function handler(req: Request, res: Response, next: NextFunction) {
     return next();
   }
   if (remoteProxyMap.has(sessionId)) {
-    if(proxyServer) {
-        const response = await axios({
-          method: req.method,
-          url: new URL(req.path, new URL(remoteHostMap.get(sessionId)).origin).toString(),
-          data: req.body,
-          params: req.query,
-          validateStatus: () => true,
-          httpsAgent : new HttpsProxyAgent(proxyServer),
-          httpAgent : new HttpProxyAgent(proxyServer),
-          proxy: false
-        })
+    if (proxyServer) {
+      const response = await axios({
+        method: req.method,
+        url: new URL(req.path, new URL(remoteHostMap.get(sessionId)).origin).toString(),
+        data: req.body,
+        params: req.query,
+        validateStatus: () => true,
+        httpsAgent: new HttpsProxyAgent(proxyServer),
+        httpAgent: new HttpProxyAgent(proxyServer),
+        proxy: false,
+      });
       res.status(response.status).json(response.data);
     } else {
       remoteProxyMap.get(sessionId)(req, res, next);
     }
     if (req.method === 'DELETE') {
       logger.info(
-        `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`
+        `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`,
       );
       unblockDevice({ session_id: sessionId });
       removeProxyHandler(sessionId);

@@ -34,7 +34,6 @@ export function addNewDevice(devices: Array<IDevice>) {
       }
     } else {
       log.debug(`Device "${device.udid}" already exists in database`);
-      // log.debug(`Device found: ${JSON.stringify(isDeviceAlreadyPresent)}`)
     }
   });
 }
@@ -111,7 +110,6 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
       filter.state = 'Shutdown';
     }
   }
-
   return results.find(filter).data()[0];
 }
 
@@ -159,7 +157,7 @@ export async function unblockDevice(filter: object) {
   const device = DeviceModel.chain().find(filter).data()[0];
   if (device !== undefined) {
     console.log(
-      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`
+      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`,
     );
     const sessionStart = device.sessionStartTime;
     const currentTime = new Date().getTime();

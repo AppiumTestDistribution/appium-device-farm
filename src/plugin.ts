@@ -34,7 +34,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hubUrl, hasHubArgument, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
+import {
+  hubUrl,
+  hasHubArgument,
+  spinWith,
+  stripAppiumPrefixes,
+  isDeviceFarmRunning,
+} from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -68,8 +74,8 @@ class DevicePlugin extends BasePlugin {
     unblockDevice(deviceFilter);
     logger.info(
       `Unblocking device mapped with filter ${JSON.stringify(
-        deviceFilter
-      )} onUnexpectedShutdown from server`
+        deviceFilter,
+      )} onUnexpectedShutdown from server`,
     );
   }
 
@@ -94,7 +100,7 @@ class DevicePlugin extends BasePlugin {
 
     if (!platform)
       throw new Error(
-        '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
+        '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
 
     if (emulators && cliArgs.plugin['device-farm'].platform.toLowerCase() === 'android') {
@@ -127,10 +133,10 @@ class DevicePlugin extends BasePlugin {
     await initlializeStorage();
 
     logger.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
     );
 
-    const hubArgument = cliArgs.plugin['device-farm'].hub
+    const hubArgument = cliArgs.plugin['device-farm'].hub;
 
     if (hubArgument) {
       await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
@@ -148,7 +154,7 @@ class DevicePlugin extends BasePlugin {
       await cronUpdateDeviceList(hubArgument);
     } else {
       // let's check for stale nodes
-      await cronRefreshNodeDevices()
+      await cronRefreshNodeDevices();
     }
   }
 
@@ -165,11 +171,11 @@ class DevicePlugin extends BasePlugin {
     await spinWith(
       `Waiting for node server ${host} to be up and running\n`,
       async () => {
-        await isDeviceFarmRunning(host)
+        await isDeviceFarmRunning(host);
       },
       (msg: any) => {
         throw new Error(`Failed: ${msg}`);
-      }
+      },
     );
   }
 
@@ -178,7 +184,7 @@ class DevicePlugin extends BasePlugin {
     driver: any,
     jwpDesCaps: any,
     jwpReqCaps: any,
-    caps: ISessionCapability
+    caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
     const {
@@ -205,7 +211,7 @@ class DevicePlugin extends BasePlugin {
           await removePendingSession(pendingSessionId);
           throw err;
         }
-      }
+      },
     );
     let session;
     if (!device.host.includes(ip.address())) {
@@ -220,8 +226,8 @@ class DevicePlugin extends BasePlugin {
       let sessionDetails: any;
       logger.info(
         `Creating cloud session with desiredCapabilities: "${JSON.stringify(
-          capabilitiesToCreateSession
-        )}"`
+          capabilitiesToCreateSession,
+        )}"`,
       );
       const config: any = {
         method: 'post',
@@ -282,10 +288,10 @@ class DevicePlugin extends BasePlugin {
   private unblockDeviceOnError(device: IDevice, error: any) {
     updatedAllocatedDevice(device, { busy: false });
     logger.info(
-      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`
+      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`,
     );
     throw new Error(
-      `"${error}", Please check the remote appium server log to know the reason for failure`
+      `"${error}", Please check the remote appium server log to know the reason for failure`,
     );
   }
 

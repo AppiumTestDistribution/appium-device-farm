@@ -26,24 +26,20 @@ export default class IOSDeviceManager implements IDeviceManager {
   async getDevices(
     deviceTypes: { iosDeviceType: string },
     existingDeviceDetails: Array<IDevice>,
-    cliArgs: any
+    cliArgs: any,
   ): Promise<IDevice[]> {
-    if (!isMac()) {
-      return [];
+    if (deviceTypes.iosDeviceType === 'real') {
+      return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
+    } else if (deviceTypes.iosDeviceType === 'simulated') {
+      return flatten(await Promise.all([this.getSimulators(cliArgs)]));
+      // return both real and simulated devices
     } else {
-      if (deviceTypes.iosDeviceType === 'real') {
-        return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, cliArgs)]));
-      } else if (deviceTypes.iosDeviceType === 'simulated') {
-        return flatten(await Promise.all([this.getSimulators(cliArgs)]));
-        // return both real and simulated devices
-      } else {
-        return flatten(
-          await Promise.all([
-            this.getRealDevices(existingDeviceDetails, cliArgs),
-            this.getSimulators(cliArgs),
-          ])
-        );
-      }
+      return flatten(
+        await Promise.all([
+          this.getRealDevices(existingDeviceDetails, cliArgs),
+          this.getSimulators(cliArgs),
+        ]),
+      );
     }
   }
 
@@ -70,7 +66,7 @@ export default class IOSDeviceManager implements IDeviceManager {
    */
   private async getRealDevices(
     existingDeviceDetails: Array<IDevice>,
-    cliArgs: any
+    cliArgs: any,
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
     if (isCloud(cliArgs)) {
@@ -92,7 +88,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         if (!fs.existsSync(tmpPath)) {
           logger.info(`DerivedDataPath for UDID ${udid} not set, so falling back to ${tmpPath}`);
           logger.info(
-            `WDA will be build once and will use WDA Runner from path ${tmpPath}, second test run will skip the build process`
+            `WDA will be build once and will use WDA Runner from path ${tmpPath}, second test run will skip the build process`,
           );
           fs.mkdirSync(tmpPath, { recursive: true });
         }
@@ -104,7 +100,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         throw new Error('DerivedData Path should be able Object');
       const tmpPath = path.join(
         os.homedir(),
-        `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`
+        `Library/Developer/Xcode/DerivedData/WebDriverAgent-${udid}`,
       );
       if (realDevice) {
         derivedPathExtracted(tmpPath, derivedDataPath.device);
@@ -120,7 +116,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   private async fetchLocalIOSDevices(
     existingDeviceDetails: IDevice[],
     deviceState: IDevice[],
-    cliArgs: any
+    cliArgs: any,
   ) {
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
@@ -217,8 +213,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     if (hasUserGivenSimulators) {
       filteredSimulators = flattenValued.filter((device: IDevice) =>
         cliArgs.plugin['device-farm'].simulators.some(
-          (simulator: IDevice) => device.name === simulator.name && device.sdk === simulator.sdk
-        )
+          (simulator: IDevice) => device.name === simulator.name && device.sdk === simulator.sdk,
+        ),
       );
     }
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
@@ -239,7 +235,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
           derivedDataPath: this.derivedDataPath(cliArgs, device.udid, false),
-        })
+        }),
       );
     });
   }
@@ -254,7 +250,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       let tvosSimulators: any = [];
       if (iOSSimulators) {
         iosSimulators = flatten(
-          Object.values((await simctl.getDevicesByParsing('iOS')) as Array<IDevice>)
+          Object.values((await simctl.getDevicesByParsing('iOS')) as Array<IDevice>),
         );
       } else {
         console.log('No iOS simulators found!');
@@ -262,7 +258,7 @@ export default class IOSDeviceManager implements IDeviceManager {
 
       if (tvSimulators) {
         tvosSimulators = flatten(
-          Object.values((await simctl.getDevicesByParsing('tvOS')) as Array<IDevice>)
+          Object.values((await simctl.getDevicesByParsing('tvOS')) as Array<IDevice>),
         );
       } else {
         console.log('No tvOS simulators found!');

@@ -35,7 +35,7 @@ describe('Browserstack Devices', () => {
     delete iosDevics[0].meta;
     delete iosDevics[0]['$loki'];
     expect(iosDevics[0]).to.deep.equal({
-      deviceName: 'iPhone 11 Pro',
+      deviceName: 'iPhone XS',
       os_version: '15',
       platform: 'ios',
       host: 'http://hub-cloud.browserstack.com/wd/hub',
@@ -43,14 +43,14 @@ describe('Browserstack Devices', () => {
       userBlocked: false,
       deviceType: 'real',
       capability: {
-        deviceName: 'iPhone 11 Pro',
+        deviceName: 'iPhone XS',
         os_version: '15',
         platform: 'ios',
       },
       cloud: 'browserstack',
-      name: 'iPhone 11 Pro',
+      name: 'iPhone XS',
       sdk: '15',
-      udid: 'iPhone 11 Pro',
+      udid: 'iPhone XS',
       offline: false,
     });
   });

@@ -39,7 +39,7 @@ export async function iOSCapabilities(
     mjpegServerPort?: number;
     wdaLocalPort?: number;
     derivedDataPath?: string;
-  }
+  },
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;

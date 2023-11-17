@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.3.15",
+  "version": "8.3.16",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "test-parallel-pcloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/pcloudy.spec.js --timeout 260000",
     "test-parallel-sauce": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/sauce.spec.js --timeout 260000",
     "test-parallel-lt": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/lambdaTest.spec.js --timeout 260000",
-    "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/conf1.spec.js --timeout 260000",
+    "test-parallel-ios-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/confIOS.js --timeout 260000",
     "test-e2e": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/plugin.spec.js --timeout 999999",
     "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --timeout 999999",
     "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --timeout 999999",

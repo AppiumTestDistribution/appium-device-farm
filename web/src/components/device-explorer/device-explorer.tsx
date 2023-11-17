@@ -88,7 +88,7 @@ export default class DeviceExplorer extends React.Component<any, IDeviceExplorer
       filters.push(
         (d: IDevice) =>
           d.name.toLowerCase().includes(this.state.filter.name.toLowerCase()) ||
-          d.udid.toLowerCase().includes(this.state.filter.name.toLowerCase())
+          d.udid.toLowerCase().includes(this.state.filter.name.toLowerCase()),
       );
     }
     return filters.reduce((acc: Array<IDevice>, predicate: (d: IDevice) => boolean) => {
