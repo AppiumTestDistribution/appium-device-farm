@@ -1,7 +1,7 @@
 import { DeviceModel } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
-import logger from '../logger';
+import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
 export function removeDevice(device: any) {
@@ -14,17 +14,26 @@ export function addNewDevice(devices: Array<IDevice>) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-  const devicesInDB = DeviceModel.chain().find().data();
   devices.forEach(function (device) {
-    const isDeviceAlreadyPresent = devicesInDB.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host,
-    );
-    if (!isDeviceAlreadyPresent) {
-      DeviceModel.insert({
-        ...device,
-        offline: false,
-        userBlocked: false,
-      });
+    const isDeviceAlreadyPresent = DeviceModel.chain().find(
+      { udid: device.udid, host: device.host }
+    ).data();
+    if (isDeviceAlreadyPresent.length === 0) {
+      // @ts-ignore
+      delete device["$loki"]
+      // @ts-ignore
+      delete device["meta"]
+      try {
+        DeviceModel.insert({
+          ...device,
+          offline: false,
+          userBlocked: false,
+        });
+      } catch (error) {
+        log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`)
+      }
+    } else {
+      log.debug(`Device "${device.udid}" already exists in database`);
     }
   });
 }
@@ -38,8 +47,8 @@ export function setSimulatorState(devices: Array<IDevice>) {
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
-        logger.info(
-          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
+        log.info(
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
         );
         DeviceModel.chain()
           .find({ udid: device.udid })
@@ -95,18 +104,17 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     filter.state = 'Booted';
     const results_copy = results.copy();
     if (results_copy.find(filter).data()[0] != undefined) {
-      logger.info('Picking up booted simulator');
+      log.info('Picking up booted simulator');
       return results.find(filter).data()[0];
     } else {
       filter.state = 'Shutdown';
     }
   }
-  console.log('----', results.find().data());
   return results.find(filter).data()[0];
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
-  logger.info(`Updating allocated device: "${JSON.stringify(device)}"`);
+  log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
   DeviceModel.chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
