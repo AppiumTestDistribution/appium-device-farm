@@ -19,6 +19,10 @@ export function addNewDevice(devices: Array<IDevice>) {
       { udid: device.udid, host: device.host }
     ).data();
     if (isDeviceAlreadyPresent.length === 0) {
+      // @ts-ignore
+      delete device["$loki"]
+      // @ts-ignore
+      delete device["meta"]
       try {
         DeviceModel.insert({
           ...device,
