@@ -10,7 +10,7 @@ const WDIO_PARAMS = {
   logLevel: 'info',
 };
 const capabilities = {
-  platformName: 'iOS',
+  platformName: 'ios',
   'appium:app': 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
   'bstack:options': {
     projectName: 'Login',
