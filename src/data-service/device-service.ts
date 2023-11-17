@@ -101,7 +101,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
       filter.state = 'Shutdown';
     }
   }
-
+  console.log('----', results.find().data())
   return results.find(filter).data()[0];
 }
 
