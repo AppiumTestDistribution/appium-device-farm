@@ -18,6 +18,7 @@ import {
 import {
   allocateDeviceForSession,
   checkNodeServerAvailability,
+  cronRefreshNodeDevices,
   cronReleaseBlockedDevices,
   cronUpdateDeviceList,
   deviceType,
@@ -33,7 +34,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hubUrl, hasHubArgument, spinWith, stripAppiumPrefixes } from './helpers';
+import { hubUrl, hasHubArgument, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -132,8 +133,7 @@ class DevicePlugin extends BasePlugin {
     const hubArgument = cliArgs.plugin['device-farm'].hub
 
     if (hubArgument) {
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(hubArgument);
-      await checkNodeServerAvailability();
+      await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
     }
 
     const devicesUpdates = await updateDeviceList(hubArgument);
@@ -143,9 +143,12 @@ class DevicePlugin extends BasePlugin {
     }
     await cronReleaseBlockedDevices();
 
-    // hub may have been restarted, so let's send device list regularly
     if (hubArgument) {
+      // hub may have been restarted, so let's send device list regularly
       await cronUpdateDeviceList(hubArgument);
+    } else {
+      // let's check for stale nodes
+      await cronRefreshNodeDevices()
     }
   }
 
@@ -158,18 +161,11 @@ class DevicePlugin extends BasePlugin {
     return deviceTypes;
   }
 
-  static async waitForRemoteHubServerToBeRunning(host: string) {
+  static async waitForRemoteDeviceFarmToBeRunning(host: string) {
     await spinWith(
       `Waiting for node server ${host} to be up and running\n`,
       async () => {
-        await axios({
-          method: 'get',
-          url: `${host}/device-farm`,
-          timeout: 30000,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        await isDeviceFarmRunning(host)
       },
       (msg: any) => {
         throw new Error(`Failed: ${msg}`);

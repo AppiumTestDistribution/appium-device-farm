@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.3.14",
+  "version": "8.3.15",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/index.js",
   "scripts": {
@@ -80,7 +80,7 @@
     "get-port": "^5.1.1",
     "http-proxy-middleware": "^2.0.6",
     "ip": "^1.1.8",
-    "jsonschema":"1.4.1",
+    "jsonschema": "1.4.1",
     "lodash": "^4.17.21",
     "lokijs": "^1.5.12",
     "node-abort-controller": "^3.1.1",

@@ -136,7 +136,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         deviceState.push(deviceInfo);
       }
     });
-    const goIosTracker = new GoIosTracker();
+    const goIosTracker = GoIosTracker.getInstance();
     await goIosTracker.start();
     goIosTracker.on('device-connected', async (message) => {
       const deviceAttached = [await this.getDeviceInfo(message.id, cliArgs)];

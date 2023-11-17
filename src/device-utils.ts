@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, hasHubArgument, cachePath } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -48,6 +48,7 @@ const customCapability = {
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
+let cronTimerToUpdateNodeDevices: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -261,7 +262,12 @@ export async function updateDeviceList(hubArgument?: string) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
   if (hubArgument) {
     const nodeDevices = new NodeDevices(hubArgument);
-    await nodeDevices.postDevicesToHub(devices, 'add');
+    try {
+      await nodeDevices.postDevicesToHub(devices, 'add');
+    } catch (error) {
+      log.error(`Cannot send device list update. Reason: ${error}`)
+    }
+    
   }
   addNewDevice(devices);
 
@@ -294,7 +300,7 @@ export async function checkNodeServerAvailability() {
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
       nodeChecked.push(device.host);
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
+      await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(device.host);
       return device.host;
     });
 
@@ -360,8 +366,29 @@ export async function cronUpdateDeviceList(hubArgument: string) {
     clearInterval(cronTimerToUpdateDevices);
   }
   log.info(`This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`)
-  await updateDeviceList(hubArgument);
+  
   cronTimerToUpdateDevices = setInterval(async () => {
-    await updateDeviceList(hubArgument);
+    if (await isDeviceFarmRunning(hubArgument)) {
+      await updateDeviceList(hubArgument);
+    } else {
+      log.warn(`Not sending device update since hub ${hubArgument} is not running`)
+    }
+  }, intervalMs);
+}
+
+/**
+ * Remove devices from unavailable nodes
+ * @param hubArgument host
+ */
+export async function cronRefreshNodeDevices() {
+  const intervalMs = 1000 * 60 * 5 // 5 minutes
+  if (cronTimerToUpdateNodeDevices) {
+    clearInterval(cronTimerToUpdateNodeDevices);
+  }
+  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`)
+  
+  cronTimerToUpdateNodeDevices = setInterval(async () => {
+    log.info("Scanning for stale nodes.")
+    await checkNodeServerAvailability();
   }, intervalMs);
 }

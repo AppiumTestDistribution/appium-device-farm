@@ -4,9 +4,22 @@ import { SubProcess } from 'teen_process';
 import { cachePath } from '../helpers';
 import log from '../logger';
 export class GoIosTracker extends EventEmitter {
+  private static instance: GoIosTracker;
   private deviceMap: Map<number, string> = new Map();
   private process!: SubProcess;
   private started = true;
+
+  private constructor() {
+    super();
+  }
+
+  public static getInstance(): GoIosTracker {
+    if (!GoIosTracker.instance) {
+      GoIosTracker.instance = new GoIosTracker();
+    }
+
+    return GoIosTracker.instance;
+  }
 
   async start() {
     if (!_.isNil(this.process) && this.process.isRunning) {
