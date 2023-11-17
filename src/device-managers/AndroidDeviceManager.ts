@@ -40,7 +40,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   async getDevices(
     deviceTypes: { androidDeviceType: string },
     existingDeviceDetails: Array<IDevice>,
-    cliArgs: any
+    cliArgs: any,
   ): Promise<any> {
     if (!this.adbAvailable) {
       return [];
@@ -73,7 +73,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async fetchAndroidDevices(
     deviceState: IDevice[],
     existingDeviceDetails: IDevice[],
-    cliArgs: any
+    cliArgs: any,
   ) {
     await this.requireSdkRoot();
     const connectedDevices = await this.getConnectedDevices(cliArgs);
@@ -84,11 +84,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
         if (
           !deviceState.find(
             (devicestate) =>
-              devicestate.udid === device.udid && devicestate.adbRemoteHost === device.adbRemoteHost
+              devicestate.udid === device.udid &&
+              devicestate.adbRemoteHost === device.adbRemoteHost,
           )
         ) {
           const existingDevice = existingDeviceDetails.find(
-            (dev) => dev.udid === device.udid && dev.host.includes(ip.address())
+            (dev) => dev.udid === device.udid && dev.host.includes(ip.address()),
           );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
@@ -117,10 +118,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return deviceState;
   }
 
-  private async deviceInfo(device: any, adbInstance: any, cliArgs: any): Promise<IDevice | undefined> {
+  private async deviceInfo(
+    device: any,
+    adbInstance: any,
+    cliArgs: any,
+  ): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
-    let deviceInfo
+    let deviceInfo;
 
     try {
       deviceInfo = await Promise.all([
@@ -128,13 +133,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
         this.isRealDevice(adbInstance, device.udid),
         this.getDeviceName(adbInstance, device.udid),
         this.getChromeVersion(adbInstance, device.udid, cliArgs),
-      ])
+      ]);
     } catch (error) {
-      log.info(`Error while getting device info for ${device.udid}. Error: ${error}`)
-      return undefined
+      log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
+      return undefined;
     }
 
-    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo
+    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
 
     let host;
     if (adbInstance.adbHost != null) {
@@ -182,7 +187,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           const bootStatus = (await this.getDeviceProperty(
             originalADB,
             udid,
-            'init.svc.bootanim'
+            'init.svc.bootanim',
           )) as any;
           if (!_.isNil(bootStatus) && !_.isEmpty(bootStatus) && bootStatus == 'stopped') {
             console.log('Boot Completed!', udid);
@@ -195,7 +200,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       {
         intervalBetweenAttempts: 2000,
         timeout: 60 * 1000,
-      }
+      },
     );
   }
 
@@ -225,7 +230,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           remoteAdb,
           originalADB,
           adbHost,
-          cliArgs
+          cliArgs,
         );
         remoteAdbTracking();
       });
@@ -245,15 +250,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice = await this.deviceInfo(
-              clonedDevice,
-              originalADB,
-              cliArgs
-            );
+            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, cliArgs);
 
             if (!trackedDevice) {
               log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
-              return
+              return;
             }
 
             log.info(`Adding device ${clonedDevice.udid} to list!`);
@@ -305,15 +306,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice = await this.deviceInfo(
-              clonedDevice,
-              originalADB,
-              cliArgs
-            );
+            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, cliArgs);
 
             if (!trackedDevice) {
               log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
-              return
+              return;
             }
 
             log.info(`Adding device ${clonedDevice.udid} to list!`);
@@ -324,7 +321,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], host: adbHost });
           log.warn(
-            `Removing device ${clonedDevice.udid} from ${adbHost} list as the device was unplugged!`
+            `Removing device ${clonedDevice.udid} from ${adbHost} list as the device was unplugged!`,
           );
           removeDevice(clonedDevice);
           this.abort(clonedDevice.udid);
@@ -386,13 +383,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
       'Read https://developer.android.com/studio/command-line/variables for more details';
     if (_.isEmpty(sdkRoot)) {
       throw new Error(
-        `Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable was exported. ${docMsg}`
+        `Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable was exported. ${docMsg}`,
       );
     }
 
     if (!(await fs.exists(sdkRoot))) {
       throw new Error(
-        `The Android SDK root folder '${sdkRoot}' does not exist on the local file system. ${docMsg}`
+        `The Android SDK root folder '${sdkRoot}' does not exist on the local file system. ${docMsg}`,
       );
     }
     const stats = await fs.stat(sdkRoot);
@@ -403,17 +400,15 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private getDeviceName = async (adbInstance: any, udid: string) => {
-    let deviceName = await (await adbInstance).adbExec([
-      '-s',
-      udid,
-      'shell',
-      'getprop',
-      'ro.product.name',
-    ]);
+    let deviceName = await (
+      await adbInstance
+    ).adbExec(['-s', udid, 'shell', 'getprop', 'ro.product.name']);
 
     if (!deviceName || deviceName.trim() === '') {
       // If the device name is null or empty, try to get it from the Bluetooth manager.
-      deviceName = await (await adbInstance).adbExec([
+      deviceName = await (
+        await adbInstance
+      ).adbExec([
         '-s',
         udid,
         'shell',

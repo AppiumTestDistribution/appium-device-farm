@@ -37,8 +37,8 @@ export class DeviceFarmManager {
         ...(await deviceManager.getDevices(
           this.deviceTypes,
           existingDeviceDetails || [],
-          this.cliArgs
-        ))
+          this.cliArgs,
+        )),
       );
     }
     return devices;

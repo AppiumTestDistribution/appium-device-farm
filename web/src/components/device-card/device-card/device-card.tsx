@@ -41,7 +41,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       platform,
       udid,
       deviceState === 'busy',
-      deviceState === 'offline'
+      deviceState === 'offline',
     );
 
     this.props.reloadDevices();
@@ -53,7 +53,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       platform,
       udid,
       deviceState === 'busy',
-      deviceState === 'offline'
+      deviceState === 'offline',
     );
 
     this.props.reloadDevices();

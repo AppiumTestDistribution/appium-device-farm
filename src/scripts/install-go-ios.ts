@@ -34,7 +34,7 @@ async function main() {
 (async () => await main())();
 function unzipgoIOS(platform) {
   fs.createReadStream(`${basePath}/go-ios-${platform}.zip`).pipe(
-    unzipper.Extract({ path: `${basePath}/` })
+    unzipper.Extract({ path: `${basePath}/` }),
   );
 }
 

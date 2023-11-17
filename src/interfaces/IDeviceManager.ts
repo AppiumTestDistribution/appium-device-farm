@@ -4,6 +4,6 @@ export interface IDeviceManager {
   getDevices(
     deviceTypes: { androidDeviceType: string; iosDeviceType: string },
     existingDeviceDetails: Array<IDevice>,
-    cliArgs: any
+    cliArgs: any,
   ): Promise<IDevice[]>;
 }

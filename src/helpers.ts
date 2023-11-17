@@ -19,7 +19,7 @@ export async function asyncForEach(
     (device: any): Promise<void>;
     (udid: any): Promise<void>;
     (arg0: any, arg1: number, arg2: any): any;
-  }
+  },
 ) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -44,7 +44,7 @@ export async function spinWith(msg: string, fn: () => any, callback = (msg: stri
     {
       intervalBetweenAttempts: 2000,
       timeout: 60 * 1000,
-    }
+    },
   );
 }
 
@@ -115,7 +115,7 @@ const STANDARD_CAPS = [
 function isStandardCap(cap: any) {
   return !!_.find(
     STANDARD_CAPS,
-    (standardCap) => standardCap.toLowerCase() === `${cap}`.toLowerCase()
+    (standardCap) => standardCap.toLowerCase() === `${cap}`.toLowerCase(),
   );
 }
 
@@ -125,13 +125,13 @@ export function stripAppiumPrefixes(caps: any) {
   // split into prefixed and non-prefixed.
   // non-prefixed should be standard caps at this point
   const [prefixedCaps, nonPrefixedCaps] = _.partition(_.keys(caps), (cap) =>
-    String(cap).startsWith(APPIUM_VENDOR_PREFIX)
+    String(cap).startsWith(APPIUM_VENDOR_PREFIX),
   );
 
   // initialize this with the k/v pairs of the non-prefixed caps
   const strippedCaps = /** @type {import('@appium/types').Capabilities<C>} */ _.pick(
     caps,
-    nonPrefixedCaps
+    nonPrefixedCaps,
   );
   const badPrefixedCaps = [];
 
@@ -139,7 +139,7 @@ export function stripAppiumPrefixes(caps: any) {
   for (const prefixedCap of prefixedCaps) {
     const strippedCapName =
       /** @type {import('type-fest').StringKeyOf<import('@appium/types').Capabilities<C>>} */ prefixedCap.substring(
-        APPIUM_VENDOR_PREFIX.length
+        APPIUM_VENDOR_PREFIX.length,
       );
 
     // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
@@ -150,7 +150,7 @@ export function stripAppiumPrefixes(caps: any) {
       } else {
         log.warn(
           `Ignoring capability '${prefixedCap}=${caps[prefixedCap]}' and ` +
-            `using capability '${strippedCapName}=${strippedCaps[strippedCapName]}'`
+            `using capability '${strippedCapName}=${strippedCaps[strippedCapName]}'`,
         );
       }
     } else {
@@ -162,8 +162,8 @@ export function stripAppiumPrefixes(caps: any) {
   if (badPrefixedCaps.length > 0) {
     log.warn(
       `The capabilities ${JSON.stringify(
-        badPrefixedCaps
-      )} are standard capabilities and do not require "appium:" prefix`
+        badPrefixedCaps,
+      )} are standard capabilities and do not require "appium:" prefix`,
     );
   }
   return strippedCaps;
@@ -180,9 +180,8 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
       },
     });
 
-    return result.status == 200
+    return result.status == 200;
   } catch (error: any) {
-    return false
+    return false;
   }
-  
 }

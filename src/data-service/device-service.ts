@@ -17,7 +17,7 @@ export function addNewDevice(devices: Array<IDevice>) {
   const devicesInDB = DeviceModel.chain().find().data();
   devices.forEach(function (device) {
     const isDeviceAlreadyPresent = devicesInDB.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host
+      (d: IDevice) => d.udid === device.udid && device.host === d.host,
     );
     if (!isDeviceAlreadyPresent) {
       DeviceModel.insert({
@@ -39,7 +39,7 @@ export function setSimulatorState(devices: Array<IDevice>) {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
         logger.info(
-          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
         DeviceModel.chain()
           .find({ udid: device.udid })
@@ -101,7 +101,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
       filter.state = 'Shutdown';
     }
   }
-  console.log('----', results.find().data())
+  console.log('----', results.find().data());
   return results.find(filter).data()[0];
 }
 
@@ -149,7 +149,7 @@ export async function unblockDevice(filter: object) {
   const device = DeviceModel.chain().find(filter).data()[0];
   if (device !== undefined) {
     console.log(
-      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`
+      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`,
     );
     const sessionStart = device.sessionStartTime;
     const currentTime = new Date().getTime();
