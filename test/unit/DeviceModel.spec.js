@@ -81,4 +81,35 @@ describe('Model Test', () => {
       .data();
     expect(updatedDeviceList[0].state).to.be.equal('Shutdown');
   });
+
+  it('Should handle concurrent update to device list', async () => {
+    // create bunch of devices using loop
+    let newDeviceList = [];
+    for (let i = 0; i < 100; i++) {
+      newDeviceList.push({
+        busy: false,
+        state: 'device',
+        udid: `emulator-${i}`,
+        platform: 'android',
+      });
+    }
+
+    // create a function to add new device with random delay
+    const delayedAddDevice = async (newDeviceList) => {
+      await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
+      await addNewDevice(newDeviceList);
+    };
+
+    // clear the db
+    DeviceModel.removeDataOnly();
+
+    // create two parallel calls to addNewDevice
+    await Promise.all([delayedAddDevice(newDeviceList), delayedAddDevice(newDeviceList)]);
+    // verify that all devices are added to the db
+    const updatedDeviceList = DeviceModel.chain().find({ platform: 'android' }).data();
+    expect(updatedDeviceList.length).to.be.equal(100);
+
+    // clear the db
+    DeviceModel.removeDataOnly();
+  });
 });

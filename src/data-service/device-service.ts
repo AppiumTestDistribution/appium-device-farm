@@ -1,7 +1,7 @@
 import { DeviceModel } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
-import logger from '../logger';
+import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
 export function removeDevice(device: any) {
@@ -20,11 +20,15 @@ export function addNewDevice(devices: Array<IDevice>) {
       (d: IDevice) => d.udid === device.udid && device.host === d.host
     );
     if (!isDeviceAlreadyPresent) {
-      DeviceModel.insert({
-        ...device,
-        offline: false,
-        userBlocked: false,
-      });
+      try {
+        DeviceModel.insert({
+          ...device,
+          offline: false,
+          userBlocked: false,
+        });
+      } catch (error) {
+        log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`)
+      }
     }
   });
 }
@@ -38,7 +42,7 @@ export function setSimulatorState(devices: Array<IDevice>) {
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
-        logger.info(
+        log.info(
           `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
         );
         DeviceModel.chain()
@@ -95,7 +99,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
     filter.state = 'Booted';
     const results_copy = results.copy();
     if (results_copy.find(filter).data()[0] != undefined) {
-      logger.info('Picking up booted simulator');
+      log.info('Picking up booted simulator');
       return results.find(filter).data()[0];
     } else {
       filter.state = 'Shutdown';
@@ -106,7 +110,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
-  logger.info(`Updating allocated device: "${JSON.stringify(device)}"`);
+  log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
   DeviceModel.chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
