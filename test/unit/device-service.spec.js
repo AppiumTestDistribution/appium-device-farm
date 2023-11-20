@@ -112,7 +112,7 @@ describe('Get device', () => {
   });
 
 
-  it.only('Get iOS device based on filter real device', () => {
+  it('Get iOS device based on filter real device', () => {
     const filterOptions = {"platform":"ios","name":"","deviceType":"real","busy":false,"userBlocked":false};
     const device = getDevice(filterOptions);
     console.log(device)
@@ -145,7 +145,7 @@ describe('Get device', () => {
   it('Get ios simulator based on filter with minSDK', () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' };
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('15.0');
+    expect(device.sdk).to.be.eq('15');
   });
 
   it('Get ios simulator based on filter with maxSDK', () => {

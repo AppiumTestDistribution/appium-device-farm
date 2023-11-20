@@ -5,6 +5,7 @@ import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
 import { getAdbOriginal } from './GetAdbOriginal';
 import ip from 'ip';
+import _ from 'lodash';
 
 var sandbox = sinon.createSandbox();
 
@@ -250,5 +251,46 @@ describe('Android Device Manager', function () {
         userBlocked: false,
       },
     ]);
+  });
+
+  it("Should handle error when adb doesn't respond", async () => {
+    // mock getDeviceProperty
+    const androidDevices = new AndroidDeviceManager();
+    const deviceList = new Map();
+    adb = await getAdbOriginal();
+    deviceList.set(adb, [
+      { udid: 'emulator-9999', state: 'device' },
+      { udid: 'emulator-7777', state: 'device' },
+    ]);
+    
+
+    const mockAdbExec = (args) => {
+      if (args.includes('emulator-9999')) {
+        return Promise.reject(new Error('Adb timeout'));
+      } else {
+        return Promise.resolve("foo");
+      }
+    };
+
+    sandbox.stub(androidDevices, 'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, 'getChromeVersion').returns('/var/path/chromedriver');
+    sandbox.stub(adb, "adbExec").callsFake(mockAdbExec);
+
+    const devices = await androidDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
+
+    const resultDevices = _.map(devices, device => { return { "udid" : device.udid} });
+    // check that emulator-7777 is returned and emulator-9999 is not
+    expect(resultDevices).to.have.deep.members([
+      {
+        udid: 'emulator-7777'
+      }],
+    );
+
+    expect(resultDevices).to.not.have.deep.members([
+      {
+        udid: 'emulator-9999'
+      }],
+    );
+
   });
 });
