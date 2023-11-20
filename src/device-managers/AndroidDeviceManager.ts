@@ -139,13 +139,19 @@ export default class AndroidDeviceManager implements IDeviceManager {
       return undefined;
     }
 
-    // check we got all the info we need
-    if (deviceInfo.some((info) => _.isNil(info))) {
-      log.info(`Cannot get device info for ${device.udid}. Skipping`);
+    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
+
+    // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
+    if (!cliArgs.plugin['device-farm'].skipChromeDownload && chromeDriverPath === undefined) {
+      log.info(`Cannot get chromeDriverPath for ${device.udid}. Skipping`);
       return undefined;
     }
 
-    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
+    // Except for chromeDriverPath, all other info is mandatory
+    if (_.isNil(sdk) || _.isNil(realDevice) || _.isNil(name)) {
+      log.info(`Cannot get device info for ${device.udid}. Skipping`);
+      return undefined;
+    }
 
     let host;
     if (adbInstance.adbHost != null) {
