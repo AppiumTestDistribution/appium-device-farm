@@ -139,6 +139,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
       return undefined;
     }
 
+    // check we got all the info we need
+    if (deviceInfo.some((info) => _.isNil(info))) {
+      log.info(`Cannot get device info for ${device.udid}. Skipping`);
+      return undefined;
+    }
+
     const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
 
     let host;
@@ -153,9 +159,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       adbRemoteHost: adbInstance.adbHost,
       adbPort: adbInstance.adbPort,
       systemPort,
-      sdk,
+      sdk: sdk ?? "unknown",
       realDevice,
-      name,
+      name: name ?? "unknown",
       busy: false,
       state: device.state,
       udid: device.udid,
@@ -364,12 +370,16 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await instance.downloadChromeDriver(version);
   }
 
-  private async getDeviceVersion(adbInstance: any, udid: string) {
+  private async getDeviceVersion(adbInstance: any, udid: string): Promise<string | undefined> {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.release');
   }
 
-  private async getDeviceProperty(adbInstance: any, udid: string, prop: string) {
-    return await (await adbInstance).adbExec(['-s', udid, 'shell', 'getprop', prop]);
+  private async getDeviceProperty(adbInstance: any, udid: string, prop: string): Promise<string | undefined> {
+    try {
+      return await (await adbInstance).adbExec(['-s', udid, 'shell', 'getprop', prop]);
+    } catch (error) {
+      log.error(`Error while getting device property "${prop}" for ${udid}. Error: ${error}`);
+    }
   }
 
   private async isRealDevice(adbInstance: any, udid: string): Promise<boolean> {
@@ -399,12 +409,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return sdkRoot;
   }
 
-  private getDeviceName = async (adbInstance: any, udid: string) => {
-    let deviceName = await (
-      await adbInstance
-    ).adbExec(['-s', udid, 'shell', 'getprop', 'ro.product.name']);
+  private getDeviceName = async (adbInstance: any, udid: string): Promise<string | undefined> => {
+    let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name')
 
-    if (!deviceName || deviceName.trim() === '') {
+    if (!deviceName || (deviceName && deviceName.trim() === '')) {
       // If the device name is null or empty, try to get it from the Bluetooth manager.
       deviceName = await (
         await adbInstance
