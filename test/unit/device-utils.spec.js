@@ -1,5 +1,6 @@
 import sinon from 'sinon';
 import * as DeviceUtils from '../../src/device-utils';
+import * as DeviceService from '../../src/data-service/device-service';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
 import { DeviceModel, db } from '../../src/data-service/db';
@@ -13,7 +14,7 @@ chai.use(sinonChai);
 var expect = chai.expect;
 var sandbox = sinon.createSandbox();
 
-describe('Android Device Manager', () => {
+describe('Device Utils', () => {
   const hub1Device = {
     systemPort: 56205,
     sdk: '10',
@@ -144,5 +145,27 @@ describe('Android Device Manager', () => {
           'No device found for filters: {"platform":"android","name":"","udid":"emulator-5555","busy":false,"userBlocked":false}'
         )
     );
+  });
+
+  it.only('should release blocked devices that have no activity for more than the timeout', async () => {
+    // Mock the dependencies and setup the test data
+    const getAllDevicesMock = () => ([
+      { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DeviceUtils.DEVICE_NEW_COMMAND_TIMEOUT_SECONDS + 5) * 1000)},
+      { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },
+      { udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
+    ]);
+    
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
+
+    const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
+
+    // Call the function under test
+    await DeviceUtils.releaseBlockedDevices();
+
+    // Verify the expected behavior
+    unblockDeviceMock.should.have.been.calledTwice;
+    unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
+    unblockDeviceMock.should.have.been.calledWith({ udid: 'device2' });
+    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device3' });
   });
 });

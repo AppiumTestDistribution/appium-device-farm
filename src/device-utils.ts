@@ -21,9 +21,7 @@ import {
 import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
-import os from 'os';
 import fs from 'fs';
-import path from 'path';
 import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
@@ -31,10 +29,10 @@ import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
 import { DevicePlugin } from './plugin';
-import { CloudArgs } from './types/CloudArgs';
 
-const DEVICE_AVAILABILITY_TIMEOUT = 180000;
-const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
+const DEVICE_AVAILABILITY_TIMEOUT: number = 180000;
+const DEVICE_AVAILABILITY_QUERY_INTERVAL: number = 10000;
+export const DEVICE_NEW_COMMAND_TIMEOUT_SECONDS: number = 60;
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
   deviceQueryInteval: 'appium:deviceRetryInterval',
@@ -48,7 +46,6 @@ const customCapability = {
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
-let cronTimerToUpdateNodeDevices: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -329,21 +326,20 @@ export async function releaseBlockedDevices() {
     return device.busy && device.host.includes(ip.address());
   });
   busyDevices.forEach(function (device) {
+    if (device.lastCmdExecutedAt == undefined) {
+      return;
+    }
+
     const currentEpoch = new Date().getTime();
-    const timeoutSeconds = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
-    if (
-      device.lastCmdExecutedAt != undefined &&
-      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeoutSeconds
-    ) {
-      console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeoutSeconds} seconds`,
-      );
+    const timeoutSeconds = device.newCommandTimeout != undefined ? device.newCommandTimeout : DEVICE_NEW_COMMAND_TIMEOUT_SECONDS;
+    const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
+    if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
       unblockDevice({ udid: device.udid });
       log.info(
-        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds} seconds`,
+        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
       );
-    } 
+    }
   });
 }
 
