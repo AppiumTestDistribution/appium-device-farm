@@ -283,7 +283,7 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
   }, 10000);
 }
 
-export async function checkNodeServerAvailability() {
+export async function setupCronCheckNodesAvailability(intervalMs: number = 5000) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -320,7 +320,7 @@ export async function checkNodeServerAvailability() {
       removeDevice(device);
       nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
-  }, 5000);
+  }, intervalMs);
 }
 
 export async function releaseBlockedDevices() {
@@ -330,26 +330,24 @@ export async function releaseBlockedDevices() {
   });
   busyDevices.forEach(function (device) {
     const currentEpoch = new Date().getTime();
-    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
+    const timeoutSeconds = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
     if (
       device.lastCmdExecutedAt != undefined &&
-      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
+      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeoutSeconds
     ) {
       console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`,
+        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeoutSeconds} seconds`,
       );
-      const sessionId = device.session_id;
-      if (sessionId !== undefined) {
-        unblockDevice({ session_id: sessionId });
-        log.info(
-          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`,
-        );
-      }
-    }
+      // unblock regardless of whether the device has session or not
+      unblockDevice({ udid: device.udid });
+      log.info(
+        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds} seconds`,
+      );
+    } 
   });
 }
 
-export async function cronReleaseBlockedDevices() {
+export async function setupCronReleaseBlockedDevices() {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
@@ -359,7 +357,7 @@ export async function cronReleaseBlockedDevices() {
   }, 30000);
 }
 
-export async function cronUpdateDeviceList(hubArgument: string) {
+export async function setupCronUpdateDeviceList(hubArgument: string) {
   const intervalMs = 30000;
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
@@ -374,22 +372,5 @@ export async function cronUpdateDeviceList(hubArgument: string) {
     } else {
       log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
-  }, intervalMs);
-}
-
-/**
- * Remove devices from unavailable nodes
- * @param hubArgument host
- */
-export async function cronRefreshNodeDevices() {
-  const intervalMs = 1000 * 60 * 5; // 5 minutes
-  if (cronTimerToUpdateNodeDevices) {
-    clearInterval(cronTimerToUpdateNodeDevices);
-  }
-  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`);
-
-  cronTimerToUpdateNodeDevices = setInterval(async () => {
-    log.info('Scanning for stale nodes.');
-    await checkNodeServerAvailability();
   }, intervalMs);
 }

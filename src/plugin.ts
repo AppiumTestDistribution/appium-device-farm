@@ -17,14 +17,13 @@ import {
 } from './data-service/pending-sessions-service';
 import {
   allocateDeviceForSession,
-  checkNodeServerAvailability,
-  cronRefreshNodeDevices,
-  cronReleaseBlockedDevices,
-  cronUpdateDeviceList,
+  setupCronReleaseBlockedDevices,
+  setupCronUpdateDeviceList,
   deviceType,
   initlializeStorage,
   isIOS,
   refreshSimulatorState,
+  setupCronCheckNodesAvailability,
   updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
@@ -36,7 +35,6 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import {
   hubUrl,
-  hasHubArgument,
   spinWith,
   stripAppiumPrefixes,
   isDeviceFarmRunning,
@@ -45,11 +43,10 @@ import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
+import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
-import { ServerCLI } from './types/CLIArgs';
 import { ADB } from 'appium-adb';
 
 const commandsQueueGuard = new AsyncLock();
@@ -147,14 +144,15 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(cliArgs);
     }
-    await cronReleaseBlockedDevices();
+    await setupCronReleaseBlockedDevices();
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
-      await cronUpdateDeviceList(hubArgument);
+      await setupCronUpdateDeviceList(hubArgument);
     } else {
-      // let's check for stale nodes
-      await cronRefreshNodeDevices();
+      // I'm a hub so let's check for stale nodes
+      const intervalMs = 1000 * 60 * 5; // 5 minutes
+      await setupCronCheckNodesAvailability(intervalMs);
     }
   }
 
