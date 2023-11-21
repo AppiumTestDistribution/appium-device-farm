@@ -283,7 +283,7 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
   }, 10000);
 }
 
-export async function setupCronCheckNodesAvailability(intervalMs: number = 5000) {
+export async function setupCronCheckNodesAvailability(intervalMs: number = 30000) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -347,18 +347,17 @@ export async function releaseBlockedDevices() {
   });
 }
 
-export async function setupCronReleaseBlockedDevices() {
+export async function setupCronReleaseBlockedDevices(intervalMs: number = 30000) {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
   await releaseBlockedDevices();
   cronTimerToReleaseBlockedDevices = setInterval(async () => {
     await releaseBlockedDevices();
-  }, 30000);
+  }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(hubArgument: string) {
-  const intervalMs = 30000;
+export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number = 30000) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }
