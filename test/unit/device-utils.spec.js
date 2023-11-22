@@ -153,6 +153,7 @@ describe('Device Utils', () => {
       { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DeviceUtils.DEVICE_NEW_COMMAND_TIMEOUT_SECONDS + 5) * 1000)},
       { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },
       { udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
+      { udid: 'device4', busy: true, host: ip.address() },
     ]);
     
     sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
@@ -167,5 +168,6 @@ describe('Device Utils', () => {
     unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
     unblockDeviceMock.should.have.been.calledWith({ udid: 'device2' });
     unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device3' });
+    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device4' });
   });
 });
