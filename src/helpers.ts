@@ -171,10 +171,11 @@ export function stripAppiumPrefixes(caps: any) {
 
 export async function isDeviceFarmRunning(host: string): Promise<boolean> {
   try {
+    const timeoutMs = 30000;
     const result = await axios({
       method: 'get',
       url: `${host}/device-farm`,
-      timeout: 30000,
+      timeout: timeoutMs,
       headers: {
         'Content-Type': 'application/json',
       },

@@ -32,6 +32,8 @@ import { DevicePlugin } from './plugin';
 
 const DEVICE_AVAILABILITY_TIMEOUT: number = 180000;
 const DEVICE_AVAILABILITY_QUERY_INTERVAL: number = 10000;
+const SEND_DEVICE_LIST_TO_HUB_INTERVAL_MS = 30000;
+const CHECK_STALE_DEVICES_INTERVAL_MS = 30000;
 export const DEVICE_NEW_COMMAND_TIMEOUT_SECONDS: number = 60;
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
@@ -280,7 +282,7 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
   }, 10000);
 }
 
-export async function setupCronCheckNodesAvailability(intervalMs: number = 30000) {
+export async function setupCronCheckNodesAvailability(intervalMs: number = CHECK_STALE_DEVICES_INTERVAL_MS) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -353,7 +355,7 @@ export async function setupCronReleaseBlockedDevices(intervalMs: number = 30000)
   }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number = 30000) {
+export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number = SEND_DEVICE_LIST_TO_HUB_INTERVAL_MS) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }

@@ -147,7 +147,7 @@ describe('Device Utils', () => {
     );
   });
 
-  it.only('should release blocked devices that have no activity for more than the timeout', async () => {
+  it('should release blocked devices that have no activity for more than the timeout', async () => {
     // Mock the dependencies and setup the test data
     const getAllDevicesMock = () => ([
       { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DeviceUtils.DEVICE_NEW_COMMAND_TIMEOUT_SECONDS + 5) * 1000)},

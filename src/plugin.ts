@@ -102,7 +102,7 @@ class DevicePlugin extends BasePlugin {
 
     if (emulators && cliArgs.plugin['device-farm'].platform.toLowerCase() === 'android') {
       logger.info('Emulators will be booted!!');
-      const adb = await ADB.createADB();
+      const adb = await ADB.createADB({});
       const array = cliArgs.plugin['device-farm'].emulators;
       const promiseArray = array.map(async (arr: any) => {
         await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
