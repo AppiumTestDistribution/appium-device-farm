@@ -165,9 +165,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       adbRemoteHost: adbInstance.adbHost,
       adbPort: adbInstance.adbPort,
       systemPort,
-      sdk: sdk ?? "unknown",
+      sdk: sdk ?? 'unknown',
       realDevice,
-      name: name ?? "unknown",
+      name: name ?? 'unknown',
       busy: false,
       state: device.state,
       udid: device.udid,
@@ -380,7 +380,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.release');
   }
 
-  private async getDeviceProperty(adbInstance: any, udid: string, prop: string): Promise<string | undefined> {
+  private async getDeviceProperty(
+    adbInstance: any,
+    udid: string,
+    prop: string,
+  ): Promise<string | undefined> {
     try {
       return await (await adbInstance).adbExec(['-s', udid, 'shell', 'getprop', prop]);
     } catch (error) {
@@ -417,7 +421,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private getDeviceName = async (adbInstance: any, udid: string): Promise<string | undefined> => {
-    let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name')
+    let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name');
 
     if (!deviceName || (deviceName && deviceName.trim() === '')) {
       // If the device name is null or empty, try to get it from the Bluetooth manager.

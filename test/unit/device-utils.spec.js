@@ -9,6 +9,7 @@ import { addNewDevice } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { allocateDeviceForSession } from '../../src/device-utils';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 chai.should();
 chai.use(sinonChai);
 var expect = chai.expect;
@@ -150,7 +151,7 @@ describe('Device Utils', () => {
   it('should release blocked devices that have no activity for more than the timeout', async () => {
     // Mock the dependencies and setup the test data
     const getAllDevicesMock = () => ([
-      { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DeviceUtils.DEVICE_NEW_COMMAND_TIMEOUT_SECONDS + 5) * 1000)},
+      { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DefaultPluginArgs.newCommandTimeoutSec + 5) * 1000)},
       { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },
       { udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
       { udid: 'device4', busy: true, host: ip.address() },
@@ -161,7 +162,7 @@ describe('Device Utils', () => {
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
     // Call the function under test
-    await DeviceUtils.releaseBlockedDevices();
+    await DeviceUtils.releaseBlockedDevices(DefaultPluginArgs.newCommandTimeoutSec);
 
     // Verify the expected behavior
     unblockDeviceMock.should.have.been.calledTwice;

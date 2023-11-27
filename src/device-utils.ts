@@ -30,11 +30,6 @@ import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
 import { DevicePlugin } from './plugin';
 
-const DEVICE_AVAILABILITY_TIMEOUT: number = 180000;
-const DEVICE_AVAILABILITY_QUERY_INTERVAL: number = 10000;
-const SEND_DEVICE_LIST_TO_HUB_INTERVAL_MS = 30000;
-const CHECK_STALE_DEVICES_INTERVAL_MS = 30000;
-export const DEVICE_NEW_COMMAND_TIMEOUT_SECONDS: number = 60;
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
   deviceQueryInteval: 'appium:deviceRetryInterval',
@@ -90,15 +85,19 @@ export function isDeviceConfigPathAbsolute(path: string) {
  * @param capability
  * @returns
  */
-export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
+export async function allocateDeviceForSession(
+  capability: ISessionCapability,
+  deviceTimeOutMs: number,
+  deviceQueryIntervalMs: number,
+): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   log.info(JSON.stringify(filters));
-  const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
+  const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
-    firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
+    firstMatch[customCapability.deviceQueryInteval] || deviceQueryIntervalMs;
 
   try {
     await waitUntil(
@@ -282,7 +281,9 @@ export async function refreshSimulatorState(cliArgs: ServerCLI) {
   }, 10000);
 }
 
-export async function setupCronCheckNodesAvailability(intervalMs: number = CHECK_STALE_DEVICES_INTERVAL_MS) {
+export async function setupCronCheckStaleDevices(
+  intervalMs: number,
+) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -322,7 +323,7 @@ export async function setupCronCheckNodesAvailability(intervalMs: number = CHECK
   }, intervalMs);
 }
 
-export async function releaseBlockedDevices() {
+export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
     return device.busy && device.host.includes(ip.address());
@@ -333,7 +334,10 @@ export async function releaseBlockedDevices() {
     }
 
     const currentEpoch = new Date().getTime();
-    const timeoutSeconds = device.newCommandTimeout != undefined ? device.newCommandTimeout : DEVICE_NEW_COMMAND_TIMEOUT_SECONDS;
+    const timeoutSeconds =
+      device.newCommandTimeout != undefined
+        ? device.newCommandTimeout
+        : newCommandTimeout;
     const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
@@ -345,17 +349,20 @@ export async function releaseBlockedDevices() {
   });
 }
 
-export async function setupCronReleaseBlockedDevices(intervalMs: number = 30000) {
+export async function setupCronReleaseBlockedDevices(intervalMs: number, newCommandTimeoutSec: number) {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
-  await releaseBlockedDevices();
+  await releaseBlockedDevices(newCommandTimeoutSec);
   cronTimerToReleaseBlockedDevices = setInterval(async () => {
-    await releaseBlockedDevices();
+    await releaseBlockedDevices(newCommandTimeoutSec);
   }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number = SEND_DEVICE_LIST_TO_HUB_INTERVAL_MS) {
+export async function setupCronUpdateDeviceList(
+  hubArgument: string,
+  intervalMs: number,
+) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }

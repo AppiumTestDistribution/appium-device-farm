@@ -23,7 +23,7 @@ import {
   initlializeStorage,
   isIOS,
   refreshSimulatorState,
-  setupCronCheckNodesAvailability,
+  setupCronCheckStaleDevices,
   updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
@@ -33,12 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  hubUrl,
-  spinWith,
-  stripAppiumPrefixes,
-  isDeviceFarmRunning,
-} from './helpers';
+import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -48,6 +43,7 @@ import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
 import { ADB } from 'appium-adb';
+import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -59,8 +55,11 @@ let emulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
+  private pluginArgs: IPluginArgs = DefaultPluginArgs;
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
+    // initialize plugin args
+    Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as IPluginArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -77,13 +76,18 @@ class DevicePlugin extends BasePlugin {
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
+    const pluginArgs: IPluginArgs = Object.assign(
+      {},
+      DefaultPluginArgs,
+      cliArgs.plugin['device-farm'] as IPluginArgs,
+    );
     registerProxyMiddlware(expressApp);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
-      platform = cliArgs.plugin['device-farm'].platform;
-      androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
-      iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
-      skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
+      platform = pluginArgs.platform;
+      androidDeviceType = pluginArgs.androidDeviceType;
+      iosDeviceType = pluginArgs.iosDeviceType;
+      skipChromeDownload = pluginArgs.skipChromeDownload;
       if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
         logger.info(`Adding proxy: ${JSON.stringify(cliArgs.plugin['device-farm'].proxy)}`);
         proxy = cliArgs.plugin['device-farm'].proxy;
@@ -100,17 +104,17 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
 
-    if (emulators && cliArgs.plugin['device-farm'].platform.toLowerCase() === 'android') {
+    if (emulators && pluginArgs.platform.toLowerCase() === 'android') {
       logger.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});
-      const array = cliArgs.plugin['device-farm'].emulators;
+      const array = pluginArgs.emulators || [];
       const promiseArray = array.map(async (arr: any) => {
         await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
       });
       await Promise.all(promiseArray);
     }
 
-    if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+    if (skipChromeDownload === undefined) pluginArgs.skipChromeDownload = true;
 
     const chromeDriverManager =
       cliArgs.plugin['device-farm'].skipChromeDownload === false
@@ -133,7 +137,7 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
     );
 
-    const hubArgument = cliArgs.plugin['device-farm'].hub;
+    const hubArgument = pluginArgs.hub;
 
     if (hubArgument) {
       await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
@@ -144,15 +148,14 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(cliArgs);
     }
-    await setupCronReleaseBlockedDevices();
+    await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
-      await setupCronUpdateDeviceList(hubArgument);
+      await setupCronUpdateDeviceList(hubArgument, this.pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
       // I'm a hub so let's check for stale nodes
-      const intervalMs = 1000 * 60 * 5; // 5 minutes
-      await setupCronCheckNodesAvailability(intervalMs);
+      await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
     }
   }
 
@@ -204,7 +207,11 @@ class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
-          return await allocateDeviceForSession(caps);
+          return await allocateDeviceForSession(
+            caps, 
+            this.pluginArgs.deviceAvailabilityTimeoutMs,
+            this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+          );
         } catch (err) {
           await removePendingSession(pendingSessionId);
           throw err;
