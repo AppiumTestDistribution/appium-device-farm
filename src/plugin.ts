@@ -58,8 +58,9 @@ class DevicePlugin extends BasePlugin {
   private pluginArgs: IPluginArgs = DefaultPluginArgs;
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
-    // initialize plugin args
-    Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as IPluginArgs);
+    // initialize plugin args only when cliArgs.plugin['device-farm'] is present
+    if (cliArgs.plugin && cliArgs.plugin['device-farm'])
+      Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as unknown as IPluginArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
