@@ -15,14 +15,14 @@ export function addNewDevice(devices: Array<IDevice>) {
    * If the newly identified devices are not in the database, then add them to the database
    */
   devices.forEach(function (device) {
-    const isDeviceAlreadyPresent = DeviceModel.chain().find(
-      { udid: device.udid, host: device.host }
-    ).data();
+    const isDeviceAlreadyPresent = DeviceModel.chain()
+      .find({ udid: device.udid, host: device.host })
+      .data();
     if (isDeviceAlreadyPresent.length === 0) {
       // @ts-ignore
-      delete device["$loki"]
+      delete device['$loki'];
       // @ts-ignore
-      delete device["meta"]
+      delete device['meta'];
       try {
         DeviceModel.insert({
           ...device,
@@ -30,7 +30,7 @@ export function addNewDevice(devices: Array<IDevice>) {
           userBlocked: false,
         });
       } catch (error) {
-        log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`)
+        log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`);
       }
     } else {
       log.debug(`Device "${device.udid}" already exists in database`);
@@ -48,7 +48,7 @@ export function setSimulatorState(devices: Array<IDevice>) {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
         log.info(
-          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
         DeviceModel.chain()
           .find({ udid: device.udid })
