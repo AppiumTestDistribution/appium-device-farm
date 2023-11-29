@@ -18,6 +18,7 @@
     "test-parallel-lt": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/lambdaTest.spec.js --timeout 260000",
     "test-parallel-ios-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/confIOS.js --timeout 260000",
     "test-e2e": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/plugin.spec.js --timeout 999999",
+    "test-e2e-hubnode": "mocha -r ts-node/register ./test/e2e/hubnode.spec.* --plugin-device-farm-platform=both --exit --timeout=999999",
     "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --timeout 999999",
     "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
@@ -144,7 +145,7 @@
     "typescript": "5.2.2",
     "vite": "^4.5.0",
     "wait-on": "7.0.1",
-    "webdriverio": "8.20.4"
+    "webdriverio": "^8.20.4"
   },
   "appium": {
     "pluginName": "device-farm",
@@ -197,6 +198,24 @@
         },
         "proxy": {
           "type": "object"
+        },
+        "deviceAvailabilityTimeoutMs": {
+          "type": "number"
+        },
+        "deviceAvailabilityQueryIntervalMs": {
+          "type": "number"
+        },
+        "sendNodeDevicesToHubIntervalMs": {
+          "type": "number"
+        },
+        "checkStaleDevicesIntervalMs": {
+          "type": "number"
+        },
+        "checkBlockedDevicesIntervalMs": {
+          "type": "number"
+        },
+        "newCommandTimeoutSec": {
+          "type": "number"
         }
       },
       "title": "Appium device farm plugin",

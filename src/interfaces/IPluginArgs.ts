@@ -17,7 +17,7 @@ export interface IPluginArgs {
    */
   adbRemote: string[];
   /** For remote execution if the node machine is behind proxy. eg: http://remoteMachineProxyIP:proxyPort */
-  proxyIp?: string;
+  proxy?: string | URL;
   /**
    * The name of Android emulator to run the test on. The names of currently installed emulators could be listed using avdmanager list avd command.
    * If the emulator with the given name is not running then it is going to be launched on automated session startup.
@@ -42,7 +42,7 @@ export const DefaultPluginArgs: IPluginArgs = {
   maxSessions: 8,
   derivedDataPath: undefined,
   adbRemote: [],
-  proxyIp: undefined,
+  proxy: undefined,
   emulators: [],
   deviceAvailabilityTimeoutMs: 300000,
   deviceAvailabilityQueryIntervalMs: 10000,

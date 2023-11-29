@@ -153,7 +153,7 @@ class DevicePlugin extends BasePlugin {
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
-      await setupCronUpdateDeviceList(hubArgument, this.pluginArgs.sendNodeDevicesToHubIntervalMs);
+      await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
       // I'm a hub so let's check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
