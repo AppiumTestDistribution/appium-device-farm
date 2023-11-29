@@ -27,7 +27,13 @@
         "derivedDataPath": {
           "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test",
           "device": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"
-        }
+        },
+        "deviceAvailabilityTimeoutMs": 300000,
+        "deviceAvailabilityQueryIntervalMs": 10000,
+        "sendNodeDevicesToHubIntervalMs": 30000,
+        "checkStaleDevicesIntervalMs": 30000,
+        "checkBlockedDevicesIntervalMs": 30000,
+        "newCommandTimeoutSec": 60
       }
     }
   }
