@@ -23,7 +23,7 @@ describe('Model Test', () => {
   });
 
   it('Should remove device from old pool when new poll call does not have the device', () => {
-    removeDevice({ udid: 'emulator-5570', host: '127.0.0.1' });
+    removeDevice([{ udid: 'emulator-5570', host: '127.0.0.1' }]);
     const updatedDeviceList = DeviceModel.chain().find({ udid: 'emulator-5570' }).data();
     expect(updatedDeviceList).to.deep.equal([]);
   });
