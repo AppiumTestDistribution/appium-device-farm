@@ -80,7 +80,7 @@ jobs:
         npm run test-e2e-hubnode
       displayName: 'E2E Hub and Node Test'
 
-- job: E2EPHubAndNodeTest
+ - job: E2EPHubAndNodeTest
    pool:
      vmImage: 'macOS-latest'
 
