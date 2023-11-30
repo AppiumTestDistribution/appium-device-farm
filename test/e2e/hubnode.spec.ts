@@ -87,7 +87,7 @@ describe('E2E', () => {
   })
 
 
-  it.only('should use my plugin', async function () {
+  it('should use my plugin', async function () {
     this.timeout(200000);
 
     // port/host should match what you provided to `pluginE2EHarness`
