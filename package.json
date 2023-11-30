@@ -6,7 +6,7 @@
   "scripts": {
     "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
-    "install-docs-deps": "appium-docs init --no-mkdocs -e lib/index.js",
+    "install-docs-deps": "appium-docs init --no-mkdocs -e lib/src/index.js",
     "coverage": "nyc npm run test",
     "test-remote": "mocha --require ts-node/register ./test/e2e/remote.spec.js --timeout 60000 --exit",
     "test": "mocha -r ts-node/register ./test/unit/*.spec.{j,t}s --plugin-device-farm-platform=both --exit --timeout=10000",
@@ -244,6 +244,6 @@
     "scripts"
   ],
   "typedoc": {
-    "entryPoint": "lib/index.js"
+    "entryPoint": "lib/src/index.js"
   }
 }
