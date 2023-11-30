@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import fs from 'fs';
 import path from 'path';
+import ip from 'ip';
 
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
@@ -12,7 +13,7 @@ const PLUGIN_PATH = path.resolve(__dirname + '/../..');
 
 const hub_config = DefaultPluginArgs
 const node_config = Object.assign(DefaultPluginArgs, {
-  hub: `http://localhost:${HUB_APPIUM_PORT}`,
+  hub: `http://${ip.address()}:${HUB_APPIUM_PORT}`,
 })
 
 describe('E2E', () => {
@@ -92,7 +93,8 @@ describe('E2E', () => {
 
     // port/host should match what you provided to `pluginE2EHarness`
     const browser = await remote({
-      port: HUB_APPIUM_PORT, hostname: '127.0.0.1',
+      port: HUB_APPIUM_PORT, 
+      hostname: ip.address(),
       capabilities: {
         "appium:automationName": "UiAutomator2",
         "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
