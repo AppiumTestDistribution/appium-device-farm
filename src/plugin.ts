@@ -20,7 +20,7 @@ import {
   setupCronReleaseBlockedDevices,
   setupCronUpdateDeviceList,
   deviceType,
-  initlializeStorage,
+  initializeStorage,
   isIOS,
   refreshSimulatorState,
   setupCronCheckStaleDevices,
@@ -51,7 +51,7 @@ let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
 let skipChromeDownload: any;
-let emulators: any;
+let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
@@ -84,19 +84,16 @@ class DevicePlugin extends BasePlugin {
     );
     registerProxyMiddlware(expressApp);
 
-    if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
-      platform = pluginArgs.platform;
-      androidDeviceType = pluginArgs.androidDeviceType;
-      iosDeviceType = pluginArgs.iosDeviceType;
-      skipChromeDownload = pluginArgs.skipChromeDownload;
-      if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
-        logger.info(`Adding proxy: ${JSON.stringify(cliArgs.plugin['device-farm'].proxy)}`);
-        proxy = cliArgs.plugin['device-farm'].proxy;
-      } else {
-        logger.info('proxy is not required');
-      }
-      emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
+    platform = pluginArgs.platform;
+    androidDeviceType = pluginArgs.androidDeviceType;
+    iosDeviceType = pluginArgs.iosDeviceType;
+    if (pluginArgs.proxy !== undefined) {
+      logger.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
+      proxy = pluginArgs.proxy;
+    } else {
+      logger.info('proxy is not required for axios');
     }
+    hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
     expressApp.use('/device-farm', router);
 
@@ -105,7 +102,7 @@ class DevicePlugin extends BasePlugin {
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
 
-    if (emulators && pluginArgs.platform.toLowerCase() === 'android') {
+    if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       logger.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});
       const array = pluginArgs.emulators || [];
@@ -115,10 +112,8 @@ class DevicePlugin extends BasePlugin {
       await Promise.all(promiseArray);
     }
 
-    if (skipChromeDownload === undefined) pluginArgs.skipChromeDownload = true;
-
     const chromeDriverManager =
-      cliArgs.plugin['device-farm'].skipChromeDownload === false
+      pluginArgs.skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
         : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
@@ -127,12 +122,13 @@ class DevicePlugin extends BasePlugin {
       platform,
       deviceTypes,
       cliArgs,
+      pluginArgs
     });
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
     await addCLIArgs(cliArgs);
-    await initlializeStorage();
+    await initializeStorage();
 
     logger.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
@@ -145,9 +141,9 @@ class DevicePlugin extends BasePlugin {
     }
 
     const devicesUpdates = await updateDeviceList(hubArgument);
-    if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
+    if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(cliArgs);
+      await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
     await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
 
@@ -160,9 +156,8 @@ class DevicePlugin extends BasePlugin {
     }
   }
 
-  private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = _.has(cliArgs, 'plugin["device-farm"].cloud');
-    if (cloudExists) {
+  private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
+    if (pluginArgs.cloud !== undefined) {
       deviceTypes = 'real';
       logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }

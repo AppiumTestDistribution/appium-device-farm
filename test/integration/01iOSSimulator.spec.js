@@ -5,7 +5,7 @@ import { Container } from 'typedi';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initlializeStorage,
+  initializeStorage,
   getBusyDevicesCount,
 } from '../../src/device-utils';
 import { CLIArgs, DeviceModel } from '../../src/data-service/db';
@@ -30,7 +30,7 @@ describe('Max sessions CLI argument test', () => {
     await addCLIArgs(serverCliArgs);
   });
   it('Allocate first device without issue', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
@@ -52,7 +52,7 @@ describe('Max sessions CLI argument test', () => {
   });
 
   it('Should throw error if the app does not match with device type', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
@@ -79,7 +79,7 @@ describe('Max sessions CLI argument test', () => {
   });
 
   it('Throw error when all sessions occupied', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager(cliArgs);
     expect(await getBusyDevicesCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
@@ -108,7 +108,7 @@ describe('Max sessions CLI argument test', () => {
 
 describe('IOS Simulator Test', () => {
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
@@ -143,7 +143,7 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',
@@ -172,7 +172,7 @@ describe('IOS Simulator Test', () => {
 
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
-      await initlializeStorage();
+      await initializeStorage();
       const deviceManager = new DeviceFarmManager({
         platform: 'ios',
         deviceTypes: 'both',
@@ -210,7 +210,7 @@ describe('Boot simulator test', async () => {
   });
 
   it('Should pick Booted simulator when app path has .app', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'ios',
       deviceTypes: 'both',

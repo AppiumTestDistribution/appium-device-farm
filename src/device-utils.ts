@@ -29,6 +29,7 @@ import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
 import { DevicePlugin } from './plugin';
+import { IPluginArgs } from './interfaces/IPluginArgs';
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
@@ -56,19 +57,17 @@ export function isAndroid(cliArgs: ServerCLI) {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
-export function deviceType(cliArgs: any, device: string) {
-  const iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType;
-  if (_.has(cliArgs, 'plugin["device-farm"].iosDeviceType')) {
-    return iosDeviceType === device || iosDeviceType === 'both';
-  }
+export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
+  const iosDeviceType = pluginArgs.iosDeviceType;
+  return iosDeviceType === device || iosDeviceType === 'both';
 }
 
-export function isIOS(cliArgs: any) {
-  return isMac() && cliArgs.plugin['device-farm'].platform.toLowerCase() === DevicePlatform.IOS;
+export function isIOS(pluginArgs: IPluginArgs) {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.IOS;
 }
 
-export function isAndroidAndIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.BOTH;
+export function isAndroidAndIOS(pluginArgs: IPluginArgs) {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
 export function isDeviceConfigPathAbsolute(path: string) {
@@ -141,7 +140,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * Sets up node-persist storage in local cache
  * @returns storage
  */
-export async function initlializeStorage() {
+export async function initializeStorage() {
   const basePath = cachePath('storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -271,12 +270,12 @@ export async function updateDeviceList(hubArgument?: string) {
   return devices;
 }
 
-export async function refreshSimulatorState(cliArgs: ServerCLI) {
+export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {
   if (timer) {
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }

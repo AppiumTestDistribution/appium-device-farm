@@ -15,11 +15,16 @@ import ip from 'ip';
 import NodeDevices from './NodeDevices';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
+import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
   private abortControl: Map<string, AbortController> = new Map();
+
+  constructor(private pluginArgs: IPluginArgs, private hostPort: number) {
+
+  }
 
   private initiateAbortControl(deviceUdid: string) {
     const control = new AbortController();
@@ -38,20 +43,19 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   async getDevices(
-    deviceTypes: { androidDeviceType: string },
-    existingDeviceDetails: Array<IDevice>,
-    cliArgs: any,
+    deviceTypes: { androidDeviceType: DeviceTypeToInclude },
+    existingDeviceDetails: Array<IDevice>
   ): Promise<any> {
     if (!this.adbAvailable) {
       return [];
     }
     const deviceState: Array<IDevice> = [];
     try {
-      if (isCloud(cliArgs)) {
-        const cloud = new Devices(cliArgs.plugin['device-farm'].cloud, deviceState, 'android');
+      if (this.pluginArgs.cloud != undefined) {
+        const cloud = new Devices(this.pluginArgs.cloud, deviceState, 'android');
         return await cloud.getDevices();
       } else {
-        await this.fetchAndroidDevices(deviceState, existingDeviceDetails, cliArgs);
+        await this.fetchAndroidDevices(deviceState, existingDeviceDetails, this.pluginArgs);
       }
       if (deviceTypes.androidDeviceType === 'real') {
         return deviceState.filter((device) => {
@@ -102,7 +106,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             // device may have changed the status since the last time we queried
             // we want to avoid device with offline or unauthorized status
             if (device.state === 'device') {
-              const deviceInfo = await this.deviceInfo(device, adbInstance, cliArgs);
+              const deviceInfo = await this.deviceInfo(device, adbInstance, this.pluginArgs, this.hostPort);
               if (!deviceInfo) {
                 log.info(`Cannot get device info for ${device.udid}. Skipping`);
               } else {
@@ -121,7 +125,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async deviceInfo(
     device: any,
     adbInstance: any,
-    cliArgs: any,
+    pluginArgs: IPluginArgs,
+    hostPort: number,
   ): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
@@ -132,7 +137,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         this.getDeviceVersion(adbInstance, device.udid),
         this.isRealDevice(adbInstance, device.udid),
         this.getDeviceName(adbInstance, device.udid),
-        this.getChromeVersion(adbInstance, device.udid, cliArgs),
+        this.getChromeVersion(adbInstance, device.udid, pluginArgs),
       ]);
     } catch (error) {
       log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
@@ -142,7 +147,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
 
     // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
-    if (!cliArgs.plugin['device-farm'].skipChromeDownload && chromeDriverPath === undefined) {
+    if (!pluginArgs.skipChromeDownload && chromeDriverPath === undefined) {
       log.info(`Cannot get chromeDriverPath for ${device.udid}. Skipping`);
       return undefined;
     }
@@ -156,10 +161,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
     let host;
     if (adbInstance.adbHost != null) {
       host = `http://${adbInstance.adbHost}:${adbInstance.adbPort}`;
-    } else if (Object.hasOwn(cliArgs.plugin['device-farm'], 'remoteMachineProxyIP')) {
-      host = `${cliArgs.plugin['device-farm'].remoteMachineProxyIP}`;
+    } else if (pluginArgs.remoteMachineProxyIP !== undefined) {
+      host = `${pluginArgs.remoteMachineProxyIP}`;
     } else {
-      host = `http://${ip.address()}:${cliArgs.port}`;
+      host = `http://${ip.address()}:${hostPort}`;
     }
     return {
       adbRemoteHost: adbInstance.adbHost,
@@ -216,14 +221,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
     );
   }
 
-  public async getConnectedDevices(cliArgs: any) {
+  public async getConnectedDevices(pluginArgs: IPluginArgs) {
     const deviceList = new Map();
     const originalADB = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
     const client = Adb.createClient();
-    const originalADBTracking = this.createLocalAdbTracker(client, originalADB, cliArgs);
+    const originalADBTracking = this.createLocalAdbTracker(client, originalADB);
     originalADBTracking();
-    const adbRemote = cliArgs.plugin['device-farm'].adbRemote;
+    const adbRemote = pluginArgs.adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
         const adbRemoteValue = value.split(':');
@@ -241,8 +246,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         const remoteAdbTracking = this.createRemoteAdbTracker(
           remoteAdb,
           originalADB,
-          adbHost,
-          cliArgs,
+          adbHost
         );
         remoteAdbTracking();
       });
@@ -250,7 +254,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return deviceList;
   }
 
-  private createLocalAdbTracker(adbClient: any, originalADB: any, cliArgs: any) {
+  private createLocalAdbTracker(adbClient: any, originalADB: any) {
+    const pluginArgs = this.pluginArgs;
     const adbTracker = async () => {
       try {
         const tracker = await adbClient.trackDevices();
@@ -262,7 +267,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, cliArgs);
+            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, pluginArgs, this.hostPort);
 
             if (!trackedDevice) {
               log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
@@ -270,10 +275,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
             }
 
             log.info(`Adding device ${clonedDevice.udid} to list!`);
-            const hubExists = hasHubArgument(cliArgs);
-            if (hubExists) {
+            if (pluginArgs.hub != undefined) {
               log.info(`Updating Hub with device ${clonedDevice.udid}`);
-              const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+              const nodeDevices = new NodeDevices(pluginArgs.hub);
               await nodeDevices.postDevicesToHub([trackedDevice], 'add');
             } else {
               addNewDevice([trackedDevice]);
@@ -283,10 +287,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
         tracker.on('remove', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
           Object.assign(clonedDevice, { udid: clonedDevice['id'], host: ip.address() });
-          const hubExists = hasHubArgument(cliArgs);
-          if (hubExists) {
+          if (pluginArgs.hub != undefined) {
             log.info(`Removing device from Hub with device ${clonedDevice.udid}`);
-            const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
+            const nodeDevices = new NodeDevices(pluginArgs.hub);
             await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
           } else {
             log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
@@ -303,7 +306,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return adbTracker;
   }
 
-  private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string, cliArgs: any) {
+  private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string) {
     const adbTracking = async () => {
       try {
         const tracker = await adbClient.trackDevices();
@@ -318,7 +321,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.initiateAbortControl(clonedDevice.udid);
             await this.waitBootComplete(originalADB, clonedDevice.udid);
             this.cancelAbort(clonedDevice.udid);
-            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, cliArgs);
+            const trackedDevice = await this.deviceInfo(clonedDevice, originalADB, this.pluginArgs, this.hostPort);
 
             if (!trackedDevice) {
               log.info(`Cannot get device info for ${clonedDevice.udid}. Skipping`);
@@ -347,8 +350,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return adbTracking;
   }
 
-  public async getChromeVersion(adbInstance: any, udid: string, cliArgs: any) {
-    if (cliArgs.plugin['device-farm'].skipChromeDownload) {
+  public async getChromeVersion(adbInstance: any, udid: string, pluginArgs: IPluginArgs) {
+    if (pluginArgs.skipChromeDownload) {
       log.warn('skipChromeDownload server arg is set; skipping Chromedriver installation.');
       log.warn('Android web/hybrid testing will not be possible without Chromedriver.');
       return;

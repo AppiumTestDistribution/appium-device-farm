@@ -96,6 +96,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
 }
 
 export function registerProxyMiddlware(expressApp: any) {
+  logger.info('Registering proxy middleware');
   const index = expressApp._router.stack.findIndex((s: any) => s.route);
   expressApp.use('/', handler);
   expressApp._router.stack.splice(index, 0, expressApp._router.stack.pop());

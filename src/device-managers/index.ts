@@ -1,32 +1,35 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { Platform } from '../types/Platform';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
-  private deviceManagers: Array<IDeviceManager> = [];
-  private deviceTypes: { androidDeviceType: string; iosDeviceType: string };
+  private deviceManagers: IDeviceManager[] = [];
+  private deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude };
   private cliArgs: any;
 
   constructor({
     platform,
     deviceTypes,
     cliArgs,
+    pluginArgs
   }: {
     platform: Platform | 'both';
-    deviceTypes: { androidDeviceType: string; iosDeviceType: string };
+    deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude };
     cliArgs: any;
+    pluginArgs: IPluginArgs;
   }) {
     this.deviceTypes = deviceTypes;
     this.cliArgs = cliArgs;
     if (platform.toLowerCase() === 'both') {
-      this.deviceManagers.push(new AndroidDeviceManager());
-      this.deviceManagers.push(new IOSDeviceManager());
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, cliArgs.port));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, cliArgs.port));
     } else if (platform.toLowerCase() === 'android') {
-      this.deviceManagers.push(new AndroidDeviceManager());
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, cliArgs.port));
     } else if (platform.toLowerCase() === 'ios') {
-      this.deviceManagers.push(new IOSDeviceManager());
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, cliArgs.port));
     }
   }
 

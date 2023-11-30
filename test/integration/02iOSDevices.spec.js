@@ -5,13 +5,13 @@ import { Container } from 'typedi';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initlializeStorage,
+  initializeStorage,
 } from '../../src/device-utils';
 import { CLIArgs } from '../../src/data-service/db';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     CLIArgs.chain()
       .find()
       .update(function (d) {
@@ -45,7 +45,7 @@ describe('IOS Test', () => {
   });
 
   it('Should throw error if the IPA does not match with device type real', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     const deviceManager = new DeviceFarmManager({
       platform: 'iOS',
       deviceTypes: 'real',
