@@ -1,55 +1,19 @@
 import { expect } from 'chai';
-import fs from 'fs';
-import path from 'path';
 import ip from 'ip';
 
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-
-const HUB_APPIUM_PORT = 4723;
-const NODE_APPIUM_PORT = 4724;
-const PLUGIN_PATH = path.resolve(__dirname + '/../..');
-
-const hub_config = DefaultPluginArgs
-const node_config = Object.assign(DefaultPluginArgs, {
-  hub: `http://${ip.address()}:${HUB_APPIUM_PORT}`,
-})
+import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
 
 describe('E2E', () => {
-  // create temp dir
-  const tempDir = path.resolve(__dirname + '/../../appium-e2e-test');
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir);
-  }
-
   // dump hub config into a file
-  const hub_config_file = tempDir + '/hub-config.json';
-  fs.writeFileSync(hub_config_file, JSON.stringify({
-    "server": {
-      "port": HUB_APPIUM_PORT,
-      "plugin": {
-        "device-farm": hub_config
-      }
-    }
-  }));
+  const hub_config_file = ensureHubConfig();
 
   // dump node config into a file
-  const node_config_file = tempDir + '/node-config.json';
-  fs.writeFileSync(node_config_file, JSON.stringify({
-    "server": {
-      "port": NODE_APPIUM_PORT,
-      "plugin": {
-        "device-farm": node_config
-      }
-    }
-  }));
+  const node_config_file = ensureNodeConfig();
 
   // setup appium home
-  const APPIUM_HOME = path.resolve(__dirname + '/../../temp-appium')
-  if (!fs.existsSync(APPIUM_HOME)) {
-    fs.mkdirSync(APPIUM_HOME);
-  }
+  const APPIUM_HOME = ensureAppiumHome();
 
   // run hub
   pluginE2EHarness({

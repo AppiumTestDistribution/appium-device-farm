@@ -4,10 +4,13 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function removeDevice(device: any) {
-  DeviceModel.chain()
-    .find({ udid: device.udid, host: { $contains: device.host } })
-    .remove();
+export function removeDevice(devices: { udid: string; host: string}[]) {
+  devices.forEach(function (device) {
+    log.info(`Removing device ${device.udid} from host ${device.host} from list per node request.`);
+    DeviceModel.chain()
+      .find({ udid: device.udid, host: { $contains: device.host } })
+      .remove();
+  })
 }
 
 export function addNewDevice(devices: Array<IDevice>) {

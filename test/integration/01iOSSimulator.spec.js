@@ -8,25 +8,18 @@ import {
   initializeStorage,
   getBusyDevicesCount,
 } from '../../src/device-utils';
-import { CLIArgs, DeviceModel } from '../../src/data-service/db';
+import { DeviceModel } from '../../src/data-service/db';
 
 import Simctl from 'node-simctl';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from './cliArgs';
+import ip from 'ip';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
 
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: ['http://127.0.0.1:4723'] })
+const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`] })
 
-const cliArgs = {
-  platform: 'ios',
-  deviceTypes: { androidDeviceType: '', iosDeviceType: 'simulated' },
-  cliArgs: {
-    port: 4723,
-    plugin: { 'device-farm': pluginArgs },
-  },
-};
 describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
     await addCLIArgs(serverCliArgs);

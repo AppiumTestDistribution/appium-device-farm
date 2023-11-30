@@ -68,15 +68,11 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./server-config.json &
         npm run test-e2e
       displayName: 'E2E Test'
 
     - script: |
         npm ci
-        
         npm run test-e2e-hubnode
       displayName: 'E2E Hub and Node Test'
 
@@ -97,7 +93,6 @@ jobs:
         echo '---'
         echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
         echo '---'
-        
         $ANDROID_HOME/emulator/emulator -list-avds
       displayName: "create AVD"
     - script: |
