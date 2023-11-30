@@ -17,11 +17,7 @@ describe('IOS Test', () => {
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
       });
-    const deviceManager = new DeviceFarmManager({
-      platform: 'iOS',
-      deviceTypes: 'real',
-      cliArgs: { plugin: { 'device-farm': { port: 4723, plugin: '' } } },
-    });
+    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -46,11 +42,7 @@ describe('IOS Test', () => {
 
   it('Should throw error if the IPA does not match with device type real', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager({
-      platform: 'iOS',
-      deviceTypes: 'real',
-      cliArgs: { plugin: { 'device-farm': { port: 4723, plugin: '' } } },
-    });
+    const deviceManager = new DeviceFarmManager(new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {})));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {

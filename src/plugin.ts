@@ -118,12 +118,12 @@ class DevicePlugin extends BasePlugin {
         : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager({
+    const deviceManager = new DeviceFarmManager(
       platform,
       deviceTypes,
-      cliArgs,
+      cliArgs.port,
       pluginArgs
-    });
+    );
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 

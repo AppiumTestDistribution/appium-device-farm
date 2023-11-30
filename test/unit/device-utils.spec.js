@@ -87,14 +87,7 @@ describe('Device Utils', () => {
 
   it('Set busy status to device with same udid from remote machine', async function () {
     db.removeCollection('devices');
-    const cliArgs = {
-      platform: 'android',
-      androidDeviceType: 'both',
-      cliArgs: {
-        plugin: { 'device-farm': { maxSessions: 3 } },
-      },
-    };
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('android', 'both', 4723, { maxSessions: 3 });
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
     const capabilities = {

@@ -7,29 +7,21 @@ import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
   private deviceManagers: IDeviceManager[] = [];
-  private deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude };
-  private cliArgs: any;
 
-  constructor({
-    platform,
-    deviceTypes,
-    cliArgs,
-    pluginArgs
-  }: {
-    platform: Platform | 'both';
-    deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude };
-    cliArgs: any;
-    pluginArgs: IPluginArgs;
-  }) {
+  constructor(
+    platform: Platform | 'both',
+    private deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude },
+    hostPort: number,
+    private pluginArgs: IPluginArgs) 
+  {
     this.deviceTypes = deviceTypes;
-    this.cliArgs = cliArgs;
     if (platform.toLowerCase() === 'both') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, cliArgs.port));
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, cliArgs.port));
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
     } else if (platform.toLowerCase() === 'android') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, cliArgs.port));
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
     } else if (platform.toLowerCase() === 'ios') {
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, cliArgs.port));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
     }
   }
 
@@ -39,8 +31,7 @@ export class DeviceFarmManager {
       devices.push(
         ...(await deviceManager.getDevices(
           this.deviceTypes,
-          existingDeviceDetails || [],
-          this.cliArgs,
+          existingDeviceDetails || []
         )),
       );
     }
@@ -48,7 +39,7 @@ export class DeviceFarmManager {
   }
 
   public getMaxSessionCount(): number {
-    return this.cliArgs.plugin['device-farm'].maxSessions;
+    return this.pluginArgs.maxSessions;
   }
 
   public async deviceInstances() {

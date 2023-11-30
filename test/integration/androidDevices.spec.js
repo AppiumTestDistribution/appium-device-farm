@@ -7,21 +7,17 @@ import {
   allocateDeviceForSession,
   initializeStorage,
 } from '../../src/device-utils';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import ip from 'ip';
 
-const cliArgs = {
-  platform: 'android',
-  deviceTypes: 'both',
-  cliArgs: {
-    port: 4723,
-    plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'], skipChromeDownload: true } },
-  },
-};
+const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('android', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -39,7 +35,7 @@ describe('Android Test', () => {
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('android', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -58,9 +54,9 @@ describe('Android Test', () => {
 
   it('Finding a device should throw error when all devices are busy', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('android', 'both', 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {

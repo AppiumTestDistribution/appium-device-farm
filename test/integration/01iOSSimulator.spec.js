@@ -17,12 +17,14 @@ import { serverCliArgs } from './cliArgs';
 const simctl = new Simctl();
 const name = 'My Device Name';
 
+const pluginArgs = Object.assign(DefaultPluginArgs, { remote: ['http://127.0.0.1:4723'] })
+
 const cliArgs = {
   platform: 'ios',
   deviceTypes: { androidDeviceType: '', iosDeviceType: 'simulated' },
   cliArgs: {
     port: 4723,
-    plugin: { 'device-farm': { maxSessions: 1 } },
+    plugin: { 'device-farm': pluginArgs },
   },
 };
 describe('Max sessions CLI argument test', () => {
@@ -31,10 +33,10 @@ describe('Max sessions CLI argument test', () => {
   });
   it('Allocate first device without issue', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -53,10 +55,10 @@ describe('Max sessions CLI argument test', () => {
 
   it('Should throw error if the app does not match with device type', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -80,10 +82,10 @@ describe('Max sessions CLI argument test', () => {
 
   it('Throw error when all sessions occupied', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
     expect(await getBusyDevicesCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -109,20 +111,9 @@ describe('Max sessions CLI argument test', () => {
 describe('IOS Simulator Test', () => {
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager({
-      platform: 'ios',
-      deviceTypes: 'both',
-      cliArgs: {
-        port: 4723,
-        plugin: {
-          'device-farm': {
-            remote: ['http://127.0.0.1:4723'],
-          },
-        },
-      },
-    });
+    const deviceManager = new DeviceFarmManager('iOS', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -144,13 +135,9 @@ describe('IOS Simulator Test', () => {
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager({
-      platform: 'ios',
-      deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-    });
+    const deviceManager = new DeviceFarmManager('iOS', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
@@ -173,13 +160,9 @@ describe('IOS Simulator Test', () => {
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
       await initializeStorage();
-      const deviceManager = new DeviceFarmManager({
-        platform: 'ios',
-        deviceTypes: 'both',
-        cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-      });
+      const deviceManager = new DeviceFarmManager('iOS', 'both', 4723, Object.assign(DefaultPluginArgs, { remote: ['http://127.0.0.1:4723'] }));
       Container.set(DeviceFarmManager, deviceManager);
-      const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+      const hub = pluginArgs.hub
       await updateDeviceList(hub);
       const capabilities = {
         alwaysMatch: {
@@ -211,13 +194,9 @@ describe('Boot simulator test', async () => {
 
   it('Should pick Booted simulator when app path has .app', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager({
-      platform: 'ios',
-      deviceTypes: 'both',
-      cliArgs: { port: 4723, plugin: { 'device-farm': { remote: ['http://127.0.0.1:4723'] } } },
-    });
+    const deviceManager = new DeviceFarmManager('iOS', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = cliArgs.cliArgs.plugin["device-farm"].hub
+    const hub = pluginArgs.hub
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
