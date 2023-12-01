@@ -34,7 +34,7 @@ describe('Browserstack Devices', () => {
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
   it('Should be able to run the android with PCloudy config', async () => {
-    let androidDevices = (await axios.get(`${hub_url}/device-farm/devices/android`))
+    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`))
       .data;
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
@@ -60,12 +60,12 @@ describe('Browserstack Devices', () => {
   });
 
   it('Should be able to run the plugin with PCloudy config', async () => {
-    const status = (await axios.get(`${hub_url}/device-farm/devices`)).status;
+    const status = (await axios.get(`${hub_url}/device-farm/api/devices`)).status;
     expect(status).to.be.eql(200);
   });
 
   it('Should be able to get iOS devices from PCloudy config', async () => {
-    let iosDevics = (await axios.get(`${hub_url}/device-farm/devices/ios`)).data;
+    let iosDevics = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
     delete iosDevics[0].meta;
     delete iosDevics[0]['$loki'];
     expect(iosDevics[0]).to.deep.equal({
