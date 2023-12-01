@@ -129,9 +129,7 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/pcloudy-config.json &
+        
         npm run test-e2e-pCloudy
       displayName: 'E2E Test'
 
@@ -146,11 +144,10 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
+        
         export CLOUD_USERNAME=$BS_USERNAME
         export CLOUD_KEY=$BS_PASSWORD
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
+        
         npm run test-parallel-bs
       displayName: 'E2E Test'
 
