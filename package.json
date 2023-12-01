@@ -19,7 +19,7 @@
     "test-parallel-ios-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/confIOS.js --exit --timeout 260000",
     "test-e2e": "mocha --require ts-node/register ./test/e2e/plugin.spec.* --exit --timeout=999999",
     "test-e2e-hubnode": "mocha -r ts-node/register ./test/e2e/hubnode.spec.* --plugin-device-farm-platform=both --exit --timeout=999999",
-    "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --exit --timeout 999999",
+    "test-e2e-browserstack": "mocha --require ts-node/register ./test/e2e/browserstack.spec.ts --exit --timeout 999999",
     "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --exit --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/*iOS*.spec.js --timeout 260000 --exit",

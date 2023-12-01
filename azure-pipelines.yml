@@ -71,11 +71,6 @@ jobs:
         npm run test-e2e
       displayName: 'E2E Test'
 
-    - script: |
-        npm ci
-        npm run test-e2e-hubnode
-      displayName: 'E2E Hub and Node Test'
-
  - job: E2EHubAndNodeTest
    pool:
      vmImage: 'macOS-latest'
@@ -119,9 +114,7 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
+        
         npm run test-e2e-browserstack
       displayName: 'E2E Test'
 
