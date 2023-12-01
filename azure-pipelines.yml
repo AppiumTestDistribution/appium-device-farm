@@ -45,10 +45,10 @@ jobs:
     - script: |
         $ANDROID_HOME/platform-tools/adb devices
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell -s emulator-5554 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell -s emulator-5555 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
@@ -147,7 +147,7 @@ jobs:
         
         export CLOUD_USERNAME=$BS_USERNAME
         export CLOUD_KEY=$BS_PASSWORD
-        
+
         npm run test-parallel-bs
       displayName: 'E2E Test'
 
