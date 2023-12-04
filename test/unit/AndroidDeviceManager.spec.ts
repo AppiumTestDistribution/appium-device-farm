@@ -278,4 +278,13 @@ describe('Android Device Manager', function () {
     );
 
   });
+
+  it.only("should handle device never completing boot", async () => {
+    // mock getDeviceProperty
+    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    adb = await getAdbOriginal();
+    sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));
+    
+    androidDevices.handleNewlyPluggedDevice(adb, { udid: 'emulator-9999', state: 'device' }).should.not.throw;
+  });
 });
