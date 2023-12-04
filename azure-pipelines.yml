@@ -45,10 +45,10 @@ jobs:
     - script: |
         $ANDROID_HOME/platform-tools/adb devices
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb -s emulator-5554 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb -s emulator-5554 wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb -s emulator-5555 wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb -s emulator-5555 wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
@@ -162,11 +162,9 @@ jobs:
 
      - script: |
          npm ci
-         export APPIUM_HOME=/tmp/device-farm
          export CLOUD_USERNAME=$BS_USERNAME
          export CLOUD_KEY=$BS_PASSWORD
-         ./node_modules/.bin/appium plugin install --source=local .
-         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
+         
          npm run test-parallel-ios-bs
        displayName: 'E2E Test BS Linux'
 
@@ -198,10 +196,8 @@ jobs:
 
      - script: |
          npm ci
-         export APPIUM_HOME=/tmp/device-farm
          export CLOUD_USERNAME=$LT_USERNAME
          export CLOUD_KEY=$LT_PASSWORD
-         ./node_modules/.bin/appium plugin install --source=local .
-         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/lt-config.json &
+
          npm run test-parallel-lt
        displayName: 'E2E Test'
