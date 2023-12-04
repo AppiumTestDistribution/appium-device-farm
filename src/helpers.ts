@@ -183,6 +183,7 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
 
     return result.status == 200;
   } catch (error: any) {
+    log.info(`Device Farm is not running at ${host}. Error: ${error}`);
     return false;
   }
 }
