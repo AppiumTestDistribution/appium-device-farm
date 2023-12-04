@@ -11,7 +11,7 @@ const WDIO_PARAMS = {
   connectionRetryCount: 0,
   hostname: APPIUM_HOST,
   port: APPIUM_PORT,
-  path: '/wd/hub/',
+  path: '/',
   logLevel: 'info',
 };
 const capabilities = {
