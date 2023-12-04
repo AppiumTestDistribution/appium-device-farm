@@ -16,6 +16,7 @@ import NodeDevices from './NodeDevices';
 import { GoIosTracker } from './iOSTracker';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
+import e from 'express';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(private pluginArgs: IPluginArgs, private hostPort: number) {}
@@ -43,8 +44,14 @@ export default class IOSDeviceManager implements IDeviceManager {
     }
   }
 
-  async getConnectedDevices() {
-    return await IOSUtils.getConnectedDevices();
+  async getConnectedDevices(): Promise<Array<unknown>> {
+    try {
+      const devices = await IOSUtils.getConnectedDevices();
+      return devices;
+    } catch (error) {
+      log.error(error);
+      return [];
+    }
   }
 
   async getOSVersion(udid: string) {
@@ -210,7 +217,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   public async fetchLocalSimulators(simulators: IDevice[]) {
-    const flattenValued: any = await this.getLocalSims();
+    const flattenValued = await this.getLocalSims();
     let filteredSimulators: Array<IDevice> = [];
     const localPluginArgs = this.pluginArgs;
     if (this.pluginArgs.simulators !== undefined) {
@@ -243,7 +250,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     });
   }
 
-  private async getLocalSims() {
+  private async getLocalSims(): Promise<Array<IDevice>> {
     try {
       const simctl = await new Simctl();
       const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
@@ -269,6 +276,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       return [...iosSimulators, ...tvosSimulators];
     } catch (error) {
       log.error(error);
+      return [];
     }
   }
 }
