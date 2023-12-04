@@ -187,3 +187,22 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function isAppiumRunningAt(url: string): Promise<boolean> {
+  try {
+    const timeoutMs = 30000;
+    const result = await axios({
+      method: 'get',
+      url: `${url}/status`,
+      timeout: timeoutMs,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result.status == 200;
+  } catch (error: any) {
+    log.info(`Appium is not running at ${url}. Error: ${error}`);
+    return false;
+  }
+}

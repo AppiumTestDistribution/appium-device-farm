@@ -279,7 +279,7 @@ describe('Android Device Manager', function () {
 
   });
 
-  it.only("should handle device never completing boot", async () => {
+  it("should handle device never completing boot", async () => {
     // mock getDeviceProperty
     const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
     adb = await getAdbOriginal();

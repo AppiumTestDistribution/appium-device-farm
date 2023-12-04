@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath, isAppiumRunningAt } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -298,7 +298,12 @@ export async function setupCronCheckStaleDevices(
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
       nodeChecked.push(device.host);
-      await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(device.host);
+      // use different function to check cloud devices
+      if (device.hasOwnProperty('cloud')) {
+        await isAppiumRunningAt(device.host);
+      } else {
+        await isDeviceFarmRunning(device.host);
+      }
       return device.host;
     });
 
