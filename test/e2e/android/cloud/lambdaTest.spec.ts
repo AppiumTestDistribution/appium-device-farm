@@ -4,6 +4,8 @@ import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 import ip from 'ip';
 import { Options } from '@wdio/types';
+import 'dotenv/config'
+
 
 const APPIUM_HOST = ip.address();
 const APPIUM_PORT = 4723;
@@ -16,9 +18,9 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'Android',
-  'appium:isRealMobile': true,
+  //'appium:isRealMobile': true,
   'appium:appiumVersion': '2.0',
-  'appium:app': 'lt://APP10160361451697712441620971',
+  'appium:app': process.env.LT_APP ?? 'lt://APP10160361451697712441620971',
   'appium:build': 'ATDDevs',
   'appium:name': 'Device-Farm Plugin',
   'appium:project': 'Appium Device Farm',
