@@ -18,7 +18,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'Android',
-  //'appium:isRealMobile': true,
+  'appium:isRealMobile': true,
   'appium:appiumVersion': '2.0',
   'appium:app': process.env.CLOUD_APP ?? 'lt://APP10160361451697712441620971',
   'appium:build': 'ATDDevs',
