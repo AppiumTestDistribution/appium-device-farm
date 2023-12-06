@@ -103,4 +103,8 @@ describe('E2E', () => {
       }])
     console.log("Successfully swiped");
   });
+
+  afterEach(async function() {
+    await driver.deleteSession()
+  });
 });
