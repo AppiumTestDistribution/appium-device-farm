@@ -22,7 +22,7 @@ const capabilities = {
   "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
   "platformName": "android",
   "appium:deviceName": "",
-  "uiautomator2ServerInstallTimeout": 90000,
+  "appium:uiautomator2ServerInstallTimeout": 90000,
 } as unknown as WebdriverIO.Capabilities
 
 describe('E2E', () => {
