@@ -5,6 +5,7 @@ import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
 import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
 import { Options } from '@wdio/types';
+import axios from 'axios';
 
 let driver: any;
 
@@ -92,6 +93,12 @@ describe('E2E', () => {
       }])
     console.log("Successfully swiped");
   });
+
+  it.only('serve device-farm endpoint when test is still running', async () => {
+    // check device-farm endpoint using axios
+    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm`);
+    expect(res.status).to.equal(200);
+  })
 
   afterEach(async function() {
     await driver.deleteSession()

@@ -44,6 +44,10 @@ describe('Basic Plugin Test', () => {
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
   it('Basic Plugin test', async () => {
+    (await axios.get(`${hub_url}/device-farm`)).status.should.eql(200);
+  });
+
+  it('Basic Plugin API test', async () => {
     (await axios.get(`${hub_url}/device-farm/api/devices`)).status.should.eql(200);
   });
 

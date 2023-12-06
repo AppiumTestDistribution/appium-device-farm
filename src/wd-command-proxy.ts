@@ -51,7 +51,7 @@ export function removeProxyHandler(sessionId: string) {
 
 function proxyRequestInterceptor(proxyReq: any, req: any, res: any) {
   if (!new RegExp(/post|put|patch/g).test(req.method.toLowerCase())) {
-    // log.debug(`📱 Skipping request for session ${JSON.stringify(req.method)}`);
+    log.debug(`📱 Skipping request for session ${JSON.stringify(req.method)}`);
     return;
   }
 

@@ -50,7 +50,6 @@ const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
-let skipChromeDownload: any;
 let hasEmulators: any;
 let proxy: any;
 
@@ -82,7 +81,6 @@ class DevicePlugin extends BasePlugin {
       DefaultPluginArgs,
       cliArgs.plugin['device-farm'] as IPluginArgs,
     );
-    registerProxyMiddlware(expressApp);
 
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
@@ -96,6 +94,7 @@ class DevicePlugin extends BasePlugin {
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
     expressApp.use('/device-farm', router);
+    registerProxyMiddlware(expressApp);
 
     if (!platform)
       throw new Error(
