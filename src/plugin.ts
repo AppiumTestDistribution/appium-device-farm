@@ -184,6 +184,7 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
+    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`)
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -246,7 +247,7 @@ class DevicePlugin extends BasePlugin {
         config.proxy = false;
       }
 
-      log.info(`with config: "${JSON.stringify(config)}"`);
+      log.info(`With axios config: "${JSON.stringify(config)}"`);
       try {
         const response = await axios(config);
         sessionDetails = response.data;
@@ -266,6 +267,8 @@ class DevicePlugin extends BasePlugin {
         if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
       }
 
+      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
+
       session = {
         protocol: 'W3C',
         value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
@@ -280,6 +283,7 @@ class DevicePlugin extends BasePlugin {
       await updatedAllocatedDevice(device, { busy: false });
       log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
+      log.info(`📱 Device UDID ${device.udid} blocked for session ${session.value[0]}`);
       const sessionId = session.value[0];
       await updatedAllocatedDevice(device, {
         busy: true,

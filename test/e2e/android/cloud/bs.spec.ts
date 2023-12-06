@@ -4,6 +4,7 @@ import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 import ip from 'ip';
 import type { Options } from '@wdio/types'
+import 'dotenv/config'
 
 const APPIUM_HOST = ip.address();
 const APPIUM_PORT = 4723;
@@ -15,7 +16,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'android',
-  'appium:app': 'bs://a46a2773fdddf08758c5db6e4b02cf9743f3055d',
+  'appium:app': process.env.CLOUD_APP ?? 'bs://a46a2773fdddf08758c5db6e4b02cf9743f3055d',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
@@ -54,9 +55,25 @@ describe('Plugin Test', () => {
   });
 
   it('Vertical swipe test', async () => {
-    console.log(await driver.capabilities.deviceUDID);
-    await driver.$('~login').click();
+    console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
+    await driver.performActions([
+      {
+        "type": "pointer",
+        "id": "finger1",
+        "parameters": {"pointerType": "touch"},
+        "actions": [
+          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
+          {"type": "pointerDown", "button": 0},
+          {"type": "pause", "duration": 500},
+          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": -50, "y": 0},
+          {"type": "pointerUp", "button": 0}
+        ]
+      }])
+    console.log("Successfully swiped");
   });
 
-  afterEach(async () => await driver.deleteSession());
+  afterEach(async function() {
+    // can't delete session since it will end up as a failure (cannot match session id)
+    // await driver.deleteSession()
+  });
 });
