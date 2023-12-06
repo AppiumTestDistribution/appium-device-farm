@@ -4,6 +4,25 @@ import ip from 'ip';
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
 import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
+import { Options } from '@wdio/types';
+
+let driver: any;
+
+const APPIUM_HOST = ip.address();
+const APPIUM_PORT = 4723;
+const WDIO_PARAMS = {
+  connectionRetryCount: 0,
+  hostname: APPIUM_HOST,
+  port: APPIUM_PORT,
+  logLevel: 'info',
+};
+
+const capabilities = {
+  "appium:automationName": "UiAutomator2",
+  "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
+  "platformName": "android",
+  "appium:deviceName": "",
+} as unknown as WebdriverIO.Capabilities
 
 describe('E2E', () => {
   // dump hub config into a file
@@ -51,27 +70,37 @@ describe('E2E', () => {
     appiumHome: APPIUM_HOME!
   })
 
+  beforeEach(async () => {
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+  });
+
 
   it('should use my plugin', async function () {
     this.timeout(200000);
-
-    // port/host should match what you provided to `pluginE2EHarness`
-    const browser = await remote({
-      port: HUB_APPIUM_PORT, 
-      hostname: ip.address(),
-      capabilities: {
-        "appium:automationName": "UiAutomator2",
-        "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
-        "platformName": "android",
-        "appium:deviceName": "",
-      } as unknown as WebdriverIO.Capabilities
-    });
     
-    const cap = browser.capabilities;
+    const cap = driver.capabilities;
     
     // check that session is created
     expect(cap).to.have.property('app').that.is.a('string').that.satisfies((app: string) => {
       return app.startsWith('http')
     })
   })
+
+  it('Vertical swipe test', async () => {
+    console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
+    await driver.performActions([
+      {
+        "type": "pointer",
+        "id": "finger1",
+        "parameters": {"pointerType": "touch"},
+        "actions": [
+          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
+          {"type": "pointerDown", "button": 0},
+          {"type": "pause", "duration": 500},
+          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": -50, "y": 0},
+          {"type": "pointerUp", "button": 0}
+        ]
+      }])
+    console.log("Successfully swiped");
+  });
 });

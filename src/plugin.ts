@@ -224,7 +224,8 @@ class DevicePlugin extends BasePlugin {
           desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
         });
       }
-      log.info(`Remote Host URL - ${remoteUrl}`);
+      // need to sanitize to remove sensitive information
+      // log.debug(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
       log.info(
         `Creating cloud session with desiredCapabilities: "${JSON.stringify(

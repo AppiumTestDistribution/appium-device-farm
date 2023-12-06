@@ -130,7 +130,7 @@ jobs:
     - script: |
         npm ci
         
-        npm run test-e2e-pCloudy
+        npm run test-e2e-pcloudy
       displayName: 'E2E Test'
 
  - job: BrowserStack_mac

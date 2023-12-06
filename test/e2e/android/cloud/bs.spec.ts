@@ -73,7 +73,6 @@ describe('Plugin Test', () => {
   });
 
   afterEach(async function() {
-    // can't delete session since it will end up as a failure (cannot match session id)
-    // await driver.deleteSession()
+    await driver.deleteSession()
   });
 });

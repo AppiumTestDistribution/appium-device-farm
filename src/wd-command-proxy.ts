@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { createProxyMiddleware } from 'http-proxy-middleware';
@@ -16,15 +16,27 @@ function getProxyServer() {
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
   const proxyServer = getProxyServer();
+  const targetBasePath = new URL(remoteHost).pathname
   const config: any = {
-    target: new URL(remoteHost),
-    logLevel: 'debug',
+    target: new URL(remoteHost).origin,
     changeOrigin: true,
-    onProxyReq: proxyRequestInterceptor,
+    pathRewrite: (path: any, req: any) => {
+      const newPath = `${targetBasePath}/${path}`
+      return newPath;
+    },
+    on: {
+      proxyReq: proxyRequestInterceptor,
+      proxyRes: (proxyRes: any, req: any, res: any) => {
+        // log.debug(`proxyRes host: ${req.headers.host} method: ${req.method}  path: ${req.url}`);
+      },
+      error: (err: any, req: any, res: any) => {
+        log.error('proxy handler error: ', err.message, ' data: ', err.response.data);
+      },
+    }
   };
 
   if (proxyServer) {
-    log.info(`Added proxy to createProxyMiddleware: ${JSON.stringify(proxyServer)}`);
+    //log.info(`Added proxy to createProxyMiddleware: ${JSON.stringify(proxyServer)}`);
     config.agent = new HttpsProxyAgent(proxyServer);
   }
 
@@ -39,13 +51,18 @@ export function removeProxyHandler(sessionId: string) {
 
 function proxyRequestInterceptor(proxyReq: any, req: any, res: any) {
   if (!new RegExp(/post|put|patch/g).test(req.method.toLowerCase())) {
+    // log.debug(`📱 Skipping request for session ${JSON.stringify(req.method)}`);
     return;
   }
+
+  // log.debug(`📱 Intercepting request ${req.method} ${req.url} ${JSON.stringify(req.body)}`);
+
   const contentType = proxyReq.getHeader('Content-Type');
 
   const writeBody = (bodyData: string) => {
     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
     proxyReq.write(bodyData);
+    proxyReq.end();
   };
 
   if (contentType && contentType.includes('application/json')) {
