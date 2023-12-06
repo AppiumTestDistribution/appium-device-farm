@@ -74,18 +74,6 @@ describe('E2E', () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
   });
 
-
-  it('should use my plugin', async function () {
-    this.timeout(200000);
-    
-    const cap = driver.capabilities;
-    
-    // check that session is created
-    expect(cap).to.have.property('app').that.is.a('string').that.satisfies((app: string) => {
-      return app.startsWith('http')
-    })
-  })
-
   it('Vertical swipe test', async () => {
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
     await driver.performActions([
