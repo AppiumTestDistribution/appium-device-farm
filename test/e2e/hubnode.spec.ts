@@ -94,7 +94,7 @@ describe('E2E', () => {
     console.log("Successfully swiped");
   });
 
-  it.only('serve device-farm endpoint when test is still running', async () => {
+  it('serve device-farm endpoint when test is still running', async () => {
     // check device-farm endpoint using axios
     const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm`);
     expect(res.status).to.equal(200);
