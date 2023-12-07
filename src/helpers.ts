@@ -67,7 +67,7 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function hubUrl(device: IDevice) {
+export function hubUrl(device: IDevice): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
@@ -171,10 +171,11 @@ export function stripAppiumPrefixes(caps: any) {
 
 export async function isDeviceFarmRunning(host: string): Promise<boolean> {
   try {
+    const timeoutMs = 30000;
     const result = await axios({
       method: 'get',
       url: `${host}/device-farm`,
-      timeout: 30000,
+      timeout: timeoutMs,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -182,6 +183,26 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
 
     return result.status == 200;
   } catch (error: any) {
+    log.info(`Device Farm is not running at ${host}. Error: ${error}`);
+    return false;
+  }
+}
+
+export async function isAppiumRunningAt(url: string): Promise<boolean> {
+  try {
+    const timeoutMs = 30000;
+    const result = await axios({
+      method: 'get',
+      url: `${url}/status`,
+      timeout: timeoutMs,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result.status == 200;
+  } catch (error: any) {
+    log.info(`Appium is not running at ${url}. Error: ${error}`);
     return false;
   }
 }

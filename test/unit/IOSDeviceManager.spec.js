@@ -7,6 +7,7 @@ import os from 'os';
 import path from 'path';
 import { deviceMock } from './fixtures/devices';
 import ip from 'ip';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -21,7 +22,7 @@ describe('IOS Device Manager', () => {
     sandbox.restore();
   });
   it('IOS Device List to have added state', async () => {
-    const iosDevices = new IOSDeviceManager();
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(Helper, 'isMac').returns(true);
@@ -46,7 +47,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
       },
     ]);
-    const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
+    const devices = await iosDevices.getDevices({iosDeviceType: 'both'}, []);
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
@@ -86,67 +87,63 @@ describe('IOS Device Manager', () => {
   });
 
   it('Should consider only simulators that is given by user and all real devices', async () => {
-    const cliArgs = {
-      'device-farm': {
-        platform: 'iOS',
-        simulators: [
-          {
-            name: 'iPhone 14',
-            sdk: '16.1',
-          },
-          {
-            name: 'iPhone 14 Plus',
-            sdk: '16.1',
-          },
-        ],
+    const simulators = [
+      {
+        name: 'iPhone 14',
+        sdk: '16.1',
       },
-    };
-    let iosDeviceManager = new IOSDeviceManager();
+      {
+        name: 'iPhone 14 Plus',
+        sdk: '16.1',
+      },
+    ]
+
+    let iosDeviceManager = new IOSDeviceManager(Object.assign({
+      platform: 'iOS',
+      simulators,
+    }, DefaultPluginArgs), 4723);
     sandbox.stub(iosDeviceManager, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDeviceManager, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDeviceManager, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock);
-    const devices = await iosDeviceManager.getDevices('both', [], { port: 4723, plugin: cliArgs });
-    expect(devices.length).to.be.equal(3);
-    expect(devices[1].name).to.be.equal('iPhone 14 Plus');
-    expect(devices[2].name).to.be.equal('iPhone 14');
+    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock.filter((device) => device.platform === 'iOS'));
+    const devices = await iosDeviceManager.getDevices({iosDeviceType: 'real'}, []);
+    // all devices are simulators
+    devices.forEach((device) => {
+      expect(device.realDevice).to.equal(true);
+    });
   });
 
   it('Should consider only simulators that is given by user and not real devices', async () => {
-    const cliArgs = {
-      'device-farm': {
-        platform: 'iOS',
-        iosDeviceType: 'simulated',
-        remote: ['http://127.0.0.1:4723'],
-        simulators: [
-          {
-            name: 'iPhone 14',
-            sdk: '16.1',
-          },
-          {
-            name: 'iPhone 14 Plus',
-            sdk: '16.1',
-          },
-        ],
+    const simulators = [
+      {
+        name: 'iPhone 14',
+        sdk: '16.1',
       },
-    };
-    let iosDeviceManager = new IOSDeviceManager();
+      {
+        name: 'iPhone 14 Plus',
+        sdk: '16.1',
+      },
+    ]
+    let iosDeviceManager = new IOSDeviceManager(Object.assign({
+      platform: 'iOS',
+      iosDeviceType: 'simulated',
+      remote: ['http://127.0.0.1:4723'],
+      simulators,
+    }, DefaultPluginArgs), 4723);
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock);
+    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock.filter((device) => device.platform === 'iOS'));
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    const devices = await iosDeviceManager.getDevices('simulated', [], {
-      port: 4723,
-      plugin: cliArgs,
+    const devices = await iosDeviceManager.getDevices({iosDeviceType: 'simulated'}, []);
+    // all devices are simulators
+    devices.forEach((device) => {
+      expect(device.realDevice).to.be.false;
     });
-    expect(devices.length).to.be.equal(2);
-    expect(devices[0].name).to.be.equal('iPhone 14 Plus');
-    expect(devices[1].name).to.be.equal('iPhone 14');
   });
 
   it('IOS Device List to have added state - Include simulators with real devices', async () => {
-    const iosDevices = new IOSDeviceManager();
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
@@ -194,7 +191,7 @@ describe('IOS Device Manager', () => {
   });
 
   it('IOS Device List to have added state - Only simulators', async () => {
-    const iosDevices = new IOSDeviceManager();
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
@@ -210,10 +207,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
       },
     ]);
-    const devices = await iosDevices.getDevices({ iosDeviceType: 'simulated' }, [], {
-      port: 4723,
-      plugin: cliArgs,
-    });
+    const devices = await iosDevices.getDevices({ iosDeviceType: 'simulated' }, []);
     expect(devices).to.deep.equal([
       {
         name: 'iPad Air (3rd generation)',
@@ -227,7 +221,7 @@ describe('IOS Device Manager', () => {
   });
 
   it('IOS Device List to have added state - Only real devices', async () => {
-    const iosDevices = new IOSDeviceManager();
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');

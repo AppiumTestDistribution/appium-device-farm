@@ -11,21 +11,25 @@ export default class NodeDevices {
 
   async postDevicesToHub(devices: Array<IDevice>, arg: string) {
     log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
-    const status = (
-      await axios.post(`${this.host}/device-farm/api/register`, devices, {
-        params: {
-          type: arg,
-        },
-      })
-    ).status;
-    if (status === 200) {
-      if (arg === 'add') {
-        log.info(`Pushed devices to hub ${JSON.stringify(devices)}`);
+    try {
+      const status = (
+        await axios.post(`${this.host}/device-farm/api/register`, devices, {
+          params: {
+            type: arg,
+          },
+        })
+      ).status;
+      if (status === 200) {
+        if (arg === 'add') {
+          log.info(`Pushed devices to hub ${JSON.stringify(devices)}`);
+        } else {
+          log.info(`Removed device and pushed information to hub ${JSON.stringify(devices)}`);
+        }
       } else {
-        log.info(`Removed device and pushed information to hub ${JSON.stringify(devices)}`);
+        log.warn('Something went wrong!!');
       }
-    } else {
-      log.warn('Something went wrong!!');
+    } catch (error) {
+      log.error(`Unable to push devices update to hub. Reason: ${error}`);
     }
   }
 }

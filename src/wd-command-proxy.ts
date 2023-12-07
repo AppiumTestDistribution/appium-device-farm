@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import e, { Request, Response, NextFunction } from 'express';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
 import { unblockDevice } from './data-service/device-service';
-import logger from './logger';
 import axios from 'axios';
+import log from './logger';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
@@ -16,17 +16,31 @@ function getProxyServer() {
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
   const proxyServer = getProxyServer();
-  logger.info(`proxyServer: ${JSON.stringify(proxyServer)}`);
+  const targetBasePath = new URL(remoteHost).pathname
   const config: any = {
     target: new URL(remoteHost).origin,
-    logLevel: 'debug',
     changeOrigin: true,
-    onProxyReq: proxyRequestInterceptor,
+    pathRewrite: (path: any, req: any) => {
+      const newPath = `${targetBasePath}/${path}`
+      return newPath;
+    },
+    on: {
+      proxyReq: proxyRequestInterceptor,
+      proxyRes: (proxyRes: any, req: any, res: any) => {
+        // log.debug(`proxyRes host: ${req.headers.host} method: ${req.method}  path: ${req.url}`);
+      },
+      error: (err: any, req: any, res: any) => {
+        log.error('proxy handler error: ', err.message, ' data: ', err.response.data);
+      },
+    }
   };
+
   if (proxyServer) {
-    logger.info(`Added proxy to createProxyMiddleware: ${JSON.stringify(proxyServer)}`);
+    //log.info(`Added proxy to createProxyMiddleware: ${JSON.stringify(proxyServer)}`);
     config.agent = new HttpsProxyAgent(proxyServer);
   }
+
+  log.info(`Creating remote proxy for session ${sessionId} to ${remoteHost}`);
   remoteProxyMap.set(sessionId, createProxyMiddleware(config));
   remoteHostMap.set(sessionId, remoteHost);
 }
@@ -37,13 +51,18 @@ export function removeProxyHandler(sessionId: string) {
 
 function proxyRequestInterceptor(proxyReq: any, req: any, res: any) {
   if (!new RegExp(/post|put|patch/g).test(req.method.toLowerCase())) {
+    log.debug(`📱 Skipping request for session ${JSON.stringify(req.method)}`);
     return;
   }
+
+  // log.debug(`📱 Intercepting request ${req.method} ${req.url} ${JSON.stringify(req.body)}`);
+
   const contentType = proxyReq.getHeader('Content-Type');
 
   const writeBody = (bodyData: string) => {
     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
     proxyReq.write(bodyData);
+    proxyReq.end();
   };
 
   if (contentType && contentType.includes('application/json')) {
@@ -84,7 +103,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
       remoteProxyMap.get(sessionId)(req, res, next);
     }
     if (req.method === 'DELETE') {
-      logger.info(
+      log.info(
         `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`,
       );
       unblockDevice({ session_id: sessionId });
@@ -96,6 +115,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
 }
 
 export function registerProxyMiddlware(expressApp: any) {
+  log.info('Registering proxy middleware');
   const index = expressApp._router.stack.findIndex((s: any) => s.route);
   expressApp.use('/', handler);
   expressApp._router.stack.splice(index, 0, expressApp._router.stack.pop());

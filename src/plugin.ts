@@ -17,53 +17,49 @@ import {
 } from './data-service/pending-sessions-service';
 import {
   allocateDeviceForSession,
-  checkNodeServerAvailability,
-  cronRefreshNodeDevices,
-  cronReleaseBlockedDevices,
-  cronUpdateDeviceList,
+  setupCronReleaseBlockedDevices,
+  setupCronUpdateDeviceList,
   deviceType,
-  initlializeStorage,
+  initializeStorage,
   isIOS,
   refreshSimulatorState,
+  setupCronCheckStaleDevices,
   updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
-import logger from './logger';
+import log from './logger';
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  hubUrl,
-  hasHubArgument,
-  spinWith,
-  stripAppiumPrefixes,
-  isDeviceFarmRunning,
-} from './helpers';
+import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
+import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import ip from 'ip';
 import _ from 'lodash';
-import { ServerCLI } from './types/CLIArgs';
 import { ADB } from 'appium-adb';
+import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
-let skipChromeDownload: any;
-let emulators: any;
+let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
+  private pluginArgs: IPluginArgs = DefaultPluginArgs;
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
+    // initialize plugin args only when cliArgs.plugin['device-farm'] is present
+    if (cliArgs.plugin && cliArgs.plugin['device-farm'])
+      Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as unknown as IPluginArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -72,7 +68,7 @@ class DevicePlugin extends BasePlugin {
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
     };
     unblockDevice(deviceFilter);
-    logger.info(
+    log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
         deviceFilter,
       )} onUnexpectedShutdown from server`,
@@ -80,89 +76,89 @@ class DevicePlugin extends BasePlugin {
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
-    registerProxyMiddlware(expressApp);
+    const pluginArgs: IPluginArgs = Object.assign(
+      {},
+      DefaultPluginArgs,
+      cliArgs.plugin['device-farm'] as IPluginArgs,
+    );
 
-    if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
-      platform = cliArgs.plugin['device-farm'].platform;
-      androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
-      iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
-      skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
-      if (Object.hasOwn(cliArgs.plugin['device-farm'], 'proxy')) {
-        logger.info(`Adding proxy: ${JSON.stringify(cliArgs.plugin['device-farm'].proxy)}`);
-        proxy = cliArgs.plugin['device-farm'].proxy;
-      } else {
-        logger.info('proxy is not required');
-      }
-      emulators = Object.hasOwn(cliArgs.plugin['device-farm'], 'emulators');
+    platform = pluginArgs.platform;
+    androidDeviceType = pluginArgs.androidDeviceType;
+    iosDeviceType = pluginArgs.iosDeviceType;
+    if (pluginArgs.proxy !== undefined) {
+      log.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
+      proxy = pluginArgs.proxy;
+    } else {
+      log.info('proxy is not required for axios');
     }
+    hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
     expressApp.use('/device-farm', router);
+    registerProxyMiddlware(expressApp);
 
     if (!platform)
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
 
-    if (emulators && cliArgs.plugin['device-farm'].platform.toLowerCase() === 'android') {
-      logger.info('Emulators will be booted!!');
-      const adb = await ADB.createADB();
-      const array = cliArgs.plugin['device-farm'].emulators;
+    if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
+      log.info('Emulators will be booted!!');
+      const adb = await ADB.createADB({});
+      const array = pluginArgs.emulators || [];
       const promiseArray = array.map(async (arr: any) => {
         await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
       });
       await Promise.all(promiseArray);
     }
 
-    if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
-
     const chromeDriverManager =
-      cliArgs.plugin['device-farm'].skipChromeDownload === false
+      pluginArgs.skipChromeDownload === false
         ? await ChromeDriverManager.getInstance()
         : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager({
+    const deviceManager = new DeviceFarmManager(
       platform,
       deviceTypes,
-      cliArgs,
-    });
+      cliArgs.port,
+      pluginArgs
+    );
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
     await addCLIArgs(cliArgs);
-    await initlializeStorage();
+    await initializeStorage();
 
-    logger.info(
+    log.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
     );
 
-    const hubArgument = cliArgs.plugin['device-farm'].hub;
+    const hubArgument = pluginArgs.hub;
 
     if (hubArgument) {
       await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
     }
 
     const devicesUpdates = await updateDeviceList(hubArgument);
-    if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
+    if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(cliArgs);
+      await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-    await cronReleaseBlockedDevices();
+    await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
-      await cronUpdateDeviceList(hubArgument);
+      await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
-      // let's check for stale nodes
-      await cronRefreshNodeDevices();
+      // I'm a hub so let's check for stale nodes
+      await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
     }
   }
 
-  private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = _.has(cliArgs, 'plugin["device-farm"].cloud');
-    if (cloudExists) {
+  private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
+    if (pluginArgs.cloud !== undefined) {
       deviceTypes = 'real';
-      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+      log.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }
     return deviceTypes;
   }
@@ -187,6 +183,7 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
+    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`)
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -206,7 +203,11 @@ class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
-          return await allocateDeviceForSession(caps);
+          return await allocateDeviceForSession(
+            caps, 
+            this.pluginArgs.deviceAvailabilityTimeoutMs,
+            this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+          );
         } catch (err) {
           await removePendingSession(pendingSessionId);
           throw err;
@@ -222,9 +223,10 @@ class DevicePlugin extends BasePlugin {
           desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
         });
       }
-      logger.info(`Remote Host URL - ${remoteUrl}`);
+      // need to sanitize to remove sensitive information
+      // log.debug(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
-      logger.info(
+      log.info(
         `Creating cloud session with desiredCapabilities: "${JSON.stringify(
           capabilitiesToCreateSession,
         )}"`,
@@ -237,24 +239,35 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
-      logger.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
-      if (proxy) {
-        logger.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+      //log.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
+      if (proxy != undefined) {
+        log.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
         config.httpsAgent = new HttpsProxyAgent(proxy);
         config.httpAgent = new HttpProxyAgent(proxy);
         config.proxy = false;
       }
 
-      logger.info(`with config: "${JSON.stringify(config)}"`);
+      log.info(`With axios config: "${JSON.stringify(config)}"`);
       try {
         const response = await axios(config);
         sessionDetails = response.data;
         if (Object.hasOwn(sessionDetails.value, 'error')) {
+          log.error(`Error while creating session: ${sessionDetails.value.error}`);
           this.unblockDeviceOnError(device, sessionDetails.value.error);
         }
-      } catch (error: any) {
-        if (error != undefined) this.unblockDeviceOnError(device, error);
+      } catch (error: AxiosError<any> | any) {
+        let errorMessage = '';
+        if (error instanceof AxiosError) {
+          log.error(`Error while creating session: ${JSON.stringify(error.response?.data)}`);
+          errorMessage = JSON.stringify(error.response?.data);
+        } else {
+          log.error(`Error while creating session: ${error}`);
+          errorMessage = error;
+        }
+        if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
       }
+
+      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
 
       session = {
         protocol: 'W3C',
@@ -268,8 +281,9 @@ class DevicePlugin extends BasePlugin {
 
     if (session.error) {
       await updatedAllocatedDevice(device, { busy: false });
-      logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
+      log.info(`📱 Device UDID ${device.udid} blocked for session ${session.value[0]}`);
       const sessionId = session.value[0];
       await updatedAllocatedDevice(device, {
         busy: true,
@@ -280,14 +294,14 @@ class DevicePlugin extends BasePlugin {
       if (!device.host.includes(ip.address())) {
         addProxyHandler(sessionId, device.host);
       }
-      logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+      log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
   }
 
   private unblockDeviceOnError(device: IDevice, error: any) {
     updatedAllocatedDevice(device, { busy: false });
-    logger.info(
+    log.info(
       `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`,
     );
     throw new Error(
@@ -297,7 +311,7 @@ class DevicePlugin extends BasePlugin {
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     unblockDevice({ session_id: sessionId });
-    logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
+    log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
 }

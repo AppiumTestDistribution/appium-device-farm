@@ -5,23 +5,19 @@ import { Container } from 'typedi';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initlializeStorage,
+  initializeStorage,
 } from '../../src/device-utils';
 import { CLIArgs } from '../../src/data-service/db';
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
-    await initlializeStorage();
+    await initializeStorage();
     CLIArgs.chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
       });
-    const deviceManager = new DeviceFarmManager({
-      platform: 'iOS',
-      deviceTypes: 'real',
-      cliArgs: { plugin: { 'device-farm': { port: 4723, plugin: '' } } },
-    });
+    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -45,12 +41,8 @@ describe('IOS Test', () => {
   });
 
   it('Should throw error if the IPA does not match with device type real', async () => {
-    await initlializeStorage();
-    const deviceManager = new DeviceFarmManager({
-      platform: 'iOS',
-      deviceTypes: 'real',
-      cliArgs: { plugin: { 'device-farm': { port: 4723, plugin: '' } } },
-    });
+    await initializeStorage();
+    const deviceManager = new DeviceFarmManager(new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {})));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {

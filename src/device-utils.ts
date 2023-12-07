@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath } from './helpers';
+import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath, isAppiumRunningAt } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -21,9 +21,7 @@ import {
 import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
-import os from 'os';
 import fs from 'fs';
-import path from 'path';
 import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
@@ -31,10 +29,8 @@ import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { getCLIArgs } from './data-service/pluginArgs';
 import { DevicePlugin } from './plugin';
-import { CloudArgs } from './types/CloudArgs';
+import { IPluginArgs } from './interfaces/IPluginArgs';
 
-const DEVICE_AVAILABILITY_TIMEOUT = 180000;
-const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
   deviceQueryInteval: 'appium:deviceRetryInterval',
@@ -48,7 +44,6 @@ const customCapability = {
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
-let cronTimerToUpdateNodeDevices: any;
 
 export const getDeviceTypeFromApp = (app: string) => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -62,19 +57,17 @@ export function isAndroid(cliArgs: ServerCLI) {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
-export function deviceType(cliArgs: any, device: string) {
-  const iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType;
-  if (_.has(cliArgs, 'plugin["device-farm"].iosDeviceType')) {
-    return iosDeviceType === device || iosDeviceType === 'both';
-  }
+export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
+  const iosDeviceType = pluginArgs.iosDeviceType;
+  return iosDeviceType === device || iosDeviceType === 'both';
 }
 
-export function isIOS(cliArgs: any) {
-  return isMac() && cliArgs.plugin['device-farm'].platform.toLowerCase() === DevicePlatform.IOS;
+export function isIOS(pluginArgs: IPluginArgs) {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.IOS;
 }
 
-export function isAndroidAndIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.BOTH;
+export function isAndroidAndIOS(pluginArgs: IPluginArgs) {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
 export function isDeviceConfigPathAbsolute(path: string) {
@@ -91,15 +84,19 @@ export function isDeviceConfigPathAbsolute(path: string) {
  * @param capability
  * @returns
  */
-export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
+export async function allocateDeviceForSession(
+  capability: ISessionCapability,
+  deviceTimeOutMs: number,
+  deviceQueryIntervalMs: number,
+): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   console.log(firstMatch);
   const filters = getDeviceFiltersFromCapability(firstMatch);
   log.info(JSON.stringify(filters));
-  const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
+  const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
-    firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
+    firstMatch[customCapability.deviceQueryInteval] || deviceQueryIntervalMs;
 
   try {
     await waitUntil(
@@ -143,7 +140,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * Sets up node-persist storage in local cache
  * @returns storage
  */
-export async function initlializeStorage() {
+export async function initializeStorage() {
   const basePath = cachePath('storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -273,17 +270,19 @@ export async function updateDeviceList(hubArgument?: string) {
   return devices;
 }
 
-export async function refreshSimulatorState(cliArgs: ServerCLI) {
+export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {
   if (timer) {
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }
 
-export async function checkNodeServerAvailability() {
+export async function setupCronCheckStaleDevices(
+  intervalMs: number,
+) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -299,7 +298,12 @@ export async function checkNodeServerAvailability() {
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
       nodeChecked.push(device.host);
-      await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(device.host);
+      // use different function to check cloud devices
+      if (device.hasOwnProperty('cloud')) {
+        await isAppiumRunningAt(device.host);
+      } else {
+        await isDeviceFarmRunning(device.host);
+      }
       return device.host;
     });
 
@@ -320,47 +324,49 @@ export async function checkNodeServerAvailability() {
       removeDevice(device);
       nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
-  }, 5000);
+  }, intervalMs);
 }
 
-export async function releaseBlockedDevices() {
+export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
     return device.busy && device.host.includes(ip.address());
   });
   busyDevices.forEach(function (device) {
+    if (device.lastCmdExecutedAt == undefined) {
+      return;
+    }
+
     const currentEpoch = new Date().getTime();
-    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
-    if (
-      device.lastCmdExecutedAt != undefined &&
-      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
-    ) {
-      console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`,
+    const timeoutSeconds =
+      device.newCommandTimeout != undefined
+        ? device.newCommandTimeout
+        : newCommandTimeout;
+    const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
+    if (timeSinceLastCmdExecuted > timeoutSeconds) {
+      // unblock regardless of whether the device has session or not
+      unblockDevice({ udid: device.udid });
+      log.info(
+        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
       );
-      const sessionId = device.session_id;
-      if (sessionId !== undefined) {
-        unblockDevice({ session_id: sessionId });
-        log.info(
-          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`,
-        );
-      }
     }
   });
 }
 
-export async function cronReleaseBlockedDevices() {
+export async function setupCronReleaseBlockedDevices(intervalMs: number, newCommandTimeoutSec: number) {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
-  await releaseBlockedDevices();
+  await releaseBlockedDevices(newCommandTimeoutSec);
   cronTimerToReleaseBlockedDevices = setInterval(async () => {
-    await releaseBlockedDevices();
-  }, 30000);
+    await releaseBlockedDevices(newCommandTimeoutSec);
+  }, intervalMs);
 }
 
-export async function cronUpdateDeviceList(hubArgument: string) {
-  const intervalMs = 30000;
+export async function setupCronUpdateDeviceList(
+  hubArgument: string,
+  intervalMs: number,
+) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }
@@ -374,22 +380,5 @@ export async function cronUpdateDeviceList(hubArgument: string) {
     } else {
       log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
-  }, intervalMs);
-}
-
-/**
- * Remove devices from unavailable nodes
- * @param hubArgument host
- */
-export async function cronRefreshNodeDevices() {
-  const intervalMs = 1000 * 60 * 5; // 5 minutes
-  if (cronTimerToUpdateNodeDevices) {
-    clearInterval(cronTimerToUpdateNodeDevices);
-  }
-  log.info(`Plugin will check for stale device-farm nodes every ${intervalMs} ms`);
-
-  cronTimerToUpdateNodeDevices = setInterval(async () => {
-    log.info('Scanning for stale nodes.');
-    await checkNodeServerAvailability();
   }, intervalMs);
 }

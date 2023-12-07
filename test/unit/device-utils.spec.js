@@ -1,5 +1,6 @@
 import sinon from 'sinon';
 import * as DeviceUtils from '../../src/device-utils';
+import * as DeviceService from '../../src/data-service/device-service';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
 import { DeviceModel, db } from '../../src/data-service/db';
@@ -8,12 +9,13 @@ import { addNewDevice } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { allocateDeviceForSession } from '../../src/device-utils';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 chai.should();
 chai.use(sinonChai);
 var expect = chai.expect;
 var sandbox = sinon.createSandbox();
 
-describe('Android Device Manager', () => {
+describe('Device Utils', () => {
   const hub1Device = {
     systemPort: 56205,
     sdk: '10',
@@ -85,14 +87,7 @@ describe('Android Device Manager', () => {
 
   it('Set busy status to device with same udid from remote machine', async function () {
     db.removeCollection('devices');
-    const cliArgs = {
-      platform: 'android',
-      androidDeviceType: 'both',
-      cliArgs: {
-        plugin: { 'device-farm': { maxSessions: 3 } },
-      },
-    };
-    const deviceManager = new DeviceFarmManager(cliArgs);
+    const deviceManager = new DeviceFarmManager('android', 'both', 4723, { maxSessions: 3 });
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
     const capabilities = {
@@ -144,5 +139,29 @@ describe('Android Device Manager', () => {
           'No device found for filters: {"platform":"android","name":"","udid":"emulator-5555","busy":false,"userBlocked":false}'
         )
     );
+  });
+
+  it('should release blocked devices that have no activity for more than the timeout', async () => {
+    // Mock the dependencies and setup the test data
+    const getAllDevicesMock = () => ([
+      { udid: 'device1', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - ((DefaultPluginArgs.newCommandTimeoutSec + 5) * 1000)},
+      { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },
+      { udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
+      { udid: 'device4', busy: true, host: ip.address() },
+    ]);
+    
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
+
+    const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
+
+    // Call the function under test
+    await DeviceUtils.releaseBlockedDevices(DefaultPluginArgs.newCommandTimeoutSec);
+
+    // Verify the expected behavior
+    unblockDeviceMock.should.have.been.calledTwice;
+    unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
+    unblockDeviceMock.should.have.been.calledWith({ udid: 'device2' });
+    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device3' });
+    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device4' });
   });
 });

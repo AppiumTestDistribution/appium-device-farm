@@ -13,10 +13,12 @@ const asyncLock = new AsyncLock(),
 let dashboardPluginUrl: any = null;
 
 const router = express.Router(),
-  apiRouter = express.Router();
+  apiRouter = express.Router(),
+  staticFilesRouter = express.Router();
 
 router.use(cors());
 apiRouter.use(cors());
+staticFilesRouter.use(cors());
 
 /**
  * Middleware to check if the appium-dashboard plugin is installed
@@ -97,9 +99,6 @@ apiRouter.post('/register', (req, res) => {
     });
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
-    log.info(
-      `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`,
-    );
   }
   res.json('200');
 });
@@ -141,7 +140,8 @@ apiRouter.get('/devices/ios', (req, res) => {
   }
 });
 
+staticFilesRouter.use(express.static(path.join(__dirname, '..', 'public')));
 router.use('/api', apiRouter);
-router.use(express.static(path.join(__dirname, 'public')));
+router.use(staticFilesRouter);
 
 export { router };

@@ -1,7 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import Cloud from '../../enums/Cloud';
 import { IDevice } from '../../interfaces/IDevice';
-import { CloudArgs } from '../../types/CloudArgs';
 import {
   browserStackSchema,
   sauceOrLambdaSchema,
@@ -10,14 +9,15 @@ import {
 } from '../../types/CloudSchema';
 import logger from '../../logger';
 import { Schema, Validator } from 'jsonschema';
+import { CloudConfig, CloudDevice } from '../../interfaces/IPluginArgs';
 
 export default class Devices {
-  private devices: any;
+  private devices: CloudDevice[];
   private deviceState: any;
-  private platform: any;
-  private cloud: any;
+  private platform: string;
+  private cloud: CloudConfig;
 
-  constructor(cloudArgs: CloudArgs, deviceState: IDevice[], platform: any) {
+  constructor(cloudArgs: CloudConfig, deviceState: IDevice[], platform: any) {
     this.devices = cloudArgs.devices;
     this.deviceState = deviceState;
     this.platform = platform;
