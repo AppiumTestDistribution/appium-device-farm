@@ -330,8 +330,20 @@ export async function setupCronCheckStaleDevices(
 export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy && device.host.includes(ip.address());
+    // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released`);
+    let deviceUrl 
+    try {
+      deviceUrl = new URL(device.host);
+    } catch (error) {
+      log.error(`Error parsing device host ${device.host} for device ${device.udid}. Reason: ${error}`);
+      return false;
+    } 
+    const deviceHostName = deviceUrl.hostname;
+    return device.busy && !device.userBlocked
   });
+
+  log.debug(`Found ${busyDevices.length} device candidates to be released`);
+
   busyDevices.forEach(function (device) {
     if (device.lastCmdExecutedAt == undefined) {
       return;
@@ -346,8 +358,8 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
       unblockDevice({ udid: device.udid });
-      log.info(
-        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
+      log.debug(
+        `👋🏼 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
       );
     }
   });

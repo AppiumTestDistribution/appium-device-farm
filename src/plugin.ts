@@ -144,7 +144,6 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-    await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
@@ -152,6 +151,8 @@ class DevicePlugin extends BasePlugin {
     } else {
       // I'm a hub so let's check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
     }
   }
 

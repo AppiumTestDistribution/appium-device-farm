@@ -164,4 +164,26 @@ describe('Device Utils', () => {
     unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device3' });
     unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device4' });
   });
+
+  it.only('should release device on node that is not used for more than the timeout', async () => {
+    // spec: we have devices from different hosts, all of them are busy and one of them is not used for more than the timeout
+    const getAllDevicesMock = () => ([
+      { udid: 'device1', busy: true, host: 'http://anotherhost:4723', lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },
+      { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
+      // user blocked device
+      { udid: 'device3', busy: true, host: ip.address(), userBlocked: true, lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 }
+    ]);
+
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
+
+    const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
+    
+    // calling releaseBlockedDevices should release the device on anotherhost
+    await DeviceUtils.releaseBlockedDevices(DefaultPluginArgs.newCommandTimeoutSec);
+
+    // Verify the expected behavior
+    unblockDeviceMock.should.have.been.calledOnce;
+    unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
+    unblockDeviceMock.should.have.not.been.calledWith({ udid: 'device3' });
+  })
 });
