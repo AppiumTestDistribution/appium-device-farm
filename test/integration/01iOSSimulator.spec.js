@@ -14,6 +14,7 @@ import Simctl from 'node-simctl';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from './cliArgs';
 import ip from 'ip';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
