@@ -88,10 +88,11 @@ export async function allocateDeviceForSession(
   capability: ISessionCapability,
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
+  pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   console.log(firstMatch);
-  const filters = getDeviceFiltersFromCapability(firstMatch);
+  const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
   log.info(JSON.stringify(filters));
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
@@ -190,7 +191,7 @@ export async function setUtilizationTime(udid: string, utilizationTime: number) 
  * @param capability
  * @returns IDeviceFilterOptions
  */
-export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPluginArgs): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[customCapability.udids]
     ? capability[customCapability.udids].split(',').map(_.trim)
@@ -206,7 +207,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
       : undefined;
   if (
     deviceType?.startsWith('sim') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
+    pluginArgs.iosDeviceType.startsWith('real')
   ) {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
@@ -214,7 +215,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
   }
   if (
     deviceType?.startsWith('real') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
+    pluginArgs.iosDeviceType.startsWith('sim')
   ) {
     throw new Error(
       'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',

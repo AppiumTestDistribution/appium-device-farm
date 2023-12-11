@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
+import ip from 'ip';
 
 import {
   updateDeviceList,
@@ -8,6 +9,8 @@ import {
   initializeStorage,
 } from '../../src/device-utils';
 import { CLIArgs } from '../../src/data-service/db';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
 describe('IOS Test', () => {
   it('Throw error when no device is found for given capabilities', async () => {
@@ -17,7 +20,7 @@ describe('IOS Test', () => {
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
       });
-    const deviceManager = new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {}));
+    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "real", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -30,7 +33,8 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities).catch((error) =>
+    console.log('device: ', await deviceManager.getDevices())
+    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
@@ -42,7 +46,7 @@ describe('IOS Test', () => {
 
   it('Should throw error if the IPA does not match with device type real', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager(new DeviceFarmManager('iOS', 'real', 4723, Object.assign(DefaultPluginArgs, {})));
+    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "real", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -55,7 +59,7 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities).catch((error) =>
+    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(

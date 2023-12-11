@@ -208,6 +208,7 @@ class DevicePlugin extends BasePlugin {
             caps, 
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+            this.pluginArgs
           );
         } catch (err) {
           await removePendingSession(pendingSessionId);
