@@ -9,6 +9,7 @@ import {
 } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import ip from 'ip';
+import waitUntil from 'async-wait-until';
 
 const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
 
@@ -47,6 +48,16 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
+
+    // wait until there are two devices and both are not offline
+    let devices = [];
+    waitUntil(async () => {
+      await updateDeviceList();
+      devices = await deviceManager.getDevices();
+      
+      return devices.length === 2 && devices.every(device => !device.offline);
+    })
+    
     await allocateDeviceForSession(capabilities);
     const allDeviceIds = DeviceModel.chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
