@@ -330,15 +330,7 @@ export async function setupCronCheckStaleDevices(
 export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released`);
-    let deviceUrl 
-    try {
-      deviceUrl = new URL(device.host);
-    } catch (error) {
-      log.error(`Error parsing device host ${device.host} for device ${device.udid}. Reason: ${error}`);
-      return false;
-    } 
-    const deviceHostName = deviceUrl.hostname;
+    log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released`);
     return device.busy && !device.userBlocked
   });
 

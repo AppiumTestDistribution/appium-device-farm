@@ -165,7 +165,7 @@ describe('Device Utils', () => {
     unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device4' });
   });
 
-  it.only('should release device on node that is not used for more than the timeout', async () => {
+  it('should release device on node that is not used for more than the timeout', async () => {
     // spec: we have devices from different hosts, all of them are busy and one of them is not used for more than the timeout
     const getAllDevicesMock = () => ([
       { udid: 'device1', busy: true, host: 'http://anotherhost:4723', lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 },

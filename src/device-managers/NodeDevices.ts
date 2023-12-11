@@ -1,6 +1,7 @@
 import axios from 'axios';
 import log from '../logger';
-import { IDevice } from '../interfaces/IDevice';
+import { DeviceWithPath } from '@devicefarmer/adbkit';
+import { DeviceUpdate } from '../types/DeviceUpdate';
 
 export default class NodeDevices {
   private host: string;
@@ -9,7 +10,9 @@ export default class NodeDevices {
     this.host = host;
   }
 
-  async postDevicesToHub(devices: Array<IDevice>, arg: string) {
+  async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: string) {
+    // DeviceWithPath -> new device
+    // DeviceUpdate -> removed device
     log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
     try {
       const status = (

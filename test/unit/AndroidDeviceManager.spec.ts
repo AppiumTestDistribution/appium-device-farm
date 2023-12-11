@@ -8,6 +8,7 @@ import ip from 'ip';
 import _ from 'lodash';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { DeviceModel } from '../../src/data-service/db';
+import { DeviceWithPath } from '@devicefarmer/adbkit';
 
 var sandbox = sinon.createSandbox();
 
@@ -285,6 +286,6 @@ describe('Android Device Manager', function () {
     adb = await getAdbOriginal();
     sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));
     
-    androidDevices.handleNewlyPluggedDevice(adb, { udid: 'emulator-9999', state: 'device' }).should.not.throw;
+    androidDevices.onDeviceAdded(adb, { udid: 'emulator-9999', state: 'device' } as any as DeviceWithPath).should.not.throw;
   });
 });

@@ -13,7 +13,7 @@ export function removeDevice(devices: { udid: string; host: string}[]) {
   })
 }
 
-export function addNewDevice(devices: Array<IDevice>) {
+export function addNewDevice(devices: IDevice[]) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */

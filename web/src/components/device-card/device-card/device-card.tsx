@@ -75,7 +75,13 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     } = this.props.device;
 
     const deviceState = this.getDeviceState();
-    const hostName = host.split(':')[1].replace('//', '');
+    let hostName = '';
+    try {
+      hostName = new URL(host).hostname;
+    } catch (error) {
+      hostName = host.split(':')[1].replace('//', '');
+    }
+    
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className={`device-state ${deviceState}`}>{deviceState}</div>
