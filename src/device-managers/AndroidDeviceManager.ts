@@ -334,6 +334,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string) {
+    const pluginArgs = this.pluginArgs;
     const adbTracking = async () => {
       try {
         const tracker = await adbClient.trackDevices();
@@ -341,8 +342,15 @@ export default class AndroidDeviceManager implements IDeviceManager {
           this.onDeviceAdded(originalADB, device);
         });
         tracker.on('remove', async (device: DeviceWithPath) => {
-          this.onDeviceRemoved(device, this.pluginArgs);
+          this.onDeviceRemoved(device, pluginArgs);
         });
+        tracker.on('change', async (device: DeviceWithPath) => {
+          if (device.type === 'offline' || device.type === 'unauthorized') {
+            await this.onDeviceRemoved(device, pluginArgs);
+          } else {
+            this.onDeviceAdded(originalADB, device);
+          }
+        })
         tracker.on('end', () => console.log('Tracking stopped'));
       } catch (err: any) {
         console.error('Something went wrong:', err.stack);
