@@ -309,7 +309,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
           } else {
             log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
-            removeDevice(clonedDevice);
+            removeDevice([clonedDevice]);
             this.abort(clonedDevice.udid);
           }
         });
