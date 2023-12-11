@@ -267,7 +267,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       } catch (error) {
         log.info(`Device ${clonedDevice.udid} boot did not complete. Error: ${error}`);
       }
-      
+
       if (!bootCompleted) {
         log.info(`Device ${clonedDevice.udid} boot did not complete in time. Ignoring`);
         return;
@@ -298,7 +298,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       try {
         const tracker = await adbClient.trackDevices();
         tracker.on('add', async (device: any) => {
-          this.handleNewlyPluggedDevice(originalADB, device);
+          await this.handleNewlyPluggedDevice(originalADB, device);
         });
         tracker.on('remove', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
@@ -306,7 +306,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           if (pluginArgs.hub != undefined) {
             log.info(`Removing device from Hub with device ${clonedDevice.udid}`);
             const nodeDevices = new NodeDevices(pluginArgs.hub);
-            await nodeDevices.postDevicesToHub(clonedDevice, 'remove');
+            await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
           } else {
             log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
             removeDevice(clonedDevice);
@@ -327,7 +327,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       try {
         const tracker = await adbClient.trackDevices();
         tracker.on('add', async (device: any) => {
-          this.handleNewlyPluggedDevice(originalADB, device);
+          await this.handleNewlyPluggedDevice(originalADB, device);
         });
         tracker.on('remove', async (device: any) => {
           const clonedDevice = _.cloneDeep(device);
