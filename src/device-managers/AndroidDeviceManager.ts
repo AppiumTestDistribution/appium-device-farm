@@ -323,11 +323,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async onDeviceRemoved(device: DeviceWithPath, pluginArgs: IPluginArgs) {
     const clonedDevice: DeviceUpdate = { udid: device['id'], host: ip.address(), state: device.type };
     if (pluginArgs.hub != undefined) {
-      log.info(`Removing device from Hub with device ${clonedDevice.udid}`);
       const nodeDevices = new NodeDevices(pluginArgs.hub);
       await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
     } else {
-      log.warn(`Removing device ${clonedDevice.udid} from list as the device was unplugged!`);
       removeDevice([clonedDevice]);
       this.abort(clonedDevice.udid);
     }
@@ -346,6 +344,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         });
         tracker.on('change', async (device: DeviceWithPath) => {
           if (device.type === 'offline' || device.type === 'unauthorized') {
+            log.info(`Device ${device.id} is ${device.type}. Removing from list`);
             await this.onDeviceRemoved(device, pluginArgs);
           } else {
             this.onDeviceAdded(originalADB, device);
