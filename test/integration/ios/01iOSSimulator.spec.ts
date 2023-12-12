@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { DeviceFarmManager } from '../../src/device-managers';
+import { DeviceFarmManager } from '../../../src/device-managers';
 import { Container } from 'typedi';
 
 import {
@@ -7,15 +7,15 @@ import {
   allocateDeviceForSession,
   initializeStorage,
   getBusyDevicesCount,
-} from '../../src/device-utils';
-import { DeviceModel } from '../../src/data-service/db';
+} from '../../../src/device-utils';
+import { DeviceModel } from '../../../src/data-service/db';
 
 import Simctl from 'node-simctl';
-import { addCLIArgs } from '../../src/data-service/pluginArgs';
-import { serverCliArgs } from './cliArgs';
+import { addCLIArgs } from '../../../src/data-service/pluginArgs';
+import { serverCliArgs } from '../cliArgs';
 import ip from 'ip';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-import { unblockDevice } from '../../src/data-service/device-service';
+import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
+import { unblockDevice } from '../../../src/data-service/device-service';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -211,6 +211,10 @@ describe('Boot simulator test', async () => {
     await simctl.startBootMonitor({ timeout: 160000 });
   });
 
+  beforeEach('Release devices', async () => {
+    await unblockDevice({ platform: 'ios' });
+  })
+
   it('Should pick Booted simulator when app path has .app', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, pluginArgs));
@@ -226,7 +230,6 @@ describe('Boot simulator test', async () => {
       },
       firstMatch: [{}],
     };
-    //console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
