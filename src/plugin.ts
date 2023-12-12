@@ -44,6 +44,8 @@ import ip from 'ip';
 import _ from 'lodash';
 import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
+import NodeDevices from './device-managers/NodeDevices';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -66,8 +68,15 @@ class DevicePlugin extends BasePlugin {
     const deviceFilter = {
       session_id: driver.sessionId ? driver.sessionId : undefined,
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
-    };
-    unblockDevice(deviceFilter);
+    } as unknown as IDeviceFilterOptions;
+
+    if (this.pluginArgs.hub !== undefined) {
+      // send unblock request to hub. Should we unblock the whole devices from this node?
+      (new NodeDevices(this.pluginArgs.hub)).unblockDevice(deviceFilter);
+    } else {
+      unblockDevice(deviceFilter);
+    }
+    
     log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
         deviceFilter,
@@ -144,7 +153,6 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-    await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
 
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
@@ -152,6 +160,8 @@ class DevicePlugin extends BasePlugin {
     } else {
       // I'm a hub so let's check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
     }
   }
 
@@ -207,6 +217,7 @@ class DevicePlugin extends BasePlugin {
             caps, 
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+            this.pluginArgs
           );
         } catch (err) {
           await removePendingSession(pendingSessionId);

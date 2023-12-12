@@ -27,8 +27,6 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
-import { getCLIArgs } from './data-service/pluginArgs';
-import { DevicePlugin } from './plugin';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 
 const customCapability = {
@@ -45,15 +43,15 @@ let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
 
-export const getDeviceTypeFromApp = (app: string) => {
+export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefined => {
   /* If the test is targeting safarim, then app capability will be empty */
   if (!app) {
     return;
   }
-  return app.endsWith('app') || app.endsWith('zip') ? 'simulator' : 'real';
+  return app.endsWith('.app') || app.endsWith('.zip') ? 'simulator' : 'real';
 };
 
-export function isAndroid(cliArgs: ServerCLI) {
+export function isAndroid(cliArgs: ServerCLI): boolean {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
@@ -62,15 +60,15 @@ export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
   return iosDeviceType === device || iosDeviceType === 'both';
 }
 
-export function isIOS(pluginArgs: IPluginArgs) {
+export function isIOS(pluginArgs: IPluginArgs): boolean {
   return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.IOS;
 }
 
-export function isAndroidAndIOS(pluginArgs: IPluginArgs) {
+export function isAndroidAndIOS(pluginArgs: IPluginArgs): boolean {
   return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
-export function isDeviceConfigPathAbsolute(path: string) {
+export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
   if (checkIfPathIsAbsolute(path)) {
     return true;
   } else {
@@ -88,11 +86,12 @@ export async function allocateDeviceForSession(
   capability: ISessionCapability,
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
+  pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  console.log(firstMatch);
-  const filters = getDeviceFiltersFromCapability(firstMatch);
-  log.info(JSON.stringify(filters));
+  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+  log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
@@ -116,11 +115,15 @@ export async function allocateDeviceForSession(
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
   const device = getDevice(filters);
-  log.info(`📱 Device found: ${JSON.stringify(device)}`);
-  updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
-  log.info(`📱 Blocking device ${device.udid} for new session`);
-  await updateCapabilityForDevice(capability, device);
-  return device;
+  if (device != undefined) {
+    log.info(`📱 Device found: ${JSON.stringify(device)}`);
+    updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
+    log.info(`📱 Blocking device ${device.udid} for new session`);
+    await updateCapabilityForDevice(capability, device);
+    return device;
+  } else {
+    throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
+  }
 }
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
@@ -190,7 +193,7 @@ export async function setUtilizationTime(udid: string, utilizationTime: number) 
  * @param capability
  * @returns IDeviceFilterOptions
  */
-export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPluginArgs): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[customCapability.udids]
     ? capability[customCapability.udids].split(',').map(_.trim)
@@ -206,7 +209,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
       : undefined;
   if (
     deviceType?.startsWith('sim') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
+    pluginArgs.iosDeviceType === 'real'
   ) {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
@@ -214,7 +217,7 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
   }
   if (
     deviceType?.startsWith('real') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
+    pluginArgs.iosDeviceType == 'simulated'
   ) {
     throw new Error(
       'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
@@ -330,8 +333,12 @@ export async function setupCronCheckStaleDevices(
 export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy && device.host.includes(ip.address());
+    log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released`);
+    return device.busy && !device.userBlocked
   });
+
+  log.debug(`Found ${busyDevices.length} device candidates to be released`);
+
   busyDevices.forEach(function (device) {
     if (device.lastCmdExecutedAt == undefined) {
       return;
@@ -346,8 +353,8 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
       unblockDevice({ udid: device.udid });
-      log.info(
-        `📱 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
+      log.debug(
+        `👋🏼 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
       );
     }
   });

@@ -10,6 +10,7 @@ export interface IDeviceFilterOptions {
   userBlocked?: boolean;
   udid?: any[];
   deviceType?: DeviceType;
-  minSDK: string;
-  maxSDK: string;
+  minSDK?: string;
+  maxSDK?: string;
+  session_id?: string;
 }
