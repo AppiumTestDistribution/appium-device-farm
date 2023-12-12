@@ -268,7 +268,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       } catch (error) {
         log.info(`Device ${newDevice.udid} boot did not complete. Error: ${error}`);
       }
-      
+
       if (!bootCompleted) {
         log.info(`Device ${newDevice.udid} boot did not complete in time. Ignoring`);
         return;
