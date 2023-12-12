@@ -27,8 +27,6 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
-import { getCLIArgs } from './data-service/pluginArgs';
-import { DevicePlugin } from './plugin';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 
 const customCapability = {
@@ -91,7 +89,7 @@ export async function allocateDeviceForSession(
   pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  log.debug(`firstMatch: ${firstMatch}`);
+  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
   log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
@@ -117,11 +115,15 @@ export async function allocateDeviceForSession(
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
   const device = getDevice(filters);
-  log.info(`📱 Device found: ${JSON.stringify(device)}`);
-  updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
-  log.info(`📱 Blocking device ${device.udid} for new session`);
-  await updateCapabilityForDevice(capability, device);
-  return device;
+  if (device != undefined) {
+    log.info(`📱 Device found: ${JSON.stringify(device)}`);
+    updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
+    log.info(`📱 Blocking device ${device.udid} for new session`);
+    await updateCapabilityForDevice(capability, device);
+    return device;
+  } else {
+    throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
+  }
 }
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {

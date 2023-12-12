@@ -67,7 +67,12 @@ export function getAllDevices(): Array<IDevice> {
   return DeviceModel.chain().find().data();
 }
 
-export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
+/**
+ * Find devices matching filter options
+ * @param filterOptions IDeviceFilterOptions
+ * @returns IDevice[]
+ */
+export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
   const semver = require('semver');
   let results = DeviceModel.chain();
 
@@ -105,15 +110,22 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
-    const results_copy = results.copy();
-    if (results_copy.find(filter).data()[0] != undefined) {
-      log.info('Picking up booted simulator');
-      return results.find(filter).data()[0];
-    } else {
-      filter.state = 'Shutdown';
-    }
   }
-  return results.find(filter).data()[0];
+  return results.find(filter).data();
+}
+
+/**
+ * Find device matching the filter options
+ * @param filterOptions IDeviceFilterOptions
+ * @returns IDevice | undefined
+ */
+export function getDevice(filterOptions: IDeviceFilterOptions): IDevice | undefined {
+  const devices = getDevices(filterOptions);
+  if (devices.length === 0) {
+    return undefined;
+  } else {
+    return devices[0];
+  }
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {

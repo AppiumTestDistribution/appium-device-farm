@@ -2,6 +2,7 @@ import axios from 'axios';
 import log from '../logger';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
 import { DeviceUpdate } from '../types/DeviceUpdate';
+import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 
 export default class NodeDevices {
   private host: string;
@@ -33,6 +34,30 @@ export default class NodeDevices {
       }
     } catch (error) {
       log.error(`Unable to push devices update to hub. Reason: ${error}`);
+    }
+  }
+
+  async unblockDevice(filter: IDeviceFilterOptions) {
+    log.info(`Unblocking device ${this.host}/device-farm/api/unblock`);
+    try {
+      const status = (
+        await axios.post(
+          `${this.host}/device-farm/api/unblock`,
+          filter,
+          {
+            params: {
+              type: 'unblock',
+            },
+          },
+        )
+      ).status;
+      if (status === 200) {
+        log.info(`Unblocked device with filter: ${filter}`);
+      } else {
+        log.warn('Something went wrong!!');
+      }
+    } catch (error) {
+      log.error(`Unable to unblock device. Reason: ${error}`);
     }
   }
 }

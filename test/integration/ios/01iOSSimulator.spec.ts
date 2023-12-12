@@ -22,13 +22,23 @@ const name = 'My Device Name';
 
 const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
+function markSimulatorsAsBooted() {
+  // mark simulators as booted
+  DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator' }).update((device) => {
+    device.state = 'Booted';
+  });
+
+  const simulators = DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
+  // console.log('simulators: ', simulators);
+}
+
 describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
     await addCLIArgs(serverCliArgs);
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({ platform: 'ios' });
+    await unblockDevice({  });
   })
 
   it('Allocate first device without issue', async () => {
@@ -38,6 +48,8 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
+    markSimulatorsAsBooted();
+    
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -48,8 +60,9 @@ describe('Max sessions CLI argument test', () => {
       },
       firstMatch: [{}],
     };
-    const devices = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-    const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
+    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+
+    const allDeviceIds = DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -67,6 +80,8 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
+    markSimulatorsAsBooted();
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -100,6 +115,8 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
+    markSimulatorsAsBooted();
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -123,7 +140,7 @@ describe('Max sessions CLI argument test', () => {
 
 describe('IOS Simulator Test', () => {
   beforeEach('Release devices', async () => {
-    await unblockDevice({ platform: 'ios' });
+    await unblockDevice({ });
   })
 
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
@@ -132,6 +149,8 @@ describe('IOS Simulator Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
+    markSimulatorsAsBooted();
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -157,6 +176,8 @@ describe('IOS Simulator Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
+    markSimulatorsAsBooted();
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -169,6 +190,7 @@ describe('IOS Simulator Test', () => {
     };
     // console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -183,6 +205,8 @@ describe('IOS Simulator Test', () => {
       Container.set(DeviceFarmManager, deviceManager);
       const hub = pluginArgs.hub
       await updateDeviceList(hub);
+      markSimulatorsAsBooted();
+
       const capabilities = {
         alwaysMatch: {
           platformName: 'tvOS',
@@ -192,6 +216,7 @@ describe('IOS Simulator Test', () => {
         firstMatch: [{}],
       };
       const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+
       const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
       const foundSimulator = allocatedSimulator[0];
       expect(foundSimulator.busy).to.be.true;
@@ -212,7 +237,7 @@ describe('Boot simulator test', async () => {
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({ platform: 'ios' });
+    await unblockDevice({ });
   })
 
   it('Should pick Booted simulator when app path has .app', async () => {
@@ -230,6 +255,8 @@ describe('Boot simulator test', async () => {
       },
       firstMatch: [{}],
     };
+    const devices = await deviceManager.getDevices();
+    console.log('devices: ', devices);
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');

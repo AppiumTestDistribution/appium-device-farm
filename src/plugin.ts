@@ -44,6 +44,8 @@ import ip from 'ip';
 import _ from 'lodash';
 import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
+import NodeDevices from './device-managers/NodeDevices';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -66,8 +68,15 @@ class DevicePlugin extends BasePlugin {
     const deviceFilter = {
       session_id: driver.sessionId ? driver.sessionId : undefined,
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
-    };
-    unblockDevice(deviceFilter);
+    } as unknown as IDeviceFilterOptions;
+
+    if (this.pluginArgs.hub !== undefined) {
+      // send unblock request to hub. Should we unblock the whole devices from this node?
+      (new NodeDevices(this.pluginArgs.hub)).unblockDevice(deviceFilter);
+    } else {
+      unblockDevice(deviceFilter);
+    }
+    
     log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
         deviceFilter,
