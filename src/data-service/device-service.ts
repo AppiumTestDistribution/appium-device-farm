@@ -157,26 +157,29 @@ export function updateCmdExecutedTime(sessionId: string) {
 }
 
 export async function unblockDevice(filter: object) {
-  const device = DeviceModel.chain().find(filter).data()[0];
-  if (device !== undefined) {
+  const devices = DeviceModel.chain().find(filter).data();
+  if (devices !== undefined) {
     console.log(
-      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`,
+      `Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`,
     );
-    const sessionStart = device.sessionStartTime;
-    const currentTime = new Date().getTime();
-    const utilization = currentTime - sessionStart;
-    const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-    await setUtilizationTime(device.udid, totalUtilization);
-    DeviceModel.chain()
-      .find(filter)
-      .update(function (device: IDevice) {
-        device.session_id = undefined;
-        device.busy = false;
-        device.lastCmdExecutedAt = undefined;
-        device.sessionStartTime = 0;
-        device.totalUtilizationTimeMilliSec = totalUtilization;
-        device.newCommandTimeout = undefined;
-      });
+
+    devices.forEach(async (device) => {
+      const sessionStart = device.sessionStartTime;
+      const currentTime = new Date().getTime();
+      const utilization = currentTime - sessionStart;
+      const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+      await setUtilizationTime(device.udid, totalUtilization);
+      DeviceModel.chain()
+        .find(filter)
+        .update(function (device: IDevice) {
+          device.session_id = undefined;
+          device.busy = false;
+          device.lastCmdExecutedAt = undefined;
+          device.sessionStartTime = 0;
+          device.totalUtilizationTimeMilliSec = totalUtilization;
+          device.newCommandTimeout = undefined;
+        });
+    });
   } else {
     console.log(`Not able to find device to unblock with filter ${JSON.stringify(filter)}`);
   }

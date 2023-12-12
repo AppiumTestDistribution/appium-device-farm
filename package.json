@@ -23,6 +23,7 @@
     "test-e2e-pcloudy": "mocha --require ts-node/register ./test/e2e/pcloudy.spec.ts --exit --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.{j,t}s --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/ios/*.spec.ts --timeout 260000 --exit",
+    "integration-ios2": "mocha -r ts-node/register ./test/integration/ios/02iOSDevices.spec.ts --timeout 260000 --exit",
     "build": "npx tsc -b && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
