@@ -15,6 +15,7 @@ import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from './cliArgs';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { unblockDevice } from '../../src/data-service/device-service';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -25,6 +26,11 @@ describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
     await addCLIArgs(serverCliArgs);
   });
+
+  beforeEach('Release devices', async () => {
+    await unblockDevice({ platform: 'ios' });
+  })
+
   it('Allocate first device without issue', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
@@ -49,7 +55,14 @@ describe('Max sessions CLI argument test', () => {
 
   it('Should throw error if the app does not match with device type', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
+    const deviceManager = new DeviceFarmManager(
+      'ios', { 
+        iosDeviceType: "simulated", 
+        androidDeviceType: "real"
+      }, 
+      4723, 
+      Object.assign(pluginArgs, { maxSessions: 1})
+    );
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
@@ -77,7 +90,13 @@ describe('Max sessions CLI argument test', () => {
   it('Throw error when all sessions occupied', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(pluginArgs, { maxSessions: 1}));
-    expect(await getBusyDevicesCount()).to.be.eql(1);
+    // set all devices to busy
+    const allDevices = await deviceManager.getDevices();
+    allDevices.forEach((device) => {
+      DeviceModel.chain().find({ udid: device.udid, platform: 'ios' }).update((device) => {
+        device.busy = true;
+      });
+    });
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
@@ -103,6 +122,10 @@ describe('Max sessions CLI argument test', () => {
 });
 
 describe('IOS Simulator Test', () => {
+  beforeEach('Release devices', async () => {
+    await unblockDevice({ platform: 'ios' });
+  })
+
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);

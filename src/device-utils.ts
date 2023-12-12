@@ -45,15 +45,15 @@ let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
 
-export const getDeviceTypeFromApp = (app: string) => {
+export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefined => {
   /* If the test is targeting safarim, then app capability will be empty */
   if (!app) {
     return;
   }
-  return app.endsWith('app') || app.endsWith('zip') ? 'simulator' : 'real';
+  return app.endsWith('.app') || app.endsWith('.zip') ? 'simulator' : 'real';
 };
 
-export function isAndroid(cliArgs: ServerCLI) {
+export function isAndroid(cliArgs: ServerCLI): boolean {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
@@ -62,15 +62,15 @@ export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
   return iosDeviceType === device || iosDeviceType === 'both';
 }
 
-export function isIOS(pluginArgs: IPluginArgs) {
+export function isIOS(pluginArgs: IPluginArgs): boolean {
   return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.IOS;
 }
 
-export function isAndroidAndIOS(pluginArgs: IPluginArgs) {
+export function isAndroidAndIOS(pluginArgs: IPluginArgs): boolean {
   return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
-export function isDeviceConfigPathAbsolute(path: string) {
+export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
   if (checkIfPathIsAbsolute(path)) {
     return true;
   } else {
@@ -207,7 +207,7 @@ export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPlu
       : undefined;
   if (
     deviceType?.startsWith('sim') &&
-    pluginArgs.iosDeviceType.startsWith('real')
+    pluginArgs.iosDeviceType === 'real'
   ) {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
@@ -215,7 +215,7 @@ export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPlu
   }
   if (
     deviceType?.startsWith('real') &&
-    pluginArgs.iosDeviceType.startsWith('sim')
+    pluginArgs.iosDeviceType == 'simulated'
   ) {
     throw new Error(
       'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',

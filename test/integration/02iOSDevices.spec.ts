@@ -10,9 +10,14 @@ import {
 } from '../../src/device-utils';
 import { CLIArgs } from '../../src/data-service/db';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { unblockDevice } from '../../src/data-service/device-service';
 const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
 describe('IOS Test', () => {
+  beforeEach('Release devices', async () => {
+    await unblockDevice({ platform: 'ios' });
+  })
+
   it('Throw error when no device is found for given capabilities', async () => {
     await initializeStorage();
     CLIArgs.chain()

@@ -3,6 +3,9 @@ import { expect } from 'chai';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../integration/cliArgs';
 import { CLIArgs } from '../../src/data-service/db';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+
+const pluginArgs = DefaultPluginArgs;
 
 describe('Device filter tests', () => {
   it('Get Device filters for real device', async () => {
@@ -23,7 +26,7 @@ describe('Device filter tests', () => {
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       platformVersion: '14.0',
@@ -53,7 +56,7 @@ describe('Device filter tests', () => {
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       platformVersion: '14.0',
@@ -78,7 +81,7 @@ describe('Device filter tests', () => {
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch);
+    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       platformVersion: undefined,
