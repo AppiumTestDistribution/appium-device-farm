@@ -163,10 +163,14 @@ export async function unblockDevice(filter: object) {
       `Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`,
     );
 
-    devices.forEach(async (device) => {
+    await Promise.all(devices.map(async (device) => {
       const sessionStart = device.sessionStartTime;
       const currentTime = new Date().getTime();
-      const utilization = currentTime - sessionStart;
+      let utilization = currentTime - sessionStart;
+      // no session time recorded means device was never used
+      if (sessionStart === 0) {
+        utilization = 0;
+      }
       const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
       await setUtilizationTime(device.udid, totalUtilization);
       DeviceModel.chain()
@@ -179,7 +183,7 @@ export async function unblockDevice(filter: object) {
           device.totalUtilizationTimeMilliSec = totalUtilization;
           device.newCommandTimeout = undefined;
         });
-    });
+    }));
   } else {
     console.log(`Not able to find device to unblock with filter ${JSON.stringify(filter)}`);
   }
