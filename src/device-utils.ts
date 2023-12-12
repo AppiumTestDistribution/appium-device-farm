@@ -91,9 +91,9 @@ export async function allocateDeviceForSession(
   pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  console.log(firstMatch);
+  log.debug(`firstMatch: ${firstMatch}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
-  log.info(JSON.stringify(filters));
+  log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =

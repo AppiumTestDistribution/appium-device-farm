@@ -15,7 +15,8 @@ const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.addr
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {
-    await unblockDevice({ platform: 'ios' });
+    // unblock all otherwise it will stuck on max session count
+    await unblockDevice({  });
   })
 
   it('Throw error when no device is found for given capabilities', async () => {
