@@ -15,6 +15,10 @@ jobs:
         npm ci
         npm test
       displayName: 'npm test'
+    - script: |
+        npm ci
+        npm run prettier-check
+      displayName: 'Prettier check'
 
  - job: ANDROID
    pool:
@@ -79,7 +83,7 @@ jobs:
     - task: NodeTool@0.200.0
       inputs:
        versionSpec: '16.x'
-    
+
     - bash: |
         echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
       displayName: "install Android image"
