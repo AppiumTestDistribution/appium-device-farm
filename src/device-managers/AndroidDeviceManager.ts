@@ -23,9 +23,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adbAvailable = true;
   private abortControl: Map<string, AbortController> = new Map();
 
-  constructor(private pluginArgs: IPluginArgs, private hostPort: number) {
-
-  }
+  constructor(
+    private pluginArgs: IPluginArgs,
+    private hostPort: number,
+  ) {}
 
   private initiateAbortControl(deviceUdid: string) {
     const control = new AbortController();
@@ -45,7 +46,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   async getDevices(
     deviceTypes: { androidDeviceType: DeviceTypeToInclude },
-    existingDeviceDetails: Array<IDevice>
+    existingDeviceDetails: Array<IDevice>,
   ): Promise<any> {
     if (!this.adbAvailable) {
       return [];
@@ -107,7 +108,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
             // device may have changed the status since the last time we queried
             // we want to avoid device with offline or unauthorized status
             if (device.state === 'device') {
-              const deviceInfo = await this.deviceInfo(device, adbInstance, this.pluginArgs, this.hostPort);
+              const deviceInfo = await this.deviceInfo(
+                device,
+                adbInstance,
+                this.pluginArgs,
+                this.hostPort,
+              );
               if (!deviceInfo) {
                 log.info(`Cannot get device info for ${device.udid}. Skipping`);
               } else {
@@ -244,11 +250,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           host: adbHost,
           port: adbPort,
         });
-        const remoteAdbTracking = this.createRemoteAdbTracker(
-          remoteAdb,
-          originalADB,
-          adbHost
-        );
+        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB, adbHost);
         remoteAdbTracking();
       });
     }
@@ -275,7 +277,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
       }
 
       this.cancelAbort(newDevice.udid);
-      const trackedDevice = await this.deviceInfo(newDevice, originalADB, this.pluginArgs, this.hostPort);
+      const trackedDevice = await this.deviceInfo(
+        newDevice,
+        originalADB,
+        this.pluginArgs,
+        this.hostPort,
+      );
 
       if (!trackedDevice) {
         log.info(`Cannot get device info for ${newDevice.udid}. Skipping`);
@@ -310,7 +317,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           } else {
             this.onDeviceAdded(originalADB, device);
           }
-        })
+        });
         tracker.on('end', () => log.info('Tracking stopped'));
       } catch (err: any) {
         log.error('Something went wrong:', err.stack);
@@ -321,7 +328,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
   }
 
   private async onDeviceRemoved(device: DeviceWithPath, pluginArgs: IPluginArgs) {
-    const clonedDevice: DeviceUpdate = { udid: device['id'], host: ip.address(), state: device.type };
+    const clonedDevice: DeviceUpdate = {
+      udid: device['id'],
+      host: ip.address(),
+      state: device.type,
+    };
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
       await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
@@ -349,7 +360,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           } else {
             this.onDeviceAdded(originalADB, device);
           }
-        })
+        });
         tracker.on('end', () => console.log('Tracking stopped'));
       } catch (err: any) {
         console.error('Something went wrong:', err.stack);

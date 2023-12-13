@@ -72,11 +72,11 @@ class DevicePlugin extends BasePlugin {
 
     if (this.pluginArgs.hub !== undefined) {
       // send unblock request to hub. Should we unblock the whole devices from this node?
-      (new NodeDevices(this.pluginArgs.hub)).unblockDevice(deviceFilter);
+      new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
     } else {
       unblockDevice(deviceFilter);
     }
-    
+
     log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
         deviceFilter,
@@ -121,17 +121,10 @@ class DevicePlugin extends BasePlugin {
     }
 
     const chromeDriverManager =
-      pluginArgs.skipChromeDownload === false
-        ? await ChromeDriverManager.getInstance()
-        : undefined;
+      pluginArgs.skipChromeDownload === false ? await ChromeDriverManager.getInstance() : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager(
-      platform,
-      deviceTypes,
-      cliArgs.port,
-      pluginArgs
-    );
+    const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
@@ -161,7 +154,10 @@ class DevicePlugin extends BasePlugin {
       // I'm a hub so let's check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
       // and release blocked devices
-      await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
     }
   }
 
@@ -193,7 +189,7 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
-    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`)
+    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`);
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -214,10 +210,10 @@ class DevicePlugin extends BasePlugin {
         //await refreshDeviceList();
         try {
           return await allocateDeviceForSession(
-            caps, 
+            caps,
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
-            this.pluginArgs
+            this.pluginArgs,
           );
         } catch (err) {
           await removePendingSession(pendingSessionId);
