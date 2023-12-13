@@ -106,7 +106,7 @@ export async function allocateDeviceForSession(
   try {
     await waitUntil(
       async () => {
-         const maxSessions = getDeviceManager().getMaxSessionCount();
+        const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
           log.info(
             `Waiting for session available, already at max session count of: ${maxSessions}`,
@@ -123,9 +123,7 @@ export async function allocateDeviceForSession(
   const device = getDevice(filters);
   if (device != undefined) {
     log.info(`📱 Device found: ${JSON.stringify(device)}`);
-    updateDevice(device,
-      { busy: true, newCommandTimeout: newCommandTimeout }
-    );
+    updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
     log.info(`📱 Blocking device ${device.udid} for new session`);
     await updateCapabilityForDevice(capability, device);
     return device;
