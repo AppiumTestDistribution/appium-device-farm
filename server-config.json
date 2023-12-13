@@ -5,14 +5,7 @@
       "device-farm": {
         "platform": "android",
         "skipChromeDownload": true,
-        "proxy": {
-          "host": "10.32.80.80",
-          "port": 800,
-          "auth": { "username": "username", "password": "password" }
-        },
-        "derivedDataPath": {
-          "simulator": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-Test"
-        }
+        "hub": "http://10.211.55.3:31337"
       }
     }
   }

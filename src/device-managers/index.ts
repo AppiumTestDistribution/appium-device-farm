@@ -10,10 +10,13 @@ export class DeviceFarmManager {
 
   constructor(
     platform: Platform | 'both',
-    private deviceTypes: { androidDeviceType: DeviceTypeToInclude; iosDeviceType: DeviceTypeToInclude },
+    private deviceTypes: {
+      androidDeviceType: DeviceTypeToInclude;
+      iosDeviceType: DeviceTypeToInclude;
+    },
     hostPort: number,
-    private pluginArgs: IPluginArgs) 
-  {
+    private pluginArgs: IPluginArgs,
+  ) {
     this.deviceTypes = deviceTypes;
     if (platform.toLowerCase() === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
@@ -29,10 +32,7 @@ export class DeviceFarmManager {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(
-        ...(await deviceManager.getDevices(
-          this.deviceTypes,
-          existingDeviceDetails || []
-        )),
+        ...(await deviceManager.getDevices(this.deviceTypes, existingDeviceDetails || [])),
       );
     }
     return devices;

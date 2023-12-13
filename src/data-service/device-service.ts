@@ -4,13 +4,13 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function removeDevice(devices: { udid: string; host: string}[]) {
+export function removeDevice(devices: { udid: string; host: string }[]) {
   devices.forEach(function (device) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
     DeviceModel.chain()
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
-  })
+  });
 }
 
 export function addNewDevice(devices: IDevice[]) {
@@ -171,31 +171,31 @@ export function updateCmdExecutedTime(sessionId: string) {
 export async function unblockDevice(filter: object) {
   const devices = DeviceModel.chain().find(filter).data();
   if (devices !== undefined) {
-    console.log(
-      `Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`,
-    );
+    console.log(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
-    await Promise.all(devices.map(async (device) => {
-      const sessionStart = device.sessionStartTime;
-      const currentTime = new Date().getTime();
-      let utilization = currentTime - sessionStart;
-      // no session time recorded means device was never used
-      if (sessionStart === 0) {
-        utilization = 0;
-      }
-      const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-      await setUtilizationTime(device.udid, totalUtilization);
-      DeviceModel.chain()
-        .find(filter)
-        .update(function (device: IDevice) {
-          device.session_id = undefined;
-          device.busy = false;
-          device.lastCmdExecutedAt = undefined;
-          device.sessionStartTime = 0;
-          device.totalUtilizationTimeMilliSec = totalUtilization;
-          device.newCommandTimeout = undefined;
-        });
-    }));
+    await Promise.all(
+      devices.map(async (device) => {
+        const sessionStart = device.sessionStartTime;
+        const currentTime = new Date().getTime();
+        let utilization = currentTime - sessionStart;
+        // no session time recorded means device was never used
+        if (sessionStart === 0) {
+          utilization = 0;
+        }
+        const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+        await setUtilizationTime(device.udid, totalUtilization);
+        DeviceModel.chain()
+          .find(filter)
+          .update(function (device: IDevice) {
+            device.session_id = undefined;
+            device.busy = false;
+            device.lastCmdExecutedAt = undefined;
+            device.sessionStartTime = 0;
+            device.totalUtilizationTimeMilliSec = totalUtilization;
+            device.newCommandTimeout = undefined;
+          });
+      }),
+    );
   } else {
     console.log(`Not able to find device to unblock with filter ${JSON.stringify(filter)}`);
   }
