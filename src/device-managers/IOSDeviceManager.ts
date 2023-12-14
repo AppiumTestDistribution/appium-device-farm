@@ -19,7 +19,10 @@ import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interface
 import e from 'express';
 
 export default class IOSDeviceManager implements IDeviceManager {
-  constructor(private pluginArgs: IPluginArgs, private hostPort: number) {}
+  constructor(
+    private pluginArgs: IPluginArgs,
+    private hostPort: number,
+  ) {}
   /**
    * Method to get all ios devices and simulators
    *
@@ -27,10 +30,14 @@ export default class IOSDeviceManager implements IDeviceManager {
    */
   async getDevices(
     deviceTypes: { iosDeviceType: DeviceTypeToInclude },
-    existingDeviceDetails: Array<IDevice>
+    existingDeviceDetails: Array<IDevice>,
   ): Promise<IDevice[]> {
     if (deviceTypes.iosDeviceType === 'real') {
-      return flatten(await Promise.all([this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort)]));
+      return flatten(
+        await Promise.all([
+          this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
+        ]),
+      );
     } else if (deviceTypes.iosDeviceType === 'simulated') {
       return flatten(await Promise.all([this.getSimulators()]));
     } else {
@@ -74,7 +81,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   private async getRealDevices(
     existingDeviceDetails: Array<IDevice>,
     pluginArgs: IPluginArgs,
-    hostPort: number
+    hostPort: number,
   ): Promise<Array<IDevice>> {
     const deviceState: Array<IDevice> = [];
     if (this.pluginArgs.cloud !== undefined) {
@@ -84,10 +91,14 @@ export default class IOSDeviceManager implements IDeviceManager {
       await this.fetchLocalIOSDevices(existingDeviceDetails, deviceState, pluginArgs, hostPort);
     }
     const returnDevices = deviceState.filter((device) => device.realDevice === true);
-    return returnDevices
+    return returnDevices;
   }
 
-  private prepareDerivedDataPath(derivedDataPath: IDerivedDataPath | undefined, udid: string, realDevice: boolean): string {
+  private prepareDerivedDataPath(
+    derivedDataPath: IDerivedDataPath | undefined,
+    udid: string,
+    realDevice: boolean,
+  ): string {
     function derivedPathExtracted(tmpPath: string, theDerivedDataPath?: string) {
       if (theDerivedDataPath !== undefined) {
         fs.copySync(theDerivedDataPath, tmpPath);
@@ -124,7 +135,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     existingDeviceDetails: IDevice[],
     deviceState: IDevice[],
     pluginArgs: IPluginArgs,
-    hostPort: number
+    hostPort: number,
   ) {
     const devices = await this.getConnectedDevices();
     await asyncForEach(devices, async (udid: string) => {
@@ -159,7 +170,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
     });
     goIosTracker.on('device-removed', async (message) => {
-      const deviceRemoved: any = { udid: message.id, host: ip.address() };
+      const deviceRemoved: any = [{ udid: message.id, host: ip.address() }];
       if (pluginArgs.hub !== undefined) {
         log.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
@@ -171,7 +182,11 @@ export default class IOSDeviceManager implements IDeviceManager {
     });
   }
 
-  private async getDeviceInfo(udid: string, pluginArgs: IPluginArgs, hostPort: number): Promise<IDevice> {
+  private async getDeviceInfo(
+    udid: string,
+    pluginArgs: IPluginArgs,
+    hostPort: number,
+  ): Promise<IDevice> {
     let host;
     if (pluginArgs.remoteMachineProxyIP) {
       host = pluginArgs.remoteMachineProxyIP;
@@ -244,7 +259,11 @@ export default class IOSDeviceManager implements IDeviceManager {
           host: `http://${ip.address()}:${this.hostPort}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
-          derivedDataPath: this.prepareDerivedDataPath(this.pluginArgs.derivedDataPath, device.udid, false),
+          derivedDataPath: this.prepareDerivedDataPath(
+            this.pluginArgs.derivedDataPath,
+            device.udid,
+            false,
+          ),
         }),
       );
     });

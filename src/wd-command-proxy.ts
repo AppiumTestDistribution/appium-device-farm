@@ -16,12 +16,12 @@ function getProxyServer() {
 
 export function addProxyHandler(sessionId: string, remoteHost: string) {
   const proxyServer = getProxyServer();
-  const targetBasePath = new URL(remoteHost).pathname
+  const targetBasePath = new URL(remoteHost).pathname;
   const config: any = {
     target: new URL(remoteHost).origin,
     changeOrigin: true,
     pathRewrite: (path: any, req: any) => {
-      const newPath = `${targetBasePath}/${path}`
+      const newPath = `${targetBasePath}/${path}`;
       return newPath;
     },
     on: {
@@ -32,7 +32,7 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
       error: (err: any, req: any, res: any) => {
         log.error('proxy handler error: ', err.message, ' data: ', err.response.data);
       },
-    }
+    },
   };
 
   if (proxyServer) {

@@ -41,15 +41,11 @@ export default class NodeDevices {
     log.info(`Unblocking device ${this.host}/device-farm/api/unblock`);
     try {
       const status = (
-        await axios.post(
-          `${this.host}/device-farm/api/unblock`,
-          filter,
-          {
-            params: {
-              type: 'unblock',
-            },
+        await axios.post(`${this.host}/device-farm/api/unblock`, filter, {
+          params: {
+            type: 'unblock',
           },
-        )
+        })
       ).status;
       if (status === 200) {
         log.info(`Unblocked device with filter: ${filter}`);

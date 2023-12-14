@@ -73,11 +73,11 @@ class DevicePlugin extends BasePlugin {
 
     if (this.pluginArgs.hub !== undefined) {
       // send unblock request to hub. Should we unblock the whole devices from this node?
-      (new NodeDevices(this.pluginArgs.hub)).unblockDevice(deviceFilter);
+      new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
     } else {
       unblockDeviceMatchingFilter(deviceFilter);
     }
-    
+
     log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
         deviceFilter,
@@ -122,17 +122,10 @@ class DevicePlugin extends BasePlugin {
     }
 
     const chromeDriverManager =
-      pluginArgs.skipChromeDownload === false
-        ? await ChromeDriverManager.getInstance()
-        : undefined;
+      pluginArgs.skipChromeDownload === false ? await ChromeDriverManager.getInstance() : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager(
-      platform,
-      deviceTypes,
-      cliArgs.port,
-      pluginArgs
-    );
+    const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
@@ -163,7 +156,10 @@ class DevicePlugin extends BasePlugin {
       // check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
       // and release blocked devices
-      await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
       // and clean up pending sessions 
       await setupCronCleanPendingSessions(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.deviceAvailabilityTimeoutMs + 10000);
     }
@@ -220,10 +216,10 @@ class DevicePlugin extends BasePlugin {
         //await refreshDeviceList();
         try {
           return await allocateDeviceForSession(
-            caps, 
+            caps,
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
-            this.pluginArgs
+            this.pluginArgs,
           );
         } catch (err) {
           await removePendingSession(pendingSessionId);

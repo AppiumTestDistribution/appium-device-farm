@@ -1,5 +1,11 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, isDeviceFarmRunning, cachePath, isAppiumRunningAt } from './helpers';
+import {
+  isMac,
+  checkIfPathIsAbsolute,
+  isDeviceFarmRunning,
+  cachePath,
+  isAppiumRunningAt,
+} from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -195,7 +201,10 @@ export async function setUtilizationTime(udid: string, utilizationTime: number) 
  * @param capability
  * @returns IDeviceFilterOptions
  */
-export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPluginArgs): IDeviceFilterOptions {
+export function getDeviceFiltersFromCapability(
+  capability: any,
+  pluginArgs: IPluginArgs,
+): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[customCapability.udids]
     ? capability[customCapability.udids].split(',').map(_.trim)
@@ -209,18 +218,12 @@ export function getDeviceFiltersFromCapability(capability: any, pluginArgs: IPlu
     platform == DevicePlatform.IOS
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
-  if (
-    deviceType?.startsWith('sim') &&
-    pluginArgs.iosDeviceType === 'real'
-  ) {
+  if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
     );
   }
-  if (
-    deviceType?.startsWith('real') &&
-    pluginArgs.iosDeviceType == 'simulated'
-  ) {
+  if (deviceType?.startsWith('real') && pluginArgs.iosDeviceType == 'simulated') {
     throw new Error(
       'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
     );
@@ -285,9 +288,7 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
   }, 10000);
 }
 
-export async function setupCronCheckStaleDevices(
-  intervalMs: number,
-) {
+export async function setupCronCheckStaleDevices(intervalMs: number) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -355,9 +356,7 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
 
     const currentEpoch = new Date().getTime();
     const timeoutSeconds =
-      device.newCommandTimeout != undefined
-        ? device.newCommandTimeout
-        : newCommandTimeout;
+      device.newCommandTimeout != undefined ? device.newCommandTimeout : newCommandTimeout;
     const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
@@ -366,7 +365,10 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
   });
 }
 
-export async function setupCronReleaseBlockedDevices(intervalMs: number, newCommandTimeoutSec: number) {
+export async function setupCronReleaseBlockedDevices(
+  intervalMs: number,
+  newCommandTimeoutSec: number,
+) {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
@@ -376,10 +378,7 @@ export async function setupCronReleaseBlockedDevices(intervalMs: number, newComm
   }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(
-  hubArgument: string,
-  intervalMs: number,
-) {
+export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }

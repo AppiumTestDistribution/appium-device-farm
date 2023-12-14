@@ -1,32 +1,32 @@
-import { type } from "os";
-import { DeviceType } from "../types/DeviceType";
-import { IDevice } from "./IDevice";
+import { type } from 'os';
+import { DeviceType } from '../types/DeviceType';
+import { IDevice } from './IDevice';
 
 export interface AxiosProxy {
-  protocol: string,
-  host: string,
-  port: number,
+  protocol: string;
+  host: string;
+  port: number;
   auth?: {
-    username: string,
-    password: string
-  }
+    username: string;
+    password: string;
+  };
 }
 
 export interface CloudDevice {
-  "deviceName": string,
-  "os_version": string,
-  "platform": string
+  deviceName: string;
+  os_version: string;
+  platform: string;
 }
 
 export interface CloudConfig {
-  "cloudName": string,
-  "url": string,
-  "devices": CloudDevice[]
+  cloudName: string;
+  url: string;
+  devices: CloudDevice[];
 }
 
 export interface IDerivedDataPath {
-  simulator?: string,
-  device?: string
+  simulator?: string;
+  device?: string;
 }
 
 export type DeviceTypeToInclude = 'both' | 'real' | 'simulated';
@@ -68,7 +68,6 @@ export interface IPluginArgs {
   /** NEW_COMMAND_TIMEOUT capability to use when none is set from the client */
   newCommandTimeoutSec: number;
   cloud?: CloudConfig;
-
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -90,5 +89,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   checkStaleDevicesIntervalMs: 30000,
   checkBlockedDevicesIntervalMs: 30000,
   newCommandTimeoutSec: 60,
-  cloud: undefined
+  cloud: undefined,
 };
