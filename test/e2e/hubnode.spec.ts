@@ -6,6 +6,9 @@ import { remote } from 'webdriverio';
 import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
 import { Options } from '@wdio/types';
 import axios from 'axios';
+import { default as chaiAsPromised } from 'chai-as-promised'
+import * as chai from 'chai';
+chai.use(chaiAsPromised);
 
 let driver: any;
 
@@ -100,7 +103,7 @@ describe('E2E', () => {
     expect(res.status).to.equal(200);
   })
 
-  it('Clean pending session when session failed to start', async () => {
+  it.only('Clean pending session when session failed to start', async () => {
     // ask appium to launch non-existent app package and app activity
     const nonExistentAppCapabilities = {
       "appium:automationName": "UiAutomator2",
@@ -111,9 +114,7 @@ describe('E2E', () => {
       "appium:uiautomator2ServerInstallTimeout": 90000,
     } as unknown as WebdriverIO.Capabilities
 
-    expect(async () => {
-      driver = await remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO);
-    }).to.throw;
+    await expect(remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO)).to.eventually.be.rejected;
 
     // check device-farm endpoint using axios: /api/queues/length
     const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queues/length`);

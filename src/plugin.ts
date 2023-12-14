@@ -197,7 +197,7 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
-    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`)
+    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`)
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -240,6 +240,7 @@ class DevicePlugin extends BasePlugin {
       session = await next();
     }
 
+    log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
@@ -325,7 +326,7 @@ class DevicePlugin extends BasePlugin {
   private unblockDeviceOnError(device: IDevice, error: any) {
     updatedAllocatedDevice(device, { busy: false });
     log.warn(
-      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`,
+      `📱 Device UDID ${device.udid} unblocked. Reason: ${error}`,
     );
   }
 
