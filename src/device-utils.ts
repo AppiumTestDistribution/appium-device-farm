@@ -396,6 +396,19 @@ export async function setupCronUpdateDeviceList(
   }, intervalMs);
 }
 
+export async function cleanPendingSessions(timeoutMs: number) {
+  const pendingSessions = PendingSessionsModel.chain().find().data();
+  const currentEpoch = new Date().getTime();
+  const timedOutSessions = pendingSessions.filter((session) => {
+    const timeSinceSessionCreated = (currentEpoch - session.createdAt);
+    return timeSinceSessionCreated > timeoutMs;
+  });
+  timedOutSessions.forEach((session) => {
+    log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
+    PendingSessionsModel.remove(session);
+  });
+}
+
 export async function setupCronCleanPendingSessions(intervalMs: number, timeoutMs: number) {
   log.info(`Hub will clean pending sessions every ${intervalMs} ms`);
   if (cronTimerToCleanPendingSessions) {
@@ -404,15 +417,6 @@ export async function setupCronCleanPendingSessions(intervalMs: number, timeoutM
 
   cronTimerToCleanPendingSessions = setInterval(async () => {
     log.debug(`Cleaning pending sessions...`);
-    const pendingSessions = PendingSessionsModel.chain().find().data();
-    const currentEpoch = new Date().getTime();
-    const timedOutSessions = pendingSessions.filter((session) => {
-      const timeSinceSessionCreated = (currentEpoch - session.createdAt) / 1000;
-      return timeSinceSessionCreated > timeoutMs;
-    });
-    timedOutSessions.forEach((session) => {
-      log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
-      PendingSessionsModel.remove(session);
-    });
+    await cleanPendingSessions(timeoutMs);
   }, intervalMs);
 }

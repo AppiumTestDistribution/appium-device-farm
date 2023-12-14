@@ -18,7 +18,7 @@ import {
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import ip from 'ip';
 import { IDevice } from '../../src/interfaces/IDevice';
-import { DeviceModel } from '../../src/data-service/db';
+import { DeviceModel, PendingSessionsModel } from '../../src/data-service/db';
 
 describe('Basic Plugin Test', () => {
   // dump hub config into a file
