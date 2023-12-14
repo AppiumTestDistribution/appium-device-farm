@@ -43,6 +43,7 @@ const customCapability = {
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
 let cronTimerToUpdateDevices: any;
+let cronTimerToCleanPendingSessions: any;
 
 export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefined => {
   /* If the test is targeting safarim, then app capability will be empty */
@@ -335,7 +336,7 @@ export async function unblockCandidateDevices() {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
     const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
-    log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}}`);
+    // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}`);
     return isCandidate
   });
   return busyDevices;
@@ -396,7 +397,12 @@ export async function setupCronUpdateDeviceList(
 }
 
 export async function setupCronCleanPendingSessions(intervalMs: number, timeoutMs: number) {
-  setInterval(async () => {
+  log.info(`Hub will clean pending sessions every ${intervalMs} ms`);
+  if (cronTimerToCleanPendingSessions) {
+    clearInterval(cronTimerToCleanPendingSessions);
+  }
+
+  cronTimerToCleanPendingSessions = setInterval(async () => {
     const pendingSessions = PendingSessionsModel.chain().find().data();
     const currentEpoch = new Date().getTime();
     const timedOutSessions = pendingSessions.filter((session) => {

@@ -67,7 +67,7 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function hubUrl(device: IDevice): string {
+export function nodeUrl(device: IDevice): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {

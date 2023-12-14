@@ -72,11 +72,9 @@ describe('E2E', () => {
     appiumHome: APPIUM_HOME!
   })
 
-  beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
-  });
-
   it('Vertical swipe test', async () => {
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
     await driver.performActions([
       {
@@ -95,12 +93,39 @@ describe('E2E', () => {
   });
 
   it('serve device-farm endpoint when test is still running', async () => {
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+
     // check device-farm endpoint using axios
     const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm`);
     expect(res.status).to.equal(200);
   })
 
+  it.only('Clean pending session when session failed to start', async () => {
+    // ask appium to launch non-existent app package and app activity
+    const nonExistentAppCapabilities = {
+      "appium:automationName": "UiAutomator2",
+      "appium:appPackage": "com.nonexistent",
+      "appium:appActivity": "com.nonexistent.MainActivity",
+      "platformName": "android",
+      "appium:deviceName": "",
+      "appium:uiautomator2ServerInstallTimeout": 90000,
+    } as unknown as WebdriverIO.Capabilities
+
+    expect(async () => {
+      driver = await remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO);
+    }).to.throw;
+
+    // check device-farm endpoint using axios: /api/queues/length
+    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queues/length`);
+    expect(res.status).to.equal(200);
+    expect(res.data).to.equal(0);
+  })
+
+
   afterEach(async function() {
-    await driver.deleteSession()
+    if (driver !== undefined) {
+      await driver.deleteSession()
+      driver = undefined;
+    }
   });
 });

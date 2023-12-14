@@ -34,7 +34,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
+import { nodeUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -159,7 +159,8 @@ class DevicePlugin extends BasePlugin {
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
-      // I'm a hub so let's check for stale nodes
+      // I'm a hub so let's:
+      // check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
       // and release blocked devices
       await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
@@ -230,65 +231,11 @@ class DevicePlugin extends BasePlugin {
         }
       },
     );
+
     let session;
+
     if (!device.host.includes(ip.address())) {
-      const remoteUrl = hubUrl(device);
-      let capabilitiesToCreateSession = { capabilities: caps };
-      if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
-        capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
-          desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
-        });
-      }
-      // need to sanitize to remove sensitive information
-      // log.debug(`Remote Host URL - ${remoteUrl}`);
-      let sessionDetails: any;
-      log.info(
-        `Creating cloud session with desiredCapabilities: "${JSON.stringify(
-          capabilitiesToCreateSession,
-        )}"`,
-      );
-      const config: any = {
-        method: 'post',
-        url: remoteUrl,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: capabilitiesToCreateSession,
-      };
-      //log.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
-      if (proxy != undefined) {
-        log.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
-        config.httpsAgent = new HttpsProxyAgent(proxy);
-        config.httpAgent = new HttpProxyAgent(proxy);
-        config.proxy = false;
-      }
-
-      log.info(`With axios config: "${JSON.stringify(config)}"`);
-      try {
-        const response = await axios(config);
-        sessionDetails = response.data;
-        if (Object.hasOwn(sessionDetails.value, 'error')) {
-          log.error(`Error while creating session: ${sessionDetails.value.error}`);
-          this.unblockDeviceOnError(device, sessionDetails.value.error);
-        }
-      } catch (error: AxiosError<any> | any) {
-        let errorMessage = '';
-        if (error instanceof AxiosError) {
-          log.error(`Error while creating session: ${JSON.stringify(error.response?.data)}`);
-          errorMessage = JSON.stringify(error.response?.data);
-        } else {
-          log.error(`Error while creating session: ${error}`);
-          errorMessage = error;
-        }
-        if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
-      }
-
-      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
-
-      session = {
-        protocol: 'W3C',
-        value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
-      };
+      session = await this.forwardSessionRequest(device, caps)
     } else {
       session = await next();
     }
@@ -313,6 +260,66 @@ class DevicePlugin extends BasePlugin {
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
+  }
+
+  private async forwardSessionRequest(device: IDevice, caps: ISessionCapability): Promise<{ protocol: string; value: string[]; }> {
+    const remoteUrl = nodeUrl(device);
+    let capabilitiesToCreateSession = { capabilities: caps };
+    if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
+      capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
+        desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
+      });
+    }
+    // need to sanitize to remove sensitive information
+    // log.debug(`Remote Host URL - ${remoteUrl}`);
+    let sessionDetails: any;
+    log.info(
+      `Creating cloud session with desiredCapabilities: "${JSON.stringify(
+        capabilitiesToCreateSession
+      )}"`
+    );
+    const config: any = {
+      method: 'post',
+      url: remoteUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: capabilitiesToCreateSession,
+    };
+    //log.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
+    if (proxy != undefined) {
+      log.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+      config.httpsAgent = new HttpsProxyAgent(proxy);
+      config.httpAgent = new HttpProxyAgent(proxy);
+      config.proxy = false;
+    }
+
+    log.info(`With axios config: "${JSON.stringify(config)}"`);
+    try {
+      const response = await axios(config);
+      sessionDetails = response.data;
+      if (Object.hasOwn(sessionDetails.value, 'error')) {
+        log.error(`Error while creating session: ${sessionDetails.value.error}`);
+        this.unblockDeviceOnError(device, sessionDetails.value.error);
+      }
+    } catch (error: AxiosError<any> | any) {
+      let errorMessage = '';
+      if (error instanceof AxiosError) {
+        log.error(`Error while creating session: ${JSON.stringify(error.response?.data)}`);
+        errorMessage = JSON.stringify(error.response?.data);
+      } else {
+        log.error(`Error while creating session: ${error}`);
+        errorMessage = error;
+      }
+      if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
+    }
+
+    log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
+
+    return {
+      protocol: 'W3C',
+      value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
+    };
   }
 
   private unblockDeviceOnError(device: IDevice, error: any) {
