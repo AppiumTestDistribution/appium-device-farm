@@ -403,6 +403,11 @@ export async function cleanPendingSessions(timeoutMs: number) {
     const timeSinceSessionCreated = (currentEpoch - session.createdAt);
     return timeSinceSessionCreated > timeoutMs;
   });
+  if (timedOutSessions.length === 0) {
+    log.debug(`No pending sessions to clean`);
+  } else {
+    log.debug(`Found ${timedOutSessions.length} pending sessions to clean`);
+  }
   timedOutSessions.forEach((session) => {
     log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
     PendingSessionsModel.remove(session);
@@ -410,7 +415,7 @@ export async function cleanPendingSessions(timeoutMs: number) {
 }
 
 export async function setupCronCleanPendingSessions(intervalMs: number, timeoutMs: number) {
-  log.info(`Hub will clean pending sessions every ${intervalMs} ms`);
+  log.info(`Hub will clean pending sessions every ${intervalMs} ms with pending session timeout: ${timeoutMs} ms`);
   if (cronTimerToCleanPendingSessions) {
     clearInterval(cronTimerToCleanPendingSessions);
   }
