@@ -10,6 +10,8 @@ import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { allocateDeviceForSession } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { IDevice } from '../../src/interfaces/IDevice';
+
 chai.should();
 chai.use(sinonChai);
 var expect = chai.expect;
@@ -48,22 +50,6 @@ describe('Device Utils', () => {
     offline: false,
     lastCmdExecutedAt: 1667113356356,
   };
-  const localDeviceAndroid = {
-    systemPort: 56205,
-    sdk: '10',
-    realDevice: true,
-    name: 'emulator-5555',
-    busy: false,
-    state: 'device',
-    udid: 'emulator-5555',
-    platform: 'android',
-    deviceType: 'real',
-    host: `http://${ip.address()}:4723`,
-    totalUtilizationTimeMilliSec: 40778,
-    sessionStartTime: 1667113345897,
-    offline: false,
-    lastCmdExecutedAt: 1667113356356,
-  };
   const localDeviceiOS = {
     name: 'iPhone SE (3rd generation)',
     udid: '14C1078F-74C1-4672-BDB7-B65FC85FBFB4',
@@ -79,15 +65,17 @@ describe('Device Utils', () => {
     sessionStartTime: 0,
     offline: false,
   };
-  const devices = [hub1Device, hub2Device, localDeviceiOS];
+  const devices = [hub1Device, hub2Device, localDeviceiOS] as unknown as IDevice[];
+
+  const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both', androidDeviceType: 'both' });
 
   afterEach(function () {
     sandbox.restore();
   });
 
-  it('Set busy status to device with same udid from remote machine', async function () {
-    db.removeCollection('devices');
-    const deviceManager = new DeviceFarmManager('android', 'both', 4723, { maxSessions: 3 });
+  it('Allocating device should set device to be busy', async function () {
+    DeviceModel.removeDataOnly();
+    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, { maxSessions: 3 }));
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
     const capabilities = {
@@ -99,39 +87,34 @@ describe('Device Utils', () => {
       },
       firstMatch: [{}],
     };
-    let allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(capabilities);
+    let allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
 
-    function getData() {
-      return DeviceModel.chain().find().data();
-    }
+    let foundDevice = DeviceModel.chain().find({
+      udid: allocatedDeviceForFirstSession.udid, 
+      host: allocatedDeviceForFirstSession.host
+    }).data()[0];
 
-    let foundDevice = getData().find(
-      (device) =>
-        device.udid === allocatedDeviceForFirstSession.udid &&
-        device.host === allocatedDeviceForFirstSession.host
-    );
+    expect(foundDevice.busy).to.be.true;
 
     function getFilterDeviceWithSameUDID() {
-      const devicesInDB = getData();
-      return devicesInDB.filter((device) => device.udid === 'emulator-5555');
+      return DeviceModel.chain().find({udid: 'emulator-5555'}).data();
     }
 
     const filterDeviceWithSameUDID = getFilterDeviceWithSameUDID();
-    expect(filterDeviceWithSameUDID[0].busy).to.be.true;
-    expect(filterDeviceWithSameUDID[1].busy).to.be.false;
-    expect(foundDevice.busy).to.be.true;
+    expect(filterDeviceWithSameUDID.length).to.be.equal(2);
+    // one device should be busy and the other is not
+    filterDeviceWithSameUDID.filter((device) => device.busy).length.should.be.equal(1);
+    filterDeviceWithSameUDID.filter((device) => !device.busy).length.should.be.equal(1);
 
-    let allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(capabilities);
-    let foundSecondDevice = getData().find(
-      (device) =>
-        device.udid === allocatedDeviceForSecondSession.udid &&
-        device.host === allocatedDeviceForSecondSession.host
-    );
+
+    let allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    let foundSecondDevice = DeviceModel.chain().find({udid: allocatedDeviceForSecondSession.udid, host: allocatedDeviceForSecondSession.host}).data()[0];
+
     expect(getFilterDeviceWithSameUDID()[0].busy).to.be.true;
     expect(getFilterDeviceWithSameUDID()[1].busy).to.be.true;
     expect(foundSecondDevice.busy).to.be.true;
 
-    await allocateDeviceForSession(capabilities).catch((error) =>
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
@@ -150,7 +133,7 @@ describe('Device Utils', () => {
       { udid: 'device4', busy: true, host: ip.address() },
     ]);
     
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
@@ -159,10 +142,10 @@ describe('Device Utils', () => {
 
     // Verify the expected behavior
     unblockDeviceMock.should.have.been.calledTwice;
-    unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
-    unblockDeviceMock.should.have.been.calledWith({ udid: 'device2' });
-    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device3' });
-    unblockDeviceMock.should.not.have.been.calledWith({ udid: 'device4' });
+    unblockDeviceMock.should.have.been.calledWith('device1', ip.address());
+    unblockDeviceMock.should.have.been.calledWith('device2', ip.address());
+    unblockDeviceMock.should.not.have.been.calledWith('device3', ip.address());
+    unblockDeviceMock.should.not.have.been.calledWith('device3', ip.address());
   });
 
   it('should release device on node that is not used for more than the timeout', async () => {
@@ -174,7 +157,7 @@ describe('Device Utils', () => {
       { udid: 'device3', busy: true, host: ip.address(), userBlocked: true, lastCmdExecutedAt: new Date().getTime() - 30000, newCommandTimeout: 20000 / 1000 }
     ]);
 
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
     
@@ -183,7 +166,54 @@ describe('Device Utils', () => {
 
     // Verify the expected behavior
     unblockDeviceMock.should.have.been.calledOnce;
-    unblockDeviceMock.should.have.been.calledWith({ udid: 'device1' });
-    unblockDeviceMock.should.have.not.been.calledWith({ udid: 'device3' });
+    unblockDeviceMock.should.have.been.calledWith('device1', 'http://anotherhost:4723' );
+    unblockDeviceMock.should.have.not.been.calledWith('device3', ip.address());
   })
+
+  it('Block and unblock device', async () => {
+      DeviceModel.removeDataOnly();
+      // mock setUtilizationTime
+      sandbox.stub(DeviceUtils, <any> 'setUtilizationTime').callsFake(sinon.fake());
+    
+    
+      const unbusyDevices = devices.map((device) => ({ ...device, busy: false })) as unknown as IDevice[];
+      addNewDevice(unbusyDevices);
+
+      const targetDevice = unbusyDevices[0];
+
+      
+      // action: block device
+      DeviceService.blockDevice(targetDevice.udid, targetDevice.host);
+  
+      // assert device is busy
+      expect(DeviceModel.chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]).to.have.property('busy', true);
+    
+      // set lastCommandTimestamp, otherwise it won't be picked up as device to unblock
+      DeviceModel.chain()
+        .find({ udid: targetDevice.udid, host: targetDevice.host })
+        .update(function (device: IDevice) {
+          device.lastCmdExecutedAt = new Date().getTime();
+        });
+  
+      let unblockCandidates = await DeviceUtils.unblockCandidateDevices();
+      //console.log(unblockCandidates);
+  
+      // assert: device should be part of candidate list to unblock
+      expect(unblockCandidates.map((item) => item.udid)).to.include(targetDevice.udid);
+      
+      // action: release blocked devices
+      await DeviceService.unblockDevice(targetDevice.udid, targetDevice.host);
+  
+      // assert: device should not be part of candidate list to unblock
+      unblockCandidates =  await DeviceUtils.unblockCandidateDevices();
+      expect((await unblockCandidates).map((item) => item.udid)).to.not.include(targetDevice.udid);
+  
+      // assert: device should not have lastCommandTimestamp or it should be undefined
+
+      const device = DeviceModel.chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]
+      expect(device).to.be.not.undefined;
+      expect(device?.lastCmdExecutedAt).to.be.undefined;
+      
+  })
+  
 });

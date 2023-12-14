@@ -35,26 +35,14 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     }
   }
 
-  blockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
-    DeviceFarmApiService.blockDevice(
-      sdk,
-      platform,
-      udid,
-      deviceState === 'busy',
-      deviceState === 'offline',
-    );
+  blockDevice(udid: string, host: string) {
+    DeviceFarmApiService.blockDevice(udid, host);
 
     this.props.reloadDevices();
   }
 
-  unblockDevice(sdk: string, platform: string, udid: string, deviceState: string) {
-    DeviceFarmApiService.unblockDevice(
-      sdk,
-      platform,
-      udid,
-      deviceState === 'busy',
-      deviceState === 'offline',
-    );
+  unblockDevice(udid: string, host: string) {
+    DeviceFarmApiService.unblockDevice(udid, host);
 
     this.props.reloadDevices();
   }
@@ -81,7 +69,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     } catch (error) {
       hostName = host.split(':')[1].replace('//', '');
     }
-    
+
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className={`device-state ${deviceState}`}>{deviceState}</div>
@@ -151,7 +139,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           {busy && userBlocked && (
             <button
               className="device-info-card__body_unblock-device"
-              onClick={() => this.unblockDevice(sdk, platform, udid, deviceState)}
+              onClick={() => this.unblockDevice(udid, host)}
             >
               <img src={CancelRedIcon} className="device-info-card__body_block-device-icon" />
               Unblock Device
@@ -160,7 +148,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           {!busy && (
             <button
               className="device-info-card__body_block-device"
-              onClick={() => this.blockDevice(sdk, platform, udid, deviceState)}
+              onClick={() => this.blockDevice(udid, host)}
             >
               <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
               Block Device

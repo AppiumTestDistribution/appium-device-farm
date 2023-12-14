@@ -6,30 +6,18 @@ export default class DeviceFarmApiService {
   }
 
   public static getPendingSessionsCount() {
-    return apiClient.makeGETRequest('/queue', {});
+    return apiClient.makeGETRequest('/queues/length', {});
   }
 
-  public static blockDevice(
-    sdk: string,
-    platform: string,
-    udid: string,
-    busy: boolean,
-    offline: boolean,
-  ) {
-    return apiClient.makePOSTRequest('/block', {}, { platform, udid, minSDK: sdk, busy, offline });
+  public static getPendingSessions() {
+    return apiClient.makeGETRequest('/queues', {});
   }
 
-  public static unblockDevice(
-    sdk: string,
-    platform: string,
-    udid: string,
-    busy: boolean,
-    offline: boolean,
-  ) {
-    return apiClient.makePOSTRequest(
-      '/unblock',
-      {},
-      { platform, udid, minSDK: sdk, busy, offline },
-    );
+  public static blockDevice(udid: string, host: string) {
+    return apiClient.makePOSTRequest('/block', {}, { udid, host });
+  }
+
+  public static unblockDevice(udid: string, host: string) {
+    return apiClient.makePOSTRequest('/unblock', {}, { udid, host });
   }
 }

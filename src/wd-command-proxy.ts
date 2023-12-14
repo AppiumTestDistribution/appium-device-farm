@@ -3,7 +3,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
-import { unblockDevice } from './data-service/device-service';
+import { unblockDeviceMatchingFilter } from './data-service/device-service';
 import axios from 'axios';
 import log from './logger';
 
@@ -106,7 +106,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
       log.info(
         `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`,
       );
-      unblockDevice({ session_id: sessionId });
+      unblockDeviceMatchingFilter({ session_id: sessionId });
       removeProxyHandler(sessionId);
     }
   } else {

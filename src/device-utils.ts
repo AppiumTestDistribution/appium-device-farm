@@ -10,13 +10,13 @@ import { IDevice } from './interfaces/IDevice';
 import { Container } from 'typedi';
 import { DeviceFarmManager } from './device-managers';
 import {
-  updateDevice,
-  unblockDevice,
   getAllDevices,
   getDevice,
   setSimulatorState,
   addNewDevice,
   removeDevice,
+  unblockDevice,
+  blockDevice,
 } from './data-service/device-service';
 import log from './logger';
 import DevicePlatform from './enums/Platform';
@@ -117,8 +117,8 @@ export async function allocateDeviceForSession(
   const device = getDevice(filters);
   if (device != undefined) {
     log.info(`📱 Device found: ${JSON.stringify(device)}`);
-    updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
-    log.info(`📱 Blocking device ${device.udid} for new session`);
+    blockDevice(device.udid, device.host);
+    log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
     await updateCapabilityForDevice(capability, device);
     return device;
   } else {
@@ -330,16 +330,23 @@ export async function setupCronCheckStaleDevices(
   }, intervalMs);
 }
 
-export async function releaseBlockedDevices(newCommandTimeout: number) {
+export async function unblockCandidateDevices() {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released`);
-    return device.busy && !device.userBlocked
+    const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
+    log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}}`);
+    return isCandidate
   });
+  return busyDevices;
+}
+
+export async function releaseBlockedDevices(newCommandTimeout: number) {
+  const busyDevices = await unblockCandidateDevices();
 
   log.debug(`Found ${busyDevices.length} device candidates to be released`);
 
   busyDevices.forEach(function (device) {
+    // need to keep this to make typescript happy. good thing tho.
     if (device.lastCmdExecutedAt == undefined) {
       return;
     }
@@ -352,10 +359,7 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
     const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
-      unblockDevice({ udid: device.udid });
-      log.debug(
-        `👋🏼 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
-      );
+      unblockDevice(device.udid, device.host);
     }
   });
 }

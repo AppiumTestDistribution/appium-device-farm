@@ -8,7 +8,7 @@ import { ISessionCapability } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
 import {
   setSimulatorState,
-  unblockDevice,
+  unblockDeviceMatchingFilter,
   updatedAllocatedDevice,
 } from './data-service/device-service';
 import {
@@ -74,7 +74,7 @@ class DevicePlugin extends BasePlugin {
       // send unblock request to hub. Should we unblock the whole devices from this node?
       (new NodeDevices(this.pluginArgs.hub)).unblockDevice(deviceFilter);
     } else {
-      unblockDevice(deviceFilter);
+      unblockDeviceMatchingFilter(deviceFilter);
     }
     
     log.info(
@@ -321,7 +321,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
-    unblockDevice({ session_id: sessionId });
+    unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }

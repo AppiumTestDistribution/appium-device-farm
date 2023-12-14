@@ -15,7 +15,7 @@ import { addCLIArgs } from '../../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../cliArgs';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
-import { unblockDevice } from '../../../src/data-service/device-service';
+import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -38,7 +38,7 @@ describe('Max sessions CLI argument test', () => {
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({  });
+    await unblockDeviceMatchingFilter({  });
   })
 
   it('Allocate first device without issue', async () => {
@@ -140,7 +140,7 @@ describe('Max sessions CLI argument test', () => {
 
 describe('IOS Simulator Test', () => {
   beforeEach('Release devices', async () => {
-    await unblockDevice({ });
+    await unblockDeviceMatchingFilter({ });
   })
 
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
@@ -237,7 +237,7 @@ describe('Boot simulator test', async () => {
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({ });
+    await unblockDeviceMatchingFilter({ });
   })
 
   it('Should pick Booted simulator when app path has .app', async () => {

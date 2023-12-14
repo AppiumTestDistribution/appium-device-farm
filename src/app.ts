@@ -6,7 +6,7 @@ import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
 import axios from 'axios';
-import { addNewDevice, getDevice, removeDevice, updateDevice } from './data-service/device-service';
+import { addNewDevice, userBlockDevice, getDevice, removeDevice, unblockDevice, userUnblockDevice } from './data-service/device-service';
 
 const asyncLock = new AsyncLock(),
   serverUpTime = new Date().toISOString();
@@ -74,8 +74,12 @@ apiRouter.get('/devices', async (req, res) => {
   return res.json(devices);
 });
 
-apiRouter.get('/queue', (req, res) => {
-  res.json(PendingSessionsModel.chain().find().data().length);
+apiRouter.get('/queues/length', (req, res) => {
+  res.json(PendingSessionsModel.chain().find().count());
+});
+
+apiRouter.get('/queues', (req, res) => {
+  res.json(PendingSessionsModel.chain().find().data());
 });
 
 apiRouter.get('/cliArgs', (req, res) => {
@@ -93,10 +97,9 @@ apiRouter.get('/devices/android', (req, res) => {
 apiRouter.post('/register', (req, res) => {
   const requestBody = req.body;
   if (req.query.type === 'add') {
-    addNewDevice(requestBody);
-    requestBody.forEach((device: any) => {
-      return log.info(`Adding device ${device.udid} from host ${device.host} to list!`);
-    });
+    const addedDevices = addNewDevice(requestBody);
+    if (addedDevices.length > 0)
+      log.info(`Added new devices: ${JSON.stringify(addedDevices)}`);
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
   }
@@ -107,7 +110,7 @@ apiRouter.post('/block', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  if (device != undefined) updateDevice(device, { busy: true, userBlocked: true });
+  if (device != undefined) userBlockDevice(device.udid, device.host);
 
   res.json('200');
 });
@@ -116,7 +119,7 @@ apiRouter.post('/unblock', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  if (device != undefined) updateDevice(device, { busy: false, userBlocked: false });
+  if (device != undefined) userUnblockDevice(device.udid, device.host);
 
   res.json('200');
 });
