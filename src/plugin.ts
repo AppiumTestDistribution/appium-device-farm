@@ -324,11 +324,8 @@ class DevicePlugin extends BasePlugin {
 
   private unblockDeviceOnError(device: IDevice, error: any) {
     updatedAllocatedDevice(device, { busy: false });
-    log.info(
+    log.warn(
       `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`,
-    );
-    throw new Error(
-      `"${error}", Please check the remote appium server log to know the reason for failure`,
     );
   }
 
