@@ -25,6 +25,7 @@ import {
   refreshSimulatorState,
   setupCronCheckStaleDevices,
   updateDeviceList,
+  setupCronCleanPendingSessions,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -162,6 +163,8 @@ class DevicePlugin extends BasePlugin {
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
       // and release blocked devices
       await setupCronReleaseBlockedDevices(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.newCommandTimeoutSec);
+      // and clean up pending sessions 
+      await setupCronCleanPendingSessions(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.deviceAvailabilityTimeoutMs + 10000);
     }
   }
 
@@ -203,6 +206,8 @@ class DevicePlugin extends BasePlugin {
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
+      // mark the insertion date
+      createdAt: new Date().getTime(),
     });
 
     /**
