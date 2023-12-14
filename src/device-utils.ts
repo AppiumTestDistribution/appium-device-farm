@@ -401,6 +401,7 @@ export async function cleanPendingSessions(timeoutMs: number) {
   const currentEpoch = new Date().getTime();
   const timedOutSessions = pendingSessions.filter((session) => {
     const timeSinceSessionCreated = (currentEpoch - session.createdAt);
+    log.debug(`Session queue ID:${session.capability_id} has been pending for ${timeSinceSessionCreated} ms`);
     return timeSinceSessionCreated > timeoutMs;
   });
   if (timedOutSessions.length === 0) {
