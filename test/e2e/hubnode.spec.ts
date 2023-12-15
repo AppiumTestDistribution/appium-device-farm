@@ -103,7 +103,7 @@ describe('E2E', () => {
     expect(res.status).to.equal(200);
   })
 
-  it.only('Clean pending session when session failed to start', async () => {
+  it('Clean pending session when session failed to start', async () => {
     // ask appium to launch non-existent app package and app activity
     const nonExistentAppCapabilities = {
       "appium:automationName": "UiAutomator2",
