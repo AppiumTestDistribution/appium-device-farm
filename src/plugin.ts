@@ -160,8 +160,11 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.checkBlockedDevicesIntervalMs,
         pluginArgs.newCommandTimeoutSec,
       );
-      // and clean up pending sessions 
-      await setupCronCleanPendingSessions(pluginArgs.checkBlockedDevicesIntervalMs, pluginArgs.deviceAvailabilityTimeoutMs + 10000);
+      // and clean up pending sessions
+      await setupCronCleanPendingSessions(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+      );
     }
   }
 
@@ -193,7 +196,7 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
-    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`)
+    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -231,7 +234,7 @@ class DevicePlugin extends BasePlugin {
     let session;
 
     if (!device.host.includes(ip.address())) {
-      session = await this.forwardSessionRequest(device, caps)
+      session = await this.forwardSessionRequest(device, caps);
     } else {
       session = await next();
     }
@@ -259,7 +262,10 @@ class DevicePlugin extends BasePlugin {
     return session;
   }
 
-  private async forwardSessionRequest(device: IDevice, caps: ISessionCapability): Promise<{ protocol: string; value: string[]; }> {
+  private async forwardSessionRequest(
+    device: IDevice,
+    caps: ISessionCapability,
+  ): Promise<{ protocol: string; value: string[] }> {
     const remoteUrl = nodeUrl(device);
     let capabilitiesToCreateSession = { capabilities: caps };
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
@@ -272,8 +278,8 @@ class DevicePlugin extends BasePlugin {
     let sessionDetails: any;
     log.info(
       `Creating cloud session with desiredCapabilities: "${JSON.stringify(
-        capabilitiesToCreateSession
-      )}"`
+        capabilitiesToCreateSession,
+      )}"`,
     );
     const config: any = {
       method: 'post',
@@ -321,9 +327,7 @@ class DevicePlugin extends BasePlugin {
 
   private unblockDeviceOnError(device: IDevice, error: any) {
     updatedAllocatedDevice(device, { busy: false });
-    log.warn(
-      `📱 Device UDID ${device.udid} unblocked. Reason: ${error}`,
-    );
+    log.warn(`📱 Device UDID ${device.udid} unblocked. Reason: ${error}`);
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {

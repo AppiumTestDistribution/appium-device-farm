@@ -338,7 +338,7 @@ export async function unblockCandidateDevices() {
   const busyDevices = allDevices.filter((device) => {
     const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
     // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}`);
-    return isCandidate
+    return isCandidate;
   });
   return busyDevices;
 }
@@ -399,8 +399,10 @@ export async function cleanPendingSessions(timeoutMs: number) {
   const pendingSessions = PendingSessionsModel.chain().find().data();
   const currentEpoch = new Date().getTime();
   const timedOutSessions = pendingSessions.filter((session) => {
-    const timeSinceSessionCreated = (currentEpoch - session.createdAt);
-    log.debug(`Session queue ID:${session.capability_id} has been pending for ${timeSinceSessionCreated} ms`);
+    const timeSinceSessionCreated = currentEpoch - session.createdAt;
+    log.debug(
+      `Session queue ID:${session.capability_id} has been pending for ${timeSinceSessionCreated} ms`,
+    );
     return timeSinceSessionCreated > timeoutMs;
   });
   if (timedOutSessions.length === 0) {
@@ -415,7 +417,9 @@ export async function cleanPendingSessions(timeoutMs: number) {
 }
 
 export async function setupCronCleanPendingSessions(intervalMs: number, timeoutMs: number) {
-  log.info(`Hub will clean pending sessions every ${intervalMs} ms with pending session timeout: ${timeoutMs} ms`);
+  log.info(
+    `Hub will clean pending sessions every ${intervalMs} ms with pending session timeout: ${timeoutMs} ms`,
+  );
   if (cronTimerToCleanPendingSessions) {
     clearInterval(cronTimerToCleanPendingSessions);
   }

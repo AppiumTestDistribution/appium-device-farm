@@ -32,7 +32,7 @@ export function addNewDevice(devices: IDevice[]): IDevice[] {
           offline: false,
           userBlocked: false,
         });
-        return device
+        return device;
       } catch (error) {
         log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`);
       }
@@ -181,34 +181,34 @@ export function updateCmdExecutedTime(sessionId: string) {
 export async function userBlockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
   DeviceModel.chain()
-      .find({ udid: udid, host: host })
-      .update(function (device: IDevice) {
-        device.userBlocked = true
-      });
+    .find({ udid: udid, host: host })
+    .update(function (device: IDevice) {
+      device.userBlocked = true;
+    });
 }
 
 export async function userUnblockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
   DeviceModel.chain()
-      .find({ udid: udid, host: host })
-      .update(function (device: IDevice) {
-        device.userBlocked = false
-      });
+    .find({ udid: udid, host: host })
+    .update(function (device: IDevice) {
+      device.userBlocked = false;
+    });
 }
 
 /**
  * Block device from being allocated to a session. Device busy status will be set to true.
- * @param udid 
- * @param host 
+ * @param udid
+ * @param host
  */
 export async function blockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
   DeviceModel.chain()
-      .find({ udid: udid, host: host })
-      .update(function (device: IDevice) {
-        device.busy = true;
-        device.lastCmdExecutedAt = undefined;
-      });
+    .find({ udid: udid, host: host })
+    .update(function (device: IDevice) {
+      device.busy = true;
+      device.lastCmdExecutedAt = undefined;
+    });
 }
 
 export async function unblockDevice(udid: string, host: string) {
@@ -218,33 +218,35 @@ export async function unblockDevice(udid: string, host: string) {
 export async function unblockDeviceMatchingFilter(filter: object) {
   const devices = DeviceModel.chain().find(filter).data();
   if (devices !== undefined) {
-    log.debug(
-      `Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`,
-    );
+    log.debug(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
-    await Promise.all(devices.map(async (device) => {
-      const sessionStart = device.sessionStartTime;
-      const currentTime = new Date().getTime();
-      let utilization = currentTime - sessionStart;
-      // no session time recorded means device was never used
-      if (sessionStart === 0) {
-        utilization = 0;
-      }
-      const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-      await setUtilizationTime(device.udid, totalUtilization);
-      DeviceModel
-        .findAndUpdate({ udid: device.udid, host: device.host}, function (device: IDevice) {
-          log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
-          device.session_id = undefined;
-          device.busy = false;
-          device.lastCmdExecutedAt = undefined;
-          device.sessionStartTime = 0;
-          device.totalUtilizationTimeMilliSec = totalUtilization;
-          device.newCommandTimeout = undefined;
-        });
+    await Promise.all(
+      devices.map(async (device) => {
+        const sessionStart = device.sessionStartTime;
+        const currentTime = new Date().getTime();
+        let utilization = currentTime - sessionStart;
+        // no session time recorded means device was never used
+        if (sessionStart === 0) {
+          utilization = 0;
+        }
+        const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+        await setUtilizationTime(device.udid, totalUtilization);
+        DeviceModel.findAndUpdate(
+          { udid: device.udid, host: device.host },
+          function (device: IDevice) {
+            log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
+            device.session_id = undefined;
+            device.busy = false;
+            device.lastCmdExecutedAt = undefined;
+            device.sessionStartTime = 0;
+            device.totalUtilizationTimeMilliSec = totalUtilization;
+            device.newCommandTimeout = undefined;
+          },
+        );
 
         log.debug(`Unblocked device ${device.udid} from host ${device.host}`);
-    })).catch((error) => {
+      }),
+    ).catch((error) => {
       log.error(`Unable to unblock device. Reason: ${error}`);
     });
   } else {
