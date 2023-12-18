@@ -4,10 +4,11 @@ import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
-import { ISessionCapability } from './interfaces/ISessionCapability';
+import { CreateSessionResponseSuccessExternal, CreateSessionResponseInternal, ISessionCapability, ISessionResponse, CreateSessionResponseErrorExternal, W3CNewSessionResponse, W3CNewSessionResponseError} from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
 import {
   setSimulatorState,
+  unblockDevice,
   unblockDeviceMatchingFilter,
   updatedAllocatedDevice,
 } from './data-service/device-service';
@@ -231,7 +232,7 @@ class DevicePlugin extends BasePlugin {
       },
     );
 
-    let session;
+    let session: CreateSessionResponseInternal | W3CNewSessionResponseError| Error ;
 
     if (!device.host.includes(ip.address())) {
       session = await this.forwardSessionRequest(device, caps);
@@ -239,16 +240,24 @@ class DevicePlugin extends BasePlugin {
       session = await next();
     }
 
+    // non-forwarded session can also be an error
+    log.debug("📱 Session response: ", JSON.stringify(session));
+
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
-    if (session.error) {
-      await updatedAllocatedDevice(device, { busy: false });
-      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
+    // This is coming from the forwarded session
+    if (session instanceof Error || session.hasOwnProperty('error')) {
+      unblockDevice(device.udid, device.host);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
+      this.throwProperError(session, device.host);
+    } else if ((session as W3CNewSessionResponseError).error !== undefined) {
+
     } else {
-      log.info(`📱 Device UDID ${device.udid} blocked for session ${session.value[0]}`);
+      // @ts-ignore
       const sessionId = session.value[0];
-      await updatedAllocatedDevice(device, {
+      log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
+      updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
@@ -262,25 +271,42 @@ class DevicePlugin extends BasePlugin {
     return session;
   }
 
+  throwProperError(session: any, host: string) {
+    if (session instanceof Error) {
+      throw session;
+    } else if (session.hasOwnProperty('error')) {
+      const errorMessage = (session as W3CNewSessionResponseError).error;
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      } else {
+        throw new Error(`Unknown error while creating session. Better look at appium log on the node: ${host}`);
+      }
+    } else {
+      throw new Error(`Unknown error while creating session. Better look at appium log on the node: ${host}`);
+    }
+  }
+
   private async forwardSessionRequest(
     device: IDevice,
     caps: ISessionCapability,
-  ): Promise<{ protocol: string; value: string[] }> {
+  ): Promise<CreateSessionResponseInternal | Error> {
     const remoteUrl = nodeUrl(device);
     let capabilitiesToCreateSession = { capabilities: caps };
+
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
       capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
         desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
       });
     }
-    // need to sanitize to remove sensitive information
-    // log.debug(`Remote Host URL - ${remoteUrl}`);
-    let sessionDetails: any;
+
+    let createdSession: W3CNewSessionResponse | Error;
+
     log.info(
-      `Creating cloud session with desiredCapabilities: "${JSON.stringify(
+      `Creating session with desiredCapabilities: "${JSON.stringify(
         capabilitiesToCreateSession,
       )}"`,
     );
+
     const config: any = {
       method: 'post',
       url: remoteUrl,
@@ -289,6 +315,7 @@ class DevicePlugin extends BasePlugin {
       },
       data: capabilitiesToCreateSession,
     };
+
     //log.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
     if (proxy != undefined) {
       log.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
@@ -298,36 +325,52 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.info(`With axios config: "${JSON.stringify(config)}"`);
-    try {
-      const response = await axios(config);
-      sessionDetails = response.data;
-      if (Object.hasOwn(sessionDetails.value, 'error')) {
-        log.error(`Error while creating session: ${sessionDetails.value.error}`);
-        this.unblockDeviceOnError(device, sessionDetails.value.error);
-      }
-    } catch (error: AxiosError<any> | any) {
-      let errorMessage = '';
-      if (error instanceof AxiosError) {
-        log.error(`Error while creating session: ${JSON.stringify(error.response?.data)}`);
-        errorMessage = JSON.stringify(error.response?.data);
-      } else {
-        log.error(`Error while creating session: ${error}`);
-        errorMessage = error;
-      }
-      if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
+    createdSession = await this.invokeSessionRequest(config);
+
+    if (createdSession instanceof Error) {
+      return createdSession
+    } else {
+      return {
+        protocol: 'W3C',
+        value: [createdSession.value.sessionId, createdSession.value.capabilities, 'W3C'],
+      };
     }
-
-    log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
-
-    return {
-      protocol: 'W3C',
-      value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
-    };
   }
 
-  private unblockDeviceOnError(device: IDevice, error: any) {
-    updatedAllocatedDevice(device, { busy: false });
-    log.warn(`📱 Device UDID ${device.udid} unblocked. Reason: ${error}`);
+  async invokeSessionRequest(config: any): Promise<W3CNewSessionResponse | Error> {
+    let sessionDetails: W3CNewSessionResponse;
+    let errorMessage: string;
+    try {
+      const response = await axios(config);
+      log.debug('remote node response', JSON.stringify(response.data));
+
+      // Appium endpoint returns session details w3c format: https://github.com/jlipps/simple-wd-spec?tab=readme-ov-file#new-session
+      sessionDetails = response.data as unknown as W3CNewSessionResponse;
+
+      // check if we have error in response by checking sessionDetails.value type
+      if ('error' in sessionDetails.value) {
+        log.error(`Error while creating session: ${sessionDetails.value.error}`);
+        errorMessage = sessionDetails.value.error as string;
+      }
+    } catch (error: AxiosError<any> | any) {
+      log.debug(`Received error from remote node: ${JSON.stringify(error)}`);
+      if (error instanceof AxiosError) {
+        errorMessage = JSON.stringify(error.response?.data);
+      } else {
+        errorMessage = error;
+      }
+    }
+
+    // @ts-ignore
+    if (errorMessage) {
+      log.error(`Error while creating session: ${errorMessage}`);
+      return new Error(errorMessage);
+    } else {
+      // @ts-ignore
+      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
+      // @ts-ignore
+      return sessionDetails;
+    }
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
