@@ -71,7 +71,12 @@ class DevicePlugin extends BasePlugin {
     super(pluginName, cliArgs);
     // here, CLI Args are already pluginArgs. Different case for updateServer
     log.debug(`📱 CLI Args: ${JSON.stringify(cliArgs)}`);
-    this.pluginArgs = Object.assign({}, this.cliArgs as unknown as IPluginArgs);
+    // plugin args will assign undefined value as well for bindHostOrIp
+    this.pluginArgs = Object.assign({}, DefaultPluginArgs, this.cliArgs as unknown as IPluginArgs);
+    // not pretty but will do for now
+    if (this.pluginArgs.bindHostOrIp === undefined) {
+      this.pluginArgs.bindHostOrIp = ip.address();
+    }
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -102,6 +107,10 @@ class DevicePlugin extends BasePlugin {
       DefaultPluginArgs,
       cliArgs.plugin['device-farm'] as unknown as IPluginArgs,
     );
+
+    if (pluginArgs.bindHostOrIp === undefined) {
+      pluginArgs.bindHostOrIp = ip.address();
+    }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
 
