@@ -35,6 +35,7 @@ import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { PendingSessionsModel } from './data-service/db';
+import { node } from '@appium/support';
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
@@ -289,47 +290,37 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
 }
 
 export async function setupCronCheckStaleDevices(intervalMs: number) {
-  const nodeChecked: Array<string> = [];
-
   setInterval(async () => {
-    const devices = new Set();
-
     const allDevices = getAllDevices();
-    allDevices.forEach((device: IDevice) => {
-      if (!device.host.includes(ip.address()) && !nodeChecked.includes(device.host)) {
-        devices.add(device);
+    const nodeDevices = allDevices.filter((device) => {
+      // devices that's not from this node ip address
+      return !device.host.includes(ip.address());
+    })
+
+    const nodeHosts = nodeDevices.filter((device) => !device.hasOwnProperty('cloud')).map((device) => device.host);
+    const cloudHosts = nodeDevices.filter((device) => device.hasOwnProperty('cloud')).map((device) => device.host);
+
+    const aliveHosts = await Promise.allSettled(nodeHosts.map(async (host) => {
+      return {
+        host: host,
+        alive: await isDeviceFarmRunning(host)
       }
-    });
+    })) as {status: 'fulfilled' | 'rejected', value: {host: string, alive: boolean}}[];
 
-    const iterableSet = [...devices];
-    const nodeConnections = iterableSet.map(async (device: any) => {
-      nodeChecked.push(device.host);
-      // use different function to check cloud devices
-      if (device.hasOwnProperty('cloud')) {
-        await isAppiumRunningAt(device.host);
-      } else {
-        await isDeviceFarmRunning(device.host);
+    const aliveCloudHosts = await Promise.allSettled(cloudHosts.map(async (host) => {
+      return {
+        host: host,
+        alive: await isAppiumRunningAt(host)
       }
-      return device.host;
-    });
+    })) as {status: 'fulfilled' | 'rejected', value: {host: string, alive: boolean}}[];
 
-    const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
+    // summarize alive hosts
+    const allAliveHosts = [...aliveHosts, ...aliveCloudHosts].filter((item) => item.status === 'fulfilled').map((item) => item.value.host);
 
-    const nodeConnectionsSuccess = nodeConnectionsResult.filter(
-      (result) => result.status === 'fulfilled',
-    );
-    const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
-    const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
-
-    const nodeConnectionsFailureHostSet = new Set(
-      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host)),
-    );
-
-    nodeConnectionsFailureHostSet.forEach((device: any) => {
-      log.info(`Removing Device with udid (${device.udid}) because it is not available`);
-      removeDevice(device);
-      nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
-    });
+    // stale devices are devices that's not alive
+    const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
+    removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
+    log.info(`Removing Device with udid(s): ${staleDevices.map((device) => device.udid).join(', ')} because the node is not alive`);
   }, intervalMs);
 }
 
