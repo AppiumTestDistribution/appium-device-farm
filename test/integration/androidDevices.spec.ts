@@ -10,13 +10,14 @@ import {
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import ip from 'ip';
 import waitUntil from 'async-wait-until';
+import { IDevice } from '../../src/interfaces/IDevice';
 
 const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
 
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
@@ -29,14 +30,14 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    const devices = await allocateDeviceForSession(capabilities);
+    const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', 'both', 4723, Object.assign(DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {
@@ -50,22 +51,22 @@ describe('Android Test', () => {
     };
 
     // wait until there are two devices and both are not offline
-    let devices = [];
+    let devices: IDevice[];
     waitUntil(async () => {
       await updateDeviceList();
       devices = await deviceManager.getDevices();
       
-      return devices.length === 2 && devices.every(device => !device.offline);
+      return devices.length === 2 && devices.every((device: IDevice) => !device.offline);
     })
     
-    await allocateDeviceForSession(capabilities);
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = DeviceModel.chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
 
   it('Finding a device should throw error when all devices are busy', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', 'both', 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
@@ -78,7 +79,7 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities).catch((error) =>
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
