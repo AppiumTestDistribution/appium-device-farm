@@ -234,7 +234,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
         DeviceModel.findAndUpdate(
           { udid: device.udid, host: device.host },
           function (device: IDevice) {
-            log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
+            // log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
             device.busy = false;
             device.lastCmdExecutedAt = undefined;

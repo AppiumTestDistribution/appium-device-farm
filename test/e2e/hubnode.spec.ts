@@ -122,6 +122,21 @@ describe('E2E', () => {
     expect(res.data).to.equal(0);
   })
 
+  it('Propagate error when session failed to be created', async () => {
+    // ask appium to launch non-existent app package and app activity
+    const nonExistentAppCapabilities = {
+      "appium:automationName": "UiAutomator2",
+      "appium:appPackage": "com.nonexistent",
+      "appium:appActivity": "com.nonexistent.MainActivity",
+      "platformName": "android",
+      "appium:deviceName": "",
+      "appium:uiautomator2ServerInstallTimeout": 90000,
+    } as unknown as WebdriverIO.Capabilities
+
+    await expect(remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO))
+      .to.eventually.be.rejectedWith("An unknown server-side error occurred while processing the command. Original error: Error: Either provide 'app' option to install 'com.nonexistent' or consider setting 'noReset' to 'true' if 'com.nonexistent' is supposed to be preinstalled.");
+  })
+
 
   afterEach(async function() {
     if (driver !== undefined) {
