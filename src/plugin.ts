@@ -4,7 +4,15 @@ import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
-import { CreateSessionResponseSuccessExternal, CreateSessionResponseInternal, ISessionCapability, ISessionResponse, CreateSessionResponseErrorExternal, W3CNewSessionResponse, W3CNewSessionResponseError} from './interfaces/ISessionCapability';
+import {
+  CreateSessionResponseSuccessExternal,
+  CreateSessionResponseInternal,
+  ISessionCapability,
+  ISessionResponse,
+  CreateSessionResponseErrorExternal,
+  W3CNewSessionResponse,
+  W3CNewSessionResponseError,
+} from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
 import {
   setSimulatorState,
@@ -232,7 +240,7 @@ class DevicePlugin extends BasePlugin {
       },
     );
 
-    let session: CreateSessionResponseInternal | W3CNewSessionResponseError| Error ;
+    let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
 
     if (!device.host.includes(ip.address())) {
       session = await this.forwardSessionRequest(device, caps);
@@ -241,7 +249,7 @@ class DevicePlugin extends BasePlugin {
     }
 
     // non-forwarded session can also be an error
-    log.debug("📱 Session response: ", JSON.stringify(session));
+    log.debug('📱 Session response: ', JSON.stringify(session));
 
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
@@ -252,7 +260,6 @@ class DevicePlugin extends BasePlugin {
       log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
       this.throwProperError(session, device.host);
     } else if ((session as W3CNewSessionResponseError).error !== undefined) {
-
     } else {
       // @ts-ignore
       const sessionId = session.value[0];
@@ -279,10 +286,14 @@ class DevicePlugin extends BasePlugin {
       if (errorMessage) {
         throw new Error(errorMessage);
       } else {
-        throw new Error(`Unknown error while creating session. Better look at appium log on the node: ${host}`);
+        throw new Error(
+          `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+        );
       }
     } else {
-      throw new Error(`Unknown error while creating session. Better look at appium log on the node: ${host}`);
+      throw new Error(
+        `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+      );
     }
   }
 
@@ -302,9 +313,7 @@ class DevicePlugin extends BasePlugin {
     let createdSession: W3CNewSessionResponse | Error;
 
     log.info(
-      `Creating session with desiredCapabilities: "${JSON.stringify(
-        capabilitiesToCreateSession,
-      )}"`,
+      `Creating session with desiredCapabilities: "${JSON.stringify(capabilitiesToCreateSession)}"`,
     );
 
     const config: any = {
@@ -328,7 +337,7 @@ class DevicePlugin extends BasePlugin {
     createdSession = await this.invokeSessionRequest(config);
 
     if (createdSession instanceof Error) {
-      return createdSession
+      return createdSession;
     } else {
       return {
         protocol: 'W3C',

@@ -295,32 +295,46 @@ export async function setupCronCheckStaleDevices(intervalMs: number) {
     const nodeDevices = allDevices.filter((device) => {
       // devices that's not from this node ip address
       return !device.host.includes(ip.address());
-    })
+    });
 
-    const nodeHosts = nodeDevices.filter((device) => !device.hasOwnProperty('cloud')).map((device) => device.host);
-    const cloudHosts = nodeDevices.filter((device) => device.hasOwnProperty('cloud')).map((device) => device.host);
+    const nodeHosts = nodeDevices
+      .filter((device) => !device.hasOwnProperty('cloud'))
+      .map((device) => device.host);
+    const cloudHosts = nodeDevices
+      .filter((device) => device.hasOwnProperty('cloud'))
+      .map((device) => device.host);
 
-    const aliveHosts = await Promise.allSettled(nodeHosts.map(async (host) => {
-      return {
-        host: host,
-        alive: await isDeviceFarmRunning(host)
-      }
-    })) as {status: 'fulfilled' | 'rejected', value: {host: string, alive: boolean}}[];
+    const aliveHosts = (await Promise.allSettled(
+      nodeHosts.map(async (host) => {
+        return {
+          host: host,
+          alive: await isDeviceFarmRunning(host),
+        };
+      }),
+    )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
 
-    const aliveCloudHosts = await Promise.allSettled(cloudHosts.map(async (host) => {
-      return {
-        host: host,
-        alive: await isAppiumRunningAt(host)
-      }
-    })) as {status: 'fulfilled' | 'rejected', value: {host: string, alive: boolean}}[];
+    const aliveCloudHosts = (await Promise.allSettled(
+      cloudHosts.map(async (host) => {
+        return {
+          host: host,
+          alive: await isAppiumRunningAt(host),
+        };
+      }),
+    )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
 
     // summarize alive hosts
-    const allAliveHosts = [...aliveHosts, ...aliveCloudHosts].filter((item) => item.status === 'fulfilled').map((item) => item.value.host);
+    const allAliveHosts = [...aliveHosts, ...aliveCloudHosts]
+      .filter((item) => item.status === 'fulfilled')
+      .map((item) => item.value.host);
 
     // stale devices are devices that's not alive
     const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
     removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
-    log.info(`Removing Device with udid(s): ${staleDevices.map((device) => device.udid).join(', ')} because the node is not alive`);
+    log.info(
+      `Removing Device with udid(s): ${staleDevices
+        .map((device) => device.udid)
+        .join(', ')} because the node is not alive`,
+    );
   }, intervalMs);
 }
 

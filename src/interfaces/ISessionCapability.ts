@@ -6,18 +6,20 @@ export type ISessionCapability = {
 export type ISessionResponseWithValidSession = {
   sessionId: string;
   capabilities: ISessionCapability;
-}
+};
 
 export type ISessionResponseValueWithError = {
-    error: string
-}
+  error: string;
+};
 
 export type ISessionResponse<T> = {
   protocol: string;
-  value: T
-}
+  value: T;
+};
 
-export type ISessionResponseAny = ISessionResponse<ISessionResponseWithValidSession | ISessionResponseValueWithError>;
+export type ISessionResponseAny = ISessionResponse<
+  ISessionResponseWithValidSession | ISessionResponseValueWithError
+>;
 export type ISessionResponseError = ISessionResponse<ISessionResponseValueWithError>;
 export type ISessionResponseOK = ISessionResponse<ISessionResponseWithValidSession>;
 
@@ -43,19 +45,20 @@ export type CreateSessionResponseInternal = {
     // session id
     string,
     // capabilities
-    ISessionCapability, 
+    ISessionCapability,
     // protocol
-    string?]
-}
+    string?,
+  ];
+};
 
 export type W3CNewSessionResponse = {
   value: {
     sessionId: string;
     capabilities: ISessionCapability;
   };
-}
+};
 
 export type W3CNewSessionResponseError = {
   protocol: string;
   error: any;
-}
+};
