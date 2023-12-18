@@ -12,7 +12,7 @@ import ip from 'ip';
 import waitUntil from 'async-wait-until';
 import { IDevice } from '../../src/interfaces/IDevice';
 
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
 
 describe('Android Test', () => {
   it('Allocate free device and verify the device state is busy in db', async () => {
@@ -37,7 +37,7 @@ describe('Android Test', () => {
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign({}, DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList();
     const capabilities = {

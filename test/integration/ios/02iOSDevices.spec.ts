@@ -11,7 +11,7 @@ import {
 import { CLIArgs, DeviceModel } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {

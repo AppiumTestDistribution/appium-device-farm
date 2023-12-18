@@ -1,9 +1,8 @@
 import { expect } from 'chai';
 import ip from 'ip';
-
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
-import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
+import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from '../e2ehelper';
 import { Options } from '@wdio/types';
 import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised'
@@ -31,13 +30,14 @@ const capabilities = {
 
 describe('E2E', () => {
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig();
+  const hub_config_file = ensureHubConfig('ios');
 
   // dump node config into a file
   const node_config_file = ensureNodeConfig();
 
   // setup appium home
-  const APPIUM_HOME = ensureAppiumHome();
+  const APPIUM_HOME = ensureAppiumHome('hub');
+  const APPIUM_HOME_NODE = ensureAppiumHome("node");
 
   // run hub
   pluginE2EHarness({

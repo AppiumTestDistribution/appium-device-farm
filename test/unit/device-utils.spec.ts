@@ -67,7 +67,7 @@ describe('Device Utils', () => {
   };
   const devices = [hub1Device, hub2Device, localDeviceiOS] as unknown as IDevice[];
 
-  const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both', androidDeviceType: 'both' });
+  const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both', androidDeviceType: 'both' });
 
   afterEach(function () {
     sandbox.restore();

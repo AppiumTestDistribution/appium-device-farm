@@ -66,12 +66,12 @@ let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
-  private pluginArgs: IPluginArgs = DefaultPluginArgs;
+  private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);;
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
-    // initialize plugin args only when cliArgs.plugin['device-farm'] is present
-    if (cliArgs.plugin && cliArgs.plugin['device-farm'])
-      Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as unknown as IPluginArgs);
+    // here, CLI Args are already pluginArgs. Different case for updateServer
+    log.debug(`📱 CLI Args: ${JSON.stringify(cliArgs)}`);
+    this.pluginArgs = Object.assign({}, this.cliArgs as unknown as IPluginArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
@@ -95,11 +95,15 @@ class DevicePlugin extends BasePlugin {
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
+    // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
+    log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     const pluginArgs: IPluginArgs = Object.assign(
       {},
       DefaultPluginArgs,
-      cliArgs.plugin['device-farm'] as IPluginArgs,
+      cliArgs.plugin['device-farm'] as unknown as IPluginArgs,
     );
+
+    log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
 
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
@@ -142,28 +146,23 @@ class DevicePlugin extends BasePlugin {
     await initializeStorage();
 
     log.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm`,
     );
 
     const hubArgument = pluginArgs.hub;
 
-    if (hubArgument) {
-      await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
-    }
-
-    const devicesUpdates = await updateDeviceList(hubArgument);
-    if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
-      await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(pluginArgs, cliArgs.port);
-    }
-
-    if (hubArgument) {
+    if (hubArgument !== undefined) {
+      log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
+      log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
       // I'm a hub so let's:
       // check for stale nodes
-      await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
+      await setupCronCheckStaleDevices(
+        pluginArgs.checkStaleDevicesIntervalMs,
+        pluginArgs.bindHostOrIp,
+      );
       // and release blocked devices
       await setupCronReleaseBlockedDevices(
         pluginArgs.checkBlockedDevicesIntervalMs,
@@ -174,6 +173,12 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.checkBlockedDevicesIntervalMs,
         pluginArgs.deviceAvailabilityTimeoutMs + 10000,
       );
+    }
+
+    const devicesUpdates = await updateDeviceList(hubArgument);
+    if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
+      await setSimulatorState(devicesUpdates);
+      await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
   }
 
@@ -187,9 +192,9 @@ class DevicePlugin extends BasePlugin {
 
   static async waitForRemoteDeviceFarmToBeRunning(host: string) {
     await spinWith(
-      `Waiting for node server ${host} to be up and running\n`,
+      `Waiting for device farm server ${host} to be up and running\n`,
       async () => {
-        await isDeviceFarmRunning(host);
+        return await isDeviceFarmRunning(host);
       },
       (msg: any) => {
         throw new Error(`Failed: ${msg}`);
@@ -204,6 +209,12 @@ class DevicePlugin extends BasePlugin {
     jwpReqCaps: any,
     caps: ISessionCapability,
   ) {
+    // Here, this.cliArgs is the correct pluginArgs. How? I don't know.
+    this.pluginArgs = Object.assign({}, this.cliArgs as unknown as IPluginArgs);
+
+    log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
+    log.debug(`📱 cliArgs: ${JSON.stringify(this.cliArgs)}`);
+    log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
     const pendingSessionId = uuidv4();
     log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
     const {
@@ -241,10 +252,13 @@ class DevicePlugin extends BasePlugin {
     );
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
-
-    if (!device.host.includes(ip.address())) {
+    
+    log.debug(`device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`);
+    if (!device.host.includes(this.pluginArgs.bindHostOrIp)) {
+      log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
     } else {
+      log.debug(`📱 Creating session on the same node`);
       session = await next();
     }
 
@@ -270,7 +284,7 @@ class DevicePlugin extends BasePlugin {
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (!device.host.includes(ip.address())) {
+      if (!device.host.includes(this.pluginArgs.bindHostOrIp)) {
         addProxyHandler(sessionId, device.host);
       }
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);

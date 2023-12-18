@@ -79,14 +79,16 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async fetchAndroidDevices(
     deviceState: IDevice[],
     existingDeviceDetails: IDevice[],
-    cliArgs: any,
+    pluginArgs: IPluginArgs,
   ) {
     await this.requireSdkRoot();
-    const connectedDevices = await this.getConnectedDevices(cliArgs);
+    const connectedDevices = await this.getConnectedDevices(pluginArgs);
     for (const [adbInstance, devices] of connectedDevices) {
       await asyncForEach(devices, async (device: IDevice) => {
         device.adbRemoteHost =
-          adbInstance.adbRemoteHost === null ? ip.address() : adbInstance.adbRemoteHost;
+          adbInstance.adbRemoteHost === null
+            ? this.pluginArgs.bindHostOrIp
+            : adbInstance.adbRemoteHost;
         if (
           !deviceState.find(
             (devicestate) =>
@@ -95,7 +97,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           )
         ) {
           const existingDevice = existingDeviceDetails.find(
-            (dev) => dev.udid === device.udid && dev.host.includes(ip.address()),
+            (dev) => dev.udid === device.udid && dev.host.includes(this.pluginArgs.bindHostOrIp),
           );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
@@ -171,7 +173,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     } else if (pluginArgs.remoteMachineProxyIP !== undefined) {
       host = `${pluginArgs.remoteMachineProxyIP}`;
     } else {
-      host = `http://${ip.address()}:${hostPort}`;
+      host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
     return {
       adbRemoteHost: adbInstance.adbHost,
@@ -330,7 +332,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async onDeviceRemoved(device: DeviceWithPath, pluginArgs: IPluginArgs) {
     const clonedDevice: DeviceUpdate = {
       udid: device['id'],
-      host: ip.address(),
+      host: pluginArgs.bindHostOrIp,
       state: device.type,
     };
     if (pluginArgs.hub != undefined) {

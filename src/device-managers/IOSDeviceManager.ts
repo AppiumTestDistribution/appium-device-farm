@@ -170,7 +170,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
     });
     goIosTracker.on('device-removed', async (message) => {
-      const deviceRemoved: any = [{ udid: message.id, host: ip.address() }];
+      const deviceRemoved: any = [{ udid: message.id, host: pluginArgs.bindHostOrIp }];
       if (pluginArgs.hub !== undefined) {
         log.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
@@ -191,7 +191,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     if (pluginArgs.remoteMachineProxyIP) {
       host = pluginArgs.remoteMachineProxyIP;
     } else {
-      host = `http://${ip.address()}:${hostPort}`;
+      host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
     const wdaLocalPort = await getFreePort();
     const mjpegServerPort = await getFreePort();
@@ -256,7 +256,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           realDevice: false,
           platform: this.getDevicePlatformName(device.name),
           deviceType: 'simulator',
-          host: `http://${ip.address()}:${this.hostPort}`,
+          host: `http://${this.pluginArgs.bindHostOrIp}:${this.hostPort}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
           derivedDataPath: this.prepareDerivedDataPath(

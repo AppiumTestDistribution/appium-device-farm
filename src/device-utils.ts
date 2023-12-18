@@ -264,8 +264,9 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(hubArgument?: string) {
-  const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
+export async function updateDeviceList(hubArgument?: string): Promise<IDevice[]> {
+  const devices: IDevice[] = await getDeviceManager().getDevices(getAllDevices());
+  log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
   if (hubArgument) {
     const nodeDevices = new NodeDevices(hubArgument);
     try {
@@ -273,8 +274,9 @@ export async function updateDeviceList(hubArgument?: string) {
     } catch (error) {
       log.error(`Cannot send device list update. Reason: ${error}`);
     }
+  } else {
+    addNewDevice(devices);
   }
-  addNewDevice(devices);
 
   return devices;
 }
@@ -289,12 +291,12 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
   }, 10000);
 }
 
-export async function setupCronCheckStaleDevices(intervalMs: number) {
+export async function setupCronCheckStaleDevices(intervalMs: number, currentHost: string) {
   setInterval(async () => {
     const allDevices = getAllDevices();
     const nodeDevices = allDevices.filter((device) => {
       // devices that's not from this node ip address
-      return !device.host.includes(ip.address());
+      return !device.host.includes(currentHost);
     });
 
     const nodeHosts = nodeDevices

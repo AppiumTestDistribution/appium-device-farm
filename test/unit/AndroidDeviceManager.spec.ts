@@ -48,7 +48,7 @@ describe('Android Device Manager', function () {
   }
 
   it('Android Device List to have added state', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(Object.assign({}, DefaultPluginArgs, { platform: "android" }), 4723);
     const deviceList = new Map();
     adb = await getAdbOriginal();
     cloneAdb = await getCloneAdb();
@@ -108,7 +108,7 @@ describe('Android Device Manager', function () {
   });
 
   it('Android Device List to have added state - Only emulators', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(Object.assign({}, DefaultPluginArgs, { platform: "android" }), 4723);
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -150,7 +150,7 @@ describe('Android Device Manager', function () {
   });
 
   it('Android Device List to have added state - Only real devices', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(Object.assign({}, DefaultPluginArgs, { platform: "android" }), 4723);
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -192,7 +192,7 @@ describe('Android Device Manager', function () {
   });
   it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
     DeviceModel.removeDataOnly();
-    const pluginArgs = Object.assign(DefaultPluginArgs, {
+    const pluginArgs = Object.assign({}, DefaultPluginArgs, {
       platform: "android", 
       'device-types': 'both',
       skipChromeDownload: true,
@@ -241,7 +241,7 @@ describe('Android Device Manager', function () {
 
   it("Should handle error when adb doesn't respond", async () => {
     // mock getDeviceProperty
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(Object.assign({}, DefaultPluginArgs, { platform: "android" }), 4723);
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -282,7 +282,7 @@ describe('Android Device Manager', function () {
 
   it("should handle device never completing boot", async () => {
     // mock getDeviceProperty
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(Object.assign({}, DefaultPluginArgs, { platform: "android" }), 4723);
     adb = await getAdbOriginal();
     sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));
     

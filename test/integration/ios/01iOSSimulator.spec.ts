@@ -20,7 +20,7 @@ import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-se
 const simctl = new Simctl();
 const name = 'My Device Name';
 
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
 function markSimulatorsAsBooted() {
   // mark simulators as booted
@@ -43,7 +43,7 @@ describe('Max sessions CLI argument test', () => {
 
   it('Allocate first device without issue', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
+    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign({}, DefaultPluginArgs, { maxSessions: 1}));
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
@@ -242,7 +242,7 @@ describe('Boot simulator test', async () => {
 
   it('Should pick Booted simulator when app path has .app', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, Object.assign({}, DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(hub);
