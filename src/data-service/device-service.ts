@@ -104,11 +104,25 @@ export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
           filter.platform = filterOptions.platform;
           break;
         case 'platformVersion':
-          filter.sdk = filterOptions.platformVersion;
+          log.debug(`platformVersion: ${filterOptions.platformVersion}`);
+          const coercedPlatformVersion = semver.coerce(filterOptions.platformVersion);
+          
+          results = results.where(function (obj: IDevice) {
+            const coercedSDK = semver.coerce(obj.sdk);  
+            log.debug(`coerced obj SDK: ${coercedSDK}`);
+            if (coercedSDK && coercedPlatformVersion) {
+              log.debug(`coerced obj SDK: ${coercedSDK} == coercedPlatformVersion: ${coercedPlatformVersion}`);
+              return semver.eq(coercedSDK, coercedPlatformVersion);
+            }
+            return false;
+          });
           break;
         case 'name':
           // only is name is not empty nor undefined
-          if (filterOptions.name) filter.name = { $contains: filterOptions.name };
+          if (filterOptions.name !== undefined && filterOptions.name.trim() !== '') 
+            filter.name = { $contains: filterOptions.name.trim() };
+          else
+            filter.name = { $ne: undefined };
           break;
         case 'busy':
           filter.busy = filterOptions.busy;
