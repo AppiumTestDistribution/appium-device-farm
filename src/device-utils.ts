@@ -101,7 +101,6 @@ export async function allocateDeviceForSession(
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
   log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
-  const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
     firstMatch[customCapability.deviceQueryInterval] || deviceQueryIntervalMs;
 
@@ -115,13 +114,14 @@ export async function allocateDeviceForSession(
           );
           return false;
         } else log.info(`Waiting for free device. Filter: ${JSON.stringify(filters)}}`);
-        return (await getDevice(filters)) != undefined;
+        return getDevice(filters) != undefined;
       },
       { timeout, intervalBetweenAttempts },
     );
   } catch (err) {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
+
   const device = getDevice(filters);
   if (device != undefined) {
     log.info(`📱 Device found: ${JSON.stringify(device)}`);
