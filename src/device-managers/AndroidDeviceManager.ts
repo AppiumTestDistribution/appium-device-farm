@@ -296,9 +296,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
         log.info(`Updating Hub with device ${newDevice.udid}`);
         const nodeDevices = new NodeDevices(this.pluginArgs.hub);
         await nodeDevices.postDevicesToHub([trackedDevice], 'add');
-      } else {
-        addNewDevice([trackedDevice]);
       }
+      
+      // node also need a copy of devices, otherwise it cannot serve requests
+      addNewDevice([trackedDevice]);
     }
   }
 
@@ -338,10 +339,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
       await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
-    } else {
-      removeDevice([clonedDevice]);
-      this.abort(clonedDevice.udid);
-    }
+    } 
+
+    // node also need a copy of devices, otherwise it cannot serve requests
+    removeDevice([clonedDevice]);
+    this.abort(clonedDevice.udid);
   }
 
   private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string) {

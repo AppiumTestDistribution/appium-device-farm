@@ -164,10 +164,11 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.info(`Updating Hub with iOS device ${message.id}`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
         await nodeDevices.postDevicesToHub(deviceAttached, 'add');
-      } else {
-        log.info(`iOS device with udid ${message.id} plugged! updating device list...`);
-        addNewDevice(deviceAttached);
       }
+      // add device to local list
+      log.info(`iOS device with udid ${message.id} plugged! updating device list...`);
+      addNewDevice(deviceAttached);
+      
     });
     goIosTracker.on('device-removed', async (message) => {
       const deviceRemoved: any = [{ udid: message.id, host: pluginArgs.bindHostOrIp }];
@@ -175,10 +176,12 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
         await nodeDevices.postDevicesToHub(deviceRemoved, 'remove');
-      } else {
-        log.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
-        removeDevice(deviceRemoved);
       }
+
+      // remove device from local list
+      log.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
+      removeDevice(deviceRemoved);
+      
     });
   }
 
@@ -223,11 +226,14 @@ export default class IOSDeviceManager implements IDeviceManager {
     const simulators: Array<IDevice> = [];
     await this.fetchLocalSimulators(simulators);
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
-    if (this.pluginArgs.hub !== undefined) {
+
+    // should not be here, but we need to update the hub with simulators
+    /*if (this.pluginArgs.hub !== undefined) {
       log.info('Updating Hub with Simulators');
       const nodeDevices = new NodeDevices(this.pluginArgs.hub);
       await nodeDevices.postDevicesToHub(simulators, 'add');
-    }
+    }*/
+    
     return simulators;
   }
 

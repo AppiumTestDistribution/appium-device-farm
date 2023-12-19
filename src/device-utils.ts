@@ -32,14 +32,13 @@ import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
-import ip from 'ip';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { PendingSessionsModel } from './data-service/db';
-import { node } from '@appium/support';
+
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
-  deviceQueryInteval: 'appium:deviceRetryInterval',
+  deviceQueryInterval: 'appium:deviceRetryInterval',
   iphoneOnly: 'appium:iPhoneOnly',
   ipadOnly: 'appium:iPadOnly',
   udids: 'appium:udids',
@@ -104,7 +103,7 @@ export async function allocateDeviceForSession(
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
-    firstMatch[customCapability.deviceQueryInteval] || deviceQueryIntervalMs;
+    firstMatch[customCapability.deviceQueryInterval] || deviceQueryIntervalMs;
 
   try {
     await waitUntil(
@@ -115,7 +114,7 @@ export async function allocateDeviceForSession(
             `Waiting for session available, already at max session count of: ${maxSessions}`,
           );
           return false;
-        } else log.info('Waiting for free device');
+        } else log.info(`Waiting for free device. Filter: ${JSON.stringify(filters)}}`);
         return (await getDevice(filters)) != undefined;
       },
       { timeout, intervalBetweenAttempts },
@@ -219,23 +218,27 @@ export function getDeviceFiltersFromCapability(
     platform == DevicePlatform.IOS
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
+  
   if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
     );
   }
+
   if (deviceType?.startsWith('real') && pluginArgs.iosDeviceType == 'simulated') {
     throw new Error(
       'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
     );
   }
-  let name = '';
+
+  let name: string | undefined = undefined;
   if (capability[customCapability.ipadOnly]) {
     name = 'iPad';
   } else if (capability[customCapability.iphoneOnly]) {
     name = 'iPhone';
   }
-  return {
+
+  let caps = {
     platform,
     platformVersion: capability['appium:platformVersion']
       ? capability['appium:platformVersion']
@@ -243,11 +246,16 @@ export function getDeviceFiltersFromCapability(
     name,
     deviceType,
     udid: udids?.length ? udids : capability['appium:udid'],
-    busy: false,
     userBlocked: false,
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
   };
+
+  if (name !== undefined) {
+    caps = { ...caps, name };
+  }
+
+  return caps
 }
 
 /**
@@ -267,16 +275,24 @@ export async function getBusyDevicesCount() {
 export async function updateDeviceList(hubArgument?: string): Promise<IDevice[]> {
   const devices: IDevice[] = await getDeviceManager().getDevices(getAllDevices());
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
+  
+  // first thing first. Update device list in local list
+  addNewDevice(devices);
+
   if (hubArgument) {
-    const nodeDevices = new NodeDevices(hubArgument);
-    try {
-      await nodeDevices.postDevicesToHub(devices, 'add');
-    } catch (error) {
-      log.error(`Cannot send device list update. Reason: ${error}`);
+    if (await isDeviceFarmRunning(hubArgument)) {
+      const nodeDevices = new NodeDevices(hubArgument);
+      try {
+        await nodeDevices.postDevicesToHub(devices, 'add');
+      } catch (error) {
+        log.error(`Cannot send device list update. Reason: ${error}`);
+      }
+    } else {
+      log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
-  } else {
-    addNewDevice(devices);
-  }
+  } 
+    
+  
 
   return devices;
 }
@@ -394,11 +410,7 @@ export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs:
   );
 
   cronTimerToUpdateDevices = setInterval(async () => {
-    if (await isDeviceFarmRunning(hubArgument)) {
-      await updateDeviceList(hubArgument);
-    } else {
-      log.warn(`Not sending device update since hub ${hubArgument} is not running`);
-    }
+    await updateDeviceList(hubArgument);
   }, intervalMs);
 }
 

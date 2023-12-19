@@ -3,6 +3,7 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
+import semver from 'semver';
 
 export function removeDevice(devices: { udid: string; host: string }[]) {
   devices.forEach(function (device) {
@@ -42,7 +43,13 @@ export function addNewDevice(devices: IDevice[]): IDevice[] {
   });
 
   // nasty hack to remove undefined values from array while satisfying typescript checker
-  return addedDevices.filter((device): device is IDevice => Boolean(device));
+  const result = addedDevices.filter((device): device is IDevice => Boolean(device));
+  log.debug(`Added ${result.length} new devices to local database`);
+
+  log.debug(`Added devices: ${JSON.stringify(result)}`);
+  log.debug(`All devices: ${JSON.stringify(DeviceModel.chain().find().data())}`);
+  
+  return result
 }
 
 export function setSimulatorState(devices: Array<IDevice>) {
@@ -77,22 +84,26 @@ export function getAllDevices(): Array<IDevice> {
  * @returns IDevice[]
  */
 export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
-  const semver = require('semver');
   let results = DeviceModel.chain();
+  
 
   if (semver.coerce(filterOptions.minSDK)) {
+    const coercedMinSDK = semver.coerce(filterOptions.minSDK);
     results = results.where(function (obj: IDevice) {
-      if (semver.coerce(obj.sdk)) {
-        return semver.gte(semver.coerce(obj.sdk), semver.coerce(filterOptions.minSDK));
+      const coercedSDK = semver.coerce(obj.sdk);
+      if (coercedSDK && coercedMinSDK) {
+        return semver.gte(coercedSDK, coercedMinSDK);
       }
       return false;
     });
   }
 
   if (semver.coerce(filterOptions.maxSDK)) {
+    const coercedMaxSDK = semver.coerce(filterOptions.maxSDK);
     results = results.where(function (obj: IDevice) {
-      if (semver.coerce(obj.sdk)) {
-        return semver.lte(semver.coerce(obj.sdk), semver.coerce(filterOptions.maxSDK));
+      const coercedSDK = semver.coerce(obj.sdk);
+      if (coercedSDK && coercedMaxSDK) {
+        return semver.lte(coercedSDK, coercedMaxSDK);
       }
       return false;
     });
@@ -100,9 +111,12 @@ export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
 
   const filter = {
     platform: filterOptions.platform,
-    name: { $contains: filterOptions.name || '' },
     busy: filterOptions.busy,
   } as any;
+
+  if (filterOptions.name !== undefined) {
+    filter.name = { $contains: filterOptions.name };
+  }
 
   if (filterOptions.platformVersion) {
     filter.sdk = filterOptions.platformVersion;
@@ -115,7 +129,17 @@ export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
   }
-  return results.find(filter).data();
+
+  const matchingDevices = results.find(filter).data();
+  log.debug(`available devices: ${JSON.stringify(DeviceModel.chain().find().data())}`);
+  DeviceModel.chain().find().data().forEach((device) => {
+    log.debug(`device platform: ${device.platform}, filter platform: ${filter.platform}. is it equal? ${device.platform === filter.platform}`);
+  })
+  log.debug(`filter: ${JSON.stringify(filter)}`);
+  log.debug(`results: ${JSON.stringify(matchingDevices)}`)
+  log.debug(`expected result: ${JSON.stringify(DeviceModel.find(filter))}`);
+
+  return matchingDevices;
 }
 
 /**
