@@ -1,4 +1,4 @@
-import { DeviceModel } from './db';
+import { ADTDatabase } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
@@ -8,18 +8,22 @@ import semver from 'semver';
 export function removeDevice(devices: { udid: string; host: string }[]) {
   devices.forEach(function (device) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
-    DeviceModel.chain()
+    ADTDatabase.instance().DeviceModel.chain()
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
   });
 }
 
-export function addNewDevice(devices: IDevice[]): IDevice[] {
+export function addNewDevice(devices: IDevice[], host?: string): IDevice[] {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
   const addedDevices = devices.map(function (device) {
-    const isDeviceAlreadyPresent = DeviceModel.chain()
+    // make sure all devices have host
+    if (device.host === undefined && host !== undefined) {
+      device.host = host;
+    }
+    const isDeviceAlreadyPresent = ADTDatabase.instance().DeviceModel.chain()
       .find({ udid: device.udid, host: device.host })
       .data();
     if (isDeviceAlreadyPresent.length === 0) {
@@ -28,7 +32,7 @@ export function addNewDevice(devices: IDevice[]): IDevice[] {
       // @ts-ignore
       delete device['meta'];
       try {
-        DeviceModel.insert({
+        ADTDatabase.instance().DeviceModel.insert({
           ...device,
           offline: false,
           userBlocked: false,
@@ -47,7 +51,7 @@ export function addNewDevice(devices: IDevice[]): IDevice[] {
   log.debug(`Added ${result.length} new devices to local database`);
 
   log.debug(`Added devices: ${JSON.stringify(result)}`);
-  log.debug(`All devices: ${JSON.stringify(DeviceModel.chain().find().data())}`);
+  log.debug(`All devices: ${JSON.stringify(ADTDatabase.instance().DeviceModel.chain().find().data())}`);
   
   return result
 }
@@ -57,14 +61,14 @@ export function setSimulatorState(devices: Array<IDevice>) {
    * Update the Latest Simulator state in DB
    */
   devices.forEach(function (device) {
-    const allDevices = DeviceModel.chain().find().data();
+    const allDevices = ADTDatabase.instance().DeviceModel.chain().find().data();
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
         log.info(
           `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
-        DeviceModel.chain()
+        ADTDatabase.instance().DeviceModel.chain()
           .find({ udid: device.udid })
           .update(function (d: IDevice) {
             d.state = device.state;
@@ -75,7 +79,7 @@ export function setSimulatorState(devices: Array<IDevice>) {
 }
 
 export function getAllDevices(): Array<IDevice> {
-  return DeviceModel.chain().find().data();
+  return ADTDatabase.instance().DeviceModel.chain().find().data();
 }
 
 /**
@@ -84,60 +88,93 @@ export function getAllDevices(): Array<IDevice> {
  * @returns IDevice[]
  */
 export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
-  let results = DeviceModel.chain();
-  
+  // host, userBlocked must not be undefined
+  const basicFilter = { host: { $ne: undefined }, userBlocked: { $ne: undefined } };
+  let results = ADTDatabase.instance().DeviceModel.chain().find(basicFilter);
+  const filter = {} as any;
 
-  if (semver.coerce(filterOptions.minSDK)) {
-    const coercedMinSDK = semver.coerce(filterOptions.minSDK);
-    results = results.where(function (obj: IDevice) {
-      const coercedSDK = semver.coerce(obj.sdk);
-      if (coercedSDK && coercedMinSDK) {
-        return semver.gte(coercedSDK, coercedMinSDK);
+  // for every keys in filterOptions, add it to the filter or modify the results query
+  type FilterOptionsKey = keyof IDeviceFilterOptions;
+  const filterOptionKeys = Object.keys(filterOptions) as FilterOptionsKey[];
+  filterOptionKeys
+    .filter(key => filterOptions[key] !== undefined)
+    .forEach((key: FilterOptionsKey) => {
+      switch (key) {
+        case 'platform':
+          filter.platform = filterOptions.platform;
+          break;
+        case 'platformVersion':
+          filter.sdk = filterOptions.platformVersion;
+          break;
+        case 'name':
+          // only is name is not empty nor undefined
+          if (filterOptions.name) filter.name = { $contains: filterOptions.name };
+          break;
+        case 'busy':
+          filter.busy = filterOptions.busy;
+          break;
+        case 'offline':
+          filter.offline = filterOptions.offline;
+          break;
+        case 'userBlocked':
+          filter.userBlocked = filterOptions.userBlocked;
+          break;
+        case 'udid':
+          filter.udid = filterOptions.udid;
+          break;
+        case 'deviceType':
+          filter.deviceType = filterOptions.deviceType;
+          break;
+        case 'session_id':
+          filter.session_id = filterOptions.session_id;
+          break;
+        case 'minSDK':
+          if (semver.coerce(filterOptions.minSDK)) {
+            log.debug(`minSDK: ${filterOptions.minSDK}`);
+            const coercedMinSDK = semver.coerce(filterOptions.minSDK);
+            results = results.where(function (obj: IDevice) {
+              const coercedSDK = semver.coerce(obj.sdk);
+              
+              if (coercedSDK && coercedMinSDK) {
+                log.debug(`coerced obj SDK: ${coercedSDK} >= coercedMinSDK: ${coercedMinSDK}`);
+                return semver.gte(coercedSDK, coercedMinSDK);
+              }
+              return false;
+            });
+          }
+          break;
+        case 'maxSDK':
+          if (semver.coerce(filterOptions.maxSDK)) {
+            log.debug(`maxSDK: ${filterOptions.maxSDK}`);
+            const coercedMaxSDK = semver.coerce(filterOptions.maxSDK);
+            results = results.where(function (obj: IDevice) {
+              const coercedSDK = semver.coerce(obj.sdk);
+              log.debug(`coerced obj SDK: ${coercedSDK}`);
+              if (coercedSDK && coercedMaxSDK) {
+                return semver.lte(coercedSDK, coercedMaxSDK);
+              }
+              return false;
+            });
+          }
+          break;
+        default:
+          // do not remove this line as it will help us to know if we have missed any filter options
+          const exhaustiveCheck: never = key;
+          break;
       }
-      return false;
-    });
-  }
-
-  if (semver.coerce(filterOptions.maxSDK)) {
-    const coercedMaxSDK = semver.coerce(filterOptions.maxSDK);
-    results = results.where(function (obj: IDevice) {
-      const coercedSDK = semver.coerce(obj.sdk);
-      if (coercedSDK && coercedMaxSDK) {
-        return semver.lte(coercedSDK, coercedMaxSDK);
-      }
-      return false;
-    });
-  }
-
-  const filter = {
-    platform: filterOptions.platform,
-    busy: filterOptions.busy,
-  } as any;
-
-  if (filterOptions.name !== undefined) {
-    filter.name = { $contains: filterOptions.name };
-  }
-
-  if (filterOptions.platformVersion) {
-    filter.sdk = filterOptions.platformVersion;
-  }
-
-  if (filterOptions.udid) {
-    filter.udid = { $in: filterOptions.udid };
-  }
+    })
 
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
   }
 
+  
   const matchingDevices = results.find(filter).data();
-  log.debug(`available devices: ${JSON.stringify(DeviceModel.chain().find().data())}`);
-  DeviceModel.chain().find().data().forEach((device) => {
-    log.debug(`device platform: ${device.platform}, filter platform: ${filter.platform}. is it equal? ${device.platform === filter.platform}`);
-  })
+  log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);
+  log.debug(`all devices: ${JSON.stringify(ADTDatabase.instance().DeviceModel.chain().find().data())}`);
+  log.debug(`basic filter applied devices: ${JSON.stringify(ADTDatabase.instance().DeviceModel.chain().find(basicFilter).data())}`);
   log.debug(`filter: ${JSON.stringify(filter)}`);
-  log.debug(`results: ${JSON.stringify(matchingDevices)}`)
-  log.debug(`expected result: ${JSON.stringify(DeviceModel.find(filter))}`);
+  log.debug(`results: ${JSON.stringify(matchingDevices)}`);
 
   return matchingDevices;
 }
@@ -149,6 +186,7 @@ export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
  */
 export function getDevice(filterOptions: IDeviceFilterOptions): IDevice | undefined {
   const devices = getDevices(filterOptions);
+  // log.debug(`getDevice devices: ${JSON.stringify(devices)}`);
   if (devices.length === 0) {
     return undefined;
   } else {
@@ -158,7 +196,7 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice | undefi
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
   log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
-  DeviceModel.chain()
+  ADTDatabase.instance().DeviceModel.chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
       Object.assign(device, {
@@ -168,12 +206,12 @@ export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDev
 }
 
 function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
-  const filterDevice = DeviceModel.chain().find({
+  const filterDevice = ADTDatabase.instance().DeviceModel.chain().find({
     udid: device.udid,
   });
   if (filterDevice.data().length > 1) {
     const find = filterDevice.data().find((d) => d.busy === false);
-    DeviceModel.chain()
+    ADTDatabase.instance().DeviceModel.chain()
       .find({ udid: find.udid, host: find.host })
       .update(function (device: IDevice) {
         Object.assign(device, {
@@ -190,7 +228,7 @@ function updateDevice(device: IDevice, updateData: Partial<IDevice>) {
 }
 
 export function updateCmdExecutedTime(sessionId: string) {
-  DeviceModel.chain()
+  ADTDatabase.instance().DeviceModel.chain()
     .find({ session_id: sessionId })
     .update(function (device: IDevice) {
       device.lastCmdExecutedAt = new Date().getTime();
@@ -204,7 +242,7 @@ export function updateCmdExecutedTime(sessionId: string) {
  */
 export async function userBlockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  DeviceModel.chain()
+  ADTDatabase.instance().DeviceModel.chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = true;
@@ -213,7 +251,7 @@ export async function userBlockDevice(udid: string, host: string) {
 
 export async function userUnblockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  DeviceModel.chain()
+  ADTDatabase.instance().DeviceModel.chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = false;
@@ -227,7 +265,7 @@ export async function userUnblockDevice(udid: string, host: string) {
  */
 export async function blockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  DeviceModel.chain()
+  ADTDatabase.instance().DeviceModel.chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.busy = true;
@@ -240,7 +278,13 @@ export async function unblockDevice(udid: string, host: string) {
 }
 
 export async function unblockDeviceMatchingFilter(filter: object) {
-  const devices = DeviceModel.chain().find(filter).data();
+  let devices;
+  if (Object.keys(filter).length === 0) {
+    devices = ADTDatabase.instance().DeviceModel.chain().find().data();
+  } else {
+    devices = ADTDatabase.instance().DeviceModel.chain().find(filter).data();
+  }
+
   if (devices !== undefined) {
     log.debug(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
@@ -255,7 +299,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
         }
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
         await setUtilizationTime(device.udid, totalUtilization);
-        DeviceModel.findAndUpdate(
+        ADTDatabase.instance().DeviceModel.findAndUpdate(
           { udid: device.udid, host: device.host },
           function (device: IDevice) {
             // log.debug(`Unblocking device ${device.udid} from host ${device.host}`);

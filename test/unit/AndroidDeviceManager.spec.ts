@@ -7,7 +7,7 @@ import { getAdbOriginal } from './GetAdbOriginal';
 import ip from 'ip';
 import _ from 'lodash';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-import { DeviceModel } from '../../src/data-service/db';
+import { ADTDatabase } from '../../src/data-service/db';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
 
 var sandbox = sinon.createSandbox();
@@ -191,7 +191,7 @@ describe('Android Device Manager', function () {
     ]);
   });
   it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
-    DeviceModel.removeDataOnly();
+    ADTDatabase.instance().DeviceModel.removeDataOnly();
     const pluginArgs = Object.assign({}, DefaultPluginArgs, {
       platform: "android", 
       'device-types': 'both',

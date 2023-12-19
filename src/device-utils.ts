@@ -33,7 +33,7 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
-import { PendingSessionsModel } from './data-service/db';
+import { ADTDatabase } from './data-service/db';
 
 
 const customCapability = {
@@ -99,6 +99,7 @@ export async function allocateDeviceForSession(
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+
   log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const intervalBetweenAttempts =
@@ -246,6 +247,7 @@ export function getDeviceFiltersFromCapability(
     name,
     deviceType,
     udid: udids?.length ? udids : capability['appium:udid'],
+    busy: false,
     userBlocked: false,
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
@@ -272,12 +274,12 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(hubArgument?: string): Promise<IDevice[]> {
+export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
   const devices: IDevice[] = await getDeviceManager().getDevices(getAllDevices());
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
   
   // first thing first. Update device list in local list
-  addNewDevice(devices);
+  addNewDevice(devices, host);
 
   if (hubArgument) {
     if (await isDeviceFarmRunning(hubArgument)) {
@@ -309,51 +311,71 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
 
 export async function setupCronCheckStaleDevices(intervalMs: number, currentHost: string) {
   setInterval(async () => {
-    const allDevices = getAllDevices();
-    const nodeDevices = allDevices.filter((device) => {
-      // devices that's not from this node ip address
-      return !device.host.includes(currentHost);
-    });
-
-    const nodeHosts = nodeDevices
-      .filter((device) => !device.hasOwnProperty('cloud'))
-      .map((device) => device.host);
-    const cloudHosts = nodeDevices
-      .filter((device) => device.hasOwnProperty('cloud'))
-      .map((device) => device.host);
-
-    const aliveHosts = (await Promise.allSettled(
-      nodeHosts.map(async (host) => {
-        return {
-          host: host,
-          alive: await isDeviceFarmRunning(host),
-        };
-      }),
-    )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
-
-    const aliveCloudHosts = (await Promise.allSettled(
-      cloudHosts.map(async (host) => {
-        return {
-          host: host,
-          alive: await isAppiumRunningAt(host),
-        };
-      }),
-    )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
-
-    // summarize alive hosts
-    const allAliveHosts = [...aliveHosts, ...aliveCloudHosts]
-      .filter((item) => item.status === 'fulfilled')
-      .map((item) => item.value.host);
-
-    // stale devices are devices that's not alive
-    const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
-    removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
-    log.info(
-      `Removing Device with udid(s): ${staleDevices
-        .map((device) => device.udid)
-        .join(', ')} because the node is not alive`,
-    );
+    await removeStaleDevices(currentHost);
   }, intervalMs);
+}
+
+/**
+ * Remove devices where the host is not alive nor defined.
+ * @param currentHost current host ip address
+ */
+export async function removeStaleDevices(currentHost: string) {
+  const allDevices = getAllDevices();
+  const nodeDevices = allDevices.filter((device) => {
+    // devices that's not from this node ip address
+    return !device.host.includes(currentHost);
+  });
+
+  const devicesWithNoHost = nodeDevices.filter((device) => {
+    return device.host === undefined;
+  });
+
+  const nodeHosts = nodeDevices
+    .filter((device) => !device.hasOwnProperty('cloud'))
+    .map((device) => device.host);
+  const cloudHosts = nodeDevices
+    .filter((device) => device.hasOwnProperty('cloud'))
+    .map((device) => device.host);
+
+  const aliveHosts = (await Promise.allSettled(
+    nodeHosts.map(async (host) => {
+      return {
+        host: host,
+        alive: await isDeviceFarmRunning(host),
+      };
+    })
+  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean; }; }[];
+
+  const aliveCloudHosts = (await Promise.allSettled(
+    cloudHosts.map(async (host) => {
+      return {
+        host: host,
+        alive: await isAppiumRunningAt(host),
+      };
+    })
+  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean; }; }[];
+
+  // summarize alive hosts
+  const allAliveHosts = [...aliveHosts, ...aliveCloudHosts]
+    .filter((item) => item.status === 'fulfilled')
+    .map((item) => item.value.host);
+
+  // stale devices are devices that's not alive
+  const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
+  removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
+  log.debug(
+    `Removing Device with udid(s): ${staleDevices
+      .map((device) => device.udid)
+      .join(', ')} because the node is not alive`
+  );
+
+  // remove devices with no host
+  removeDevice(devicesWithNoHost.map((device) => ({ udid: device.udid, host: device.host })));
+  log.debug(
+    `Removing Device with udid(s): ${devicesWithNoHost
+      .map((device) => device.udid)
+      .join(', ')} because the device has no host`
+  );
 }
 
 export async function unblockCandidateDevices() {
@@ -401,7 +423,7 @@ export async function setupCronReleaseBlockedDevices(
   }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number) {
+export async function setupCronUpdateDeviceList(host: string, hubArgument: string, intervalMs: number) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }
@@ -410,12 +432,12 @@ export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs:
   );
 
   cronTimerToUpdateDevices = setInterval(async () => {
-    await updateDeviceList(hubArgument);
+    await updateDeviceList(host, hubArgument);
   }, intervalMs);
 }
 
 export async function cleanPendingSessions(timeoutMs: number) {
-  const pendingSessions = PendingSessionsModel.chain().find().data();
+  const pendingSessions = ADTDatabase.instance().PendingSessionsModel.chain().find().data();
   const currentEpoch = new Date().getTime();
   const timedOutSessions = pendingSessions.filter((session) => {
     const timeSinceSessionCreated = currentEpoch - session.createdAt;
@@ -431,7 +453,7 @@ export async function cleanPendingSessions(timeoutMs: number) {
   }
   timedOutSessions.forEach((session) => {
     log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
-    PendingSessionsModel.remove(session);
+    ADTDatabase.instance().PendingSessionsModel.remove(session);
   });
 }
 

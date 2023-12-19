@@ -2,7 +2,7 @@ import { cleanPendingSessions, getDeviceFiltersFromCapability } from '../../src/
 import { expect } from 'chai';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../integration/cliArgs';
-import { CLIArgs, PendingSessionsModel } from '../../src/data-service/db';
+import { ADTDatabase } from '../../src/data-service/db';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 
 const pluginArgs = DefaultPluginArgs;
@@ -10,7 +10,7 @@ const pluginArgs = DefaultPluginArgs;
 describe('Device filter tests', () => {
   it('Get Device filters for real device', async () => {
     await addCLIArgs(serverCliArgs);
-    CLIArgs.chain()
+    ADTDatabase.instance().CLIArgs.chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
@@ -41,7 +41,7 @@ describe('Device filter tests', () => {
   });
 
   it('Get Device from filter properties for simulator', () => {
-    CLIArgs.chain()
+    ADTDatabase.instance().CLIArgs.chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'simulated';
@@ -99,14 +99,14 @@ describe('Device filter tests', () => {
 describe("Pending sessions", async () => {
   it('clean pending sessions', async () => {
     // insert pending sessions
-    PendingSessionsModel.insert({capability_id: '1', createdAt: new Date().getTime()});
-    PendingSessionsModel.insert({capability_id: '2', createdAt: new Date().getTime() - 10000});
+    ADTDatabase.instance().PendingSessionsModel.insert({capability_id: '1', createdAt: new Date().getTime()});
+    ADTDatabase.instance().PendingSessionsModel.insert({capability_id: '2', createdAt: new Date().getTime() - 10000});
     
     // clean pending sessions
     await cleanPendingSessions(5000);
 
     // check pending sessions
-    const pendingSessions = PendingSessionsModel.chain().data();
+    const pendingSessions = ADTDatabase.instance().PendingSessionsModel.chain().data();
     expect(pendingSessions.length).to.equal(1);
   })
 });

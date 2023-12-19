@@ -82,7 +82,7 @@ describe('E2E', () => {
   });
 
 
-  it.only('can forward session request to node', async () => {
+  it('can forward session request to node', async () => {
     if (hub_config.bindHostOrIp == node_config.bindHostOrIp) {
       it.skip('node and hub should not be using the same host');
     }
@@ -106,7 +106,7 @@ describe('E2E', () => {
 
 
     // one of the device should come from node
-    const nodeDevice = allDevices.filter((device: any) => device.host.includes(node_config.bindHostOrIp));
+    const nodeDevice = allDevices.filter((device: any) => device.host?.includes(node_config.bindHostOrIp));
     
     expect(nodeDevice).to.not.be.undefined;
 

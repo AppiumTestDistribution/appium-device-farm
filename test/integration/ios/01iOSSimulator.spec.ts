@@ -6,9 +6,8 @@ import {
   updateDeviceList,
   allocateDeviceForSession,
   initializeStorage,
-  getBusyDevicesCount,
 } from '../../../src/device-utils';
-import { DeviceModel } from '../../../src/data-service/db';
+import { ADTDatabase } from '../../../src/data-service/db';
 
 import Simctl from 'node-simctl';
 import { addCLIArgs } from '../../../src/data-service/pluginArgs';
@@ -24,11 +23,11 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.
 
 function markSimulatorsAsBooted() {
   // mark simulators as booted
-  DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator' }).update((device) => {
+  ADTDatabase.instance().DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator' }).update((device) => {
     device.state = 'Booted';
   });
 
-  const simulators = DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
+  const simulators = ADTDatabase.instance().DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
   // console.log('simulators: ', simulators);
 }
 
@@ -47,7 +46,7 @@ describe('Max sessions CLI argument test', () => {
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
     
     const capabilities = {
@@ -62,7 +61,7 @@ describe('Max sessions CLI argument test', () => {
     };
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allDeviceIds = DeviceModel.chain().find({ udid: device.udid }).data();
+    const allDeviceIds = ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -79,7 +78,7 @@ describe('Max sessions CLI argument test', () => {
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
 
     const capabilities = {
@@ -108,13 +107,13 @@ describe('Max sessions CLI argument test', () => {
     // set all devices to busy
     const allDevices = await deviceManager.getDevices();
     allDevices.forEach((device) => {
-      DeviceModel.chain().find({ udid: device.udid, platform: 'ios' }).update((device) => {
+      ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid, platform: 'ios' }).update((device) => {
         device.busy = true;
       });
     });
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
 
     const capabilities = {
@@ -148,7 +147,7 @@ describe('IOS Simulator Test', () => {
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
 
     const capabilities = {
@@ -163,7 +162,7 @@ describe('IOS Simulator Test', () => {
     };
     // console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-    const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
+    const allocatedSimulator = ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid }).data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
     expect(foundSimulator.name).to.match(/^iPhone/);
@@ -175,7 +174,7 @@ describe('IOS Simulator Test', () => {
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
 
     const capabilities = {
@@ -191,7 +190,7 @@ describe('IOS Simulator Test', () => {
     // console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
+    const allocatedSimulator = ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid }).data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
     expect(foundSimulator.name).to.match(/^iPad/);
@@ -204,7 +203,7 @@ describe('IOS Simulator Test', () => {
       const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
       Container.set(DeviceFarmManager, deviceManager);
       const hub = pluginArgs.hub
-      await updateDeviceList(hub);
+      await updateDeviceList(pluginArgs.bindHostOrIp, hub);
       markSimulatorsAsBooted();
 
       const capabilities = {
@@ -217,7 +216,7 @@ describe('IOS Simulator Test', () => {
       };
       const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-      const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
+      const allocatedSimulator = ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid }).data();
       const foundSimulator = allocatedSimulator[0];
       expect(foundSimulator.busy).to.be.true;
       expect(foundSimulator.name).to.match(/^Apple TV/);
@@ -245,7 +244,7 @@ describe('Boot simulator test', async () => {
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, Object.assign({}, DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -258,7 +257,7 @@ describe('Boot simulator test', async () => {
     const devices = await deviceManager.getDevices();
     console.log('devices: ', devices);
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-    const allocatedSimulator = DeviceModel.chain().find({ udid: device.udid }).data();
+    const allocatedSimulator = ADTDatabase.instance().DeviceModel.chain().find({ udid: device.udid }).data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });
   after('Delete simulator', async () => {

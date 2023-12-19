@@ -35,6 +35,7 @@ import {
   setupCronCheckStaleDevices,
   updateDeviceList,
   setupCronCleanPendingSessions,
+  removeStaleDevices,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -163,32 +164,38 @@ class DevicePlugin extends BasePlugin {
     if (hubArgument !== undefined) {
       log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
       // hub may have been restarted, so let's send device list regularly
-      await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
+      await setupCronUpdateDeviceList(pluginArgs.bindHostOrIp, hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
     } else {
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
-      // I'm a hub so let's:
-      // check for stale nodes
-      await setupCronCheckStaleDevices(
-        pluginArgs.checkStaleDevicesIntervalMs,
-        pluginArgs.bindHostOrIp,
-      );
-      // and release blocked devices
-      await setupCronReleaseBlockedDevices(
-        pluginArgs.checkBlockedDevicesIntervalMs,
-        pluginArgs.newCommandTimeoutSec,
-      );
-      // and clean up pending sessions
-      await setupCronCleanPendingSessions(
-        pluginArgs.checkBlockedDevicesIntervalMs,
-        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
-      );
     }
 
-    const devicesUpdates = await updateDeviceList(hubArgument);
+    // check for stale nodes
+    await setupCronCheckStaleDevices(
+      pluginArgs.checkStaleDevicesIntervalMs,
+      pluginArgs.bindHostOrIp,
+    );
+    // and release blocked devices
+    await setupCronReleaseBlockedDevices(
+      pluginArgs.checkBlockedDevicesIntervalMs,
+      pluginArgs.newCommandTimeoutSec,
+    );
+    // and clean up pending sessions
+    await setupCronCleanPendingSessions(
+      pluginArgs.checkBlockedDevicesIntervalMs,
+      pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+    );
+
+    const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
+
+    // unblock all devices on node/hub restart
+    unblockDeviceMatchingFilter({});
+
+    // remove stale devices
+    removeStaleDevices(pluginArgs.bindHostOrIp);
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -263,7 +270,7 @@ class DevicePlugin extends BasePlugin {
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
     
     log.debug(`device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`);
-    if (!device.host.includes(this.pluginArgs.bindHostOrIp)) {
+    if (device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
     } else {

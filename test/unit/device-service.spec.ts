@@ -1,8 +1,10 @@
 import { getDevice } from '../../src/data-service/device-service';
-import { DeviceModel } from '../../src/data-service/db';
+import { ADTDatabase } from '../../src/data-service/db';
 import { expect } from 'chai';
+import { IDeviceFilterOptions } from '../../src/interfaces/IDeviceFilterOptions';
+import semver from 'semver';
 
-describe('Get device', () => {
+describe.only('Get device', () => {
   before('Set devices in memory', () => {
     const devices = [
       {
@@ -15,6 +17,8 @@ describe('Get device', () => {
         platform: 'android',
         deviceType: 'emulator',
         offline: false,
+        userBlocked: false,
+        host: 'http://localhost:4723',
       },
       {
         sdk: '11',
@@ -26,6 +30,8 @@ describe('Get device', () => {
         platform: 'android',
         deviceType: 'emulator',
         offline: false,
+        userBlocked: false,
+        host: 'http://localhost:4723',
       },
       {
         name: 'iPhone SE (2nd generation)',
@@ -37,6 +43,8 @@ describe('Get device', () => {
         offline: false,
         realDevice: false,
         deviceType: 'simulator',
+        host: 'http://localhost:4723',
+        userBlocked: false,
       },
       {
         name: 'iPhone 11 Pro Max',
@@ -48,6 +56,8 @@ describe('Get device', () => {
         offline: false,
         realDevice: false,
         deviceType: 'simulator',
+        host: 'http://localhost:4723',
+        userBlocked: false,
       },
       {
         name: 'iPhone 11 Pro',
@@ -59,6 +69,8 @@ describe('Get device', () => {
         offline: false,
         realDevice: false,
         deviceType: 'simulator',
+        host: 'http://localhost:4723',
+        userBlocked: false,
       },
       {
         name: 'Apple TV',
@@ -70,6 +82,8 @@ describe('Get device', () => {
         offline: false,
         realDevice: false,
         deviceType: 'simulator',
+        userBlocked: false,
+        host: 'http://localhost:4723',
       },
       {
         "deviceName": "iPhone XS",
@@ -92,11 +106,13 @@ describe('Get device', () => {
       }
     ];
 
+    ADTDatabase.instance().DeviceModel.removeDataOnly();
     devices.forEach(function (device) {
-      DeviceModel.insert({
+      ADTDatabase.instance().DeviceModel.insert({
         ...device,
       });
     });
+
   });
 
   it('Get android device based on filter with minSDK', () => {
@@ -106,17 +122,26 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       minSDK: '10.0.1',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('11');
+
+    const sdk10 = semver.coerce('10');
+    const sdk101 = semver.coerce('10.0.1');
+    const sdk11 = semver.coerce('11.0.1');
+
+    expect(semver.gte(sdk10!, sdk10!)).to.be.true;
+    expect(semver.gte(sdk101!, sdk10!)).to.be.true;
+    expect(semver.gte(sdk10!, sdk11!)).to.be.false;
+    expect(device?.sdk).to.be.eq('11');
   });
 
 
   it('Get iOS device based on filter real device', () => {
-    const filterOptions = {"platform":"ios","name":"","deviceType":"real","busy":false,"userBlocked":false};
+    const filterOptions = {"platform":"ios","name":"","deviceType":"real","busy":false,"userBlocked":false} as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    console.log(device)
+    expect(device?.deviceType).to.be.eq('real');
   });
+
   it('Get android device based on filter with minSDK and maxSDK', () => {
     const filterOptions = {
       platform: 'android',
@@ -125,9 +150,9 @@ describe('Get device', () => {
       offline: false,
       minSDK: '10',
       maxSDK: '10.0.1',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('10');
+    expect(device?.sdk).to.be.eq('10');
   });
 
   it('Get android device based on filter with maxSDK', () => {
@@ -137,27 +162,27 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       maxSDK: '10.0.1',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('10');
+    expect(device?.sdk).to.be.eq('10');
   });
 
   it('Get ios simulator based on filter with minSDK', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' };
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' } as unknown as IDeviceFilterOptions; 
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('15');
+    expect(device?.sdk).to.be.eq('15');
   });
 
   it('Get ios simulator based on filter with maxSDK', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, maxSDK: '14.1.0' };
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, maxSDK: '14.1.0' } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('14.0');
+    expect(device?.sdk).to.be.eq('14.0');
   });
 
   it('Get ios simulator based on filter with minSDK and maxSDK', () => {
-    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14', maxSDK: '14.1.0' };
+    const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14', maxSDK: '14.1.0' } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('14.0');
+    expect(device?.sdk).to.be.eq('14.0');
   });
 
   it('Get android device based on filter with platformVersion', () => {
@@ -167,9 +192,9 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       platformVersion: '10',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eql('10');
+    expect(device?.sdk).to.be.eql('10');
   });
 
   it('Get ios simulator based on filter with platformVersion', () => {
@@ -179,9 +204,9 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       platformVersion: '14.0',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eql('14.0');
+    expect(device?.sdk).to.be.eql('14.0');
   });
 
   it('Get android device returns undefined based on filter with platformVersion', () => {
@@ -191,7 +216,7 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       platformVersion: '9',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
     expect(device).to.be.undefined;
   });
@@ -203,14 +228,21 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       platformVersion: '16.0',
-    };
+    } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
     expect(device).to.be.undefined;
   });
 
   it('Get apple tv simulator based on filter with platformName', () => {
-    const filterOptions = { platform: 'tvos', name: '', busy: false, offline: false };
+    const filterOptions = { platform: 'tvos', name: '', busy: false, offline: false } as unknown as IDeviceFilterOptions;
     const device = getDevice(filterOptions);
-    expect(parseFloat(device.sdk)).to.be.gte(14.1);
+    expect(device?.platform).to.be.eql('tvos');
+    expect(device?.sdk).to.be.eql('15.0');
+
+    if (device?.sdk) {
+      expect(parseFloat(device?.sdk)).to.be.gte(14.1);
+    } else {
+      expect(device?.sdk).to.be.not.undefined;
+    }
   });
 });

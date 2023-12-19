@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
-import { DeviceModel } from '../../src/data-service/db';
+import { ADTDatabase } from '../../src/data-service/db';
 import {
   updateDeviceList,
   allocateDeviceForSession,
@@ -20,7 +20,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -31,7 +31,7 @@ describe('Android Test', () => {
       firstMatch: [{}],
     };
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = DeviceModel.chain().find({ udid: devices.udid }).data();
+    const allDeviceIds = ADTDatabase.instance().DeviceModel.chain().find({ udid: devices.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -39,7 +39,7 @@ describe('Android Test', () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign({}, DefaultPluginArgs, pluginArgs));
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(pluginArgs.bindHostOrIp);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -53,14 +53,14 @@ describe('Android Test', () => {
     // wait until there are two devices and both are not offline
     let devices: IDevice[];
     waitUntil(async () => {
-      await updateDeviceList();
+      await updateDeviceList(pluginArgs.bindHostOrIp);
       devices = await deviceManager.getDevices();
       
       return devices.length === 2 && devices.every((device: IDevice) => !device.offline);
     })
     
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = DeviceModel.chain().find().data();
+    const allDeviceIds = ADTDatabase.instance().DeviceModel.chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
 
@@ -69,7 +69,7 @@ describe('Android Test', () => {
     const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
-    await updateDeviceList(hub);
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',

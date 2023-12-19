@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import log from './logger';
-import { DeviceModel, PendingSessionsModel } from './data-service/db';
+import { ADTDatabase } from './data-service/db';
 import { getCLIArgs } from './data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
@@ -52,7 +52,7 @@ apiRouter.use(async (req, res, next) => {
 });
 
 apiRouter.get('/devices', async (req, res) => {
-  let devices = DeviceModel.find();
+  let devices = ADTDatabase.instance().DeviceModel.find();
   if (req.query.sessionId) {
     return res.json(devices.find((value) => value.session_id === req.query.sessionId));
   }
@@ -81,11 +81,11 @@ apiRouter.get('/devices', async (req, res) => {
 });
 
 apiRouter.get('/queues/length', (req, res) => {
-  res.json(PendingSessionsModel.chain().find().count());
+  res.json(ADTDatabase.instance().PendingSessionsModel.chain().find().count());
 });
 
 apiRouter.get('/queues', (req, res) => {
-  res.json(PendingSessionsModel.chain().find().data());
+  res.json(ADTDatabase.instance().PendingSessionsModel.chain().find().data());
 });
 
 apiRouter.get('/cliArgs', (req, res) => {
@@ -94,7 +94,7 @@ apiRouter.get('/cliArgs', (req, res) => {
 
 apiRouter.get('/devices/android', (req, res) => {
   res.json(
-    DeviceModel.find({
+    ADTDatabase.instance().DeviceModel.find({
       platform: 'android',
     }),
   );
@@ -130,7 +130,7 @@ apiRouter.post('/unblock', (req, res) => {
 });
 
 apiRouter.get('/devices/ios', (req, res) => {
-  const devices = DeviceModel.find({
+  const devices = ADTDatabase.instance().DeviceModel.find({
     platform: 'ios',
   });
   if (req.query.deviceType === 'real') {

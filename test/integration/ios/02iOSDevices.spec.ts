@@ -8,7 +8,7 @@ import {
   allocateDeviceForSession,
   initializeStorage,
 } from '../../../src/device-utils';
-import { CLIArgs, DeviceModel } from '../../../src/data-service/db';
+import { ADTDatabase } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
@@ -21,14 +21,14 @@ describe('IOS Test', () => {
 
   it('Throw error when no device is found for given capabilities', async () => {
     await initializeStorage();
-    CLIArgs.chain()
+    ADTDatabase.instance().CLIArgs.chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
       });
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(pluginArgs.bindHostOrIp );
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -53,7 +53,7 @@ describe('IOS Test', () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(pluginArgs.bindHostOrIp);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',

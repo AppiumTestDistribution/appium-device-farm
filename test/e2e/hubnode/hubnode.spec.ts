@@ -7,6 +7,7 @@ import { Options } from '@wdio/types';
 import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised'
 import * as chai from 'chai';
+import { ADTDatabase } from '../../../src/data-service/db';
 chai.use(chaiAsPromised);
 
 let driver: any;
@@ -38,6 +39,9 @@ describe('E2E', () => {
   // setup appium home
   const APPIUM_HOME = ensureAppiumHome('hub');
   const APPIUM_HOME_NODE = ensureAppiumHome("node");
+
+  // clean up db
+  ADTDatabase.instance().DeviceModel.removeDataOnly();
 
   // run hub
   pluginE2EHarness({
@@ -72,7 +76,7 @@ describe('E2E', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
+    appiumHome: APPIUM_HOME_NODE!
   })
 
   it('Vertical swipe test', async () => {
@@ -95,7 +99,7 @@ describe('E2E', () => {
     console.log("Successfully swiped");
   });
 
-  it('serve device-farm endpoint when test is still running', async () => {
+  it.only('serve device-farm endpoint when test is still running', async () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
 
     // check device-farm endpoint using axios

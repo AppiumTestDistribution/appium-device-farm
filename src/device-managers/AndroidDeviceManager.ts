@@ -299,7 +299,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       }
       
       // node also need a copy of devices, otherwise it cannot serve requests
-      addNewDevice([trackedDevice]);
+      addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
     }
   }
 

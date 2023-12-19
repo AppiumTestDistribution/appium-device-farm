@@ -167,7 +167,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
       // add device to local list
       log.info(`iOS device with udid ${message.id} plugged! updating device list...`);
-      addNewDevice(deviceAttached);
+      addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
       
     });
     goIosTracker.on('device-removed', async (message) => {
