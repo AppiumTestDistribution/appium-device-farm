@@ -40,7 +40,7 @@ describe('Browserstack Devices', () => {
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0]).to.deep.equal({
       platform: 'android',
-      host: 'https://device.pcloudy.com/appiumcloud/wd/hub',
+      host: 'https://device.pcloudy.com/appiumcloud',
       busy: false,
       deviceType: 'real',
       capability: {
@@ -70,7 +70,7 @@ describe('Browserstack Devices', () => {
     delete iosDevics[0]['$loki'];
     expect(iosDevics[0]).to.deep.equal({
       platform: 'ios',
-      host: 'https://device.pcloudy.com/appiumcloud/wd/hub',
+      host: 'https://device.pcloudy.com/appiumcloud',
       busy: false,
       userBlocked: false,
       deviceType: 'real',
