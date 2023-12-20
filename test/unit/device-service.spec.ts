@@ -4,8 +4,8 @@ import { expect } from 'chai';
 import { IDeviceFilterOptions } from '../../src/interfaces/IDeviceFilterOptions';
 import semver from 'semver';
 
-describe.only('Get device', () => {
-  before('Set devices in memory', () => {
+describe('Get device', () => {
+  before('Set devices in memory', async () => {
     const devices = [
       {
         sdk: '10',
@@ -106,16 +106,16 @@ describe.only('Get device', () => {
       }
     ];
 
-    ADTDatabase.instance().DeviceModel.removeDataOnly();
-    devices.forEach(function (device) {
-      ADTDatabase.instance().DeviceModel.insert({
+    (await ADTDatabase.DeviceModel).removeDataOnly();
+    for await (const device of devices) {
+      (await ADTDatabase.DeviceModel).insert({
         ...device,
       });
-    });
+    }
 
   });
 
-  it('Get android device based on filter with minSDK', () => {
+  it('Get android device based on filter with minSDK', async () => {
     const filterOptions = {
       platform: 'android',
       name: '',
@@ -123,7 +123,7 @@ describe.only('Get device', () => {
       offline: false,
       minSDK: '10.0.1',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
 
     const sdk10 = semver.coerce('10');
     const sdk101 = semver.coerce('10.0.1');
@@ -136,13 +136,13 @@ describe.only('Get device', () => {
   });
 
 
-  it('Get iOS device based on filter real device', () => {
+  it('Get iOS device based on filter real device', async () => {
     const filterOptions = {"platform":"ios","name":"","deviceType":"real","busy":false,"userBlocked":false} as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.deviceType).to.be.eq('real');
   });
 
-  it('Get android device based on filter with minSDK and maxSDK', () => {
+  it('Get android device based on filter with minSDK and maxSDK', async () => {
     const filterOptions = {
       platform: 'android',
       name: '',
@@ -151,11 +151,11 @@ describe.only('Get device', () => {
       minSDK: '10',
       maxSDK: '10.0.1',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eq('10');
   });
 
-  it('Get android device based on filter with maxSDK', () => {
+  it('Get android device based on filter with maxSDK', async () => {
     const filterOptions = {
       platform: 'android',
       name: '',
@@ -163,29 +163,30 @@ describe.only('Get device', () => {
       offline: false,
       maxSDK: '10.0.1',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eq('10');
   });
 
-  it('Get ios simulator based on filter with minSDK', () => {
+  it('Get ios simulator based on filter with minSDK', async () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' } as unknown as IDeviceFilterOptions; 
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eq('15');
   });
+  
 
-  it('Get ios simulator based on filter with maxSDK', () => {
+  it('Get ios simulator based on filter with maxSDK', async () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, maxSDK: '14.1.0' } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eq('14.0');
   });
 
-  it('Get ios simulator based on filter with minSDK and maxSDK', () => {
+  it('Get ios simulator based on filter with minSDK and maxSDK', async () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14', maxSDK: '14.1.0' } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eq('14.0');
   });
 
-  it('Get android device based on filter with platformVersion', () => {
+  it('Get android device based on filter with platformVersion', async () => {
     const filterOptions = {
       platform: 'android',
       name: '',
@@ -193,23 +194,36 @@ describe.only('Get device', () => {
       offline: false,
       platformVersion: '10',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eql('10');
   });
-
-  it('Get ios simulator based on filter with platformVersion', () => {
+  
+  
+  it('Get ios simulator based on filter with platform', async () => {
     const filterOptions = {
       platform: 'ios',
+      name: '',
+      busy: false,
+      offline: false
+    } as unknown as IDeviceFilterOptions;
+    const device = await getDevice(filterOptions);
+    expect(device?.sdk).to.be.eql('13.0');
+  });
+
+  it('Get ios simulator based on filter with platformVersion', async () => {
+    const filterOptions = {
+      //platform: 'ios',
       name: '',
       busy: false,
       offline: false,
       platformVersion: '14.0',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eql('14.0');
   });
+  
 
-  it('Get android device returns undefined based on filter with platformVersion', () => {
+  it('Get android device returns undefined based on filter with platformVersion', async () => {
     const filterOptions = {
       platform: 'android',
       name: '',
@@ -217,11 +231,12 @@ describe.only('Get device', () => {
       offline: false,
       platformVersion: '9',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device).to.be.undefined;
   });
+  
 
-  it('Get ios simulator returns undefined based on filter with platformVersion', () => {
+  it('Get ios simulator returns undefined based on filter with platformVersion', async () => {
     const filterOptions = {
       platform: 'ios',
       name: '',
@@ -229,13 +244,13 @@ describe.only('Get device', () => {
       offline: false,
       platformVersion: '16.0',
     } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device).to.be.undefined;
   });
 
-  it('Get apple tv simulator based on filter with platformName', () => {
+  it('Get apple tv simulator based on filter with platformName', async () => {
     const filterOptions = { platform: 'tvos', name: '', busy: false, offline: false } as unknown as IDeviceFilterOptions;
-    const device = getDevice(filterOptions);
+    const device = await getDevice(filterOptions);
     expect(device?.platform).to.be.eql('tvos');
     expect(device?.sdk).to.be.eql('15.0');
 

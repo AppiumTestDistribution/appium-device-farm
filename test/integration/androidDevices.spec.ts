@@ -31,7 +31,7 @@ describe('Android Test', () => {
       firstMatch: [{}],
     };
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = ADTDatabase.instance().DeviceModel.chain().find({ udid: devices.udid }).data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: devices.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -60,7 +60,7 @@ describe('Android Test', () => {
     })
     
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = ADTDatabase.instance().DeviceModel.chain().find().data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
 

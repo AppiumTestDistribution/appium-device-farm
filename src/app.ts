@@ -52,7 +52,7 @@ apiRouter.use(async (req, res, next) => {
 });
 
 apiRouter.get('/devices', async (req, res) => {
-  let devices = ADTDatabase.instance().DeviceModel.find();
+  let devices = (await ADTDatabase.DeviceModel).find();
   if (req.query.sessionId) {
     return res.json(devices.find((value) => value.session_id === req.query.sessionId));
   }
@@ -80,57 +80,57 @@ apiRouter.get('/devices', async (req, res) => {
   return res.json(devices);
 });
 
-apiRouter.get('/queues/length', (req, res) => {
-  res.json(ADTDatabase.instance().PendingSessionsModel.chain().find().count());
+apiRouter.get('/queues/length', async (req, res) => {
+  res.json((await ADTDatabase.PendingSessionsModel).chain().find().count());
 });
 
-apiRouter.get('/queues', (req, res) => {
-  res.json(ADTDatabase.instance().PendingSessionsModel.chain().find().data());
+apiRouter.get('/queues', async (req, res) => {
+  res.json((await ADTDatabase.PendingSessionsModel).chain().find().data());
 });
 
 apiRouter.get('/cliArgs', (req, res) => {
   res.json(getCLIArgs());
 });
 
-apiRouter.get('/devices/android', (req, res) => {
+apiRouter.get('/devices/android', async (req, res) => {
   res.json(
-    ADTDatabase.instance().DeviceModel.find({
+    (await ADTDatabase.DeviceModel).find({
       platform: 'android',
     }),
   );
 });
 
-apiRouter.post('/register', (req, res) => {
+apiRouter.post('/register', async (req, res) => {
   const requestBody = req.body;
   if (req.query.type === 'add') {
-    const addedDevices = addNewDevice(requestBody);
+    const addedDevices = await addNewDevice(requestBody);
     if (addedDevices.length > 0) log.info(`Added new devices: ${JSON.stringify(addedDevices)}`);
   } else if (req.query.type === 'remove') {
-    removeDevice(requestBody);
+    await removeDevice(requestBody);
   }
   res.json('200');
 });
 
-apiRouter.post('/block', (req, res) => {
+apiRouter.post('/block', async (req, res) => {
   const requestBody = req.body;
 
-  const device = getDevice(requestBody);
-  if (device != undefined) userBlockDevice(device.udid, device.host);
+  const device = await getDevice(requestBody);
+  if (device != undefined) await userBlockDevice(device.udid, device.host);
 
   res.json('200');
 });
 
-apiRouter.post('/unblock', (req, res) => {
+apiRouter.post('/unblock', async (req, res) => {
   const requestBody = req.body;
 
-  const device = getDevice(requestBody);
-  if (device != undefined) userUnblockDevice(device.udid, device.host);
+  const device = await getDevice(requestBody);
+  if (device != undefined) await userUnblockDevice(device.udid, device.host);
 
   res.json('200');
 });
 
-apiRouter.get('/devices/ios', (req, res) => {
-  const devices = ADTDatabase.instance().DeviceModel.find({
+apiRouter.get('/devices/ios', async (req, res) => {
+  const devices = (await ADTDatabase.DeviceModel).find({
     platform: 'ios',
   });
   if (req.query.deviceType === 'real') {

@@ -59,7 +59,7 @@ describe('Basic Plugin Test', () => {
   });
 
   it('Add Android devices from node to hub', async () => {
-    ADTDatabase.instance().DeviceModel.removeDataOnly();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     const nodeAndroidDevice = [
       {
         adbRemoteHost: null,

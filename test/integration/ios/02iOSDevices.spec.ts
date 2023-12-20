@@ -21,7 +21,7 @@ describe('IOS Test', () => {
 
   it('Throw error when no device is found for given capabilities', async () => {
     await initializeStorage();
-    ADTDatabase.instance().CLIArgs.chain()
+    (await ADTDatabase.CLIArgs).chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';

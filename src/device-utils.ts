@@ -123,7 +123,7 @@ export async function allocateDeviceForSession(
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
 
-  const device = getDevice(filters);
+  const device = await getDevice(filters);
   if (device != undefined) {
     log.info(`📱 Device found: ${JSON.stringify(device)}`);
     blockDevice(device.udid, device.host);
@@ -268,14 +268,14 @@ function getDeviceManager() {
 }
 
 export async function getBusyDevicesCount() {
-  const allDevices = getAllDevices();
+  const allDevices = await getAllDevices();
   return allDevices.filter((device) => {
     return device.busy;
   }).length;
 }
 
 export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
-  const devices: IDevice[] = await getDeviceManager().getDevices(getAllDevices());
+  const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
   
   // first thing first. Update device list in local list
@@ -320,7 +320,7 @@ export async function setupCronCheckStaleDevices(intervalMs: number, currentHost
  * @param currentHost current host ip address
  */
 export async function removeStaleDevices(currentHost: string) {
-  const allDevices = getAllDevices();
+  const allDevices = await getAllDevices();
   const nodeDevices = allDevices.filter((device) => {
     // devices that's not from this node ip address
     return !device.host.includes(currentHost);
@@ -379,7 +379,7 @@ export async function removeStaleDevices(currentHost: string) {
 }
 
 export async function unblockCandidateDevices() {
-  const allDevices = getAllDevices();
+  const allDevices = await getAllDevices();
   const busyDevices = allDevices.filter((device) => {
     const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
     // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}`);
@@ -437,7 +437,7 @@ export async function setupCronUpdateDeviceList(host: string, hubArgument: strin
 }
 
 export async function cleanPendingSessions(timeoutMs: number) {
-  const pendingSessions = ADTDatabase.instance().PendingSessionsModel.chain().find().data();
+  const pendingSessions = (await ADTDatabase.PendingSessionsModel).chain().find().data();
   const currentEpoch = new Date().getTime();
   const timedOutSessions = pendingSessions.filter((session) => {
     const timeSinceSessionCreated = currentEpoch - session.createdAt;
@@ -451,10 +451,10 @@ export async function cleanPendingSessions(timeoutMs: number) {
   } else {
     log.debug(`Found ${timedOutSessions.length} pending sessions to clean`);
   }
-  timedOutSessions.forEach((session) => {
+  for await (const session of timedOutSessions) {
     log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
-    ADTDatabase.instance().PendingSessionsModel.remove(session);
-  });
+    (await ADTDatabase.PendingSessionsModel).remove(session);
+  }
 }
 
 export async function setupCronCleanPendingSessions(intervalMs: number, timeoutMs: number) {

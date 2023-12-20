@@ -6,10 +6,10 @@ export class ADTDatabase {
     private static _instance: ADTDatabase;
     private _dbList: {dbname: string, db: loki}[] = [];
 
-    get DeviceModel() { return ADTDatabase.getDeviceModel(); }
-    get PendingSessionsModel() { return ADTDatabase.getPendingSessionsModel(); }
-    get CLIArgs() { return ADTDatabase.getCLIArgs(); }
-    get db() { return ADTDatabase.getDB(); }
+    static get DeviceModel() { return ADTDatabase.getDeviceModel(); }
+    static get PendingSessionsModel() { return ADTDatabase.getPendingSessionsModel(); }
+    static get CLIArgs() { return ADTDatabase.getCLIArgs(); }
+    static get db() { return ADTDatabase.getDB(); }
 
     private constructor() {
         log.info('Initializing database');
@@ -26,50 +26,61 @@ export class ADTDatabase {
         return `${appium_home}/db.json`;
     }
 
-    private static getDeviceModel() {
-        return ADTDatabase.getDB().addCollection('devices');
+    private static async getDeviceModel() {
+        return (await ADTDatabase.getDB()).addCollection('devices');
     }
 
-    private static getPendingSessionsModel() {
-        return ADTDatabase.getDB().addCollection('pending-sessions');
+    private static async getPendingSessionsModel() {
+        return (await ADTDatabase.getDB()).addCollection('pending-sessions');
     }
 
-    private static getCLIArgs() {
-        return ADTDatabase.getDB().addCollection('cliArgs');
+    private static async getCLIArgs() {
+        return (await ADTDatabase.getDB()).addCollection('cliArgs');
     }
 
-    private static getDB() {
+    private static initCollections(db: loki) {
+        db.addCollection('devices');
+        db.addCollection('pending-sessions');
+        db.addCollection('cliArgs');
+    }
+
+    private static async getDB() {
         const existingDb = ADTDatabase.instance()._dbList.find((db) => db.dbname === ADTDatabase.dbname());
 
         if (existingDb) return existingDb.db;
 
         log.debug(`Creating new database: ${ADTDatabase.dbname()}`);
-        
-        const db = new loki(ADTDatabase.dbname(), {
-            autoload: true,
-            autosave: true,
-            autosaveInterval: 4000,
-        });
 
-        db.on('error', (err) => {
-            log.error(`Error in database: ${err}`);
-        }
-        );
+        const db = await new Promise<loki>((resolve, reject) => {
+            const db = new loki(ADTDatabase.dbname(), {
+                autoload: true,
+                //autosave: true,
+                //autosaveInterval: 4000,
+            });
 
-        db.on('loaded', () => {
-            log.info('Database loaded');
-        });
+            db.on('autoload', () => {
+                log.info('Database autoloaded');
+            });
 
-        db.on('flushChanges', () => {
-            log.info('Database changes flushed');
-        });
+            db.on('error', (err) => {
+                log.error(`Error in database: ${err}`);
+                reject(err);
+            }
+            );
 
-        db.on('close', () => {
-            log.info('Database closed');
-        });
+            db.on('loaded', () => {
+                log.info('Database loaded');
+                ADTDatabase.initCollections(db);
+                resolve(db);
+            });
 
-        db.loadDatabase({}, (err) => {
-            if (err) log.error(`Error loading database: ${err}`);
+            db.on('flushChanges', () => {
+                log.info('Database changes flushed');
+            });
+
+            db.on('close', () => {
+                log.info('Database closed');
+            });
         });
 
         ADTDatabase.instance()._dbList.push({dbname: ADTDatabase.dbname(), db});

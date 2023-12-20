@@ -191,7 +191,7 @@ describe('Android Device Manager', function () {
     ]);
   });
   it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
-    ADTDatabase.instance().DeviceModel.removeDataOnly();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     const pluginArgs = Object.assign({}, DefaultPluginArgs, {
       platform: "android", 
       'device-types': 'both',

@@ -29,7 +29,7 @@ const capabilities = {
   "appium:uiautomator2ServerInstallTimeout": 90000,
 } as unknown as WebdriverIO.Capabilities
 
-describe('E2E', () => {
+describe('E2E', async () => {
   // dump hub config into a file
   const hub_config_file = ensureHubConfig('ios');
 
@@ -41,7 +41,7 @@ describe('E2E', () => {
   const APPIUM_HOME_NODE = ensureAppiumHome("node");
 
   // clean up db
-  ADTDatabase.instance().DeviceModel.removeDataOnly();
+  (await ADTDatabase.DeviceModel).removeDataOnly();
 
   // run hub
   pluginE2EHarness({

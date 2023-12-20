@@ -94,7 +94,7 @@ describe('Device Utils', () => {
   });
 
   it('Allocating device should set device to be busy', async function () {
-    ADTDatabase.instance().DeviceModel.removeDataOnly();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, { maxSessions: 3 }));
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
@@ -109,18 +109,18 @@ describe('Device Utils', () => {
     };
     let allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
 
-    function getFilteredDevice(udid: string, host: string) {
-      return ADTDatabase.instance().DeviceModel.chain().find({udid, host}).data();
+    async function getFilteredDevice(udid: string, host: string) {
+      return (await ADTDatabase.DeviceModel).chain().find({udid, host}).data();
     }
 
-    let foundDevice = getFilteredDevice(
+    let foundDevice = (await getFilteredDevice(
       allocatedDeviceForFirstSession.udid, 
       allocatedDeviceForFirstSession.host
-    )[0];
+    ))[0];
 
     expect(foundDevice.busy).to.be.true;
 
-    let filterDeviceWithSameUDID = ADTDatabase.instance().DeviceModel.chain().find({udid: allocatedDeviceForFirstSession.udid}).data();
+    let filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel).chain().find({udid: allocatedDeviceForFirstSession.udid}).data();
     expect(filterDeviceWithSameUDID.length).to.be.equal(2);
     // one device should be busy and the other is not
     filterDeviceWithSameUDID.filter((device) => device.busy).length.should.be.equal(1);
@@ -130,10 +130,10 @@ describe('Device Utils', () => {
     // allocatedDeviceForSecondSession should not be the same as allocatedDeviceForFirstSession
     expect(allocatedDeviceForFirstSession).to.not.be.equal(allocatedDeviceForSecondSession);
 
-    let foundSecondDevice = ADTDatabase.instance().DeviceModel.chain().find({udid: allocatedDeviceForSecondSession.udid, host: allocatedDeviceForSecondSession.host}).data()[0];
+    let foundSecondDevice = (await ADTDatabase.DeviceModel).chain().find({udid: allocatedDeviceForSecondSession.udid, host: allocatedDeviceForSecondSession.host}).data()[0];
 
     // check that the device is busy
-    filterDeviceWithSameUDID = ADTDatabase.instance().DeviceModel.chain().find({udid: allocatedDeviceForFirstSession.udid}).data();
+    filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel).chain().find({udid: allocatedDeviceForFirstSession.udid}).data();
     expect(filterDeviceWithSameUDID[0].busy).to.be.true;
     expect(filterDeviceWithSameUDID[1].busy).to.be.true;
     expect(foundSecondDevice.busy).to.be.true;
@@ -195,7 +195,7 @@ describe('Device Utils', () => {
   })
 
   it('Block and unblock device', async () => {
-      ADTDatabase.instance().DeviceModel.removeDataOnly();
+      (await ADTDatabase.DeviceModel).removeDataOnly();
       // mock setUtilizationTime
       sandbox.stub(DeviceUtils, <any> 'setUtilizationTime').callsFake(sinon.fake());
     
@@ -210,10 +210,10 @@ describe('Device Utils', () => {
       DeviceService.blockDevice(targetDevice.udid, targetDevice.host);
   
       // assert device is busy
-      expect(ADTDatabase.instance().DeviceModel.chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]).to.have.property('busy', true);
+      expect((await ADTDatabase.DeviceModel).chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]).to.have.property('busy', true);
     
       // set lastCommandTimestamp, otherwise it won't be picked up as device to unblock
-      ADTDatabase.instance().DeviceModel.chain()
+      (await ADTDatabase.DeviceModel).chain()
         .find({ udid: targetDevice.udid, host: targetDevice.host })
         .update(function (device: IDevice) {
           device.lastCmdExecutedAt = new Date().getTime();
@@ -234,14 +234,14 @@ describe('Device Utils', () => {
   
       // assert: device should not have lastCommandTimestamp or it should be undefined
 
-      const device = ADTDatabase.instance().DeviceModel.chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]
+      const device = (await ADTDatabase.DeviceModel).chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]
       expect(device).to.be.not.undefined;
       expect(device?.lastCmdExecutedAt).to.be.undefined;
       
   })
 
   it('should remove stale devices', async () => {
-    ADTDatabase.instance().DeviceModel.removeDataOnly();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, { maxSessions: 3 }));
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
@@ -249,7 +249,7 @@ describe('Device Utils', () => {
     DeviceUtils.removeStaleDevices(pluginArgs.bindHostOrIp);
 
     // assert emulator-9999 is removed
-    expect(ADTDatabase.instance().DeviceModel.chain().find({ udid: 'emulator-9999' }).data().length).to.be.equal(0);
+    expect((await ADTDatabase.DeviceModel).chain().find({ udid: 'emulator-9999' }).data().length).to.be.equal(0);
   });
   
 });
