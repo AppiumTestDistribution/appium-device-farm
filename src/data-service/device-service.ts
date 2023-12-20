@@ -23,6 +23,13 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
     if (device.host === undefined && host !== undefined) {
       device.host = host;
     }
+
+    // make sure all devices have default values from IDevice
+    device = Object.assign({
+      userBlocked: false,
+      offline: false
+    } as unknown as Partial<IDevice>, device);
+
     const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel).chain()
       .find({ udid: device.udid, host: device.host })
       .data();
@@ -33,9 +40,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       delete device['meta'];
       try {
         (await ADTDatabase.DeviceModel).insert({
-          ...device,
-          offline: false,
-          userBlocked: false,
+          ...device
         });
         return device;
       } catch (error) {
@@ -121,9 +126,9 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
         case 'name':
           // only is name is not empty nor undefined
           if (filterOptions.name !== undefined && filterOptions.name.trim() !== '') 
-            filter.name = { $contains: filterOptions.name.trim() };
+            filter.name = { '$contains': filterOptions.name.trim() };
           else
-            filter.name = { $ne: undefined };
+            filter.name = { '$ne': undefined };
           break;
         case 'busy':
           filter.busy = filterOptions.busy;
@@ -182,7 +187,6 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
   }
-
   
   const matchingDevices = results.find(filter).data();
   log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);

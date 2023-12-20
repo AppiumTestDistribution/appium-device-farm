@@ -17,12 +17,17 @@ const cliArgs = {
     remote: ['http://127.0.0.1:4723'],
   },
 };
+
+// const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+
 describe('IOS Device Manager', () => {
+  // const deviceManager = new DeviceFarmManager('ios', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
+
   afterEach(function () {
     sandbox.restore();
   });
   it('IOS Device List to have added state', async () => {
-    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
+    const iosDevices = new IOSDeviceManager(pluginArgs, 4723);
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(Helper, 'isMac').returns(true);

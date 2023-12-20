@@ -47,53 +47,60 @@ export default class AndroidDeviceManager implements IDeviceManager {
   async getDevices(
     deviceTypes: { androidDeviceType: DeviceTypeToInclude },
     existingDeviceDetails: Array<IDevice>,
-  ): Promise<any> {
+  ): Promise<IDevice[]> {
     if (!this.adbAvailable) {
+      log.info('adb is not available. So, returning empty list');
       return [];
     }
-    const deviceState: Array<IDevice> = [];
+    let devices: IDevice[] = [];
     try {
       if (this.pluginArgs.cloud != undefined) {
-        const cloud = new Devices(this.pluginArgs.cloud, deviceState, 'android');
+        const cloud = new Devices(this.pluginArgs.cloud, devices, 'android');
         return await cloud.getDevices();
       } else {
-        await this.fetchAndroidDevices(deviceState, existingDeviceDetails, this.pluginArgs);
+        devices = await this.fetchAndroidDevices(existingDeviceDetails, this.pluginArgs);
+        log.info(`Found ${devices.length} android devices`);
       }
+
       if (deviceTypes.androidDeviceType === 'real') {
-        return deviceState.filter((device) => {
+        return devices.filter((device) => {
           return device.deviceType === 'real';
         });
       } else if (deviceTypes.androidDeviceType === 'simulated') {
-        return deviceState.filter((device) => {
+        return devices.filter((device) => {
           return device.deviceType === 'emulator';
         });
         // return both real and simulated (emulated) devices
       } else {
-        return deviceState;
+        return devices;
       }
     } catch (e) {
-      console.log(e);
+      log.err(`Error while getting android devices. Error: ${e}`);
     }
+    return [];
   }
 
   private async fetchAndroidDevices(
-    deviceState: IDevice[],
     existingDeviceDetails: IDevice[],
     pluginArgs: IPluginArgs,
   ) {
     await this.requireSdkRoot();
+    let availableDevices: IDevice[] = [];
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
+    log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
     for (const [adbInstance, devices] of connectedDevices) {
-      await asyncForEach(devices, async (device: IDevice) => {
+      log.debug(`fetchAndroidDevices host: ${adbInstance.adbHost}. Found ${devices.length} android devices`);
+      for await (const device of devices) {
+        // log.info(`Checking device ${device.udid}`);
         device.adbRemoteHost =
           adbInstance.adbRemoteHost === null
             ? this.pluginArgs.bindHostOrIp
             : adbInstance.adbRemoteHost;
         if (
-          !deviceState.find(
-            (devicestate) =>
-              devicestate.udid === device.udid &&
-              devicestate.adbRemoteHost === device.adbRemoteHost,
+          !availableDevices.find(
+            (existingDevice: IDevice) =>
+              existingDevice.udid === device.udid &&
+              existingDevice.adbRemoteHost === device.adbRemoteHost,
           )
         ) {
           const existingDevice = existingDeviceDetails.find(
@@ -101,7 +108,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
-            deviceState.push({
+            availableDevices.push({
               ...existingDevice,
               busy: false,
             });
@@ -119,20 +126,24 @@ export default class AndroidDeviceManager implements IDeviceManager {
               if (!deviceInfo) {
                 log.info(`Cannot get device info for ${device.udid}. Skipping`);
               } else {
-                deviceState.push(deviceInfo);
+                availableDevices.push(deviceInfo);
               }
             } else {
               log.info(`Device ${device.udid} is not in "device" state. So, ignoring.`);
             }
           }
+        } else {
+          // log.info(`Device ${device.udid} is already in list. So, ignoring.`);
+          // log.debug(`Current list of devices: ${JSON.stringify(availableDevices)}`);
         }
-      });
+      };
     }
-    return deviceState;
+    log.info(`Found ${availableDevices.length} availableDevices android devices`);
+    return availableDevices;
   }
 
   private async deviceInfo(
-    device: any,
+    device: {udid: string, state: string},
     adbInstance: any,
     pluginArgs: IPluginArgs,
     hostPort: number,
@@ -195,7 +206,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     };
   }
 
-  private async getAdb(): Promise<any> {
+  private async getAdb(): Promise<ADB> {
     try {
       if (!this.adb) {
         this.adb = await ADB.createADB({});

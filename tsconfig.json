@@ -74,7 +74,6 @@
     "./test/**/*"
   ],
   "exclude": [
-    "./lib/**/*",
     "node_modules",
     "typings"
   ]

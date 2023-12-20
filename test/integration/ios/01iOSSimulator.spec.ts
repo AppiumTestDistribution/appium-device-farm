@@ -6,6 +6,7 @@ import {
   updateDeviceList,
   allocateDeviceForSession,
   initializeStorage,
+  cleanPendingSessions,
 } from '../../../src/device-utils';
 import { ADTDatabase } from '../../../src/data-service/db';
 
@@ -27,20 +28,22 @@ async function markSimulatorsAsBooted() {
     device.state = 'Booted';
   });
 
-  const simulators = (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
+  // const simulators = (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
   // console.log('simulators: ', simulators);
 }
 
 describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     await addCLIArgs(serverCliArgs);
   });
 
   beforeEach('Release devices', async () => {
     await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
   })
 
-  it('Allocate first device without issue', async () => {
+  it.only('Allocate first device without issue', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign({}, DefaultPluginArgs, { maxSessions: 1}));
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
@@ -48,12 +51,14 @@ describe('Max sessions CLI argument test', () => {
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
     
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true,
+        //'appium:iPhoneOnly': true,
         'appium:deviceAvailabilityTimeout': 1800,
         'appium:deviceRetryInterval': 100,
       },
@@ -261,6 +266,6 @@ describe('Boot simulator test', async () => {
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });
   after('Delete simulator', async () => {
-    await simctl.deleteDevice(simctl.udid);
+    if (simctl.udid) await simctl.deleteDevice(simctl.udid);
   });
 });

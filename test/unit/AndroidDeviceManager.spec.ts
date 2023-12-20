@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
@@ -9,6 +9,9 @@ import _ from 'lodash';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { ADTDatabase } from '../../src/data-service/db';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
+import chaiAsPromised from 'chai-as-promised';
+
+chai.use(chaiAsPromised);
 
 var sandbox = sinon.createSandbox();
 
@@ -55,7 +58,9 @@ describe('Android Device Manager', function () {
     deviceList.set(adb, [{ udid: 'emulator-5554', state: 'device' }]);
     deviceList.set(cloneAdb, [{ udid: 'emulator-5555', state: 'device' }]);
 
-    sandbox.stub(androidDevices, 'getConnectedDevices').returns(Promise.resolve(deviceList));
+    // console.log('deviceList', deviceList);
+
+    const getConnectedDevicesStub = sandbox.stub(androidDevices, 'getConnectedDevices').returns(Promise.resolve(deviceList));
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     getDeviceVersion.onFirstCall().returns(Promise.resolve('9'));
     getDeviceVersion.onSecondCall().returns(Promise.resolve('13'));
@@ -66,7 +71,14 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(Promise.resolve(true));
     sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(Promise.resolve(0));
+
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
+
+    expect(androidDevices.getDevices({ androidDeviceType: 'both' }, [])).to.eventually.be.equal(deviceList);
+    expect(getConnectedDevicesStub.called).to.be.true;
+
+    console.log('devices', devices);
+
     expect(devices).to.deep.equal([
       {
         busy: false,

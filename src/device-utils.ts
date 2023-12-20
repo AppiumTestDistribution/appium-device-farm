@@ -109,13 +109,15 @@ export async function allocateDeviceForSession(
     await waitUntil(
       async () => {
         const maxSessions = getDeviceManager().getMaxSessionCount();
-        if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
+        const busyDevicesCount = await getBusyDevicesCount();
+        log.debug(`Max session count: ${maxSessions}, Busy device count: ${busyDevicesCount}`);
+        if (maxSessions !== undefined && busyDevicesCount === maxSessions) {
           log.info(
             `Waiting for session available, already at max session count of: ${maxSessions}`,
           );
           return false;
         } else log.info(`Waiting for free device. Filter: ${JSON.stringify(filters)}}`);
-        return getDevice(filters) != undefined;
+        return await getDevice(filters) != undefined;
       },
       { timeout, intervalBetweenAttempts },
     );
@@ -126,7 +128,7 @@ export async function allocateDeviceForSession(
   const device = await getDevice(filters);
   if (device != undefined) {
     log.info(`📱 Device found: ${JSON.stringify(device)}`);
-    blockDevice(device.udid, device.host);
+    await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
     await updateCapabilityForDevice(capability, device);
     return device;
@@ -153,6 +155,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * @returns storage
  */
 export async function initializeStorage() {
+  log.info('Initializing storage');
   const basePath = cachePath('storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -163,6 +166,12 @@ export async function initializeStorage() {
 }
 
 function getStorage() {
+  try {
+    Container.get('LocalStorage')
+  } catch (err) {
+    log.error(`Failed to get LocalStorage: Error ${err}`);
+    initializeStorage();
+  }
   return Container.get('LocalStorage') as LocalStorage;
 }
 
@@ -276,6 +285,11 @@ export async function getBusyDevicesCount() {
 
 export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
   const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
+  if (devices.length === 0) {
+    log.warn('No devices found');
+    return [];
+  }
+  
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
   
   // first thing first. Update device list in local list
@@ -323,7 +337,7 @@ export async function removeStaleDevices(currentHost: string) {
   const allDevices = await getAllDevices();
   const nodeDevices = allDevices.filter((device) => {
     // devices that's not from this node ip address
-    return !device.host.includes(currentHost);
+    return device.host !== undefined && !device.host.includes(currentHost);
   });
 
   const devicesWithNoHost = nodeDevices.filter((device) => {

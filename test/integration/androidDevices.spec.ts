@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
 import { ADTDatabase } from '../../src/data-service/db';
@@ -6,21 +6,38 @@ import {
   updateDeviceList,
   allocateDeviceForSession,
   initializeStorage,
+  cleanPendingSessions,
 } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import ip from 'ip';
 import waitUntil from 'async-wait-until';
 import { IDevice } from '../../src/interfaces/IDevice';
+import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
+import chaiAsPromised from 'chai-as-promised';
+
+chai.use(chaiAsPromised);
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
 
 describe('Android Test', () => {
+  const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
+
+  before(async () => {
+    (await ADTDatabase.DeviceModel).removeDataOnly();
+    // adb devices should return devices
+    expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(0, "No devices detected. Is adb running? Is there at least one device connected?");
+  })
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
+    
+    
+    await deviceManager.getDevices()
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
+    await cleanPendingSessions(0);
+    await unblockDeviceMatchingFilter({  });
+    
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -84,7 +101,7 @@ describe('Android Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","name":"","busy":false,"userBlocked":false}'
+          'No device found for filters: {"platform":"android","busy":false,"userBlocked":false}'
         )
     );
   });

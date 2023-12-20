@@ -192,10 +192,10 @@ class DevicePlugin extends BasePlugin {
     }
 
     // unblock all devices on node/hub restart
-    unblockDeviceMatchingFilter({});
+    await unblockDeviceMatchingFilter({});
 
     // remove stale devices
-    removeStaleDevices(pluginArgs.bindHostOrIp);
+    await removeStaleDevices(pluginArgs.bindHostOrIp);
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -286,7 +286,7 @@ class DevicePlugin extends BasePlugin {
 
     // This is coming from the forwarded session
     if (session instanceof Error || session.hasOwnProperty('error')) {
-      unblockDevice(device.udid, device.host);
+      await unblockDevice(device.udid, device.host);
       log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
       this.throwProperError(session, device.host);
     } else if ((session as W3CNewSessionResponseError).error !== undefined) {
@@ -294,13 +294,13 @@ class DevicePlugin extends BasePlugin {
       // @ts-ignore
       const sessionId = session.value[0];
       log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
-      updatedAllocatedDevice(device, {
+      await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (!device.host.includes(this.pluginArgs.bindHostOrIp)) {
+      if (device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
         addProxyHandler(sessionId, device.host);
       }
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
@@ -413,7 +413,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
-    unblockDeviceMatchingFilter({ session_id: sessionId });
+    await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
