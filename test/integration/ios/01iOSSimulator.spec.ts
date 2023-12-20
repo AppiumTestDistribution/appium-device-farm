@@ -84,7 +84,7 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    markSimulatorsAsBooted();
+    await markSimulatorsAsBooted();
 
     const capabilities = {
       alwaysMatch: {
@@ -119,7 +119,7 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    markSimulatorsAsBooted();
+    await markSimulatorsAsBooted();
 
     const capabilities = {
       alwaysMatch: {
@@ -153,7 +153,7 @@ describe('IOS Simulator Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    markSimulatorsAsBooted();
+    await markSimulatorsAsBooted();
 
     const capabilities = {
       alwaysMatch: {
@@ -180,7 +180,7 @@ describe('IOS Simulator Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    markSimulatorsAsBooted();
+    await markSimulatorsAsBooted();
 
     const capabilities = {
       alwaysMatch: {
@@ -209,7 +209,7 @@ describe('IOS Simulator Test', () => {
       Container.set(DeviceFarmManager, deviceManager);
       const hub = pluginArgs.hub
       await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-      markSimulatorsAsBooted();
+      await markSimulatorsAsBooted();
 
       const capabilities = {
         alwaysMatch: {
