@@ -201,13 +201,13 @@ describe('Device Utils', () => {
     
     
       const unbusyDevices = devices.map((device) => ({ ...device, busy: false })) as unknown as IDevice[];
-      addNewDevice(unbusyDevices);
+      await addNewDevice(unbusyDevices);
 
       const targetDevice = unbusyDevices[0];
 
       
       // action: block device
-      DeviceService.blockDevice(targetDevice.udid, targetDevice.host);
+      await DeviceService.blockDevice(targetDevice.udid, targetDevice.host);
   
       // assert device is busy
       expect((await ADTDatabase.DeviceModel).chain().find({ udid: targetDevice.udid, host: targetDevice.host }).data()[0]).to.have.property('busy', true);
