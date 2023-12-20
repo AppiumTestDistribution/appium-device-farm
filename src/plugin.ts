@@ -258,8 +258,9 @@ class DevicePlugin extends BasePlugin {
       try {
         const response = await axios(config);
         sessionDetails = response.data;
+        log.info(`SessionDetails: ${JSON.stringify(sessionDetails)}`);
         if (Object.hasOwn(sessionDetails.value, 'error')) {
-          log.error(`Error while creating session: ${sessionDetails.value.error}`);
+          log.error(`Error while creating session: ${sessionDetails}`);
           this.unblockDeviceOnError(device, sessionDetails.value.error);
         }
       } catch (error: AxiosError<any> | any) {
