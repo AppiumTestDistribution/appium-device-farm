@@ -302,10 +302,7 @@ export async function setupCronCheckStaleDevices(intervalMs: number) {
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
       nodeChecked.push(device.host);
-      // use different function to check cloud devices
-      if (device.hasOwnProperty('cloud')) {
-        await isAppiumRunningAt(device.host);
-      } else {
+      if (!device.hasOwnProperty('cloud')) {
         await isDeviceFarmRunning(device.host);
       }
       return device.host;

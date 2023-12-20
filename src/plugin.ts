@@ -33,7 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
+import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning, isCloud } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -136,7 +136,6 @@ class DevicePlugin extends BasePlugin {
     );
 
     const hubArgument = pluginArgs.hub;
-
     if (hubArgument) {
       await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
     }
@@ -146,11 +145,10 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-
     if (hubArgument) {
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
-    } else {
+    } else if (!pluginArgs.cloud) {
       // I'm a hub so let's check for stale nodes
       await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
       // and release blocked devices
@@ -162,7 +160,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
-    if (pluginArgs.cloud !== undefined) {
+    if (isCloud(pluginArgs)) {
       deviceTypes = 'real';
       log.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }
