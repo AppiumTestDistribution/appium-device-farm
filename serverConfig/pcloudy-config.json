@@ -6,11 +6,11 @@
         "platform": "both",
         "cloud": {
           "cloudName": "pCloudy",
-          "url": "https://device.pcloudy.com/appiumcloud/wd/hub",
+          "url": "https://device.pcloudy.com/appiumcloud",
           "devices": [
             {
-              "pCloudy_DeviceManufacturer": "GOOGLE",
-              "pCloudy_DeviceVersion": "11.0",
+              "pCloudy_DeviceManufacturer": "SAMSUNG_GalaxyM345G_Android_13.0.0_a3197",
+              "pCloudy_DeviceVersion": "13.0.0",
               "platform": "android"
             },
             {
