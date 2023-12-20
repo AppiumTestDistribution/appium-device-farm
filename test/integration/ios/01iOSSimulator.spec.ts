@@ -50,7 +50,7 @@ describe('Max sessions CLI argument test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    markSimulatorsAsBooted();
+    await markSimulatorsAsBooted();
     await unblockDeviceMatchingFilter({  });
     await cleanPendingSessions(0);
     
@@ -85,6 +85,8 @@ describe('Max sessions CLI argument test', () => {
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     await markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
 
     const capabilities = {
       alwaysMatch: {
@@ -120,6 +122,8 @@ describe('Max sessions CLI argument test', () => {
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     await markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
 
     const capabilities = {
       alwaysMatch: {
@@ -154,6 +158,8 @@ describe('IOS Simulator Test', () => {
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     await markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
 
     const capabilities = {
       alwaysMatch: {
@@ -181,6 +187,8 @@ describe('IOS Simulator Test', () => {
     const hub = pluginArgs.hub
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     await markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({  });
+    await cleanPendingSessions(0);
 
     const capabilities = {
       alwaysMatch: {
@@ -210,6 +218,8 @@ describe('IOS Simulator Test', () => {
       const hub = pluginArgs.hub
       await updateDeviceList(pluginArgs.bindHostOrIp, hub);
       await markSimulatorsAsBooted();
+      await unblockDeviceMatchingFilter({  });
+      await cleanPendingSessions(0);
 
       const capabilities = {
         alwaysMatch: {
