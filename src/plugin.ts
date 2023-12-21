@@ -44,7 +44,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { nodeUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning } from './helpers';
+import { nodeUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning, isCloud } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -199,7 +199,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
-    if (pluginArgs.cloud !== undefined) {
+    if (isCloud(pluginArgs)) {
       deviceTypes = 'real';
       log.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }
