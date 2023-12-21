@@ -287,8 +287,16 @@ export default class IOSDeviceManager implements IDeviceManager {
 
   private async getLocalSims(): Promise<Array<IDevice>> {
     try {
-      const simctl = await new Simctl();
-      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, null))).length > 1;
+      const simctl = new Simctl();
+      // list runtimes and log availability errors
+      const list = await simctl.list();
+      const runtimes = list.runtimes;
+      const unAavailableRuntimes = runtimes.filter((runtime: any) => !runtime.isAvailable).map((runtime: any) => runtime.name);
+      if (unAavailableRuntimes.length > 0) {
+        log.error(`The following runtimes are not available: ${unAavailableRuntimes.join(', ')}`);
+      }
+
+      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
       const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 1;
 
       log.debug(`iOS Simulators: ${iOSSimulators}`);

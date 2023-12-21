@@ -16,6 +16,7 @@ import { serverCliArgs } from '../cliArgs';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
+import { flatten } from 'lodash';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -23,55 +24,19 @@ const name = 'My Device Name';
 const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
 
 async function markSimulatorsAsBooted() {
+  const deviceModel = await ADTDatabase.DeviceModel;
   // mark simulators as booted
-  (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios', deviceType: 'simulator' }).update((device) => {
+  deviceModel.findAndUpdate({platform: 'ios', deviceType: 'simulator'}, (device) => {
     device.state = 'Booted';
   });
 
-  // const simulators = (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
-  // console.log('simulators: ', simulators);
+  //const simulators = (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios', deviceType: 'simulator' }).data()
+  //console.log('simulators: ', simulators);
 }
 
-describe('Max sessions CLI argument test', () => {
-  before('Add Args', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
-    await addCLIArgs(serverCliArgs);
-  });
-
-  beforeEach('Release devices', async () => {
-    await unblockDeviceMatchingFilter({  });
-    await cleanPendingSessions(0);
-  })
-
-  it.only('Allocate first device without issue', async () => {
-    await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign({}, DefaultPluginArgs, { maxSessions: 1}));
-    expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
-    Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
-    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    await markSimulatorsAsBooted();
-    await unblockDeviceMatchingFilter({  });
-    await cleanPendingSessions(0);
-    
-    const capabilities = {
-      alwaysMatch: {
-        platformName: 'iOS',
-        'appium:app': '/Downloads/VodQA.app',
-        //'appium:iPhoneOnly': true,
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
-      },
-      firstMatch: [{}],
-    };
-    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid }).data();
-    expect(allDeviceIds[0].busy).to.be.true;
-  });
-
-  it('Should throw error if the app does not match with device type', async () => {
-    await initializeStorage();
+async function initDeviceFarm(iosDeviceType: string) {
+  const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: iosDeviceType })
+  await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios', { 
         iosDeviceType: "simulated", 
@@ -87,7 +52,36 @@ describe('Max sessions CLI argument test', () => {
     await markSimulatorsAsBooted();
     await unblockDeviceMatchingFilter({  });
     await cleanPendingSessions(0);
+}
 
+describe('Max sessions CLI argument test', () => {
+  before('Add Args', async () => {
+    (await ADTDatabase.DeviceModel).removeDataOnly();
+    await addCLIArgs(serverCliArgs);
+  });
+
+  beforeEach('Release devices', async () => {
+    await initDeviceFarm("simulated");
+  })
+
+  it('Allocate first device without issue', async () => {
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'iOS',
+        'appium:app': '/Downloads/VodQA.app',
+        'appium:iPhoneOnly': true,
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+      },
+      firstMatch: [{}],
+    };
+    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+
+    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid }).data();
+    expect(allDeviceIds[0].busy).to.be.true;
+  });
+
+  it('Should throw error if the app does not match with device type', async () => {
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -98,7 +92,7 @@ describe('Max sessions CLI argument test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 100, pluginArgs).catch((error) =>
+    await allocateDeviceForSession(capabilities, 6000, 100, Object.assign({}, pluginArgs, { iosDeviceType: 'simulated'})).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
@@ -114,16 +108,10 @@ describe('Max sessions CLI argument test', () => {
     // set all devices to busy
     const allDevices = await deviceManager.getDevices();
     for await (const device of allDevices) {
-      (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid, platform: 'ios' }).update((device) => {
+      (await ADTDatabase.DeviceModel).chain().find({ platform: 'ios' }).update((device) => {
         device.busy = true;
       });
     }
-    Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
-    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    await markSimulatorsAsBooted();
-    await unblockDeviceMatchingFilter({  });
-    await cleanPendingSessions(0);
 
     const capabilities = {
       alwaysMatch: {
@@ -244,8 +232,18 @@ describe('IOS Simulator Test', () => {
 
 describe('Boot simulator test', async () => {
   before('Boot simulator', async () => {
-    const version = (await simctl.list()).runtimes[0].version;
-    simctl.udid = await simctl.createDevice(name, 'iPhone X', version);
+    const list = await simctl.list();
+    const version = list.runtimes[0].version;
+    const devices = flatten(Object.keys(list.devices).map((key) => list.devices[key]));
+    //console.log('devices: ', devices);
+    // find device is isAvailable=true
+
+    const availableDevices = devices.filter((device: any) => device.isAvailable);
+    //console.log('availableDevices: ', availableDevices);
+    // find device name starts with iPhone
+    const iphone = availableDevices.find((device: any) => device.name.startsWith('iPhone'));
+    
+    simctl.udid = await simctl.createDevice(name, iphone.name, version);
     await simctl.bootDevice();
     await simctl.startBootMonitor({ timeout: 160000 });
   });

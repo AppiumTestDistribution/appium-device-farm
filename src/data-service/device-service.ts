@@ -189,11 +189,14 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   }
   
   const matchingDevices = results.find(filter).data();
+  // use the following debugging tools to debug this function
+  /*
   log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);
   log.debug(`all devices: ${JSON.stringify(deviceModel.chain().find().data())}`);
   log.debug(`basic filter applied devices: ${JSON.stringify(deviceModel.chain().find(basicFilter).data())}`);
   log.debug(`filter: ${JSON.stringify(filter)}`);
   log.debug(`results: ${JSON.stringify(matchingDevices)}`);
+  */
 
   return matchingDevices;
 }

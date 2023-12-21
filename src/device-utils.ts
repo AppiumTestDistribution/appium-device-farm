@@ -293,7 +293,7 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
   
   // first thing first. Update device list in local list
-  addNewDevice(devices, host);
+  await addNewDevice(devices, host);
 
   if (hubArgument) {
     if (await isDeviceFarmRunning(hubArgument)) {
