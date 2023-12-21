@@ -80,16 +80,15 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return [];
   }
 
-  private async fetchAndroidDevices(
-    existingDeviceDetails: IDevice[],
-    pluginArgs: IPluginArgs,
-  ) {
+  private async fetchAndroidDevices(existingDeviceDetails: IDevice[], pluginArgs: IPluginArgs) {
     await this.requireSdkRoot();
     let availableDevices: IDevice[] = [];
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
     log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
     for (const [adbInstance, devices] of connectedDevices) {
-      log.debug(`fetchAndroidDevices host: ${adbInstance.adbHost}. Found ${devices.length} android devices`);
+      log.debug(
+        `fetchAndroidDevices host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
+      );
       for await (const device of devices) {
         // log.info(`Checking device ${device.udid}`);
         device.adbRemoteHost =
@@ -136,14 +135,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
           // log.info(`Device ${device.udid} is already in list. So, ignoring.`);
           // log.debug(`Current list of devices: ${JSON.stringify(availableDevices)}`);
         }
-      };
+      }
     }
     log.info(`Found ${availableDevices.length} availableDevices android devices`);
     return availableDevices;
   }
 
   private async deviceInfo(
-    device: {udid: string, state: string},
+    device: { udid: string; state: string },
     adbInstance: any,
     pluginArgs: IPluginArgs,
     hostPort: number,
@@ -308,7 +307,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         const nodeDevices = new NodeDevices(this.pluginArgs.hub);
         await nodeDevices.postDevicesToHub([trackedDevice], 'add');
       }
-      
+
       // node also need a copy of devices, otherwise it cannot serve requests
       addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
     }
@@ -350,7 +349,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
       await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
-    } 
+    }
 
     // node also need a copy of devices, otherwise it cannot serve requests
     removeDevice([clonedDevice]);

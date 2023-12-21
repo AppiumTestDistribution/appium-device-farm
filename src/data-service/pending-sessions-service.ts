@@ -5,7 +5,10 @@ async function addNewPendingSession(capability: any) {
 }
 
 async function removePendingSession(sessionCapabilityId: any) {
-  (await ADTDatabase.PendingSessionsModel).chain().find({ capability_id: sessionCapabilityId }).remove();
+  (await ADTDatabase.PendingSessionsModel)
+    .chain()
+    .find({ capability_id: sessionCapabilityId })
+    .remove();
 }
 
 export { addNewPendingSession, removePendingSession };

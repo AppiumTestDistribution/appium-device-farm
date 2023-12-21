@@ -27,7 +27,11 @@ export async function asyncForEach(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export async function spinWith(msg: string, fn: () => Promise<boolean>, callback = (msg: string) => {}) {
+export async function spinWith(
+  msg: string,
+  fn: () => Promise<boolean>,
+  callback = (msg: string) => {},
+) {
   const spinner = ora(msg).start();
   await asyncWait(
     async () => {

@@ -35,7 +35,6 @@ import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
 
-
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
   deviceQueryInterval: 'appium:deviceRetryInterval',
@@ -117,7 +116,7 @@ export async function allocateDeviceForSession(
           );
           return false;
         } else log.info(`Waiting for free device. Filter: ${JSON.stringify(filters)}}`);
-        return await getDevice(filters) != undefined;
+        return (await getDevice(filters)) != undefined;
       },
       { timeout, intervalBetweenAttempts },
     );
@@ -167,7 +166,7 @@ export async function initializeStorage() {
 
 function getStorage() {
   try {
-    Container.get('LocalStorage')
+    Container.get('LocalStorage');
   } catch (err) {
     log.error(`Failed to get LocalStorage: Error ${err}`);
     initializeStorage();
@@ -228,7 +227,7 @@ export function getDeviceFiltersFromCapability(
     platform == DevicePlatform.IOS
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
-  
+
   if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
@@ -266,7 +265,7 @@ export function getDeviceFiltersFromCapability(
     caps = { ...caps, name };
   }
 
-  return caps
+  return caps;
 }
 
 /**
@@ -289,9 +288,9 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
     log.warn('No devices found');
     return [];
   }
-  
+
   log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
-  
+
   // first thing first. Update device list in local list
   await addNewDevice(devices, host);
 
@@ -306,9 +305,7 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
     } else {
       log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
-  } 
-    
-  
+  }
 
   return devices;
 }
@@ -357,8 +354,8 @@ export async function removeStaleDevices(currentHost: string) {
         host: host,
         alive: await isDeviceFarmRunning(host),
       };
-    })
-  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean; }; }[];
+    }),
+  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
 
   const aliveCloudHosts = (await Promise.allSettled(
     cloudHosts.map(async (host) => {
@@ -366,8 +363,8 @@ export async function removeStaleDevices(currentHost: string) {
         host: host,
         alive: await isAppiumRunningAt(host),
       };
-    })
-  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean; }; }[];
+    }),
+  )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
 
   // summarize alive hosts
   const allAliveHosts = [...aliveHosts, ...aliveCloudHosts]
@@ -380,7 +377,7 @@ export async function removeStaleDevices(currentHost: string) {
   log.debug(
     `Removing Device with udid(s): ${staleDevices
       .map((device) => device.udid)
-      .join(', ')} because the node is not alive`
+      .join(', ')} because the node is not alive`,
   );
 
   // remove devices with no host
@@ -388,7 +385,7 @@ export async function removeStaleDevices(currentHost: string) {
   log.debug(
     `Removing Device with udid(s): ${devicesWithNoHost
       .map((device) => device.udid)
-      .join(', ')} because the device has no host`
+      .join(', ')} because the device has no host`,
   );
 }
 
@@ -437,7 +434,11 @@ export async function setupCronReleaseBlockedDevices(
   }, intervalMs);
 }
 
-export async function setupCronUpdateDeviceList(host: string, hubArgument: string, intervalMs: number) {
+export async function setupCronUpdateDeviceList(
+  host: string,
+  hubArgument: string,
+  intervalMs: number,
+) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
   }

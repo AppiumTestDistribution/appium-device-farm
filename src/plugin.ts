@@ -67,7 +67,7 @@ let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
-  private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);;
+  private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
     // here, CLI Args are already pluginArgs. Different case for updateServer
@@ -164,7 +164,11 @@ class DevicePlugin extends BasePlugin {
     if (hubArgument !== undefined) {
       log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
       // hub may have been restarted, so let's send device list regularly
-      await setupCronUpdateDeviceList(pluginArgs.bindHostOrIp, hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
+      await setupCronUpdateDeviceList(
+        pluginArgs.bindHostOrIp,
+        hubArgument,
+        pluginArgs.sendNodeDevicesToHubIntervalMs,
+      );
     } else {
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
@@ -268,8 +272,10 @@ class DevicePlugin extends BasePlugin {
     );
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
-    
-    log.debug(`device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`);
+
+    log.debug(
+      `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
+    );
     if (device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);

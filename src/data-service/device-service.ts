@@ -8,10 +8,11 @@ import semver from 'semver';
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
-    (await ADTDatabase.DeviceModel).chain()
+    (await ADTDatabase.DeviceModel)
+      .chain()
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
-  };
+  }
 }
 
 export async function addNewDevice(devices: IDevice[], host?: string): Promise<IDevice[]> {
@@ -25,12 +26,16 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
     }
 
     // make sure all devices have default values from IDevice
-    device = Object.assign({
-      userBlocked: false,
-      offline: false
-    } as unknown as Partial<IDevice>, device);
+    device = Object.assign(
+      {
+        userBlocked: false,
+        offline: false,
+      } as unknown as Partial<IDevice>,
+      device,
+    );
 
-    const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel).chain()
+    const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel)
+      .chain()
       .find({ udid: device.udid, host: device.host })
       .data();
     if (isDeviceAlreadyPresent.length === 0) {
@@ -40,7 +45,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       delete device['meta'];
       try {
         (await ADTDatabase.DeviceModel).insert({
-          ...device
+          ...device,
         });
         return device;
       } catch (error) {
@@ -52,13 +57,17 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   });
 
   // nasty hack to remove undefined values from array while satisfying typescript checker
-  const result = (await Promise.all(addedDevices)).filter((device): device is IDevice => Boolean(device));
+  const result = (await Promise.all(addedDevices)).filter((device): device is IDevice =>
+    Boolean(device),
+  );
   log.debug(`Added ${result.length} new devices to local database`);
 
   log.debug(`Added devices: ${JSON.stringify(result)}`);
-  log.debug(`All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`);
-  
-  return result
+  log.debug(
+    `All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`,
+  );
+
+  return result;
 }
 
 export async function setSimulatorState(devices: Array<IDevice>) {
@@ -73,14 +82,15 @@ export async function setSimulatorState(devices: Array<IDevice>) {
         log.info(
           `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
-        (await ADTDatabase.DeviceModel).chain()
+        (await ADTDatabase.DeviceModel)
+          .chain()
           .find({ udid: device.udid })
           .update(function (d: IDevice) {
             d.state = device.state;
           });
       }
     }
-  };
+  }
 }
 
 export async function getAllDevices(): Promise<IDevice[]> {
@@ -103,7 +113,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   type FilterOptionsKey = keyof IDeviceFilterOptions;
   const filterOptionKeys = Object.keys(filterOptions) as FilterOptionsKey[];
   filterOptionKeys
-    .filter(key => filterOptions[key] !== undefined)
+    .filter((key) => filterOptions[key] !== undefined)
     .forEach((key: FilterOptionsKey) => {
       switch (key) {
         case 'platform':
@@ -112,12 +122,14 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
         case 'platformVersion':
           log.debug(`platformVersion: ${filterOptions.platformVersion}`);
           const coercedPlatformVersion = semver.coerce(filterOptions.platformVersion);
-          
+
           results = results.where(function (obj: IDevice) {
-            const coercedSDK = semver.coerce(obj.sdk);  
+            const coercedSDK = semver.coerce(obj.sdk);
             log.debug(`coerced obj SDK: ${coercedSDK}`);
             if (coercedSDK && coercedPlatformVersion) {
-              log.debug(`coerced obj SDK: ${coercedSDK} == coercedPlatformVersion: ${coercedPlatformVersion}`);
+              log.debug(
+                `coerced obj SDK: ${coercedSDK} == coercedPlatformVersion: ${coercedPlatformVersion}`,
+              );
               return semver.eq(coercedSDK, coercedPlatformVersion);
             }
             return false;
@@ -125,10 +137,9 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'name':
           // only is name is not empty nor undefined
-          if (filterOptions.name !== undefined && filterOptions.name.trim() !== '') 
-            filter.name = { '$contains': filterOptions.name.trim() };
-          else
-            filter.name = { '$ne': undefined };
+          if (filterOptions.name !== undefined && filterOptions.name.trim() !== '')
+            filter.name = { $contains: filterOptions.name.trim() };
+          else filter.name = { $ne: undefined };
           break;
         case 'busy':
           filter.busy = filterOptions.busy;
@@ -154,7 +165,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
             const coercedMinSDK = semver.coerce(filterOptions.minSDK);
             results = results.where(function (obj: IDevice) {
               const coercedSDK = semver.coerce(obj.sdk);
-              
+
               if (coercedSDK && coercedMinSDK) {
                 log.debug(`coerced obj SDK: ${coercedSDK} >= coercedMinSDK: ${coercedMinSDK}`);
                 return semver.gte(coercedSDK, coercedMinSDK);
@@ -182,12 +193,12 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           const exhaustiveCheck: never = key;
           break;
       }
-    })
+    });
 
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
   }
-  
+
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
   /*
@@ -218,7 +229,8 @@ export async function getDevice(filterOptions: IDeviceFilterOptions): Promise<ID
 
 export async function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
   log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
-  (await ADTDatabase.DeviceModel).chain()
+  (await ADTDatabase.DeviceModel)
+    .chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
       Object.assign(device, {
@@ -228,7 +240,8 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
 }
 
 export async function updateCmdExecutedTime(sessionId: string) {
-  (await ADTDatabase.DeviceModel).chain()
+  (await ADTDatabase.DeviceModel)
+    .chain()
     .find({ session_id: sessionId })
     .update(function (device: IDevice) {
       device.lastCmdExecutedAt = new Date().getTime();
@@ -242,7 +255,8 @@ export async function updateCmdExecutedTime(sessionId: string) {
  */
 export async function userBlockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel).chain()
+  (await ADTDatabase.DeviceModel)
+    .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = true;
@@ -251,7 +265,8 @@ export async function userBlockDevice(udid: string, host: string) {
 
 export async function userUnblockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel).chain()
+  (await ADTDatabase.DeviceModel)
+    .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = false;
@@ -265,7 +280,8 @@ export async function userUnblockDevice(udid: string, host: string) {
  */
 export async function blockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel).chain()
+  (await ADTDatabase.DeviceModel)
+    .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.busy = true;

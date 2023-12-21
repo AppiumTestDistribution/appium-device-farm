@@ -145,7 +145,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         deviceState.push({
           ...existingDevice,
           busy: false,
-          userBlocked: false
+          userBlocked: false,
         });
       } else {
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
@@ -155,7 +155,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     // might as well track devices
     this.trackIOSDevices(pluginArgs);
 
-    return deviceState
+    return deviceState;
   }
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
@@ -171,7 +171,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       // add device to local list
       log.info(`iOS device with udid ${message.id} plugged! updating device list...`);
       addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
-      
     });
     goIosTracker.on('device-removed', async (message) => {
       const deviceRemoved: any = [{ udid: message.id, host: pluginArgs.bindHostOrIp }];
@@ -184,7 +183,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       // remove device from local list
       log.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
       removeDevice(deviceRemoved);
-      
     });
   }
 
@@ -235,7 +233,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       const nodeDevices = new NodeDevices(this.pluginArgs.hub);
       await nodeDevices.postDevicesToHub(simulators, 'add');
     }*/
-    
+
     return simulators;
   }
 
@@ -253,7 +251,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       );
     }
     //log.debug(`Filtered Simulators: ${JSON.stringify(filteredSimulators)}`);
-    
+
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
 
@@ -280,7 +278,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           ),
         }),
       );
-    };
+    }
 
     return returnedSimulators;
   }
@@ -291,7 +289,9 @@ export default class IOSDeviceManager implements IDeviceManager {
       // list runtimes and log availability errors
       const list = await simctl.list();
       const runtimes = list.runtimes;
-      const unAavailableRuntimes = runtimes.filter((runtime: any) => !runtime.isAvailable).map((runtime: any) => runtime.name);
+      const unAavailableRuntimes = runtimes
+        .filter((runtime: any) => !runtime.isAvailable)
+        .map((runtime: any) => runtime.name);
       if (unAavailableRuntimes.length > 0) {
         log.error(`The following runtimes are not available: ${unAavailableRuntimes.join(', ')}`);
       }
