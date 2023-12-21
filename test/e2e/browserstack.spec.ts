@@ -52,6 +52,8 @@ describe('Browserstack Devices', () => {
       sdk: '9.0',
       udid: 'Google Pixel 3',
       offline: false,
+      sessionStartTime: 0,
+      totalUtilizationTimeMilliSec: null
     });
   });
 

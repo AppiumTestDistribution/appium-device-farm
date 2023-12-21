@@ -18,7 +18,7 @@ const cliArgs = {
   },
 };
 
-// const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
 
 describe('IOS Device Manager', () => {
   // const deviceManager = new DeviceFarmManager('ios', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));

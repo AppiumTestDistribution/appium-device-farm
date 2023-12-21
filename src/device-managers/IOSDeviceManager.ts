@@ -252,10 +252,10 @@ export default class IOSDeviceManager implements IDeviceManager {
         ),
       );
     }
-    log.debug(`Filtered Simulators: ${JSON.stringify(filteredSimulators)}`);
+    //log.debug(`Filtered Simulators: ${JSON.stringify(filteredSimulators)}`);
     
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
-    log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
+    //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
 
     for await (const device of buildSimulators) {
       const wdaLocalPort = await getFreePort();
