@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
 import ip from 'ip';
+import { IDevice } from '../../src/interfaces/IDevice';
 
 describe('PCloudy Devices', () => {
   // dump hub config into a file
@@ -36,6 +37,7 @@ describe('PCloudy Devices', () => {
   it('Should be able to run the android with PCloudy config', async () => {
     let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`))
       .data;
+    androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0]).to.deep.equal({
@@ -67,10 +69,14 @@ describe('PCloudy Devices', () => {
   });
 
   it('Should be able to get iOS devices from PCloudy config', async () => {
-    let iosDevics = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
-    delete iosDevics[0].meta;
-    delete iosDevics[0]['$loki'];
-    expect(iosDevics[0]).to.deep.equal({
+    let iosDevices = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
+    //console.log(JSON.stringify(iosDevices));
+    const cloudDevices = iosDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
+    delete cloudDevices[0].meta;
+    delete cloudDevices[0]['$loki'];
+    //delete cloudDevices[0].udid;
+    //delete cloudDevices[0].name;
+    expect(cloudDevices[0]).to.deep.equal({
       platform: 'ios',
       host: 'https://device.pcloudy.com/appiumcloud',
       busy: false,
@@ -84,12 +90,12 @@ describe('PCloudy Devices', () => {
       cloud: 'pCloudy',
       pCloudy_DeviceManufacturer: 'APPLE',
       pCloudy_DeviceVersion: '15.1',
-      name: 'APPLE',
       sdk: '15.1',
       udid: 'APPLE',
       offline: false,
       sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null
+      totalUtilizationTimeMilliSec: null,
+      name: 'APPLE'
     });
   });
 });
