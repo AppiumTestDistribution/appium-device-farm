@@ -6,7 +6,7 @@ import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
 import ip from 'ip';
 
-describe('Browserstack Devices', () => {
+describe('PCloudy Devices', () => {
   // dump hub config into a file
   const hub_config_file = path.join(__dirname, '../../serverConfig/pcloudy-config.json');
 
@@ -88,6 +88,8 @@ describe('Browserstack Devices', () => {
       sdk: '15.1',
       udid: 'APPLE',
       offline: false,
+      sessionStartTime: 0,
+      totalUtilizationTimeMilliSec: null
     });
   });
 });

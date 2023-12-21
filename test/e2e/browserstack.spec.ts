@@ -84,6 +84,9 @@ describe('Browserstack Devices', () => {
       sdk: '15',
       udid: 'iPhone XS',
       offline: false,
+
+      sessionStartTime: 0,
+      totalUtilizationTimeMilliSec: null
     });
   });
 });
