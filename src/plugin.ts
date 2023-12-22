@@ -5,11 +5,8 @@ import BasePlugin from '@appium/base-plugin';
 import { router } from './app';
 import { IDevice } from './interfaces/IDevice';
 import {
-  CreateSessionResponseSuccessExternal,
   CreateSessionResponseInternal,
   ISessionCapability,
-  ISessionResponse,
-  CreateSessionResponseErrorExternal,
   W3CNewSessionResponse,
   W3CNewSessionResponseError,
 } from './interfaces/ISessionCapability';

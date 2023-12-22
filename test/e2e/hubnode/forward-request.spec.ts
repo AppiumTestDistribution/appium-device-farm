@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { pluginE2EHarness } from '@appium/plugin-test-support';
+import { pluginE2EHarness } from '../plugin-harness';
 import { remote } from 'webdriverio';
 import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from '../e2ehelper';
 import { Options } from '@wdio/types';
@@ -19,6 +19,9 @@ const WDIO_PARAMS = {
   path: '/'
 };
 
+let hubReady = false;
+let nodeReady = false;
+
 const capabilities = {
   "appium:automationName": "UiAutomator2",
   "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
@@ -27,53 +30,76 @@ const capabilities = {
   "appium:uiautomator2ServerInstallTimeout": 90000,
 } as unknown as WebdriverIO.Capabilities
 
-describe('E2E', () => {
-  // use ios for hub
-  const hub_config_file = ensureHubConfig('ios');
+describe('E2E Forward Request', () => {
+  console.log("Before all");
+    // dump hub config into a file
+    const hub_config_file = ensureHubConfig('ios');
 
-  // and android on node so that we can test session request 
-  const node_config_file = ensureNodeConfig();
+    // dump node config into a file
+    const node_config_file = ensureNodeConfig();
 
-  // setup appium home
-  const APPIUM_HOME = ensureAppiumHome("hub");
+    // setup appium home
+    const APPIUM_HOME = ensureAppiumHome('hub', true);
+    
+    const APPIUM_HOME_NODE = ensureAppiumHome("node", true);
 
-  // run hub
-  pluginE2EHarness({
-    before: global.before,
-    after: global.after,
-    serverArgs: {
-      subcommand: 'server',
-      configFile: hub_config_file
-    },
-    pluginName: 'device-farm',
-    port: HUB_APPIUM_PORT,
-    driverSource: 'npm',
-    driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
-    pluginSource: 'local',
-    pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    console.log(`Hub config file: ${hub_config_file}`);
 
-  // run node
-  pluginE2EHarness({
-    before: global.before,
-    after: global.after,
-    serverArgs: {
-      subcommand: 'server',
-      configFile: node_config_file
-    },
-    pluginName: 'device-farm',
-    port: NODE_APPIUM_PORT,
-    driverSource: 'npm',
-    driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
-    pluginSource: 'local',
-    pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    // run hub
+    const hubProcess = pluginE2EHarness({
+      before: undefined,
+      after: global.after,
+      serverArgs: {
+        subcommand: 'server',
+        configFile: hub_config_file
+      },
+      pluginName: 'device-farm',
+      host: hub_config.bindHostOrIp,
+      port: HUB_APPIUM_PORT,
+      driverSource: 'npm',
+      driverName: 'uiautomator2',
+      driverSpec: 'appium-uiautomator2-driver',
+      pluginSource: 'local',
+      pluginSpec: PLUGIN_PATH,
+      appiumHome: APPIUM_HOME!
+    })
+
+    // run node
+    const nodeProcess =  pluginE2EHarness({
+      before: undefined,
+      after: global.after,
+      serverArgs: {
+        subcommand: 'server',
+        configFile: node_config_file
+      },
+      pluginName: 'device-farm',
+      port: NODE_APPIUM_PORT,
+      host: node_config.bindHostOrIp,
+      driverSource: 'npm',
+      driverName: 'uiautomator2',
+      driverSpec: 'appium-uiautomator2-driver',
+      pluginSource: 'local',
+      pluginSpec: PLUGIN_PATH,
+      appiumHome: APPIUM_HOME_NODE!
+    })
+
+
+  async function waitForHubAndNode() {
+    if (!hubReady) {
+      console.log("Waiting for hub to be ready");
+      await hubProcess.startPlugin();
+      hubReady = true;
+    }
+
+    if (!nodeReady){
+      console.log("Waiting for node to be ready");
+      await nodeProcess.startPlugin();
+      nodeReady = true;
+    }
+  }
 
   it('node can handle appium request on its own (hub still need to run)', async () => {
+    await waitForHubAndNode();
     const node_wdio_params = Object.assign({}, WDIO_PARAMS, { hostname: node_config.bindHostOrIp, port: NODE_APPIUM_PORT });
     console.log(`Node wdio params: ${JSON.stringify(node_wdio_params)}`);
     console.log(`node config: ${JSON.stringify(node_config)}`);
@@ -83,6 +109,7 @@ describe('E2E', () => {
 
 
   it('can forward session request to node', async () => {
+    await waitForHubAndNode();
     if (hub_config.bindHostOrIp == node_config.bindHostOrIp) {
       it.skip('node and hub should not be using the same host');
     }

@@ -289,7 +289,7 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
     return [];
   }
 
-  log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
+  // log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
 
   // first thing first. Update device list in local list
   await addNewDevice(devices, host);

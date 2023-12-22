@@ -61,10 +61,20 @@ export function ensureTempDir() {
   return tempDir;
 }
 
-export function ensureAppiumHome(suffix = '') {
+export function ensureAppiumHome(suffix = '', deleteExisting = true) {
   const newHome = path.resolve(path.join(__dirname, `/../../temp-appium`, suffix));
   if (!fs.existsSync(newHome)) {
     fs.mkdirSync(newHome);
+  }
+  // check if there's already extensions.yaml under node_modules/.cache/appium
+  const extensionsYaml = path.join(newHome, 'node_modules', '.cache', 'appium', 'extensions.yaml');
+  // log a warning as appium won't be able to install the plugin
+  if (fs.existsSync(extensionsYaml)) {
+    console.log(`WARNING: ${extensionsYaml} already exists. Appium won't be able to install the plugin`);
+    if (deleteExisting) {
+      console.log(`Deleting ${extensionsYaml}`);
+      fs.unlinkSync(extensionsYaml);
+    }
   }
   return newHome;
 }

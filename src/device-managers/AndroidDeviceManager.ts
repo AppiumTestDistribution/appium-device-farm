@@ -75,7 +75,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         return devices;
       }
     } catch (e) {
-      log.err(`Error while getting android devices. Error: ${e}`);
+      log.error(`Error while getting android devices. Error: ${e}`);
     }
     return [];
   }
@@ -84,7 +84,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
     await this.requireSdkRoot();
     let availableDevices: IDevice[] = [];
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
-    log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
+    //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
+
     for (const [adbInstance, devices] of connectedDevices) {
       log.debug(
         `fetchAndroidDevices host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
@@ -137,7 +138,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         }
       }
     }
-    log.info(`Found ${availableDevices.length} availableDevices android devices`);
+    
     return availableDevices;
   }
 
