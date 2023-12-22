@@ -1,4 +1,4 @@
-import { DevicePlugin } from './+';
+import { DevicePlugin } from './plugin';
 import { path as ffmpeg } from '@ffmpeg-installer/ffmpeg';
 
 //Add FFMPEG to path for appium to record video of the session

@@ -76,6 +76,7 @@
   "exclude": [
     "lib",
     "node_modules",
+    "src/public",
     "typings"
   ]
 }

@@ -197,8 +197,9 @@ apiRouter.get('/session/:sessionId/live_video', async (req, res) => {
   }
 });
 
+staticFilesRouter.use(express.static(path.join(__dirname, '..', 'public')));
 router.use('/api', apiRouter);
-router.use(express.static(path.join(__dirname, 'public')));
 router.use('/assets', express.static(config.sessionAssetsPath));
+router.use(staticFilesRouter);
 
 export { router };
