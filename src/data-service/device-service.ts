@@ -62,10 +62,10 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   );
   log.debug(`Added ${result.length} new devices to local database`);
 
-  log.debug(`Added devices: ${JSON.stringify(result)}`);
-  log.debug(
-    `All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`,
-  );
+  //log.debug(`Added devices: ${JSON.stringify(result)}`);
+  //log.debug(
+  //  `All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`,
+  //);
 
   return result;
 }
@@ -125,11 +125,11 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
 
           results = results.where(function (obj: IDevice) {
             const coercedSDK = semver.coerce(obj.sdk);
-            log.debug(`coerced obj SDK: ${coercedSDK}`);
+            // log.debug(`coerced obj SDK: ${coercedSDK}`);
             if (coercedSDK && coercedPlatformVersion) {
-              log.debug(
+              /*log.debug(
                 `coerced obj SDK: ${coercedSDK} == coercedPlatformVersion: ${coercedPlatformVersion}`,
-              );
+              );*/
               return semver.eq(coercedSDK, coercedPlatformVersion);
             }
             return false;
@@ -161,13 +161,13 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {
-            log.debug(`minSDK: ${filterOptions.minSDK}`);
+            // log.debug(`minSDK: ${filterOptions.minSDK}`);
             const coercedMinSDK = semver.coerce(filterOptions.minSDK);
             results = results.where(function (obj: IDevice) {
               const coercedSDK = semver.coerce(obj.sdk);
 
               if (coercedSDK && coercedMinSDK) {
-                log.debug(`coerced obj SDK: ${coercedSDK} >= coercedMinSDK: ${coercedMinSDK}`);
+                // log.debug(`coerced obj SDK: ${coercedSDK} >= coercedMinSDK: ${coercedMinSDK}`);
                 return semver.gte(coercedSDK, coercedMinSDK);
               }
               return false;
@@ -176,11 +176,11 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'maxSDK':
           if (semver.coerce(filterOptions.maxSDK)) {
-            log.debug(`maxSDK: ${filterOptions.maxSDK}`);
+            // log.debug(`maxSDK: ${filterOptions.maxSDK}`);
             const coercedMaxSDK = semver.coerce(filterOptions.maxSDK);
             results = results.where(function (obj: IDevice) {
               const coercedSDK = semver.coerce(obj.sdk);
-              log.debug(`coerced obj SDK: ${coercedSDK}`);
+              // log.debug(`coerced obj SDK: ${coercedSDK}`);
               if (coercedSDK && coercedMaxSDK) {
                 return semver.lte(coercedSDK, coercedMaxSDK);
               }
@@ -303,7 +303,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
   }
 
   if (devices !== undefined) {
-    log.debug(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
+    // log.debug(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
     await Promise.all(
       devices.map(async (device) => {

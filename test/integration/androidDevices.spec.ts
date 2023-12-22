@@ -17,27 +17,37 @@ import chaiAsPromised from 'chai-as-promised';
 
 chai.use(chaiAsPromised);
 
-const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, {
+  remote: [`http://${ip.address()}:4723`],
+  skipChromeDownload: true,
+});
 
 describe('Android Test', () => {
-  const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
+  const deviceManager = new DeviceFarmManager(
+    'android',
+    { androidDeviceType: 'both', iosDeviceType: 'both' },
+    4723,
+    Object.assign(pluginArgs, {}),
+  );
 
   before(async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
     // adb devices should return devices
-    expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(0, "No devices detected. Is adb running? Is there at least one device connected?");
-  })
+    expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
+      0,
+      'No devices detected. Is adb running? Is there at least one device connected?',
+    );
+  });
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
-    
-    
-    await deviceManager.getDevices()
+
+    await deviceManager.getDevices();
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     await cleanPendingSessions(0);
-    await unblockDeviceMatchingFilter({  });
-    
+    await unblockDeviceMatchingFilter({});
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -48,13 +58,21 @@ describe('Android Test', () => {
       firstMatch: [{}],
     };
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: devices.udid }).data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: devices.udid })
+      .data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
   it('Allocate second free device and verify both the device state is busy in db', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign({}, DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager(
+      'android',
+      { androidDeviceType: 'both', iosDeviceType: 'both' },
+      4723,
+      Object.assign({}, DefaultPluginArgs, pluginArgs),
+    );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);
     const capabilities = {
@@ -72,10 +90,10 @@ describe('Android Test', () => {
     waitUntil(async () => {
       await updateDeviceList(pluginArgs.bindHostOrIp);
       devices = await deviceManager.getDevices();
-      
+
       return devices.length === 2 && devices.every((device: IDevice) => !device.offline);
-    })
-    
+    });
+
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
@@ -83,9 +101,14 @@ describe('Android Test', () => {
 
   it('Finding a device should throw error when all devices are busy', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('android', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      'android',
+      { androidDeviceType: 'both', iosDeviceType: 'both' },
+      4723,
+      pluginArgs,
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
     const capabilities = {
       alwaysMatch: {
@@ -101,8 +124,8 @@ describe('Android Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","busy":false,"userBlocked":false}'
-        )
+          'No device found for filters: {"platform":"android","busy":false,"userBlocked":false}',
+        ),
     );
   });
 });

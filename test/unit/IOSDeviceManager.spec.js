@@ -18,7 +18,10 @@ const cliArgs = {
   },
 };
 
-const pluginArgs = Object.assign({}, DefaultPluginArgs, { remote: [ `http://${ip.address()}:4723` ], skipChromeDownload: true })
+const pluginArgs = Object.assign({}, DefaultPluginArgs, {
+  remote: [`http://${ip.address()}:4723`],
+  skipChromeDownload: true,
+});
 
 describe('IOS Device Manager', () => {
   // const deviceManager = new DeviceFarmManager('ios', {androidDeviceType: 'both', iosDeviceType: 'both'}, 4723, Object.assign(pluginArgs, {}));
@@ -52,7 +55,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
       },
     ]);
-    const devices = await iosDevices.getDevices({iosDeviceType: 'both'}, []);
+    const devices = await iosDevices.getDevices({ iosDeviceType: 'both' }, []);
     expect(devices).to.deep.equal([
       {
         udid: '00001111-00115D822222002E',
@@ -68,7 +71,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
+          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
         ),
         mjpegServerPort: 54093,
       },
@@ -101,19 +104,27 @@ describe('IOS Device Manager', () => {
         name: 'iPhone 14 Plus',
         sdk: '16.1',
       },
-    ]
+    ];
 
-    let iosDeviceManager = new IOSDeviceManager(Object.assign({
-      platform: 'iOS',
-      simulators,
-    }, DefaultPluginArgs), 4723);
+    let iosDeviceManager = new IOSDeviceManager(
+      Object.assign(
+        {
+          platform: 'iOS',
+          simulators,
+        },
+        DefaultPluginArgs,
+      ),
+      4723,
+    );
     sandbox.stub(iosDeviceManager, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDeviceManager, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDeviceManager, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock.filter((device) => device.platform === 'iOS'));
-    const devices = await iosDeviceManager.getDevices({iosDeviceType: 'real'}, []);
+    sandbox
+      .stub(iosDeviceManager, 'getLocalSims')
+      .returns(deviceMock.filter((device) => device.platform === 'iOS'));
+    const devices = await iosDeviceManager.getDevices({ iosDeviceType: 'real' }, []);
     // all devices are simulators
     devices.forEach((device) => {
       expect(device.realDevice).to.equal(true);
@@ -130,17 +141,25 @@ describe('IOS Device Manager', () => {
         name: 'iPhone 14 Plus',
         sdk: '16.1',
       },
-    ]
-    let iosDeviceManager = new IOSDeviceManager(Object.assign({
-      platform: 'iOS',
-      iosDeviceType: 'simulated',
-      remote: ['http://127.0.0.1:4723'],
-      simulators,
-    }, DefaultPluginArgs), 4723);
+    ];
+    let iosDeviceManager = new IOSDeviceManager(
+      Object.assign(
+        {
+          platform: 'iOS',
+          iosDeviceType: 'simulated',
+          remote: ['http://127.0.0.1:4723'],
+          simulators,
+        },
+        DefaultPluginArgs,
+      ),
+      4723,
+    );
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(iosDeviceManager, 'getLocalSims').returns(deviceMock.filter((device) => device.platform === 'iOS'));
+    sandbox
+      .stub(iosDeviceManager, 'getLocalSims')
+      .returns(deviceMock.filter((device) => device.platform === 'iOS'));
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
-    const devices = await iosDeviceManager.getDevices({iosDeviceType: 'simulated'}, []);
+    const devices = await iosDeviceManager.getDevices({ iosDeviceType: 'simulated' }, []);
     // all devices are simulators
     devices.forEach((device) => {
       expect(device.realDevice).to.be.false;
@@ -178,7 +197,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
+          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
         ),
         mjpegServerPort: 54093,
         sessionStartTime: 0,
@@ -261,7 +280,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
         derivedDataPath: path.join(
           os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'
+          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
         ),
         mjpegServerPort: 54093,
       },

@@ -11,19 +11,17 @@ import sinon from 'sinon';
 import { IDevice } from '../../src/interfaces/IDevice';
 var sandbox = sinon.createSandbox();
 
-
 describe('Model Test', async () => {
-  
   before('Add device collection', async () => {
     const deviceModel = await ADTDatabase.DeviceModel;
     (await ADTDatabase.DeviceModel).removeDataOnly();
     expect((await ADTDatabase.DeviceModel).chain().find().data().length).to.be.equal(0);
     expect(deviceMock.length).to.be.greaterThanOrEqual(1);
-    console.log(`deviceMock length: ${deviceMock.length}`);
+    // console.log(`deviceMock length: ${deviceMock.length}`);
     const result = (await ADTDatabase.DeviceModel).insert(deviceMock);
     (await ADTDatabase.db).saveDatabase();
-    console.log(`result: ${result}`);
-    console.log(`device model length: ${deviceModel.find().length}`);
+    // console.log(`result: ${result}`);
+    // console.log(`device model length: ${deviceModel.find().length}`);
     (await ADTDatabase.DeviceModel).chain().find().data().length.should.be.equal(deviceMock.length);
   });
 
@@ -32,10 +30,16 @@ describe('Model Test', async () => {
   });
 
   it('Should remove device from old pool when new poll call does not have the device', async () => {
-    const findDevice = (await ADTDatabase.DeviceModel).chain().find({ udid: 'emulator-5570' }).data();
+    const findDevice = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: 'emulator-5570' })
+      .data();
     expect(findDevice.length).to.be.equal(1);
     await removeDevice([{ udid: 'emulator-5570', host: '127.0.0.1' }]);
-    const updatedDeviceList = (await ADTDatabase.DeviceModel).chain().find({ udid: 'emulator-5570' }).data();
+    const updatedDeviceList = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: 'emulator-5570' })
+      .data();
     expect(updatedDeviceList).to.deep.equal([]);
   });
 
@@ -50,8 +54,11 @@ describe('Model Test', async () => {
     ] as unknown as IDevice[];
 
     await addNewDevice(newDeviceList);
-    
-    const updatedDeviceList = (await ADTDatabase.DeviceModel).chain().find({ udid: 'emulator-9994' }).data();
+
+    const updatedDeviceList = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: 'emulator-9994' })
+      .data();
     expect(updatedDeviceList.length).to.be.greaterThanOrEqual(1);
   });
 
@@ -95,7 +102,8 @@ describe('Model Test', async () => {
       },
     ] as unknown as IDevice[];
     await setSimulatorState(newDeviceList);
-    const updatedDeviceList = (await ADTDatabase.DeviceModel).chain()
+    const updatedDeviceList = (await ADTDatabase.DeviceModel)
+      .chain()
       .find({ udid: '0FBCBDCC-2FF1-4FCA-B034-60ABC86ED888' })
       .data();
     expect(updatedDeviceList[0].state).to.be.equal('Shutdown');
@@ -123,14 +131,17 @@ describe('Model Test', async () => {
       }
     };
 
-    const existingDevices = await getAllDevices()
+    const existingDevices = await getAllDevices();
 
     // create some parallel calls to addNewDevice
     await Promise.all([delayedAddDevice(newDeviceList), delayedAddDevice(existingDevices)]);
 
     // verify that all devices are added to the db
-    const updatedDeviceList = (await ADTDatabase.DeviceModel).chain().find({ platform: 'android' }).data();
-    
+    const updatedDeviceList = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ platform: 'android' })
+      .data();
+
     // every newDeviceList should be listed under updatedDeviceList
     // map udid only to make it simple
     const addedDeviceUdids = newDeviceList.map((device) => device.udid);

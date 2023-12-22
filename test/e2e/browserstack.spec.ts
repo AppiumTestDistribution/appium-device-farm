@@ -2,7 +2,13 @@
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import axios from 'axios';
 import { expect } from 'chai';
-import { ensureHubConfig, ensureNodeConfig, ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
+import {
+  ensureHubConfig,
+  ensureNodeConfig,
+  ensureAppiumHome,
+  HUB_APPIUM_PORT,
+  PLUGIN_PATH,
+} from './e2ehelper';
 import ip from 'ip';
 import path from 'path';
 import { IDevice } from '../../src/interfaces/IDevice';
@@ -20,7 +26,7 @@ describe('Browserstack Devices', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: hub_config_file
+      configFile: hub_config_file,
     },
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
@@ -29,14 +35,13 @@ describe('Browserstack Devices', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    appiumHome: APPIUM_HOME!,
+  });
 
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
-  
+
   it('Should be able to run the android with Browerstack config', async () => {
-    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`))
-      .data;
+    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`)).data;
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
@@ -55,7 +60,7 @@ describe('Browserstack Devices', () => {
       udid: 'Google Pixel 3',
       offline: false,
       sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null
+      totalUtilizationTimeMilliSec: null,
     });
   });
 
@@ -89,7 +94,7 @@ describe('Browserstack Devices', () => {
       offline: false,
 
       sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null
+      totalUtilizationTimeMilliSec: null,
     });
   });
 });
