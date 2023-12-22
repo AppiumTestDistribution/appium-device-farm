@@ -7,7 +7,6 @@ import { Options } from '@wdio/types';
 import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised'
 import * as chai from 'chai';
-import { ADTDatabase } from '../../../src/data-service/db';
 chai.use(chaiAsPromised);
 
 let driver: any;
@@ -36,7 +35,7 @@ describe('E2E Hub and Node', () => {
   
     console.log("Before all");
     // dump hub config into a file
-    const hub_config_file = ensureHubConfig('ios');
+    const hub_config_file = ensureHubConfig('android', 'real');
 
     // dump node config into a file
     const node_config_file = ensureNodeConfig();
@@ -52,10 +51,7 @@ describe('E2E Hub and Node', () => {
     const hubProcess = pluginE2EHarness({
       before: undefined,
       after: global.after,
-      serverArgs: {
-        subcommand: 'server',
-        configFile: hub_config_file
-      },
+      configFile: hub_config_file,
       pluginName: 'device-farm',
       host: hub_config.bindHostOrIp,
       port: HUB_APPIUM_PORT,
@@ -71,10 +67,7 @@ describe('E2E Hub and Node', () => {
     const nodeProcess =  pluginE2EHarness({
       before: undefined,
       after: global.after,
-      serverArgs: {
-        subcommand: 'server',
-        configFile: node_config_file
-      },
+      configFile: node_config_file,
       pluginName: 'device-farm',
       port: NODE_APPIUM_PORT,
       host: node_config.bindHostOrIp,

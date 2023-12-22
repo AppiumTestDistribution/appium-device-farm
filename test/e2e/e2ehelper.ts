@@ -4,7 +4,6 @@ import os from 'os';
 import ip from 'ip';
 import { DefaultPluginArgs, IPluginArgs } from '../../src/interfaces/IPluginArgs';
 
-
 const ifaces = os.networkInterfaces();
 /**
  {
@@ -25,9 +24,11 @@ const localIp = ip.address();
 const ifaceNames = Object.keys(ifaces);
 
 // find first ip address coming from device other than localIp
-const availableIpAddresses = ifaceNames.map((device) => {
-  return ifaces[device]!.find((iface) => iface.family === 'IPv4')?.address;
-}).filter((ip) => ip !== undefined);
+const availableIpAddresses = ifaceNames
+  .map((device) => {
+    return ifaces[device]!.find((iface) => iface.family === 'IPv4')?.address;
+  })
+  .filter((ip) => ip !== undefined);
 
 // find first ip address coming from device other than localIp
 
@@ -44,14 +45,13 @@ export const PLUGIN_PATH = path.resolve(__dirname + '/../..');
 
 export const hub_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
   hub: undefined,
-  bindHostOrIp: localIp
-})
-
+  bindHostOrIp: localIp,
+});
 
 export const node_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
   hub: `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}`,
-  bindHostOrIp: alternateIp
-})
+  bindHostOrIp: alternateIp,
+});
 
 export function ensureTempDir() {
   const tempDir = path.resolve(__dirname + '/../../temp-appium');
@@ -70,7 +70,9 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
   const extensionsYaml = path.join(newHome, 'node_modules', '.cache', 'appium', 'extensions.yaml');
   // log a warning as appium won't be able to install the plugin
   if (fs.existsSync(extensionsYaml)) {
-    console.log(`WARNING: ${extensionsYaml} already exists. Appium won't be able to install the plugin`);
+    console.log(
+      `WARNING: ${extensionsYaml} already exists. Appium won't be able to install the plugin`,
+    );
     if (deleteExisting) {
       console.log(`Deleting ${extensionsYaml}`);
       fs.unlinkSync(extensionsYaml);
@@ -79,29 +81,39 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
   return newHome;
 }
 
-export function ensureHubConfig(platform = 'android') {
+export function ensureHubConfig(platform = 'android', deviceType = 'both') {
   const hub_config_file = ensureTempDir() + '/hub-config.json';
   const config = {
-    "server": {
-      "port": HUB_APPIUM_PORT,
-      "plugin": {
-        "device-farm": Object.assign(hub_config, {platform})
-      }
-    }
-  }
+    server: {
+      port: HUB_APPIUM_PORT,
+      plugin: {
+        'device-farm': Object.assign(hub_config, {
+          platform,
+          iosDeviceType: deviceType,
+          androidDeviceType: deviceType,
+        }),
+      },
+    },
+  };
   fs.writeFileSync(hub_config_file, JSON.stringify(config));
   return hub_config_file;
 }
 
-export function ensureNodeConfig(androidDeviceType: string = 'both', iosDeviceType: string = 'both') {
+export function ensureNodeConfig(
+  androidDeviceType: string = 'both',
+  iosDeviceType: string = 'both',
+) {
   const node_config_file = ensureTempDir() + '/node-config.json';
-  fs.writeFileSync(node_config_file, JSON.stringify({
-    "server": {
-      "port": NODE_APPIUM_PORT,
-      "plugin": {
-        "device-farm": Object.assign(node_config, {androidDeviceType, iosDeviceType})
-      }
-    }
-  }));
+  fs.writeFileSync(
+    node_config_file,
+    JSON.stringify({
+      server: {
+        port: NODE_APPIUM_PORT,
+        plugin: {
+          'device-farm': Object.assign(node_config, { androidDeviceType, iosDeviceType }),
+        },
+      },
+    }),
+  );
   return node_config_file;
 }

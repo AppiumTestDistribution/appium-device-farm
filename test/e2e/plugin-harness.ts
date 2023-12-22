@@ -10,13 +10,13 @@ import yaml from 'js-yaml';
 import fs from 'fs';
 import ip from 'ip';
 
-type PluginHarnessServerArgs = Partial<ServerArgs> & { subcommand: string; configFile: string; }
+type PluginHarnessServerArgs = { subcommand: string; configFile: string; }
 
 type E2ESetupOpts = {
     appiumHome?: string;
     before: Mocha.HookFunction | undefined;
     after: Mocha.HookFunction;
-    serverArgs?: PluginHarnessServerArgs;
+    configFile?: string;
     driverSource: import('appium/types').InstallType & string;
     driverPackage?: string;
     driverName: string;
@@ -25,8 +25,8 @@ type E2ESetupOpts = {
     pluginPackage?: string;
     pluginSpec: string;
     pluginName: string;
-    port?: number;
-    host?: string;
+    port: number;
+    host: string;
 };
 
 /**
@@ -39,7 +39,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
         appiumHome,
         before,
         after,
-        serverArgs,
+        configFile,
         driverSource,
         driverPackage,
         driverName,
@@ -52,31 +52,9 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
         host,
     } = opts;
 
-    if (serverArgs === undefined) {
-        serverArgs = {} as unknown as PluginHarnessServerArgs;
-    }
-
-    if (host === undefined) {
-        throw new Error(`host is undefined`);
-        host = ip.address();
-    }
     let server: AppiumServer;
 
     async function goIosPath() {
-        /** From the following shell script:
-         function go_ios {
-                node_modules_root=$(npm root -g)
-                platform_name=$(uname -s)
-                go_ios_dir=$node_modules_root/go-ios
-                go_ios_bin=$(find $go_ios_dir -name ios | grep -i "$platform_name")
-                if [ -z "$go_ios_bin" ]; then
-                    exit 1
-                else
-                    # return the path to go-ios binary
-                    echo $go_ios_bin
-                fi
-        }
-         */
         const appium_path = path.dirname(require.resolve('appium'));
         console.log(`${info} appium_path: ${appium_path}`);
         const node_modules_root = (await exec('npm', ['root', '-g'])).stdout.trim();
@@ -97,34 +75,8 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
         return full_path;
     }
 
-    function isPluginInstalled(appium_home: string, plugin_name: string) {
-        // get extensions.yaml
-        const extensionsYaml = path.join(appium_home, 'node_modules', '.cache', 'appium', 'extensions.yaml');
-
-        // slurp yaml into json
-        const extensions = yaml.load(fs.readFileSync(extensionsYaml, 'utf8')) as any;
-        console.log(`${info} Extensions: ${JSON.stringify(extensions, null, 2)}`);
-        const plugins = extensions.plugins? Object.keys(extensions.plugins): [];
-        console.log(`${info} Plugins: ${JSON.stringify(plugins, null, 2)}`);
-        // is the plugin installed?
-        const plugin = plugins.find((p: any) => p === plugin_name);
-
-        console.log(`${info} Checking if plugin "${plugin_name}" is installed?  ${plugin? 'YES': 'NO'} (from ${extensionsYaml})`);
-        if (plugin) {
-            console.log(`${info} Plugin "${plugin_name}" is installed from: ${extensions.plugins[plugin].InstallType}`);
-        }
-        return plugin !== undefined;
-    }
-
     // return appium binary path based on APPIUM_HOME
-    function getAppiumBin(appium_home: string): string {
-        // from appium_home, find appium binary based on node_modules
-        /*let res = path.join(appium_home, 'node_modules', 'appium-device-farm', 'node_modules', 'appium', 'index.js');
-        if (!fs.existsSync(res)) {
-            res = require.resolve('appium');
-            console.log(`${info} Falling back to ${res}`)
-        }
-        console.log(`${info} Appium bin: ${res}`);*/
+    function getAppiumBin(): string {
         return require.resolve('appium');
     }
 
@@ -153,7 +105,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
          * @param {AppiumEnv} env
          */
         const installDriver = async (env: AppiumEnv) => {
-            const APPIUM_BIN = getAppiumBin(env.APPIUM_HOME!);
+            const APPIUM_BIN = getAppiumBin();
             console.log(`${info} Checking if driver "${driverName}" is installed...`);
             const driverListArgs = [APPIUM_BIN, 'driver', 'list', '--json'];
             console.log(`${info} Running: ${process.execPath} ${driverListArgs.join(' ')}`);
@@ -175,17 +127,6 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
             }
             console.log(`${success} Installed driver "${driverName}"`);
         };
-
-        async function installedPluginsByAppiumCommands(env: AppiumEnv) {
-            const APPIUM_BIN = getAppiumBin(env.APPIUM_HOME!);
-            console.log(`${info} Checking if plugin "${pluginName}" is installed...`);
-            const pluginListArgs = [APPIUM_BIN, 'plugin', 'list', '--json'];
-            const { stdout: pluginListJson } = await exec(process.execPath, pluginListArgs, {
-                env,
-            });
-            const availablePlugins = JSON.parse(pluginListJson);
-            return availablePlugins;
-        }
 
         async function removePluginFromExtensionsYaml(env: AppiumEnv) {
             const extensionsYaml = path.join(env.APPIUM_HOME!, 'node_modules', '.cache', 'appium', 'extensions.yaml');
@@ -212,7 +153,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
             await removePluginFromExtensionsYaml(env);
 
             // installing our version of plugin
-            const pluginArgs = [ getAppiumBin(env.APPIUM_HOME!), 'plugin', 'install', '--source', pluginSource, pluginSpec];
+            const pluginArgs = [ getAppiumBin(), 'plugin', 'install', '--source', pluginSource, pluginSpec];
             
             // only aplicable for npm
             if (pluginPackage) {
@@ -231,17 +172,8 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
             }
             console.log(`${info} Will use port ${port} for Appium server`);
 
-
-            const args = {
-                port,
-                address: host,
-                usePlugins: [pluginName],
-                useDrivers: [driverName],
-                appiumHome,
-                ...serverArgs,
-            };
-            console.log(`${info} Appium server args: ${JSON.stringify(args, null, 2)}`);
-            await runAppiumServerFromCli(env, args.usePlugins, args.useDrivers, args.configFile);
+            // here we are using CLI (instead of AppiumServer) to prevent schema conflicts
+            await runAppiumServerFromCli(env, [pluginName], [driverName], configFile);
             // use axios to wait until port is returning 200 OK
             console.log(`${info} Waiting for Appium server to be ready...`);
 
@@ -257,7 +189,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
                 --config ./hub-config.json \
                 -pa /wd/hub
              */
-            const APPIUM_BIN = getAppiumBin(env.APPIUM_HOME!);
+            const APPIUM_BIN = getAppiumBin();
             const serverArgs = [APPIUM_BIN, 'server', '-ka', '800'];
             if (usePlugins.length > 0) {
                 serverArgs.push(`--use-plugins=${usePlugins.join(',')}`);
