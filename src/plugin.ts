@@ -54,6 +54,7 @@ import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
+import { PluginConfig, ServerArgs } from '@appium/types';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -64,11 +65,12 @@ let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
+  static nodeBasePath: string = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
     // here, CLI Args are already pluginArgs. Different case for updateServer
-    log.debug(`📱 CLI Args: ${JSON.stringify(cliArgs)}`);
+    log.debug(`📱 Plugin Args: ${JSON.stringify(cliArgs)}`);
     // plugin args will assign undefined value as well for bindHostOrIp
     this.pluginArgs = Object.assign({}, DefaultPluginArgs, this.cliArgs as unknown as IPluginArgs);
     // not pretty but will do for now
@@ -97,14 +99,26 @@ class DevicePlugin extends BasePlugin {
     );
   }
 
-  public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
+  public static async updateServer(expressApp: any, httpServer: any, cliArgs: ServerArgs): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
-    const pluginArgs: IPluginArgs = Object.assign(
-      {},
-      DefaultPluginArgs,
-      cliArgs.plugin['device-farm'] as unknown as IPluginArgs,
-    );
+    const pluginConfigs = cliArgs.plugin as PluginConfig;
+    let pluginArgs: IPluginArgs;
+    if (pluginConfigs['device-farm'] !== undefined) {
+      pluginArgs = Object.assign(
+        {},
+        DefaultPluginArgs,
+        pluginConfigs['device-farm'] as unknown as IPluginArgs,
+      );
+    } else {
+      pluginArgs = Object.assign(
+        {},
+        DefaultPluginArgs
+      );
+    }
+
+    // I'm transferring the CLI Args to pluginArgs here.
+    DevicePlugin.nodeBasePath = cliArgs.basePath
 
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
@@ -143,7 +157,7 @@ class DevicePlugin extends BasePlugin {
 
     const chromeDriverManager =
       pluginArgs.skipChromeDownload === false ? await ChromeDriverManager.getInstance() : undefined;
-    iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
+    iosDeviceType = DevicePlugin.setIncludeSimulatorState(pluginArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
     const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);

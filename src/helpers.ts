@@ -82,7 +82,8 @@ export function nodeUrl(device: IDevice): string {
       }/wd/hub/session`;
     }
   }
-  return `${host}/session`;
+  // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
+  return `${host}/wd/hub/session`;
 }
 
 export async function isPortBusy(port: number) {
