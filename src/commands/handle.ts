@@ -1,5 +1,4 @@
 import { updateCmdExecutedTime } from '../data-service/device-service';
-import logger from '../logger';
 
 export default async function handle(
   next: () => any,

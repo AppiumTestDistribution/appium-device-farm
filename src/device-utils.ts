@@ -420,6 +420,9 @@ export async function releaseBlockedDevices(newCommandTimeout: number) {
     const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
     if (timeSinceLastCmdExecuted > timeoutSeconds) {
       // unblock regardless of whether the device has session or not
+      log.info(
+        `Unblocking device ${device.udid} at host ${device.host} because it has been idle for ${timeSinceLastCmdExecuted} seconds`,
+      );
       unblockDevice(device.udid, device.host);
     }
   });
