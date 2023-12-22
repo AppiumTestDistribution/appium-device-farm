@@ -96,10 +96,10 @@ export async function allocateDeviceForSession(
   pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  // log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
 
-  log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
+  // log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const intervalBetweenAttempts =
     firstMatch[customCapability.deviceQueryInterval] || deviceQueryIntervalMs;
@@ -126,7 +126,7 @@ export async function allocateDeviceForSession(
 
   const device = await getDevice(filters);
   if (device != undefined) {
-    log.info(`📱 Device found: ${JSON.stringify(device)}`);
+    // log.info(`📱 Device found: ${JSON.stringify(device)}`);
     await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
     await updateCapabilityForDevice(capability, device);
@@ -374,19 +374,23 @@ export async function removeStaleDevices(currentHost: string) {
   // stale devices are devices that's not alive
   const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
   removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
-  log.debug(
-    `Removing Device with udid(s): ${staleDevices
-      .map((device) => device.udid)
-      .join(', ')} because the node is not alive`,
-  );
+  if (staleDevices.length > 0) {
+    log.debug(
+      `Removing device with udid(s): ${staleDevices
+        .map((device) => device.udid)
+        .join(', ')} because the node is not alive`,
+    );
+  }
 
   // remove devices with no host
   removeDevice(devicesWithNoHost.map((device) => ({ udid: device.udid, host: device.host })));
-  log.debug(
-    `Removing Device with udid(s): ${devicesWithNoHost
-      .map((device) => device.udid)
-      .join(', ')} because the device has no host`,
-  );
+  if (devicesWithNoHost.length > 0) {
+    log.debug(
+      `Removing device with udid(s): ${devicesWithNoHost
+        .map((device) => device.udid)
+        .join(', ')} because the device has no host`,
+    );
+  }
 }
 
 export async function unblockCandidateDevices() {
