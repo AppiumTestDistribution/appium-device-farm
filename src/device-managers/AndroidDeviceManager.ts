@@ -138,7 +138,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         }
       }
     }
-    
+
     return availableDevices;
   }
 
