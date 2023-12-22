@@ -287,7 +287,8 @@ class DevicePlugin extends BasePlugin {
     log.debug(
       `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
     );
-    if (device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
+    // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
+    if (this.pluginArgs.hub == undefined && device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
     } else {
