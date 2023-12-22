@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled } from 'styled-components';
+import styled from 'styled-components';
 import FlexContainer from '../../layouts/flex-container';
 import { spawn } from 'child_process';
 import CommonUtils from '../../utils/common-utils';
@@ -121,12 +121,12 @@ function getDuration(session: any) {
   if (session.status.toLowerCase() == 'running') {
     return `Started ${CommonUtils.convertTimeToReadableFormat(
       new Date(session.startTime),
-      new Date()
+      new Date(),
     )} ago`;
   } else {
     return `Took ${CommonUtils.convertTimeToReadableFormat(
       new Date(session.startTime),
-      new Date(session.endTime)
+      new Date(session.endTime),
     )}`;
   }
 }

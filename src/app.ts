@@ -18,12 +18,14 @@ const asyncLock = new AsyncLock(),
 let dashboardPluginUrl: any = null;
 
 const router = express.Router(),
-  apiRouter = express.Router();
+  apiRouter = express.Router(),
+  staticFilesRouter = express.Router();
 
 const MJPEG_PROXY_CACHE: Map<string, any> = new Map();
 
 router.use(cors());
 apiRouter.use(cors());
+staticFilesRouter.use(cors());
 
 /**
  * Middleware to check if the appium-dashboard plugin is installed
@@ -91,7 +93,7 @@ apiRouter.get('/devices/android', (req, res) => {
   res.json(
     DeviceModel.find({
       platform: 'android',
-    })
+    }),
   );
 });
 
@@ -107,9 +109,6 @@ apiRouter.post('/register', (req, res) => {
     });
   } else if (req.query.type === 'remove') {
     removeDevice(requestBody);
-    log.info(
-      `Removing device ${requestBody.udid} from host ${requestBody.host} from list as the device was unplugged!`
-    );
   }
   res.json('200');
 });
@@ -118,7 +117,7 @@ apiRouter.post('/block', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  updateDevice(device, { busy: true, userBlocked: true });
+  if (device != undefined) updateDevice(device, { busy: true, userBlocked: true });
 
   res.json('200');
 });
@@ -127,7 +126,7 @@ apiRouter.post('/unblock', (req, res) => {
   const requestBody = req.body;
 
   const device = getDevice(requestBody);
-  updateDevice(device, { busy: false, userBlocked: false });
+  if (device != undefined) updateDevice(device, { busy: false, userBlocked: false });
 
   res.json('200');
 });

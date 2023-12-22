@@ -7,7 +7,6 @@ export default async function handle(
   commandName: string,
   ...args: any
 ) {
-  logger.info(`Received ${commandName} request on driver - ${driver}`);
   updateCmdExecutedTime(driver.sessionId);
   return await next();
 }

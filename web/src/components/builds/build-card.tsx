@@ -1,4 +1,4 @@
-import { styled } from 'styled-components';
+import styled from 'styled-components';
 import FlexContainer from '../../layouts/flex-container';
 
 const Container = styled.div`

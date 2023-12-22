@@ -1,36 +1,30 @@
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { Platform } from '../types/Platform';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
 
 export class DeviceFarmManager {
-  private deviceManagers: Array<IDeviceManager> = [];
-  private deviceTypes: { androidDeviceType: string; iosDeviceType: string };
-  private cliArgs: any;
-  private nodeId: string;
+  private deviceManagers: IDeviceManager[] = [];
 
-  constructor({
-    platform,
-    deviceTypes,
-    cliArgs,
-    nodeId,
-  }: {
-    platform: Platform | 'both';
-    deviceTypes: { androidDeviceType: string; iosDeviceType: string };
-    cliArgs: any;
-    nodeId: string;
-  }) {
+  constructor(
+    platform: Platform | 'both',
+    private deviceTypes: {
+      androidDeviceType: DeviceTypeToInclude;
+      iosDeviceType: DeviceTypeToInclude;
+    },
+    hostPort: number,
+    private pluginArgs: IPluginArgs,
+  ) {
     this.deviceTypes = deviceTypes;
-    this.cliArgs = cliArgs;
-    this.nodeId = nodeId;
     if (platform.toLowerCase() === 'both') {
-      this.deviceManagers.push(new AndroidDeviceManager());
-      this.deviceManagers.push(new IOSDeviceManager());
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
     } else if (platform.toLowerCase() === 'android') {
-      this.deviceManagers.push(new AndroidDeviceManager());
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
     } else if (platform.toLowerCase() === 'ios') {
-      this.deviceManagers.push(new IOSDeviceManager());
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
     }
   }
 
@@ -38,25 +32,14 @@ export class DeviceFarmManager {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(
-        ...(
-          await deviceManager.getDevices(
-            this.deviceTypes,
-            existingDeviceDetails || [],
-            this.cliArgs
-          )
-        ).map((device) => {
-          return {
-            ...device,
-            nodeId: !device.cloud ? this.nodeId : undefined,
-          };
-        })
+        ...(await deviceManager.getDevices(this.deviceTypes, existingDeviceDetails || [])),
       );
     }
     return devices;
   }
 
   public getMaxSessionCount(): number {
-    return this.cliArgs.plugin['device-farm'].maxSessions;
+    return this.pluginArgs.maxSessions;
   }
 
   public async deviceInstances() {

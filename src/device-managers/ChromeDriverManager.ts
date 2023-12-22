@@ -5,6 +5,7 @@ import {
   getOsInfo,
 } from '../chromeUtils';
 import { ChromedriverStorageClient } from 'appium-chromedriver';
+import log from '../logger';
 
 export default class ChromeDriverManager {
   private static instance: ChromeDriverManager;
@@ -47,7 +48,12 @@ export default class ChromeDriverManager {
       return acc;
     }, {});
     const versions = Object.keys(synchronizedDriversMapping);
-    const latestVersion = `v${versions[versions.length - 1]}`;
+    const fallBackVersion = `v${versions[versions.length - 1]}`;
+    const newVersion = Object.keys(synchronizedDriversMapping).find(
+      (k) => synchronizedDriversMapping[k] === version,
+    );
+    const latestVersion =
+      newVersion !== null && newVersion !== undefined ? `v${newVersion}` : `v${fallBackVersion}`;
     return `${await getChromedriverBinaryPath(this.tempDirectory)}/chromedriver_${
       this.osInfo.name
     }${this.osInfo.arch}_${latestVersion}`;

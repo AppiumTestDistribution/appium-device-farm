@@ -4,9 +4,22 @@ import { SubProcess } from 'teen_process';
 import { cachePath } from '../helpers';
 import log from '../logger';
 export class GoIosTracker extends EventEmitter {
+  private static instance: GoIosTracker;
   private deviceMap: Map<number, string> = new Map();
   private process!: SubProcess;
   private started = true;
+
+  private constructor() {
+    super();
+  }
+
+  public static getInstance(): GoIosTracker {
+    if (!GoIosTracker.instance) {
+      GoIosTracker.instance = new GoIosTracker();
+    }
+
+    return GoIosTracker.instance;
+  }
 
   async start() {
     if (!_.isNil(this.process) && this.process.isRunning) {
@@ -19,7 +32,13 @@ export class GoIosTracker extends EventEmitter {
     } else {
       goIOSPath = `${cachePath('goIOS')}/ios`;
     }
-    this.process = new SubProcess(goIOSPath, ['listen']);
+    try {
+      this.process = new SubProcess(goIOSPath, ['listen']);
+    } catch (err: any) {
+      log.info(
+        `Failed to load go-ios ${goIOSPath}, iOS real device tracking not possible, please refer to link https://appium-device-farm-eight.vercel.app/troubleshooting/#ios-tracking for more details`,
+      );
+    }
 
     this.process.on('lines-stdout', (out) => {
       const parsedOutput = this.parseOutput(out);

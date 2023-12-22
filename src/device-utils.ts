@@ -1,5 +1,11 @@
 /* eslint-disable no-prototype-builtins */
-import { isMac, checkIfPathIsAbsolute, hasHub, cachePath } from './helpers';
+import {
+  isMac,
+  checkIfPathIsAbsolute,
+  isDeviceFarmRunning,
+  cachePath,
+  isAppiumRunningAt,
+} from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
@@ -18,22 +24,17 @@ import {
   addNewDevice,
   removeDevice,
 } from './data-service/device-service';
-import logger from './logger';
+import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
-import os from 'os';
 import fs from 'fs';
-import path from 'path';
 import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import ip from 'ip';
-import { getCLIArgs } from './data-service/pluginArgs';
-import { DevicePlugin } from './plugin';
+import { IPluginArgs } from './interfaces/IPluginArgs';
 
-const DEVICE_AVAILABILITY_TIMEOUT = 180000;
-const DEVICE_AVAILABILITY_QUERY_INTERVAL = 10000;
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
   deviceQueryInteval: 'appium:deviceRetryInterval',
@@ -46,35 +47,34 @@ const customCapability = {
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
+let cronTimerToUpdateDevices: any;
 
-export const getDeviceTypeFromApp = (app: string) => {
+export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefined => {
   /* If the test is targeting safarim, then app capability will be empty */
   if (!app) {
     return;
   }
-  return app.endsWith('app') || app.endsWith('zip') ? 'simulator' : 'real';
+  return app.endsWith('.app') || app.endsWith('.zip') ? 'simulator' : 'real';
 };
 
-export function isAndroid(cliArgs: ServerCLI) {
+export function isAndroid(cliArgs: ServerCLI): boolean {
   return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
-export function deviceType(cliArgs: any, device: string) {
-  const iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType;
-  if (_.has(cliArgs, 'plugin["device-farm"].iosDeviceType')) {
-    return iosDeviceType === device || iosDeviceType === 'both';
-  }
+export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
+  const iosDeviceType = pluginArgs.iosDeviceType;
+  return iosDeviceType === device || iosDeviceType === 'both';
 }
 
-export function isIOS(cliArgs: any) {
-  return isMac() && cliArgs.plugin['device-farm'].platform.toLowerCase() === DevicePlatform.IOS;
+export function isIOS(pluginArgs: IPluginArgs): boolean {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.IOS;
 }
 
-export function isAndroidAndIOS(cliArgs: ServerCLI) {
-  return isMac() && cliArgs.Platform.toLowerCase() === DevicePlatform.BOTH;
+export function isAndroidAndIOS(pluginArgs: IPluginArgs): boolean {
+  return isMac() && pluginArgs.platform.toLowerCase() === DevicePlatform.BOTH;
 }
 
-export function isDeviceConfigPathAbsolute(path: string) {
+export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
   if (checkIfPathIsAbsolute(path)) {
     return true;
   } else {
@@ -88,39 +88,48 @@ export function isDeviceConfigPathAbsolute(path: string) {
  * @param capability
  * @returns
  */
-export async function allocateDeviceForSession(capability: ISessionCapability): Promise<IDevice> {
+export async function allocateDeviceForSession(
+  capability: ISessionCapability,
+  deviceTimeOutMs: number,
+  deviceQueryIntervalMs: number,
+  pluginArgs: IPluginArgs,
+): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  console.log(firstMatch);
-  const filters = getDeviceFiltersFromCapability(firstMatch);
-  logger.info(JSON.stringify(filters));
-  const timeout = firstMatch[customCapability.deviceTimeOut] || DEVICE_AVAILABILITY_TIMEOUT;
+  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+  log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
+  const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
   const newCommandTimeout = firstMatch['appium:newCommandTimeout'] || undefined;
   const intervalBetweenAttempts =
-    firstMatch[customCapability.deviceQueryInteval] || DEVICE_AVAILABILITY_QUERY_INTERVAL;
+    firstMatch[customCapability.deviceQueryInteval] || deviceQueryIntervalMs;
 
   try {
     await waitUntil(
       async () => {
         const maxSessions = getDeviceManager().getMaxSessionCount();
         if (maxSessions !== undefined && (await getBusyDevicesCount()) === maxSessions) {
-          logger.info(
-            `Waiting for session available, already at max session count of: ${maxSessions}`
+          log.info(
+            `Waiting for session available, already at max session count of: ${maxSessions}`,
           );
           return false;
-        } else logger.info('Waiting for free device');
+        } else log.info('Waiting for free device');
         return (await getDevice(filters)) != undefined;
       },
-      { timeout, intervalBetweenAttempts }
+      { timeout, intervalBetweenAttempts },
     );
   } catch (err) {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
   const device = getDevice(filters);
-  logger.info(`📱 Device found: ${JSON.stringify(device)}`);
-  updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
-  logger.info(`📱 Blocking device ${device.udid} for new session`);
-  await updateCapabilityForDevice(capability, device);
-  return device;
+  if (device != undefined) {
+    log.info(`📱 Device found: ${JSON.stringify(device)}`);
+    updateDevice(device, { busy: true, newCommandTimeout: newCommandTimeout });
+    log.info(`📱 Blocking device ${device.udid} for new session`);
+    await updateCapabilityForDevice(capability, device);
+    return device;
+  } else {
+    throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
+  }
 }
 
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
@@ -131,7 +140,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
       await iOSCapabilities(capability, device);
     }
   } else {
-    logger.info('Updating cloud Capability for Device');
+    log.info('Updating cloud capability for Device');
     return new CapabilityManager(capability, device).getCapability();
   }
 }
@@ -140,7 +149,7 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
  * Sets up node-persist storage in local cache
  * @returns storage
  */
-export async function initlializeStorage() {
+export async function initializeStorage() {
   const basePath = cachePath('storage');
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -166,10 +175,10 @@ export async function getUtilizationTime(udid: string) {
     if (value !== undefined && value && !isNaN(value)) {
       return value;
     } else {
-      //logger.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
+      //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
     }
   } catch (err) {
-    logger.error(`Failed to fetch Utilization Time \n ${err}`);
+    log.error(`Failed to fetch Utilization Time \n ${err}`);
   }
 
   return 0;
@@ -190,7 +199,10 @@ export async function setUtilizationTime(udid: string, utilizationTime: number) 
  * @param capability
  * @returns IDeviceFilterOptions
  */
-export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOptions {
+export function getDeviceFiltersFromCapability(
+  capability: any,
+  pluginArgs: IPluginArgs,
+): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[customCapability.udids]
     ? capability[customCapability.udids].split(',').map(_.trim)
@@ -201,23 +213,17 @@ export function getDeviceFiltersFromCapability(capability: any): IDeviceFilterOp
    * Applicaple only for ios.
    */
   const deviceType =
-    platform == DevicePlatform.IOS && isMac()
+    platform == DevicePlatform.IOS
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
-  if (
-    deviceType?.startsWith('sim') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('real')
-  ) {
+  if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
-      'iosDeviceType value is set to "real" but app provided is not suitable for real device.'
+      'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
     );
   }
-  if (
-    deviceType?.startsWith('real') &&
-    getCLIArgs()[0].plugin['device-farm'].iosDeviceType.startsWith('sim')
-  ) {
+  if (deviceType?.startsWith('real') && pluginArgs.iosDeviceType == 'simulated') {
     throw new Error(
-      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
+      'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
     );
   }
   let name = '';
@@ -255,28 +261,32 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(cliArgs: any) {
+export async function updateDeviceList(hubArgument?: string) {
   const devices: Array<IDevice> = await getDeviceManager().getDevices(getAllDevices());
-  if (hasHub(cliArgs)) {
-    const nodeDevices = new NodeDevices(cliArgs.plugin['device-farm'].hub);
-    await nodeDevices.postDevicesToHub(devices, 'add');
+  if (hubArgument) {
+    const nodeDevices = new NodeDevices(hubArgument);
+    try {
+      await nodeDevices.postDevicesToHub(devices, 'add');
+    } catch (error) {
+      log.error(`Cannot send device list update. Reason: ${error}`);
+    }
   }
   addNewDevice(devices);
 
   return devices;
 }
 
-export async function refreshSimulatorState(cliArgs: ServerCLI) {
+export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {
   if (timer) {
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager().getSimulators(cliArgs);
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }
 
-export async function checkNodeServerAvailability() {
+export async function setupCronCheckStaleDevices(intervalMs: number) {
   const nodeChecked: Array<string> = [];
 
   setInterval(async () => {
@@ -292,62 +302,88 @@ export async function checkNodeServerAvailability() {
     const iterableSet = [...devices];
     const nodeConnections = iterableSet.map(async (device: any) => {
       nodeChecked.push(device.host);
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(device.host);
+      if (!device.hasOwnProperty('cloud')) {
+        await isDeviceFarmRunning(device.host);
+      }
       return device.host;
     });
 
     const nodeConnectionsResult = await Promise.allSettled(nodeConnections);
 
     const nodeConnectionsSuccess = nodeConnectionsResult.filter(
-      (result) => result.status === 'fulfilled'
+      (result) => result.status === 'fulfilled',
     );
     const nodeConnectionsSuccessHost = nodeConnectionsSuccess.map((result: any) => result.value);
     const nodeConnectionsSuccessHostSet = new Set(nodeConnectionsSuccessHost);
 
     const nodeConnectionsFailureHostSet = new Set(
-      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host))
+      [...devices].filter((device: any) => !nodeConnectionsSuccessHostSet.has(device.host)),
     );
 
     nodeConnectionsFailureHostSet.forEach((device: any) => {
-      logger.info(`Removing Device with udid (${device.udid}) because it is not available`);
+      log.info(`Removing Device with udid (${device.udid}) because it is not available`);
       removeDevice(device);
       nodeChecked.splice(nodeChecked.indexOf(device.host), 1);
     });
-  }, 5000);
+  }, intervalMs);
 }
 
-export async function releaseBlockedDevices() {
+export async function releaseBlockedDevices(newCommandTimeout: number) {
   const allDevices = getAllDevices();
   const busyDevices = allDevices.filter((device) => {
-    return device.busy && device.host.includes(ip.address());
+    log.debug(
+      `Checking if device ${device.udid} from ${device.host} is a candidate to be released`,
+    );
+    return device.busy && !device.userBlocked;
   });
+
+  log.debug(`Found ${busyDevices.length} device candidates to be released`);
+
   busyDevices.forEach(function (device) {
+    if (device.lastCmdExecutedAt == undefined) {
+      return;
+    }
+
     const currentEpoch = new Date().getTime();
-    const timeout = device.newCommandTimeout != undefined ? device.newCommandTimeout : 60;
-    if (
-      device.lastCmdExecutedAt != undefined &&
-      (currentEpoch - device.lastCmdExecutedAt) / 1000 > timeout
-    ) {
-      console.log(
-        `📱 Found Device with udid ${device.udid} has no activity for more than ${timeout} seconds`
+    const timeoutSeconds =
+      device.newCommandTimeout != undefined ? device.newCommandTimeout : newCommandTimeout;
+    const timeSinceLastCmdExecuted = (currentEpoch - device.lastCmdExecutedAt) / 1000;
+    if (timeSinceLastCmdExecuted > timeoutSeconds) {
+      // unblock regardless of whether the device has session or not
+      unblockDevice({ udid: device.udid });
+      log.debug(
+        `👋🏼 Unblocked device with udid ${device.udid} as there is no activity from client for more than ${timeoutSeconds}. Last command was ${timeSinceLastCmdExecuted} seconds ago.`,
       );
-      const sessionId = device.session_id;
-      if (sessionId !== undefined) {
-        unblockDevice({ session_id: sessionId });
-        logger.info(
-          `📱 Unblocked device with udid ${device.udid} mapped to sessionId ${sessionId} as there is no activity from client for more than ${timeout} seconds`
-        );
-      }
     }
   });
 }
 
-export async function cronReleaseBlockedDevices() {
+export async function setupCronReleaseBlockedDevices(
+  intervalMs: number,
+  newCommandTimeoutSec: number,
+) {
   if (cronTimerToReleaseBlockedDevices) {
     clearInterval(cronTimerToReleaseBlockedDevices);
   }
-  await releaseBlockedDevices();
+  await releaseBlockedDevices(newCommandTimeoutSec);
   cronTimerToReleaseBlockedDevices = setInterval(async () => {
-    await releaseBlockedDevices();
-  }, 30000);
+    await releaseBlockedDevices(newCommandTimeoutSec);
+  }, intervalMs);
+}
+
+export async function setupCronUpdateDeviceList(hubArgument: string, intervalMs: number) {
+  if (cronTimerToUpdateDevices) {
+    clearInterval(cronTimerToUpdateDevices);
+  }
+  log.info(
+    `This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`,
+  );
+
+  cronTimerToUpdateDevices = setInterval(async () => {
+    if (await isDeviceFarmRunning(hubArgument)) {
+      await updateDeviceList(hubArgument);
+    } else {
+      log.warn(`Not sending device update since hub ${hubArgument} is not running`);
+    }
+  }, intervalMs);
 }

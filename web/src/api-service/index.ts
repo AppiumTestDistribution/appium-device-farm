@@ -14,7 +14,7 @@ export default class DeviceFarmApiService {
     platform: string,
     udid: string,
     busy: boolean,
-    offline: boolean
+    offline: boolean,
   ) {
     return apiClient.makePOSTRequest('/block', {}, { platform, udid, minSDK: sdk, busy, offline });
   }
@@ -24,12 +24,12 @@ export default class DeviceFarmApiService {
     platform: string,
     udid: string,
     busy: boolean,
-    offline: boolean
+    offline: boolean,
   ) {
     return apiClient.makePOSTRequest(
       '/unblock',
       {},
-      { platform, udid, minSDK: sdk, busy, offline }
+      { platform, udid, minSDK: sdk, busy, offline },
     );
   }
 

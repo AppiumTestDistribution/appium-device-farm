@@ -3,7 +3,7 @@ import _ from 'lodash';
 class ApiClient {
   public makeGETRequest(url: string, queryParams: any = {}) {
     return fetch(
-      this.formatUrl(url + `?${new URLSearchParams(_.pickBy(queryParams, _.identity)).toString()}`)
+      this.formatUrl(url + `?${new URLSearchParams(_.pickBy(queryParams, _.identity)).toString()}`),
     ).then(this.jsonResult);
   }
 

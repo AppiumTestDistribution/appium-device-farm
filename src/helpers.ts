@@ -10,6 +10,7 @@ import Cloud from './enums/Cloud';
 import normalizeUrl from 'normalize-url';
 import ora from 'ora';
 import asyncWait from 'async-wait-until';
+import axios from 'axios';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -18,7 +19,7 @@ export async function asyncForEach(
     (device: any): Promise<void>;
     (udid: any): Promise<void>;
     (arg0: any, arg1: number, arg2: any): any;
-  }
+  },
 ) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -43,7 +44,7 @@ export async function spinWith(msg: string, fn: () => any, callback = (msg: stri
     {
       intervalBetweenAttempts: 2000,
       timeout: 60 * 1000,
-    }
+    },
   );
 }
 
@@ -66,11 +67,11 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function hubUrl(device: IDevice) {
+export function hubUrl(device: IDevice): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
-      return `${host}`;
+      return `${host}/wd/hub/session`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
@@ -91,7 +92,7 @@ export async function isPortBusy(port: number) {
   }
 }
 
-export function hasHub(cliArgs: any) {
+export function hasHubArgument(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].hub');
 }
 
@@ -114,7 +115,7 @@ const STANDARD_CAPS = [
 function isStandardCap(cap: any) {
   return !!_.find(
     STANDARD_CAPS,
-    (standardCap) => standardCap.toLowerCase() === `${cap}`.toLowerCase()
+    (standardCap) => standardCap.toLowerCase() === `${cap}`.toLowerCase(),
   );
 }
 
@@ -124,13 +125,13 @@ export function stripAppiumPrefixes(caps: any) {
   // split into prefixed and non-prefixed.
   // non-prefixed should be standard caps at this point
   const [prefixedCaps, nonPrefixedCaps] = _.partition(_.keys(caps), (cap) =>
-    String(cap).startsWith(APPIUM_VENDOR_PREFIX)
+    String(cap).startsWith(APPIUM_VENDOR_PREFIX),
   );
 
   // initialize this with the k/v pairs of the non-prefixed caps
   const strippedCaps = /** @type {import('@appium/types').Capabilities<C>} */ _.pick(
     caps,
-    nonPrefixedCaps
+    nonPrefixedCaps,
   );
   const badPrefixedCaps: string[] = [];
 
@@ -138,8 +139,8 @@ export function stripAppiumPrefixes(caps: any) {
   for (const prefixedCap of prefixedCaps) {
     const strippedCapName =
       /** @type {import('type-fest').StringKeyOf<import('@appium/types').Capabilities<C>>} */ prefixedCap.substring(
-        APPIUM_VENDOR_PREFIX.length
-      ) as string;
+        APPIUM_VENDOR_PREFIX.length,
+      );
 
     // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
     if (isStandardCap(strippedCapName)) {
@@ -149,7 +150,7 @@ export function stripAppiumPrefixes(caps: any) {
       } else {
         log.warn(
           `Ignoring capability '${prefixedCap}=${caps[prefixedCap]}' and ` +
-            `using capability '${strippedCapName}=${strippedCaps[strippedCapName]}'`
+            `using capability '${strippedCapName}=${strippedCaps[strippedCapName]}'`,
         );
       }
     } else {
@@ -161,8 +162,8 @@ export function stripAppiumPrefixes(caps: any) {
   if (badPrefixedCaps.length > 0) {
     log.warn(
       `The capabilities ${JSON.stringify(
-        badPrefixedCaps
-      )} are standard capabilities and do not require "appium:" prefix`
+        badPrefixedCaps,
+      )} are standard capabilities and do not require "appium:" prefix`,
     );
   }
   return strippedCaps;
@@ -174,4 +175,49 @@ export function safeParseJson(jsonString: string) {
   } catch (err) {
     return jsonString;
   }
+}
+export async function isDeviceFarmRunning(host: string): Promise<boolean> {
+  try {
+    const timeoutMs = 30000;
+    const result = await axios({
+      method: 'get',
+      url: `${host}/device-farm`,
+      timeout: timeoutMs,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result.status == 200;
+  } catch (error: any) {
+    log.info(`Device Farm is not running at ${host}. Error: ${error}`);
+    return false;
+  }
+}
+
+export async function isAppiumRunningAt(url: string): Promise<boolean> {
+  try {
+    const timeoutMs = 30000;
+    const result = await axios({
+      method: 'get',
+      url: `${url}/status`,
+      timeout: timeoutMs,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result.status == 200;
+  } catch (error: any) {
+    log.info(`Appium is not running at ${url}. Error: ${error}`);
+    return false;
+  }
+}
+
+export function hasHub(cliArgs: any) {
+  return _.has(cliArgs, 'plugin["device-farm"].hub');
+}
+
+export function isCloud(cliArgs: any) {
+  return _.has(cliArgs, 'plugin["device-farm"].cloud');
 }

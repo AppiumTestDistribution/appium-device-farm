@@ -1,32 +1,35 @@
 {
   "name": "appium-device-farm",
-  "version": "8.2.6",
+  "version": "8.4.5",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
-  "main": "./lib/index.js",
+  "main": "./lib/src/index.js",
   "scripts": {
     "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
-    "install-docs-deps": "appium-docs init --no-mkdocs -e lib/index.js",
+    "install-docs-deps": "appium-docs init --no-mkdocs -e lib/src/index.js",
     "coverage": "nyc npm run test",
     "test-remote": "mocha --require ts-node/register ./test/e2e/remote.spec.js --timeout 60000 --exit",
-    "test": "mocha -r ts-node/register ./test/unit/*.spec.js --plugin-device-farm-platform=both --exit --timeout=10000",
+    "test": "mocha -r ts-node/register ./test/unit/*.spec.{j,t}s --plugin-device-farm-platform=both --exit --timeout=10000",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
-    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/conf.spec.js --timeout 260000",
-    "test-parallel-bs": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/conf.spec.js --timeout 260000",
-    "test-parallel-pcloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/pcloudy.spec.js --timeout 260000",
-    "test-parallel-sauce": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/sauce.spec.js --timeout 260000",
-    "test-parallel-lt": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/lambdaTest.spec.js --timeout 260000",
-    "test-parallel-ios": "mocha --require ts-node/register -p ./test/e2e/ios/conf1.spec.js --timeout 260000",
-    "test-e2e": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/plugin.spec.js --timeout 999999",
-    "test-e2e-browserstack": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/browserstack.spec.js --timeout 999999",
-    "test-e2e-pCloudy": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register ./test/e2e/pcloudy.spec.js --timeout 999999",
-    "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.js --timeout 90000 --exit",
-    "integration-ios": "mocha -r ts-node/register ./test/integration/*iOS*.spec.js --timeout 260000 --exit",
-    "build": "npx tsc && npm run copy-files",
+    "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/conf.spec.js --exit --timeout 260000",
+    "test-parallel-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/bs.spec.ts --exit --timeout 260000",
+    "test-parallel-pcloudy": "mocha --require ts-node/register -p ./test/e2e/android/cloud/pcloudy.spec.ts --exit --timeout 260000",
+    "test-parallel-sauce": "wait-on http://localhost:31337/device-farm/ && mocha --require ts-node/register -p ./test/e2e/android/cloud/sauce.spec.js --exit --timeout 260000",
+    "test-parallel-lt": "mocha --require ts-node/register -p ./test/e2e/android/cloud/lambdaTest.spec.ts --exit --timeout 260000",
+    "test-parallel-ios-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/confIOS.ts --exit --timeout 260000",
+    "test-e2e": "mocha --require ts-node/register ./test/e2e/plugin.spec.* --exit --timeout=999999",
+    "test-e2e-hubnode": "mocha -r ts-node/register ./test/e2e/hubnode.spec.* --plugin-device-farm-platform=both --exit --timeout=999999",
+    "test-e2e-browserstack": "mocha --require ts-node/register ./test/e2e/browserstack.spec.ts --exit --timeout 999999",
+    "test-e2e-pcloudy": "mocha --require ts-node/register ./test/e2e/pcloudy.spec.ts --exit --timeout 999999",
+    "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.{j,t}s --timeout 90000 --exit",
+    "integration-ios": "mocha -r ts-node/register ./test/integration/ios/*.spec.ts --timeout 260000 --exit",
+    "integration-ios2": "mocha -r ts-node/register ./test/integration/ios/02iOSDevices.spec.ts --timeout 260000 --exit",
+    "build": "npx tsc -b && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
     "prepublish": "npx tsc && npm run copy-files",
     "lint": "eslint . --ext .ts,.tsx --fix",
+    "prettier-check": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --check --verbose",
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --write --single-quote",
     "appium-home": "rm -rf rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
@@ -34,7 +37,7 @@
     "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install xcuitest",
     "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm,appium-dashboard -pa /wd/hub --plugin-device-farm-platform=ios --plugin-device-farm-max-sessions=8",
-    "run-db-migration": "node lib/scripts/initialize-database.js || exit 0",
+    "run-db-migration": "node lib/src/scripts/initialize-database.js || exit 0",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration"
   },
@@ -50,6 +53,14 @@
     {
       "name": "Srinivasan Sekar",
       "email": "srinivasan.sekar1990@gmail.com"
+    },
+    {
+      "name": "Sudharsan Selvaraj",
+      "email": "sudharsanselvaraj.c@gmail.com"
+    },
+    {
+      "name": "Anand Bagmar",
+      "email": "abagmar@gmail.com"
     }
   ],
   "license": "ISC",
@@ -69,13 +80,15 @@
     "appium-ios-device": "^2.4.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.12",
-    "axios": "^0.27.0",
+    "axios": "^0.27.2",
     "cors": "^2.8.5",
     "download": "^8.0.0",
-    "express": "^4.17.1",
-    "fs-extra": "^11.1.0",
+    "express": "^4.17.3",
+    "fs-extra": "^11.1.1",
     "get-port": "^5.1.1",
-    "http-proxy-middleware": "^2.0.6",
+    "http-proxy-agent": "7.0.0",
+    "http-proxy-middleware": "^3.0.0-beta.1",
+    "https-proxy-agent": "7.0.2",
     "ip": "^1.1.8",
     "jsonschema": "1.4.1",
     "lodash": "^4.17.21",
@@ -83,71 +96,75 @@
     "mjpeg-proxy": "^0.3.0",
     "node-abort-controller": "^3.1.1",
     "node-cache": "^5.1.2",
-    "node-persist": "^3.1.0",
-    "node-schedule": "^2.0.0",
-    "node-simctl": "^7.0.0",
+    "node-persist": "^3.1.3",
+    "node-schedule": "^2.1.1",
+    "node-simctl": "^7.3.10",
     "normalize-url": "6.1.0",
     "nyc": "^15.1.0",
     "ora": "5.4.1",
     "prisma": "^5.4.1",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
-    "semver": "^7.3.8",
+    "semver": "^7.5.4",
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "unzipper": "^0.10.14",
     "uuid": "^8.3.2",
-    "yargs": "^17.5.1"
+    "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "appium": "^2.0.0"
+    "appium": "^2.2.1"
   },
   "devDependencies": {
-    "@appium/docutils": "^0.4.3",
-    "@appium/fake-driver": "^5.1.5",
-    "@appium/plugin-test-support": "^0.3.7",
-    "@babel/core": "7.21.0",
+    "@appium/docutils": "^0.4.11",
+    "@appium/fake-driver": "^5.2.10",
+    "@appium/plugin-test-support": "^0.3.23",
+    "@babel/core": "7.23.6",
     "@babel/plugin-proposal-class-properties": "7.18.6",
-    "@types/async-lock": "1.4.0",
-    "@types/chai": "4.3.6",
-    "@types/express": "4.17.18",
+    "@types/async-lock": "1.4.2",
+    "@types/chai": "4.3.11",
+    "@types/express": "4.17.21",
     "@types/fs-extra": "^11.0.0",
-    "@types/ip": "^1.1.0",
-    "@types/lodash": "4.14.199",
-    "@types/lokijs": "1.5.10",
+    "@types/ip": "^1.1.2",
+    "@types/lodash": "4.14.202",
+    "@types/lokijs": "1.5.14",
     "@types/mocha": "9.1.1",
     "@types/node-schedule": "1.3.2",
-    "@types/tcp-port-used": "1.0.2",
+    "@types/sinon": "^17.0.2",
+    "@types/tcp-port-used": "1.0.3",
     "@types/uuid": "8.3.4",
-    "@types/yargs": "17.0.25",
-    "@typescript-eslint/eslint-plugin": "5.54.0",
-    "@typescript-eslint/parser": "5.54.0",
-    "appium-uiautomator2-driver": "^2.10.1",
-    "appium-xcuitest-driver": "^4.12.4",
+    "@types/yargs": "17.0.29",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "@wdio/types": "^8.24.2",
+    "appium-uiautomator2-driver": "^2.32.3",
+    "appium-xcuitest-driver": "^5.7.0",
     "babel-eslint": "10.1.0",
     "chai": "4.3.10",
-    "eslint": "7.32.0",
-    "eslint-config-prettier": "8.6.0",
-    "eslint-plugin-import": "2.27.5",
-    "eslint-plugin-prettier": "3.4.1",
+    "dotenv": "^16.3.1",
+    "eslint": "8.52.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-import": "2.29.0",
+    "eslint-plugin-prettier": "^5.0.0",
     "husky": "7.0.4",
-    "lint-staged": "13.0.0",
+    "lint-staged": "15.0.2",
     "mocha": "9.2.2",
-    "prettier": "2.8.8",
-    "ramda": "0.28.0",
-    "sinon": "12.0.1",
+    "prettier": "^3.0.3",
+    "ramda": "0.29.1",
+    "sinon": "17.0.0",
     "sinon-chai": "^3.7.0",
     "ts-node": "10.9.1",
-    "typescript": "5.1.6",
-    "vite": "^4.3.9",
-    "wait-on": "6.0.1",
-    "webdriverio": "8.5.1"
+    "typescript": "5.2.2",
+    "vite": "^4.5.0",
+    "wait-on": "7.0.1",
+    "webdriverio": "^8.20.4"
   },
   "appium": {
     "pluginName": "device-farm",
     "mainClass": "DevicePlugin",
     "scripts": {
-      "install-go-ios": "./lib/scripts/install-go-ios.js"
+      "install-go-ios": "./lib/scripts/install-go-ios.js",
+      "run-db-migration": "./lib/scripts/run-db-migration.js"
     },
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema",
@@ -171,7 +188,7 @@
         "hub": {
           "type": "string"
         },
-        "proxyIP": {
+        "remoteMachineProxyIP": {
           "type": "string"
         },
         "adbRemote": {
@@ -188,6 +205,30 @@
         },
         "derivedDataPath": {
           "type": "object"
+        },
+        "emulators": {
+          "type": "array"
+        },
+        "proxy": {
+          "type": "object"
+        },
+        "deviceAvailabilityTimeoutMs": {
+          "type": "number"
+        },
+        "deviceAvailabilityQueryIntervalMs": {
+          "type": "number"
+        },
+        "sendNodeDevicesToHubIntervalMs": {
+          "type": "number"
+        },
+        "checkStaleDevicesIntervalMs": {
+          "type": "number"
+        },
+        "checkBlockedDevicesIntervalMs": {
+          "type": "number"
+        },
+        "newCommandTimeoutSec": {
+          "type": "number"
         }
       },
       "title": "Appium device farm plugin",
@@ -211,9 +252,10 @@
     }
   },
   "files": [
-    "lib"
+    "lib",
+    "scripts"
   ],
   "typedoc": {
-    "entryPoint": "lib/index.js"
+    "entryPoint": "lib/src/index.js"
   }
 }

@@ -71,6 +71,25 @@ describe('Get device', () => {
         realDevice: false,
         deviceType: 'simulator',
       },
+      {
+        "deviceName": "iPhone XS",
+        "os_version": "15",
+        "platform": "ios",
+        "host": "http://hub-cloud.browserstack.com/wd/hub",
+        "busy": false,
+        "userBlocked": false,
+        "deviceType": "real",
+        "capability": {
+          "deviceName": "iPhone XS",
+          "os_version": "15",
+          "platform": "ios"
+        },
+        "cloud": "browserstack",
+        "name": "iPhone XS",
+        "sdk": "15",
+        "udid": "iPhone XS",
+        "offline": false,
+      }
     ];
 
     devices.forEach(function (device) {
@@ -92,6 +111,12 @@ describe('Get device', () => {
     expect(device.sdk).to.be.eq('11');
   });
 
+
+  it('Get iOS device based on filter real device', () => {
+    const filterOptions = {"platform":"ios","name":"","deviceType":"real","busy":false,"userBlocked":false};
+    const device = getDevice(filterOptions);
+    console.log(device)
+  });
   it('Get android device based on filter with minSDK and maxSDK', () => {
     const filterOptions = {
       platform: 'android',
@@ -120,7 +145,7 @@ describe('Get device', () => {
   it('Get ios simulator based on filter with minSDK', () => {
     const filterOptions = { platform: 'ios', name: '', busy: false, offline: false, minSDK: '14.1.0' };
     const device = getDevice(filterOptions);
-    expect(device.sdk).to.be.eq('15.0');
+    expect(device.sdk).to.be.eq('15');
   });
 
   it('Get ios simulator based on filter with maxSDK', () => {

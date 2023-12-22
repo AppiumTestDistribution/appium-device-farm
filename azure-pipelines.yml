@@ -15,6 +15,10 @@ jobs:
         npm ci
         npm test
       displayName: 'npm test'
+    - script: |
+        npm ci
+        npm run prettier-check
+      displayName: 'Prettier check'
 
  - job: ANDROID
    pool:
@@ -45,10 +49,10 @@ jobs:
     - script: |
         $ANDROID_HOME/platform-tools/adb devices
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
@@ -68,11 +72,40 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./server-config.json &
         npm run test-e2e
       displayName: 'E2E Test'
+
+ - job: E2EHubAndNodeTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - bash: |
+        echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
+      displayName: "install Android image"
+    - script: |
+        $ANDROID_HOME/emulator/emulator -list-avds
+        echo '---'
+        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
+        echo '---'
+        $ANDROID_HOME/emulator/emulator -list-avds
+      displayName: "create AVD"
+    - script: |
+        $ANDROID_HOME/platform-tools/adb devices
+        echo '---'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        echo '---'
+        $ANDROID_HOME/platform-tools/adb devices
+      displayName: "start Android emulator"
+    - script: |
+        npm ci
+        
+        npm run test-e2e-hubnode
+      displayName: 'E2E Hub and Node Test'
 
  - job: E2EPluginBrowserStackTest
    pool:
@@ -85,9 +118,7 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
+        
         npm run test-e2e-browserstack
       displayName: 'E2E Test'
 
@@ -102,13 +133,11 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/pcloudy-config.json &
-        npm run test-e2e-pCloudy
+        
+        npm run test-e2e-pcloudy
       displayName: 'E2E Test'
 
- - job: BrowserStack
+ - job: BrowserStack_mac
    pool:
      vmImage: 'macOS-latest'
 
@@ -119,13 +148,29 @@ jobs:
 
     - script: |
         npm ci
-        export APPIUM_HOME=/tmp/device-farm
+        
         export CLOUD_USERNAME=$BS_USERNAME
         export CLOUD_KEY=$BS_PASSWORD
-        ./node_modules/.bin/appium plugin install --source=local .
-        nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/bs-config.json &
+
         npm run test-parallel-bs
       displayName: 'E2E Test'
+
+ - job: BrowserStack_Linux_IOS
+   pool:
+     vmImage: 'ubuntu-latest'
+
+   steps:
+     - task: NodeTool@0.200.0
+       inputs:
+         versionSpec: '16.x'
+
+     - script: |
+         npm ci
+         export CLOUD_USERNAME=$BS_USERNAME
+         export CLOUD_KEY=$BS_PASSWORD
+         
+         npm run test-parallel-ios-bs
+       displayName: 'E2E Test BS Linux'
 
 # - job: Sauce
 #   pool:
@@ -155,10 +200,8 @@ jobs:
 
      - script: |
          npm ci
-         export APPIUM_HOME=/tmp/device-farm
          export CLOUD_USERNAME=$LT_USERNAME
          export CLOUD_KEY=$LT_PASSWORD
-         ./node_modules/.bin/appium plugin install --source=local .
-         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/lt-config.json &
+
          npm run test-parallel-lt
        displayName: 'E2E Test'

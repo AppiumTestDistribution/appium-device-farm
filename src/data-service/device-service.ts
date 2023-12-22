@@ -1,30 +1,42 @@
 import { DeviceModel } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
-import logger from '../logger';
+import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 
-export function removeDevice(device: any) {
-  DeviceModel.chain()
-    .find({ udid: device.udid, host: { $contains: device.host } })
-    .remove();
+export function removeDevice(devices: { udid: string; host: string }[]) {
+  devices.forEach(function (device) {
+    log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
+    DeviceModel.chain()
+      .find({ udid: device.udid, host: { $contains: device.host } })
+      .remove();
+  });
 }
 
-export function addNewDevice(devices: Array<IDevice>) {
+export function addNewDevice(devices: IDevice[]) {
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-  const devicesInDB = DeviceModel.chain().find().data();
   devices.forEach(function (device) {
-    const isDeviceAlreadyPresent = devicesInDB.find(
-      (d: IDevice) => d.udid === device.udid && device.host === d.host
-    );
-    if (!isDeviceAlreadyPresent) {
-      DeviceModel.insert({
-        ...device,
-        offline: false,
-        userBlocked: false,
-      });
+    const isDeviceAlreadyPresent = DeviceModel.chain()
+      .find({ udid: device.udid, host: device.host })
+      .data();
+    if (isDeviceAlreadyPresent.length === 0) {
+      // @ts-ignore
+      delete device['$loki'];
+      // @ts-ignore
+      delete device['meta'];
+      try {
+        DeviceModel.insert({
+          ...device,
+          offline: false,
+          userBlocked: false,
+        });
+      } catch (error) {
+        log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`);
+      }
+    } else {
+      log.debug(`Device "${device.udid}" already exists in database`);
     }
   });
 }
@@ -38,8 +50,8 @@ export function setSimulatorState(devices: Array<IDevice>) {
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
-        logger.info(
-          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`
+        log.info(
+          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
         DeviceModel.chain()
           .find({ udid: device.udid })
@@ -55,7 +67,12 @@ export function getAllDevices(): Array<IDevice> {
   return DeviceModel.chain().find().data();
 }
 
-export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
+/**
+ * Find devices matching filter options
+ * @param filterOptions IDeviceFilterOptions
+ * @returns IDevice[]
+ */
+export function getDevices(filterOptions: IDeviceFilterOptions): IDevice[] {
   const semver = require('semver');
   let results = DeviceModel.chain();
 
@@ -93,19 +110,26 @@ export function getDevice(filterOptions: IDeviceFilterOptions): IDevice {
 
   if (filterOptions.deviceType === 'simulator') {
     filter.state = 'Booted';
-    const results_copy = results.copy();
-    if (results_copy.find(filter).data()[0] != undefined) {
-      logger.info('Picking up booted simulator');
-      return results.find(filter).data()[0];
-    } else {
-      filter.state = 'Shutdown';
-    }
   }
+  return results.find(filter).data();
+}
 
-  return results.find(filter).data()[0];
+/**
+ * Find device matching the filter options
+ * @param filterOptions IDeviceFilterOptions
+ * @returns IDevice | undefined
+ */
+export function getDevice(filterOptions: IDeviceFilterOptions): IDevice | undefined {
+  const devices = getDevices(filterOptions);
+  if (devices.length === 0) {
+    return undefined;
+  } else {
+    return devices[0];
+  }
 }
 
 export function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
+  log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
   DeviceModel.chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
@@ -145,26 +169,33 @@ export function updateCmdExecutedTime(sessionId: string) {
 }
 
 export async function unblockDevice(filter: object) {
-  const device = DeviceModel.chain().find(filter).data()[0];
-  if (device !== undefined) {
-    console.log(
-      `Found device with udid ${device.udid} to unblock with filter ${JSON.stringify(filter)}`
+  const devices = DeviceModel.chain().find(filter).data();
+  if (devices !== undefined) {
+    console.log(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
+
+    await Promise.all(
+      devices.map(async (device) => {
+        const sessionStart = device.sessionStartTime;
+        const currentTime = new Date().getTime();
+        let utilization = currentTime - sessionStart;
+        // no session time recorded means device was never used
+        if (sessionStart === 0) {
+          utilization = 0;
+        }
+        const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
+        await setUtilizationTime(device.udid, totalUtilization);
+        DeviceModel.chain()
+          .find(filter)
+          .update(function (device: IDevice) {
+            device.session_id = undefined;
+            device.busy = false;
+            device.lastCmdExecutedAt = undefined;
+            device.sessionStartTime = 0;
+            device.totalUtilizationTimeMilliSec = totalUtilization;
+            device.newCommandTimeout = undefined;
+          });
+      }),
     );
-    const sessionStart = device.sessionStartTime;
-    const currentTime = new Date().getTime();
-    const utilization = currentTime - sessionStart;
-    const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-    await setUtilizationTime(device.udid, totalUtilization);
-    DeviceModel.chain()
-      .find(filter)
-      .update(function (device: IDevice) {
-        device.session_id = undefined;
-        device.busy = false;
-        device.lastCmdExecutedAt = undefined;
-        device.sessionStartTime = 0;
-        device.totalUtilizationTimeMilliSec = totalUtilization;
-        device.newCommandTimeout = undefined;
-      });
   } else {
     console.log(`Not able to find device to unblock with filter ${JSON.stringify(filter)}`);
   }

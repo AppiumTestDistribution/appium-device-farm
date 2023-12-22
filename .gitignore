@@ -7,3 +7,6 @@ lib/
 local_appium_home/
 .nyc_output/
 site
+appium-e2e-test
+temp-appium
+.env

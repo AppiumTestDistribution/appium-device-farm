@@ -20,14 +20,14 @@ export class LocalSession extends RemoteSession {
     sessionId: string,
     private driver: any,
     device: IDevice,
-    sessionResponse: Record<string, any>
+    sessionResponse: Record<string, any>,
   ) {
     const { address, port, basePath } = driver.opts || driver;
     super(
       sessionId,
       `http://${address}:${port}${constructBasePath(basePath)}`,
       device,
-      sessionResponse
+      sessionResponse,
     );
   }
 

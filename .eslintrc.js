@@ -23,6 +23,7 @@ module.exports = {
     'prettier/prettier': ['error', { singleQuote: true }],
     quotes: ['error', 'single'],
     '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
   },
   settings: {
     'import/resolver': {

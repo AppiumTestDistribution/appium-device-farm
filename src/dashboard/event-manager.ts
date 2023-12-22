@@ -77,7 +77,7 @@ export class DashboardEventManager {
     sessionId: string,
     commandName: string | undefined,
     request: Request,
-    response: Response
+    response: Response,
   ): Promise<boolean> {
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
 
@@ -111,7 +111,7 @@ export class DashboardEventManager {
     commandName: string | undefined,
     request: Request,
     response: Response,
-    responseBody: string
+    responseBody: string,
   ) {
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {

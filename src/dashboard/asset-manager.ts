@@ -17,7 +17,7 @@ export function saveScreenShot(sessionId: string, screenshotBase64String: string
   fs.writeFileSync(
     path.join(config.sessionAssetsPath, assetPath),
     screenshotBase64String,
-    'base64'
+    'base64',
   );
   return assetPath;
 }

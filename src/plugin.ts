@@ -17,25 +17,28 @@ import {
 } from './data-service/pending-sessions-service';
 import {
   allocateDeviceForSession,
-  checkNodeServerAvailability,
-  cronReleaseBlockedDevices,
+  setupCronReleaseBlockedDevices,
+  setupCronUpdateDeviceList,
   deviceType,
-  initlializeStorage,
+  initializeStorage,
   isIOS,
   refreshSimulatorState,
+  setupCronCheckStaleDevices,
   updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
-import logger from './logger';
+import log from './logger';
 import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
-import { hubUrl, hasHub, spinWith, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
+import axios, { AxiosError } from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { hubUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning, isCloud } from './helpers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs, getCLIArgs } from './data-service/pluginArgs';
+import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
 import _ from 'lodash';
 import { SESSION_MANAGER } from './sessions/SessionManager';
@@ -45,119 +48,150 @@ import { RemoteSession } from './sessions/RemoteSession';
 import { ISession } from './interfaces/ISession';
 import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
+import { ADB } from 'appium-adb';
+import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
+import NodeDevices from './device-managers/NodeDevices';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
+let platform: any;
+let androidDeviceType: any;
+let iosDeviceType: any;
+let skipChromeDownload: any;
+let hasEmulators: any;
+let proxy: any;
 
 class DevicePlugin extends BasePlugin {
   public static NODE_ID: string;
   public static IS_HUB = false;
 
+  private pluginArgs: IPluginArgs = DefaultPluginArgs;
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
+    // initialize plugin args only when cliArgs.plugin['device-farm'] is present
+    if (cliArgs.plugin && cliArgs.plugin['device-farm'])
+      Object.assign(this.pluginArgs, cliArgs.plugin['device-farm'] as unknown as IPluginArgs);
   }
 
   onUnexpectedShutdown(driver: any, cause: any) {
     const deviceFilter = {
       session_id: driver.sessionId ? driver.sessionId : undefined,
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
-    };
-    unblockDevice(deviceFilter);
-    logger.info(
+    } as unknown as IDeviceFilterOptions;
+
+    if (this.pluginArgs.hub !== undefined) {
+      // send unblock request to hub. Should we unblock the whole devices from this node?
+      new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
+    } else {
+      unblockDevice(deviceFilter);
+    }
+
+    log.info(
       `Unblocking device mapped with filter ${JSON.stringify(
-        deviceFilter
-      )} onUnexpectedShutdown from server`
+        deviceFilter,
+      )} onUnexpectedShutdown from server`,
     );
   }
 
   public static async updateServer(expressApp: any, httpServer: any, cliArgs: any): Promise<void> {
-    let platform;
-    let androidDeviceType;
-    let iosDeviceType;
-    let skipChromeDownload;
+    const pluginArgs: IPluginArgs = Object.assign(
+      {},
+      DefaultPluginArgs,
+      cliArgs.plugin['device-farm'] as IPluginArgs,
+    );
 
     DevicePlugin.NODE_ID = uuidv4();
     registerProxyMiddlware(expressApp, cliArgs);
 
     if (cliArgs.plugin && cliArgs.plugin['device-farm']) {
-      platform = cliArgs.plugin['device-farm'].platform;
-      androidDeviceType = cliArgs.plugin['device-farm'].androidDeviceType || 'both';
-      iosDeviceType = cliArgs.plugin['device-farm'].iosDeviceType || 'both';
-      skipChromeDownload = cliArgs.plugin['device-farm'].skipChromeDownload;
-    }
+      platform = pluginArgs.platform;
+      androidDeviceType = pluginArgs.androidDeviceType;
+      iosDeviceType = pluginArgs.iosDeviceType;
+      if (pluginArgs.proxy !== undefined) {
+        log.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
+        proxy = pluginArgs.proxy;
+      } else {
+        log.info('proxy is not required for axios');
+      }
+      hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
-    expressApp.use('/device-farm', router);
+      expressApp.use('/device-farm', router);
+      registerProxyMiddlware(expressApp, cliArgs);
+      if (!platform)
+        throw new Error(
+          '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
+        );
 
-    if (!platform)
-      throw new Error(
-        '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴'
+      if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
+        log.info('Emulators will be booted!!');
+        const adb = await ADB.createADB({});
+        const array = pluginArgs.emulators || [];
+        const promiseArray = array.map(async (arr: any) => {
+          await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
+        });
+        await Promise.all(promiseArray);
+      }
+
+      const chromeDriverManager =
+        pluginArgs.skipChromeDownload === false
+          ? await ChromeDriverManager.getInstance()
+          : undefined;
+      iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
+      const deviceTypes = { androidDeviceType, iosDeviceType };
+      const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
+      Container.set(DeviceFarmManager, deviceManager);
+      if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
+
+      await addCLIArgs(cliArgs);
+      await initializeStorage();
+      log.info(
+        `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm`,
       );
 
-    if (skipChromeDownload === undefined) cliArgs.plugin['device-farm'].skipChromeDownload = true;
+      const hubArgument = pluginArgs.hub;
+      if (hubArgument) {
+        await DevicePlugin.waitForRemoteDeviceFarmToBeRunning(hubArgument);
+      } else {
+        DevicePlugin.IS_HUB = true;
+      }
 
-    const chromeDriverManager =
-      cliArgs.plugin['device-farm'].skipChromeDownload === false
-        ? await ChromeDriverManager.getInstance()
-        : undefined;
-    iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
-    const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager({
-      platform,
-      deviceTypes,
-      cliArgs,
-      nodeId: DevicePlugin.NODE_ID,
-    });
-    Container.set(DeviceFarmManager, deviceManager);
-    if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
-
-    await addCLIArgs(cliArgs);
-    await initlializeStorage();
-
-    logger.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://localhost:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`
-    );
-
-    if (hasHub(cliArgs)) {
-      const hub = cliArgs.plugin['device-farm'].hub;
-      await DevicePlugin.waitForRemoteHubServerToBeRunning(hub);
-      await checkNodeServerAvailability();
-    } else {
-      DevicePlugin.IS_HUB = true;
+      const devicesUpdates = await updateDeviceList(hubArgument);
+      if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
+        await setSimulatorState(devicesUpdates);
+        await refreshSimulatorState(pluginArgs, cliArgs.port);
+      }
+      if (hubArgument) {
+        // hub may have been restarted, so let's send device list regularly
+        await setupCronUpdateDeviceList(hubArgument, pluginArgs.sendNodeDevicesToHubIntervalMs);
+      } else if (!pluginArgs.cloud) {
+        // I'm a hub so let's check for stale nodes
+        await setupCronCheckStaleDevices(pluginArgs.checkStaleDevicesIntervalMs);
+        // and release blocked devices
+        await setupCronReleaseBlockedDevices(
+          pluginArgs.checkBlockedDevicesIntervalMs,
+          pluginArgs.newCommandTimeoutSec,
+        );
+      }
     }
-
-    const devicesUpdates = await updateDeviceList(cliArgs);
-    if (isIOS(cliArgs) && deviceType(cliArgs, 'simulated')) {
-      await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(cliArgs);
-    }
-    await cronReleaseBlockedDevices();
   }
-
-  private static setIncludeSimulatorState(cliArgs: any, deviceTypes: string) {
-    const cloudExists = _.has(cliArgs, 'plugin["device-farm"].cloud');
-    if (cloudExists) {
+  private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
+    if (isCloud(pluginArgs)) {
       deviceTypes = 'real';
-      logger.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
+      log.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }
     return deviceTypes;
   }
 
-  static async waitForRemoteHubServerToBeRunning(host: string) {
+  static async waitForRemoteDeviceFarmToBeRunning(host: string) {
     await spinWith(
       `Waiting for node server ${host} to be up and running\n`,
       async () => {
-        await axios({
-          method: 'get',
-          url: `${host}/device-farm`,
-          timeout: 30000,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        await isDeviceFarmRunning(host);
       },
       (msg: any) => {
         throw new Error(`Failed: ${msg}`);
-      }
+      },
     );
   }
 
@@ -166,9 +200,10 @@ class DevicePlugin extends BasePlugin {
     driver: any,
     jwpDesCaps: any,
     jwpReqCaps: any,
-    caps: ISessionCapability
+    caps: ISessionCapability,
   ) {
     const pendingSessionId = uuidv4();
+    log.debug(`📱 Creating temporary session id: ${pendingSessionId}`);
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
@@ -188,12 +223,17 @@ class DevicePlugin extends BasePlugin {
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
-          return await allocateDeviceForSession(caps);
+          return await allocateDeviceForSession(
+            caps,
+            this.pluginArgs.deviceAvailabilityTimeoutMs,
+            this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+            this.pluginArgs,
+          );
         } catch (err) {
           await removePendingSession(pendingSessionId);
           throw err;
         }
-      }
+      },
     );
     let session;
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
@@ -206,10 +246,15 @@ class DevicePlugin extends BasePlugin {
           desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
         });
       }
-      logger.info(`Remote Host URL - ${remoteUrl}`);
+      // need to sanitize to remove sensitive information
+      // log.debug(`Remote Host URL - ${remoteUrl}`);
       let sessionDetails: any;
-      logger.info('Creating cloud session');
-      const config = {
+      log.info(
+        `Creating cloud session with desiredCapabilities: "${JSON.stringify(
+          capabilitiesToCreateSession,
+        )}"`,
+      );
+      const config: any = {
         method: 'post',
         url: remoteUrl,
         headers: {
@@ -217,19 +262,37 @@ class DevicePlugin extends BasePlugin {
         },
         data: capabilitiesToCreateSession,
       };
-      await axios(config)
-        .then(function (response) {
-          sessionDetails = response.data;
-        })
-        .catch(async function (error) {
-          await updatedAllocatedDevice(device, { busy: false });
-          logger.info(
-            `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create`
-          );
-          throw new Error(
-            `${error.response.data.value.message}, Please check the remote appium server log to know the reason for failure`
-          );
-        });
+      //log.info(`Add proxy to axios config only if it is set: ${JSON.stringify(proxy)}`);
+      if (proxy != undefined) {
+        log.info(`Added proxy to axios config: ${JSON.stringify(proxy)}`);
+        config.httpsAgent = new HttpsProxyAgent(proxy);
+        config.httpAgent = new HttpProxyAgent(proxy);
+        config.proxy = false;
+      }
+
+      log.info(`With axios config: "${JSON.stringify(config)}"`);
+      try {
+        const response = await axios(config);
+        sessionDetails = response.data;
+        log.info(`SessionDetails: ${JSON.stringify(sessionDetails)}`);
+        if (Object.hasOwn(sessionDetails.value, 'error')) {
+          log.error(`Error while creating session: ${sessionDetails}`);
+          this.unblockDeviceOnError(device, sessionDetails.value.error);
+        }
+      } catch (error: AxiosError<any> | any) {
+        let errorMessage = '';
+        if (error instanceof AxiosError) {
+          log.error(`Error while creating session: ${JSON.stringify(error.response?.data)}`);
+          errorMessage = JSON.stringify(error.response?.data);
+        } else {
+          log.error(`Error while creating session: ${error}`);
+          errorMessage = error;
+        }
+        if (error != undefined) this.unblockDeviceOnError(device, errorMessage);
+      }
+
+      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
+
       session = {
         protocol: 'W3C',
         value: [sessionDetails.value.sessionId, sessionDetails.value.capabilities, 'W3C'],
@@ -242,8 +305,9 @@ class DevicePlugin extends BasePlugin {
 
     if (session.error) {
       await updatedAllocatedDevice(device, { busy: false });
-      logger.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
+      log.info(`📱 Device UDID ${device.udid} blocked for session ${session.value[0]}`);
       const sessionId = session.value[0];
       await updatedAllocatedDevice(device, {
         busy: true,
@@ -271,18 +335,28 @@ class DevicePlugin extends BasePlugin {
         await DASHBORD_EVENT_MANAGER.onSessionStarted(
           deviceFarmCapabilities,
           sessionInstance,
-          device
+          device,
         );
       }
 
-      logger.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+      log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
   }
 
+  private unblockDeviceOnError(device: IDevice, error: any) {
+    updatedAllocatedDevice(device, { busy: false });
+    log.info(
+      `📱 Device UDID ${device.udid} unblocked. Reason: Remote Session failed to create. "${error}"`,
+    );
+    throw new Error(
+      `"${error}", Please check the remote appium server log to know the reason for failure`,
+    );
+  }
+
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     unblockDevice({ session_id: sessionId });
-    logger.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
+    log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     return await next();
   }
 }

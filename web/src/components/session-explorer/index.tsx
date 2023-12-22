@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import DeviceFarmApiService from '../../api-service';
-import { styled } from 'styled-components';
+import styled from 'styled-components';
 import { SessionCard } from './session-card';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
