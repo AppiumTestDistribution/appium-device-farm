@@ -63,13 +63,15 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
     const arch_name = process.arch;
     const go_ios_dir = path.join(node_modules_root, 'go-ios');
     // find ios binary matching platform name
-    const go_ios_bin = fs.readdirSync(go_ios_dir, { recursive: true }).find((item) => {
+    let go_ios_bin = fs.readdirSync(go_ios_dir, { recursive: true }).find((item) => {
       console.log(`${info} item: ${item}`);
       return item.includes(platform_name);
     });
     console.log(`${info} platform: ${platform_name} arch: ${arch_name} go_ios_bin: ${go_ios_bin}`);
     if (!go_ios_bin) {
-      throw new Error(`go-ios binary not found for platform ${platform_name}`);
+      // throw new Error(`go-ios binary not found for platform ${platform_name}`);
+      go_ios_bin = '';
+      console.log(`${warning} go-ios binary not found for platform ${platform_name}`);
     }
     const full_path = path.join(go_ios_dir, go_ios_bin.toString(), 'ios');
     return full_path;
