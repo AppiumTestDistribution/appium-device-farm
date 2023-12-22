@@ -3,12 +3,14 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import _ from 'lodash';
-import { unblockDeviceMatchingFilter } from './data-service/device-service';
+import { unblockDeviceMatchingFilter, updateCmdExecutedTime } from './data-service/device-service';
 import axios from 'axios';
 import log from './logger';
+import { IDevice } from './interfaces/IDevice';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
+const deviceSessionMap: Map<string, Partial<IDevice>> = new Map();
 
 function getProxyServer() {
   return process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
@@ -87,6 +89,8 @@ async function handler(req: Request, res: Response, next: NextFunction) {
     return next();
   }
   if (remoteProxyMap.has(sessionId)) {
+    // update
+    await updateCmdExecutedTime(sessionId);
     if (proxyServer) {
       const response = await axios({
         method: req.method,
