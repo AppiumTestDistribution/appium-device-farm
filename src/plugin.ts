@@ -240,11 +240,7 @@ class DevicePlugin extends BasePlugin {
     jwpReqCaps: any,
     caps: ISessionCapability,
   ) {
-    // Here, this.cliArgs is the correct pluginArgs. How? I don't know.
-    this.pluginArgs = Object.assign({}, this.cliArgs as unknown as IPluginArgs);
-
     log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
-    log.debug(`📱 cliArgs: ${JSON.stringify(this.cliArgs)}`);
     log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
     const pendingSessionId = uuidv4();
     log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
