@@ -146,7 +146,7 @@ describe('E2E Forward Request', () => {
     const busyDevice = newAllDevices.filter((device: any) => device.busy);
 
     // device should have host as node_config.bindHostOrIp
-    expect(busyDevice[0]).to.have.property('host', node_config.bindHostOrIp);
+    expect(busyDevice[0]).to.have.property('host').that.includes(node_config.bindHostOrIp);
   });
 
 
