@@ -88,7 +88,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
     for (const [adbInstance, devices] of connectedDevices) {
       log.debug(
-        `fetchAndroidDevices host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
+        `fetchAndroidDevices from host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
       );
       for await (const device of devices) {
         // log.info(`Checking device ${device.udid}`);
@@ -247,7 +247,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
     const client = Adb.createClient();
     const originalADBTracking = this.createLocalAdbTracker(client, originalADB);
-    originalADBTracking();
+    await originalADBTracking();
     const adbRemote = pluginArgs.adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
@@ -263,8 +263,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
           host: adbHost,
           port: adbPort,
         });
-        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB, adbHost);
-        remoteAdbTracking();
+        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB);
+        await remoteAdbTracking();
       });
     }
     return deviceList;
@@ -357,7 +357,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     this.abort(clonedDevice.udid);
   }
 
-  private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string) {
+  private createRemoteAdbTracker(adbClient: any, originalADB: any) {
     const pluginArgs = this.pluginArgs;
     const adbTracking = async () => {
       try {
