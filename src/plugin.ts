@@ -40,7 +40,6 @@ import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
-import _ from 'lodash';
 import { SESSION_MANAGER } from './sessions/SessionManager';
 import { LocalSession } from './sessions/LocalSession';
 import { CloudSession } from './sessions/CloudSession';
@@ -52,6 +51,7 @@ import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
+import ip from 'ip';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -133,13 +133,18 @@ class DevicePlugin extends BasePlugin {
         await Promise.all(promiseArray);
       }
 
-      const chromeDriverManager =
-        pluginArgs.skipChromeDownload === false
-          ? await ChromeDriverManager.getInstance()
-          : undefined;
+      const chromeDriverManager = !pluginArgs.skipChromeDownload
+        ? await ChromeDriverManager.getInstance()
+        : undefined;
       iosDeviceType = DevicePlugin.setIncludeSimulatorState(cliArgs, iosDeviceType);
       const deviceTypes = { androidDeviceType, iosDeviceType };
-      const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
+      const deviceManager = new DeviceFarmManager(
+        platform,
+        deviceTypes,
+        cliArgs.port,
+        pluginArgs,
+        DevicePlugin.NODE_ID,
+      );
       Container.set(DeviceFarmManager, deviceManager);
       if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
@@ -237,6 +242,7 @@ class DevicePlugin extends BasePlugin {
     );
     let session;
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
+    //const isRemoteOrCloudSession = !device.host.includes(ip.address());
     // If the session is either remote or in cloud
     if (isRemoteOrCloudSession) {
       const remoteUrl = `${hubUrl(device)}/session`;
@@ -304,12 +310,12 @@ class DevicePlugin extends BasePlugin {
     await removePendingSession(pendingSessionId);
 
     if (session.error) {
-      await updatedAllocatedDevice(device, { busy: false });
+      updatedAllocatedDevice(device, { busy: false });
       log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Session failed to create`);
     } else {
       log.info(`📱 Device UDID ${device.udid} blocked for session ${session.value[0]}`);
       const sessionId = session.value[0];
-      await updatedAllocatedDevice(device, {
+      updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),

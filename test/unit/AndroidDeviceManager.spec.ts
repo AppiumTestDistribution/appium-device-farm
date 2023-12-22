@@ -48,7 +48,10 @@ describe('Android Device Manager', function () {
   }
 
   it('Android Device List to have added state', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(
+      Object.assign(DefaultPluginArgs, { platform: 'android' }),
+      4723,
+    );
     const deviceList = new Map();
     adb = await getAdbOriginal();
     cloneAdb = await getCloneAdb();
@@ -60,7 +63,9 @@ describe('Android Device Manager', function () {
     getDeviceVersion.onFirstCall().returns(Promise.resolve('9'));
     getDeviceVersion.onSecondCall().returns(Promise.resolve('13'));
     sandbox.stub(androidDevices, <any>'getDeviceName').returns(Promise.resolve('sdk_phone_x86'));
-    sandbox.stub(androidDevices, 'getChromeVersion').returns(Promise.resolve('/var/path/chromedriver'));
+    sandbox
+      .stub(androidDevices, 'getChromeVersion')
+      .returns(Promise.resolve('/var/path/chromedriver'));
     const realDevice = sandbox.stub(androidDevices, <any>'isRealDevice');
     realDevice.onFirstCall().returns(Promise.resolve(false));
     realDevice.onSecondCall().returns(Promise.resolve(true));
@@ -108,7 +113,10 @@ describe('Android Device Manager', function () {
   });
 
   it('Android Device List to have added state - Only emulators', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(
+      Object.assign(DefaultPluginArgs, { platform: 'android' }),
+      4723,
+    );
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -150,7 +158,10 @@ describe('Android Device Manager', function () {
   });
 
   it('Android Device List to have added state - Only real devices', async () => {
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(
+      Object.assign(DefaultPluginArgs, { platform: 'android' }),
+      4723,
+    );
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -193,7 +204,7 @@ describe('Android Device Manager', function () {
   it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
     DeviceModel.removeDataOnly();
     const pluginArgs = Object.assign(DefaultPluginArgs, {
-      platform: "android", 
+      platform: 'android',
       'device-types': 'both',
       skipChromeDownload: true,
       remoteMachineProxyIP: 'http://10.1.1.1:3333',
@@ -241,7 +252,10 @@ describe('Android Device Manager', function () {
 
   it("Should handle error when adb doesn't respond", async () => {
     // mock getDeviceProperty
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(
+      Object.assign(DefaultPluginArgs, { platform: 'android' }),
+      4723,
+    );
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -249,43 +263,49 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-7777', state: 'device' },
     ]);
 
-
     const mockAdbExec = (args: any) => {
       if (args.includes('emulator-9999')) {
         return Promise.reject(new Error('Adb timeout'));
       } else {
-        return Promise.resolve("foo");
+        return Promise.resolve('foo');
       }
     };
 
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
-    sandbox.stub(adb, <any>"adbExec").callsFake(mockAdbExec);
+    sandbox.stub(adb, <any>'adbExec').callsFake(mockAdbExec);
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
-    const resultDevices = _.map(devices, device => { return { "udid": device.udid } });
+    const resultDevices = _.map(devices, (device) => {
+      return { udid: device.udid };
+    });
     // check that emulator-7777 is returned and emulator-9999 is not
     expect(resultDevices).to.have.deep.members([
       {
-        udid: 'emulator-7777'
-      }],
-    );
+        udid: 'emulator-7777',
+      },
+    ]);
 
     expect(resultDevices).to.not.have.deep.members([
       {
-        udid: 'emulator-9999'
-      }],
-    );
-
+        udid: 'emulator-9999',
+      },
+    ]);
   });
 
-  it("should handle device never completing boot", async () => {
+  it('should handle device never completing boot', async () => {
     // mock getDeviceProperty
-    const androidDevices = new AndroidDeviceManager(Object.assign(DefaultPluginArgs, { platform: "android" }), 4723);
+    const androidDevices = new AndroidDeviceManager(
+      Object.assign(DefaultPluginArgs, { platform: 'android' }),
+      4723,
+    );
     adb = await getAdbOriginal();
     sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));
-    
-    androidDevices.onDeviceAdded(adb, { udid: 'emulator-9999', state: 'device' } as any as DeviceWithPath).should.not.throw;
+
+    androidDevices.onDeviceAdded(adb, {
+      udid: 'emulator-9999',
+      state: 'device',
+    } as any as DeviceWithPath).should.not.throw;
   });
 });

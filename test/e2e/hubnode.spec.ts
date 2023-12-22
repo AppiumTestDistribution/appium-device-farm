@@ -3,7 +3,14 @@ import ip from 'ip';
 
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import { remote } from 'webdriverio';
-import { HUB_APPIUM_PORT, NODE_APPIUM_PORT, PLUGIN_PATH, ensureAppiumHome, ensureHubConfig, ensureNodeConfig } from './e2ehelper';
+import {
+  HUB_APPIUM_PORT,
+  NODE_APPIUM_PORT,
+  PLUGIN_PATH,
+  ensureAppiumHome,
+  ensureHubConfig,
+  ensureNodeConfig,
+} from './e2ehelper';
 import { Options } from '@wdio/types';
 import axios from 'axios';
 
@@ -19,12 +26,12 @@ const WDIO_PARAMS = {
 };
 
 const capabilities = {
-  "appium:automationName": "UiAutomator2",
-  "appium:app": "https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk",
-  "platformName": "android",
-  "appium:deviceName": "",
-  "appium:uiautomator2ServerInstallTimeout": 90000,
-} as unknown as WebdriverIO.Capabilities
+  'appium:automationName': 'UiAutomator2',
+  'appium:app': 'https://prod-mobile-artefacts.lambdatest.com/assets/docs/proverbial_android.apk',
+  platformName: 'android',
+  'appium:deviceName': '',
+  'appium:uiautomator2ServerInstallTimeout': 90000,
+} as unknown as WebdriverIO.Capabilities;
 
 describe('E2E', () => {
   // dump hub config into a file
@@ -42,7 +49,7 @@ describe('E2E', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: hub_config_file
+      configFile: hub_config_file,
     },
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
@@ -51,8 +58,8 @@ describe('E2E', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    appiumHome: APPIUM_HOME!,
+  });
 
   // run node
   pluginE2EHarness({
@@ -60,7 +67,7 @@ describe('E2E', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: node_config_file
+      configFile: node_config_file,
     },
     pluginName: 'device-farm',
     port: NODE_APPIUM_PORT,
@@ -69,8 +76,8 @@ describe('E2E', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    appiumHome: APPIUM_HOME!,
+  });
 
   beforeEach(async () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
@@ -80,27 +87,28 @@ describe('E2E', () => {
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
     await driver.performActions([
       {
-        "type": "pointer",
-        "id": "finger1",
-        "parameters": {"pointerType": "touch"},
-        "actions": [
-          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
-          {"type": "pointerDown", "button": 0},
-          {"type": "pause", "duration": 500},
-          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": -50, "y": 0},
-          {"type": "pointerUp", "button": 0}
-        ]
-      }])
-    console.log("Successfully swiped");
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: [
+          { type: 'pointerMove', duration: 0, x: 100, y: 100 },
+          { type: 'pointerDown', button: 0 },
+          { type: 'pause', duration: 500 },
+          { type: 'pointerMove', duration: 1000, origin: 'pointer', x: -50, y: 0 },
+          { type: 'pointerUp', button: 0 },
+        ],
+      },
+    ]);
+    console.log('Successfully swiped');
   });
 
   it('serve device-farm endpoint when test is still running', async () => {
     // check device-farm endpoint using axios
     const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm`);
     expect(res.status).to.equal(200);
-  })
+  });
 
-  afterEach(async function() {
-    await driver.deleteSession()
+  afterEach(async function () {
+    await driver.deleteSession();
   });
 });

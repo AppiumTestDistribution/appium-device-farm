@@ -68,6 +68,7 @@ export interface IPluginArgs {
   /** NEW_COMMAND_TIMEOUT capability to use when none is set from the client */
   newCommandTimeoutSec: number;
   cloud?: CloudConfig;
+  nodeId?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

@@ -17,6 +17,7 @@ import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
+import { v4 as uuidv4 } from 'uuid';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
@@ -190,6 +191,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       sessionStartTime: 0,
       chromeDriverPath,
       userBlocked: false,
+      nodeId: pluginArgs.nodeId || uuidv4(),
     };
   }
 

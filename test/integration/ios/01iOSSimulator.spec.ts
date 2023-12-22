@@ -16,19 +16,27 @@ import { serverCliArgs } from '../cliArgs';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDevice } from '../../../src/data-service/device-service';
+import { v4 as uuidv4 } from 'uuid';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
 
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
+const pluginArgs = Object.assign(DefaultPluginArgs, {
+  remote: [`http://${ip.address()}:4723`],
+  iosDeviceType: 'both',
+});
 
 function markSimulatorsAsBooted() {
   // mark simulators as booted
-  DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator' }).update((device) => {
-    device.state = 'Booted';
-  });
+  DeviceModel.chain()
+    .find({ platform: 'ios', deviceType: 'simulator' })
+    .update((device) => {
+      device.state = 'Booted';
+    });
 
-  const simulators = DeviceModel.chain().find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' }).data()
+  const simulators = DeviceModel.chain()
+    .find({ platform: 'ios', deviceType: 'simulator', state: 'Booted' })
+    .data();
   // console.log('simulators: ', simulators);
 }
 
@@ -38,18 +46,24 @@ describe('Max sessions CLI argument test', () => {
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({  });
-  })
+    await unblockDevice({});
+  });
 
   it('Allocate first device without issue', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, { maxSessions: 1}));
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'simulated', androidDeviceType: 'real' },
+      4723,
+      Object.assign(DefaultPluginArgs, { maxSessions: 1 }),
+      uuidv4(),
+    );
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     markSimulatorsAsBooted();
-    
+
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -69,16 +83,18 @@ describe('Max sessions CLI argument test', () => {
   it('Should throw error if the app does not match with device type', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager(
-      'ios', { 
-        iosDeviceType: "simulated", 
-        androidDeviceType: "real"
-      }, 
-      4723, 
-      Object.assign(pluginArgs, { maxSessions: 1})
+      'ios',
+      {
+        iosDeviceType: 'simulated',
+        androidDeviceType: 'real',
+      },
+      4723,
+      Object.assign(pluginArgs, { maxSessions: 1 }),
+      uuidv4(),
     );
     expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     markSimulatorsAsBooted();
 
@@ -97,23 +113,31 @@ describe('Max sessions CLI argument test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.'
-        )
+          'iosDeviceType value is set to "simulated" but app provided is not suitable for simulator device.',
+        ),
     );
   });
 
   it('Throw error when all sessions occupied', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "simulated", androidDeviceType: "real"}, 4723, Object.assign(pluginArgs, { maxSessions: 1}));
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'simulated', androidDeviceType: 'real' },
+      4723,
+      Object.assign(pluginArgs, { maxSessions: 1 }),
+      uuidv4(),
+    );
     // set all devices to busy
     const allDevices = await deviceManager.getDevices();
     allDevices.forEach((device) => {
-      DeviceModel.chain().find({ udid: device.udid, platform: 'ios' }).update((device) => {
-        device.busy = true;
-      });
+      DeviceModel.chain()
+        .find({ udid: device.udid, platform: 'ios' })
+        .update((device) => {
+          device.busy = true;
+        });
     });
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     markSimulatorsAsBooted();
 
@@ -132,22 +156,28 @@ describe('Max sessions CLI argument test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"simulator","busy":false,"userBlocked":false}'
-        )
+          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"simulator","busy":false,"userBlocked":false}',
+        ),
     );
   });
 });
 
 describe('IOS Simulator Test', () => {
   beforeEach('Release devices', async () => {
-    await unblockDevice({ });
-  })
+    await unblockDevice({});
+  });
 
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      pluginArgs,
+      uuidv4(),
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     markSimulatorsAsBooted();
 
@@ -172,9 +202,15 @@ describe('IOS Simulator Test', () => {
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      pluginArgs,
+      uuidv4(),
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     markSimulatorsAsBooted();
 
@@ -201,9 +237,15 @@ describe('IOS Simulator Test', () => {
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
       await initializeStorage();
-      const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
+      const deviceManager = new DeviceFarmManager(
+        'ios',
+        { iosDeviceType: 'both', androidDeviceType: 'real' },
+        4723,
+        pluginArgs,
+        uuidv4(),
+      );
       Container.set(DeviceFarmManager, deviceManager);
-      const hub = pluginArgs.hub
+      const hub = pluginArgs.hub;
       await updateDeviceList(hub);
       markSimulatorsAsBooted();
 
@@ -237,14 +279,20 @@ describe('Boot simulator test', async () => {
   });
 
   beforeEach('Release devices', async () => {
-    await unblockDevice({ });
-  })
+    await unblockDevice({});
+  });
 
   it('Should pick Booted simulator when app path has .app', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, Object.assign(DefaultPluginArgs, pluginArgs));
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      Object.assign(DefaultPluginArgs, pluginArgs),
+      uuidv4(),
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {

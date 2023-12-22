@@ -16,8 +16,11 @@ export class DeviceFarmManager {
     },
     hostPort: number,
     private pluginArgs: IPluginArgs,
+    private nodeId: string,
   ) {
     this.deviceTypes = deviceTypes;
+    this.pluginArgs = pluginArgs;
+    this.nodeId = nodeId;
     if (platform.toLowerCase() === 'both') {
       this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
       this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
@@ -32,7 +35,14 @@ export class DeviceFarmManager {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(
-        ...(await deviceManager.getDevices(this.deviceTypes, existingDeviceDetails || [])),
+        ...(await deviceManager.getDevices(this.deviceTypes, existingDeviceDetails || [])).map(
+          (device) => {
+            return {
+              ...device,
+              nodeId: !device.cloud ? this.nodeId : undefined,
+            };
+          },
+        ),
       );
     }
     return devices;
