@@ -1,5 +1,8 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
+import chai from 'chai';
+import chaiSubset from 'chai-subset';
+chai.use(chaiSubset);
 import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
@@ -9,6 +12,7 @@ import _ from 'lodash';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { DeviceModel } from '../../src/data-service/db';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
+import { v4 as uuidv4 } from 'uuid';
 
 var sandbox = sinon.createSandbox();
 
@@ -72,7 +76,7 @@ describe('Android Device Manager', function () {
     sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(Promise.resolve(0));
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
-    expect(devices).to.deep.equal([
+    expect(devices).to.containSubset([
       {
         busy: false,
         adbRemoteHost: null,
@@ -135,7 +139,8 @@ describe('Android Device Manager', function () {
     sandbox.stub(Helper, <any>'getFreePort').returns(54321);
     sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'simulated' }, []);
-    expect(devices).to.deep.equal([
+    expect(typeof devices[0].nodeId).to.equal('string');
+    expect(devices).to.containSubset([
       {
         busy: false,
         adbPort: 5037,
@@ -180,7 +185,7 @@ describe('Android Device Manager', function () {
     sandbox.stub(Helper, <any>'getFreePort').returns(54322);
     sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
-    expect(devices).to.deep.equal([
+    expect(devices).to.containSubset([
       {
         busy: false,
         name: 'Nexus 6',
@@ -228,7 +233,8 @@ describe('Android Device Manager', function () {
     sandbox.stub(Helper, <any>'getFreePort').returns(54322);
     sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
-    expect(devices).to.deep.equal([
+    expect(typeof devices[0].nodeId).to.equal('string');
+    expect(devices).to.containSubset([
       {
         busy: false,
         name: 'Nexus 6',

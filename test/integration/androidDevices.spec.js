@@ -54,10 +54,10 @@ describe('Android Test', () => {
     waitUntil(async () => {
       await updateDeviceList();
       devices = await deviceManager.getDevices();
-      
-      return devices.length === 2 && devices.every(device => !device.offline);
+
+      return devices.length === 2 && devices.every((device) => !device.offline);
     })
-    
+
     await allocateDeviceForSession(capabilities);
     const allDeviceIds = DeviceModel.chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
@@ -67,7 +67,7 @@ describe('Android Test', () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager('android', 'both', 4723, pluginArgs);
     Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub
+    const hub = pluginArgs.hub;
     await updateDeviceList(hub);
     const capabilities = {
       alwaysMatch: {
