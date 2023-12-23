@@ -10,7 +10,7 @@ export class RemoteSession implements ISession {
     protected sessionId: string,
     protected baseUrl: string,
     private device: IDevice,
-    protected sessionResponse: Record<string, any>
+    protected sessionResponse: Record<string, any>,
   ) {}
 
   isVideoRecordingInProgress(): boolean {
