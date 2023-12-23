@@ -1,11 +1,11 @@
-import { CLIArgs } from './db';
+import { ADTDatabase } from './db';
 
 async function addCLIArgs(args: any) {
-  CLIArgs.insert(args);
+  (await ADTDatabase.CLIArgs).insert(args);
 }
 
-function getCLIArgs() {
-  return CLIArgs.chain().find().data();
+async function getCLIArgs() {
+  return (await ADTDatabase.CLIArgs).chain().find().data();
 }
 
 export { addCLIArgs, getCLIArgs };

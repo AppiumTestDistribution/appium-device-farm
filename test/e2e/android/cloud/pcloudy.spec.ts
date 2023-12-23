@@ -26,7 +26,7 @@ const capabilities = {
   pCloudy_EnableDeviceLogs: 'true',
   pCloudy_ApplicationName: 'pCloudy_Appium_Demo.apk',
   appPackage: 'com.pcloudy.appiumdemo',
-  appActivity: 'com.ba.mobile.LaunchActivity'
+  appActivity: 'com.ba.mobile.LaunchActivity',
 };
 let driver: any;
 describe('Plugin Test', () => {
@@ -42,7 +42,7 @@ describe('Plugin Test', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: hub_config_file
+      configFile: hub_config_file,
     },
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
@@ -51,8 +51,8 @@ describe('Plugin Test', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    appiumHome: APPIUM_HOME!,
+  });
 
   beforeEach(async () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);

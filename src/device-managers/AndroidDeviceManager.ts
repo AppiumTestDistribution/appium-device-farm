@@ -47,59 +47,68 @@ export default class AndroidDeviceManager implements IDeviceManager {
   async getDevices(
     deviceTypes: { androidDeviceType: DeviceTypeToInclude },
     existingDeviceDetails: Array<IDevice>,
-  ): Promise<any> {
+  ): Promise<IDevice[]> {
     if (!this.adbAvailable) {
+      log.info('adb is not available. So, returning empty list');
       return [];
     }
-    const deviceState: Array<IDevice> = [];
+    let devices: IDevice[] = [];
     try {
       if (this.pluginArgs.cloud != undefined) {
-        const cloud = new Devices(this.pluginArgs.cloud, deviceState, 'android');
+        const cloud = new Devices(this.pluginArgs.cloud, devices, 'android');
         return await cloud.getDevices();
       } else {
-        await this.fetchAndroidDevices(deviceState, existingDeviceDetails, this.pluginArgs);
+        devices = await this.fetchAndroidDevices(existingDeviceDetails, this.pluginArgs);
+        log.info(`Found ${devices.length} android devices`);
       }
+
       if (deviceTypes.androidDeviceType === 'real') {
-        return deviceState.filter((device) => {
+        return devices.filter((device) => {
           return device.deviceType === 'real';
         });
       } else if (deviceTypes.androidDeviceType === 'simulated') {
-        return deviceState.filter((device) => {
+        return devices.filter((device) => {
           return device.deviceType === 'emulator';
         });
         // return both real and simulated (emulated) devices
       } else {
-        return deviceState;
+        return devices;
       }
     } catch (e) {
-      console.log(e);
+      log.error(`Error while getting android devices. Error: ${e}`);
     }
+    return [];
   }
 
-  private async fetchAndroidDevices(
-    deviceState: IDevice[],
-    existingDeviceDetails: IDevice[],
-    cliArgs: any,
-  ) {
+  private async fetchAndroidDevices(existingDeviceDetails: IDevice[], pluginArgs: IPluginArgs) {
     await this.requireSdkRoot();
-    const connectedDevices = await this.getConnectedDevices(cliArgs);
+    let availableDevices: IDevice[] = [];
+    const connectedDevices = await this.getConnectedDevices(pluginArgs);
+    //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
+
     for (const [adbInstance, devices] of connectedDevices) {
-      await asyncForEach(devices, async (device: IDevice) => {
+      log.debug(
+        `fetchAndroidDevices from host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
+      );
+      for await (const device of devices) {
+        // log.info(`Checking device ${device.udid}`);
         device.adbRemoteHost =
-          adbInstance.adbRemoteHost === null ? ip.address() : adbInstance.adbRemoteHost;
+          adbInstance.adbRemoteHost === null
+            ? this.pluginArgs.bindHostOrIp
+            : adbInstance.adbRemoteHost;
         if (
-          !deviceState.find(
-            (devicestate) =>
-              devicestate.udid === device.udid &&
-              devicestate.adbRemoteHost === device.adbRemoteHost,
+          !availableDevices.find(
+            (existingDevice: IDevice) =>
+              existingDevice.udid === device.udid &&
+              existingDevice.adbRemoteHost === device.adbRemoteHost,
           )
         ) {
           const existingDevice = existingDeviceDetails.find(
-            (dev) => dev.udid === device.udid && dev.host.includes(ip.address()),
+            (dev) => dev.udid === device.udid && dev.host.includes(this.pluginArgs.bindHostOrIp),
           );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
-            deviceState.push({
+            availableDevices.push({
               ...existingDevice,
               busy: false,
             });
@@ -117,20 +126,24 @@ export default class AndroidDeviceManager implements IDeviceManager {
               if (!deviceInfo) {
                 log.info(`Cannot get device info for ${device.udid}. Skipping`);
               } else {
-                deviceState.push(deviceInfo);
+                availableDevices.push(deviceInfo);
               }
             } else {
               log.info(`Device ${device.udid} is not in "device" state. So, ignoring.`);
             }
           }
+        } else {
+          // log.info(`Device ${device.udid} is already in list. So, ignoring.`);
+          // log.debug(`Current list of devices: ${JSON.stringify(availableDevices)}`);
         }
-      });
+      }
     }
-    return deviceState;
+
+    return availableDevices;
   }
 
   private async deviceInfo(
-    device: any,
+    device: { udid: string; state: string },
     adbInstance: any,
     pluginArgs: IPluginArgs,
     hostPort: number,
@@ -171,7 +184,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     } else if (pluginArgs.remoteMachineProxyIP !== undefined) {
       host = `${pluginArgs.remoteMachineProxyIP}`;
     } else {
-      host = `http://${ip.address()}:${hostPort}`;
+      host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
     return {
       adbRemoteHost: adbInstance.adbHost,
@@ -193,7 +206,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     };
   }
 
-  private async getAdb(): Promise<any> {
+  private async getAdb(): Promise<ADB> {
     try {
       if (!this.adb) {
         this.adb = await ADB.createADB({});
@@ -234,7 +247,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
     const client = Adb.createClient();
     const originalADBTracking = this.createLocalAdbTracker(client, originalADB);
-    originalADBTracking();
+    await originalADBTracking();
     const adbRemote = pluginArgs.adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
@@ -250,8 +263,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
           host: adbHost,
           port: adbPort,
         });
-        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB, adbHost);
-        remoteAdbTracking();
+        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB);
+        await remoteAdbTracking();
       });
     }
     return deviceList;
@@ -294,9 +307,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
         log.info(`Updating Hub with device ${newDevice.udid}`);
         const nodeDevices = new NodeDevices(this.pluginArgs.hub);
         await nodeDevices.postDevicesToHub([trackedDevice], 'add');
-      } else {
-        addNewDevice([trackedDevice]);
       }
+
+      // node also need a copy of devices, otherwise it cannot serve requests
+      addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
     }
   }
 
@@ -330,19 +344,20 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async onDeviceRemoved(device: DeviceWithPath, pluginArgs: IPluginArgs) {
     const clonedDevice: DeviceUpdate = {
       udid: device['id'],
-      host: ip.address(),
+      host: pluginArgs.bindHostOrIp,
       state: device.type,
     };
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
       await nodeDevices.postDevicesToHub([clonedDevice], 'remove');
-    } else {
-      removeDevice([clonedDevice]);
-      this.abort(clonedDevice.udid);
     }
+
+    // node also need a copy of devices, otherwise it cannot serve requests
+    removeDevice([clonedDevice]);
+    this.abort(clonedDevice.udid);
   }
 
-  private createRemoteAdbTracker(adbClient: any, originalADB: any, adbHost: string) {
+  private createRemoteAdbTracker(adbClient: any, originalADB: any) {
     const pluginArgs = this.pluginArgs;
     const adbTracking = async () => {
       try {

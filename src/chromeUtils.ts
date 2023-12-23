@@ -70,7 +70,6 @@ async function getChromedriverBinaryPath(dir: any, osName = getOsName()) {
     absolute: true,
     nocase: true,
     nodir: true,
-    strict: false,
   });
   return _.isEmpty(paths)
     ? path.resolve(dir, `${CD_EXECUTABLE_PREFIX}${pathSuffix}`)

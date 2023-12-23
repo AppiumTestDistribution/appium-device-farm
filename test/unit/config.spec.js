@@ -10,7 +10,7 @@ describe('Config Test', () => {
   it('Should throw error when path is not absolute', async () => {
     const deviceConfigPath = './fixtures/device.config.js';
     expect(() => isDeviceConfigPathAbsolute(deviceConfigPath)).to.throw(
-      'Device Config Path ./fixtures/device.config.js should be absolute'
+      'Device Config Path ./fixtures/device.config.js should be absolute',
     );
   });
 });

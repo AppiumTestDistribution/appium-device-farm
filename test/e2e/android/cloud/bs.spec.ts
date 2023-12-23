@@ -3,8 +3,8 @@ import path from 'path';
 import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 import ip from 'ip';
-import type { Options } from '@wdio/types'
-import 'dotenv/config'
+import type { Options } from '@wdio/types';
+import 'dotenv/config';
 
 const APPIUM_HOST = ip.address();
 const APPIUM_PORT = 4723;
@@ -38,7 +38,7 @@ describe('Plugin Test', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: hub_config_file
+      configFile: hub_config_file,
     },
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
@@ -47,9 +47,9 @@ describe('Plugin Test', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
-  
+    appiumHome: APPIUM_HOME!,
+  });
+
   beforeEach(async () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
   });
@@ -58,21 +58,22 @@ describe('Plugin Test', () => {
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
     await driver.performActions([
       {
-        "type": "pointer",
-        "id": "finger1",
-        "parameters": {"pointerType": "touch"},
-        "actions": [
-          {"type": "pointerMove", "duration": 0, "x": 100, "y": 100},
-          {"type": "pointerDown", "button": 0},
-          {"type": "pause", "duration": 500},
-          {"type": "pointerMove", "duration": 1000, "origin": "pointer", "x": -50, "y": 0},
-          {"type": "pointerUp", "button": 0}
-        ]
-      }])
-    console.log("Successfully swiped");
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: [
+          { type: 'pointerMove', duration: 0, x: 100, y: 100 },
+          { type: 'pointerDown', button: 0 },
+          { type: 'pause', duration: 500 },
+          { type: 'pointerMove', duration: 1000, origin: 'pointer', x: -50, y: 0 },
+          { type: 'pointerUp', button: 0 },
+        ],
+      },
+    ]);
+    console.log('Successfully swiped');
   });
 
-  afterEach(async function() {
-    await driver.deleteSession()
+  afterEach(async function () {
+    await driver.deleteSession();
   });
 });

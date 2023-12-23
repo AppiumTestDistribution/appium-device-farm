@@ -27,6 +27,7 @@ nav:
   - troubleshooting.md
   - cloud.md
   - remote-execution.md
+  - architecture.md
   - Reference:
       - server-args.md
       - capabilities.md

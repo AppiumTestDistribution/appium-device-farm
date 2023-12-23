@@ -1,8 +1,8 @@
-import { getDeviceFiltersFromCapability } from '../../src/device-utils';
+import { cleanPendingSessions, getDeviceFiltersFromCapability } from '../../src/device-utils';
 import { expect } from 'chai';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../integration/cliArgs';
-import { CLIArgs } from '../../src/data-service/db';
+import { ADTDatabase } from '../../src/data-service/db';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 
 const pluginArgs = DefaultPluginArgs;
@@ -10,7 +10,8 @@ const pluginArgs = DefaultPluginArgs;
 describe('Device filter tests', () => {
   it('Get Device filters for real device', async () => {
     await addCLIArgs(serverCliArgs);
-    CLIArgs.chain()
+    (await ADTDatabase.CLIArgs)
+      .chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
@@ -40,8 +41,9 @@ describe('Device filter tests', () => {
     });
   });
 
-  it('Get Device from filter properties for simulator', () => {
-    CLIArgs.chain()
+  it('Get Device from filter properties for simulator', async () => {
+    (await ADTDatabase.CLIArgs)
+      .chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'simulated';
@@ -93,5 +95,26 @@ describe('Device filter tests', () => {
       busy: false,
       userBlocked: false,
     });
+  });
+});
+
+describe('Pending sessions', async () => {
+  it('clean pending sessions', async () => {
+    // insert pending sessions
+    (await ADTDatabase.PendingSessionsModel).insert({
+      capability_id: '1',
+      createdAt: new Date().getTime(),
+    });
+    (await ADTDatabase.PendingSessionsModel).insert({
+      capability_id: '2',
+      createdAt: new Date().getTime() - 10000,
+    });
+
+    // clean pending sessions
+    await cleanPendingSessions(5000);
+
+    // check pending sessions
+    const pendingSessions = (await ADTDatabase.PendingSessionsModel).chain().data();
+    expect(pendingSessions.length).to.equal(1);
   });
 });

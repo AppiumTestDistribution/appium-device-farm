@@ -85,7 +85,10 @@ describe.skip('Remote IOS', () => {
         deviceType: 'real',
         platform: 'ios',
         host: 'http://127.0.0.1:4723',
-        derivedDataPath: path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E'),
+        derivedDataPath: path.join(
+          os.homedir(),
+          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
+        ),
         mjpegServerPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,

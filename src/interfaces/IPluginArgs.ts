@@ -1,5 +1,4 @@
-import { type } from 'os';
-import { DeviceType } from '../types/DeviceType';
+import ip from 'ip';
 import { IDevice } from './IDevice';
 
 export interface AxiosProxy {
@@ -68,6 +67,7 @@ export interface IPluginArgs {
   /** NEW_COMMAND_TIMEOUT capability to use when none is set from the client */
   newCommandTimeoutSec: number;
   cloud?: CloudConfig;
+  bindHostOrIp: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -90,4 +90,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   checkBlockedDevicesIntervalMs: 30000,
   newCommandTimeoutSec: 60,
   cloud: undefined,
+  bindHostOrIp: ip.address(),
 };

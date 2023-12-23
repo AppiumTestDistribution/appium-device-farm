@@ -1,11 +1,14 @@
-import { PendingSessionsModel } from './db';
+import { ADTDatabase } from './db';
 
 async function addNewPendingSession(capability: any) {
-  PendingSessionsModel.insert(capability);
+  (await ADTDatabase.PendingSessionsModel).insert(capability);
 }
 
 async function removePendingSession(sessionCapabilityId: any) {
-  PendingSessionsModel.chain().find({ capability_id: sessionCapabilityId }).remove();
+  (await ADTDatabase.PendingSessionsModel)
+    .chain()
+    .find({ capability_id: sessionCapabilityId })
+    .remove();
 }
 
 export { addNewPendingSession, removePendingSession };

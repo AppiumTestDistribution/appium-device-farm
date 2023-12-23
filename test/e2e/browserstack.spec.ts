@@ -2,9 +2,16 @@
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import axios from 'axios';
 import { expect } from 'chai';
-import { ensureHubConfig, ensureNodeConfig, ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
+import {
+  ensureHubConfig,
+  ensureNodeConfig,
+  ensureAppiumHome,
+  HUB_APPIUM_PORT,
+  PLUGIN_PATH,
+} from './e2ehelper';
 import ip from 'ip';
 import path from 'path';
+import { IDevice } from '../../src/interfaces/IDevice';
 
 describe('Browserstack Devices', () => {
   // dump hub config into a file
@@ -19,7 +26,7 @@ describe('Browserstack Devices', () => {
     after: global.after,
     serverArgs: {
       subcommand: 'server',
-      configFile: hub_config_file
+      configFile: hub_config_file,
     },
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
@@ -28,14 +35,14 @@ describe('Browserstack Devices', () => {
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
-    appiumHome: APPIUM_HOME!
-  })
+    appiumHome: APPIUM_HOME!,
+  });
 
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
-  
+
   it('Should be able to run the android with Browerstack config', async () => {
-    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`))
-      .data;
+    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`)).data;
+    androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0]).to.deep.equal({
@@ -52,6 +59,8 @@ describe('Browserstack Devices', () => {
       sdk: '9.0',
       udid: 'Google Pixel 3',
       offline: false,
+      sessionStartTime: 0,
+      totalUtilizationTimeMilliSec: null,
     });
   });
 
@@ -61,10 +70,11 @@ describe('Browserstack Devices', () => {
   });
 
   it('Should be able to get iOS devices from Browerstack config', async () => {
-    let iosDevics = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
-    delete iosDevics[0].meta;
-    delete iosDevics[0]['$loki'];
-    expect(iosDevics[0]).to.deep.equal({
+    let iosDevices = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
+    iosDevices = iosDevices.filter((device: IDevice) => device.cloud === 'browserstack');
+    delete iosDevices[0].meta;
+    delete iosDevices[0]['$loki'];
+    expect(iosDevices[0]).to.deep.equal({
       deviceName: 'iPhone XS',
       os_version: '15',
       platform: 'ios',
@@ -82,6 +92,9 @@ describe('Browserstack Devices', () => {
       sdk: '15',
       udid: 'iPhone XS',
       offline: false,
+
+      sessionStartTime: 0,
+      totalUtilizationTimeMilliSec: null,
     });
   });
 });

@@ -8,27 +8,36 @@ import {
   allocateDeviceForSession,
   initializeStorage,
 } from '../../../src/device-utils';
-import { CLIArgs, DeviceModel } from '../../../src/data-service/db';
+import { ADTDatabase } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
-import { unblockDevice } from '../../../src/data-service/device-service';
-const pluginArgs = Object.assign(DefaultPluginArgs, { remote: [`http://${ip.address()}:4723`], iosDeviceType: 'both' })
+import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
+const pluginArgs = Object.assign({}, DefaultPluginArgs, {
+  remote: [`http://${ip.address()}:4723`],
+  iosDeviceType: 'both',
+});
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {
     // unblock all otherwise it will stuck on max session count
-    await unblockDevice({  });
-  })
+    await unblockDeviceMatchingFilter({});
+  });
 
   it('Throw error when no device is found for given capabilities', async () => {
     await initializeStorage();
-    CLIArgs.chain()
+    (await ADTDatabase.CLIArgs)
+      .chain()
       .find()
       .update(function (d) {
         d.plugin['device-farm'].iosDeviceType = 'real';
       });
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      pluginArgs,
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(pluginArgs.bindHostOrIp);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -44,16 +53,21 @@ describe('IOS Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false,"userBlocked":false}'
-        )
+          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false,"userBlocked":false}',
+        ),
     );
   });
 
   it('Should throw error if the IPA does not match with device type real', async () => {
     await initializeStorage();
-    const deviceManager = new DeviceFarmManager('ios', { iosDeviceType: "both", androidDeviceType: "real"}, 4723, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      pluginArgs,
+    );
     Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList();
+    await updateDeviceList(pluginArgs.bindHostOrIp);
     const capabilities = {
       alwaysMatch: {
         platformName: 'iOS',
@@ -64,13 +78,13 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) => 
+    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
         .with.property(
           'message',
-          'iosDeviceType value is set to "real" but app provided is not suitable for real device.'
-        )
+          'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
+        ),
     );
   });
 });

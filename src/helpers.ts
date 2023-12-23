@@ -27,14 +27,18 @@ export async function asyncForEach(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export async function spinWith(msg: string, fn: () => any, callback = (msg: string) => {}) {
+export async function spinWith(
+  msg: string,
+  fn: () => Promise<boolean>,
+  callback = (msg: string) => {},
+) {
   const spinner = ora(msg).start();
   await asyncWait(
     async () => {
       try {
-        await fn();
+        const res = await fn();
         spinner.succeed();
-        return true;
+        return res;
       } catch (err) {
         spinner.fail();
         if (callback) callback(msg);
@@ -67,7 +71,7 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function hubUrl(device: IDevice): string {
+export function nodeUrl(device: IDevice): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
@@ -78,6 +82,7 @@ export function hubUrl(device: IDevice): string {
       }/wd/hub/session`;
     }
   }
+  // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
   return `${host}/wd/hub/session`;
 }
 
