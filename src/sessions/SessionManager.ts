@@ -1,5 +1,5 @@
 import { ISession } from '../interfaces/ISession';
-class SessionManager {
+export class SessionManager {
   private sessionMap: Map<string, ISession> = new Map();
 
   addSession(sessionId: string, session: ISession) {

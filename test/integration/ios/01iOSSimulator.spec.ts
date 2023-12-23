@@ -17,9 +17,11 @@ import ip from 'ip';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { flatten } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
+const NODE_ID = uuidv4();
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   remote: [`http://${ip.address()}:4723`],
@@ -51,6 +53,7 @@ async function initDeviceFarm(iosDeviceType: string) {
     },
     4723,
     Object.assign(pluginArgs, { maxSessions: 1 }),
+    NODE_ID,
   );
   expect(deviceManager.getMaxSessionCount()).to.be.eql(1);
   Container.set(DeviceFarmManager, deviceManager);
@@ -121,6 +124,7 @@ describe('Max sessions CLI argument test', () => {
       { iosDeviceType: 'simulated', androidDeviceType: 'real' },
       4723,
       Object.assign(pluginArgs, { maxSessions: 1 }),
+      NODE_ID,
     );
     // set all devices to busy
     const allDevices = await deviceManager.getDevices();
@@ -166,6 +170,7 @@ describe('IOS Simulator Test', () => {
       { iosDeviceType: 'both', androidDeviceType: 'real' },
       4723,
       pluginArgs,
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;
@@ -203,6 +208,7 @@ describe('IOS Simulator Test', () => {
       { iosDeviceType: 'both', androidDeviceType: 'real' },
       4723,
       pluginArgs,
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;
@@ -242,6 +248,7 @@ describe('IOS Simulator Test', () => {
         { iosDeviceType: 'both', androidDeviceType: 'real' },
         4723,
         pluginArgs,
+        NODE_ID,
       );
       Container.set(DeviceFarmManager, deviceManager);
       const hub = pluginArgs.hub;
@@ -303,6 +310,7 @@ describe('Boot simulator test', async () => {
       { iosDeviceType: 'both', androidDeviceType: 'real' },
       4723,
       Object.assign({}, DefaultPluginArgs, pluginArgs),
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;

@@ -11,10 +11,13 @@ import {
 import { ADTDatabase } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
+import { v4 as uuidv4 } from 'uuid';
+
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   remote: [`http://${ip.address()}:4723`],
   iosDeviceType: 'both',
 });
+const NODE_ID = uuidv4();
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {
@@ -35,6 +38,7 @@ describe('IOS Test', () => {
       { iosDeviceType: 'both', androidDeviceType: 'real' },
       4723,
       pluginArgs,
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);
@@ -65,6 +69,7 @@ describe('IOS Test', () => {
       { iosDeviceType: 'both', androidDeviceType: 'real' },
       4723,
       pluginArgs,
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);

@@ -121,12 +121,12 @@ function getDuration(session: any) {
   if (session.status.toLowerCase() == 'running') {
     return `Started ${CommonUtils.convertTimeToReadableFormat(
       new Date(session.startTime),
-      new Date()
+      new Date(),
     )} ago`;
   } else {
     return `Took ${CommonUtils.convertTimeToReadableFormat(
       new Date(session.startTime),
-      new Date(session.endTime)
+      new Date(session.endTime),
     )}`;
   }
 }
@@ -135,7 +135,7 @@ export function SessionCard(props: any) {
   const { session, active, onClick } = props;
 
   return (
-    <Container className={`${active ? 'active' : ''}`} onClick={onClick}>
+    <Container className={`${!active ? '' : 'active'}`} onClick={onClick}>
       <Body>
         <Title>{getTitle(session)}</Title>
         <FlexContainer direction="row" justify="flex-start">

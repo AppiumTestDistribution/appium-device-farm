@@ -3,7 +3,7 @@ import { SESSION_MANAGER } from '../sessions/SessionManager';
 import { ISession } from '../interfaces/ISession';
 import { IDevice } from '../interfaces/IDevice';
 import { prisma } from '../prisma';
-import logger from '../logger';
+import log from '../logger';
 import {
   getOrCreateNewBuild,
   getSessionById,
@@ -77,7 +77,7 @@ export class DashboardEventManager {
     sessionId: string,
     commandName: string | undefined,
     request: Request,
-    response: Response
+    response: Response,
   ): Promise<boolean> {
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
 
@@ -97,8 +97,9 @@ export class DashboardEventManager {
         break;
       case 'execute':
         if (request.body && dashboardCommands.isDashboardCommand(request.body.script)) {
+          log.info('Recieved execute command with script ' + request.body.script);
           await dashboardCommands.process(sessionId, request, response);
-          return true;
+          return false;
         }
         break;
     }
@@ -111,7 +112,7 @@ export class DashboardEventManager {
     commandName: string | undefined,
     request: Request,
     response: Response,
-    responseBody: string
+    responseBody: string,
   ) {
     const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {

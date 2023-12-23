@@ -108,7 +108,7 @@ apiRouter.get('/devices/android', async (req, res) => {
 });
 
 apiRouter.post('/register', async (req, res) => {
-  let requestBody = req.body;
+  const requestBody = req.body;
   if (req.query.type === 'add') {
     const addedDevices = await addNewDevice(requestBody);
     if (addedDevices.length > 0) log.info(`Added new devices: ${JSON.stringify(addedDevices)}`);

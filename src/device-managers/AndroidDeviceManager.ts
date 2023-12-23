@@ -1,5 +1,4 @@
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort, hasCloud, hasHub } from '../helpers';
 import { asyncForEach, getFreePort } from '../helpers';
 import { ADB, getSdkRootFromEnv } from 'appium-adb';
 import log from '../logger';
@@ -83,7 +82,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   private async fetchAndroidDevices(existingDeviceDetails: IDevice[], pluginArgs: IPluginArgs) {
     await this.requireSdkRoot();
-    let availableDevices: IDevice[] = [];
+    const availableDevices: IDevice[] = [];
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
     //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
 

@@ -487,7 +487,7 @@ export async function cleanPendingSessions(timeoutMs: number) {
     return timeSinceSessionCreated > timeoutMs;
   });
   if (timedOutSessions.length === 0) {
-    log.debug(`No pending sessions to clean`);
+    log.debug('No pending sessions to clean');
   } else {
     log.debug(`Found ${timedOutSessions.length} pending sessions to clean`);
   }
@@ -506,7 +506,7 @@ export async function setupCronCleanPendingSessions(intervalMs: number, timeoutM
   }
 
   cronTimerToCleanPendingSessions = setInterval(async () => {
-    log.debug(`Cleaning pending sessions...`);
+    log.debug('Cleaning pending sessions...');
     await cleanPendingSessions(timeoutMs);
   }, intervalMs);
 }

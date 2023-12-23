@@ -35,17 +35,14 @@ export class DeviceFarmManager {
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(
-        ...(
-          await deviceManager.getDevices(
-            this.deviceTypes,
-            existingDeviceDetails || []
-          )
-        ).map((device) => {
-          return {
-            ...device,
-            nodeId: !device.cloud ? this.nodeId : undefined,
-          };
-        }),
+        ...(await deviceManager.getDevices(this.deviceTypes, existingDeviceDetails || [])).map(
+          (device) => {
+            return {
+              ...device,
+              nodeId: !device.cloud ? this.nodeId : undefined,
+            };
+          },
+        ),
       );
     }
     return devices;
