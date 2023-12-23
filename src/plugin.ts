@@ -99,7 +99,11 @@ class DevicePlugin extends BasePlugin {
     );
   }
 
-  public static async updateServer(expressApp: any, httpServer: any, cliArgs: ServerArgs): Promise<void> {
+  public static async updateServer(
+    expressApp: any,
+    httpServer: any,
+    cliArgs: ServerArgs,
+  ): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     const pluginConfigs = cliArgs.plugin as PluginConfig;
@@ -111,14 +115,11 @@ class DevicePlugin extends BasePlugin {
         pluginConfigs['device-farm'] as unknown as IPluginArgs,
       );
     } else {
-      pluginArgs = Object.assign(
-        {},
-        DefaultPluginArgs
-      );
+      pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
 
     // I'm transferring the CLI Args to pluginArgs here.
-    DevicePlugin.nodeBasePath = cliArgs.basePath
+    DevicePlugin.nodeBasePath = cliArgs.basePath;
 
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
@@ -284,7 +285,11 @@ class DevicePlugin extends BasePlugin {
       `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
     );
     // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
-    if (this.pluginArgs.hub == undefined && device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
+    if (
+      this.pluginArgs.hub == undefined &&
+      device.host !== undefined &&
+      !device.host.includes(this.pluginArgs.bindHostOrIp)
+    ) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
     } else {

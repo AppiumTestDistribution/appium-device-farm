@@ -101,7 +101,7 @@ export function ensureHubConfig(platform = 'android', deviceType = 'both') {
 
 export function ensureNodeConfig(
   androidDeviceType: string = 'both',
-  iosDeviceType: string = 'both',
+  iosDeviceType: string = 'simulated',
 ) {
   const node_config_file = ensureTempDir() + '/node-config.json';
   fs.writeFileSync(

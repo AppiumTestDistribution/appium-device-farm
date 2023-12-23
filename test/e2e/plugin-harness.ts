@@ -97,7 +97,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
       }
 
       // find go_ios from npm
-      env.GO_IOS = await goIosPath();
+      //env.GO_IOS = await goIosPath();
 
       return env;
     };
