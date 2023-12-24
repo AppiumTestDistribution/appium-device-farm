@@ -409,7 +409,7 @@ class DevicePlugin extends BasePlugin {
     device: IDevice,
     caps: ISessionCapability,
   ): Promise<CreateSessionResponseInternal | Error> {
-    const remoteUrl = `${nodeUrl(device)}/session`;
+    const remoteUrl = `${nodeUrl(device, DevicePlugin.nodeBasePath)}/session`;
     let capabilitiesToCreateSession = { capabilities: caps };
 
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {

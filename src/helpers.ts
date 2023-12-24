@@ -71,11 +71,11 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function nodeUrl(device: IDevice): string {
+export function nodeUrl(device: IDevice, basePath = ''): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
-      return `${host}/wd/hub/`;
+      return `${host}/wd/hub`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
@@ -83,7 +83,7 @@ export function nodeUrl(device: IDevice): string {
     }
   }
   // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
-  return `${host}/wd/hub`;
+  return `${host}${basePath ? '/' + basePath : ''}`;
 }
 
 export async function isPortBusy(port: number) {

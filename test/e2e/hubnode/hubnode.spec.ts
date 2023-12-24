@@ -17,6 +17,7 @@ import { Options } from '@wdio/types';
 import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
+import { afterEach } from 'mocha';
 chai.use(chaiAsPromised);
 
 let driver: any;
@@ -194,14 +195,18 @@ describe('E2E Hub and Node', () => {
     await expect(
       remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
     ).to.eventually.be.rejectedWith(
-      "An unknown server-side error occurred while processing the command. Original error: Error: Either provide 'app' option to install 'com.nonexistent' or consider setting 'noReset' to 'true' if 'com.nonexistent' is supposed to be preinstalled.",
+      'An unknown server-side error occurred while processing the command. Original error: Error: Either provide \'app\' option to install \'com.nonexistent\' or consider setting \'noReset\' to \'true\' if \'com.nonexistent\' is supposed to be preinstalled.',
     );
   });
 
   afterEach(async function () {
-    if (driver !== undefined) {
-      await driver.deleteSession();
-      driver = undefined;
+    try {
+      if (driver !== undefined) {
+        await driver.deleteSession();
+        driver = undefined;
+      }
+    } catch (err) {
+      console.log('Unable to delete driver session');
     }
   });
 });
