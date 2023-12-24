@@ -68,6 +68,7 @@ import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import ip from 'ip';
 import _ from 'lodash';
+import SessionType from './enums/SessionType';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -358,13 +359,25 @@ class DevicePlugin extends BasePlugin {
       } else {
         sessionInstance = new RemoteSession(sessionId, nodeUrl(device), device, sessionResponse);
       }
-      SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
 
-      if (DevicePlugin.IS_HUB) {
-        await DASHBORD_EVENT_MANAGER.onSessionStarted(
-          deviceFarmCapabilities,
-          sessionInstance,
-          device,
+      const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
+
+      if (shouldSaveLogs) {
+        log.info(
+          `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
+        );
+        SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
+
+        if (DevicePlugin.IS_HUB) {
+          await DASHBORD_EVENT_MANAGER.onSessionStarted(
+            deviceFarmCapabilities,
+            sessionInstance,
+            device,
+          );
+        }
+      } else {
+        log.info(
+          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
         );
       }
 

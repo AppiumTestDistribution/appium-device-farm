@@ -10,7 +10,6 @@ import { hasHubArgument } from '../helpers';
 import { SESSION_MANAGER } from '../sessions/SessionManager';
 import { DASHBORD_EVENT_MANAGER } from '../dashboard/event-manager';
 import { routeToCommandName } from '@appium/base-driver';
-import SessionType from '../enums/SessionType';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
@@ -82,10 +81,7 @@ function handler(cliArgs: Record<string, any>) {
       return next();
     }
 
-    const shouldInterceptRequest =
-      !hasHubArgument(cliArgs) &&
-      !_.isNil(SESSION_MANAGER.getSession(sessionId)) &&
-      SESSION_MANAGER.getSession(sessionId)?.getType() !== SessionType.CLOUD;
+    const shouldInterceptRequest = !hasHubArgument(cliArgs);
 
     if (shouldInterceptRequest) {
       // Hack to decode gzip responses in lambdatest
