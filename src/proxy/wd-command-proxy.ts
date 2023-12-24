@@ -140,7 +140,7 @@ async function interceptResponse(
   req: Request,
   res: Response,
 ) {
-  const [originalWrite, originalEnd] = [res.write, res.send, res.end];
+  const [originalWrite, originalEnd] = [res.write, res.end];
   const chunks: Buffer[] = [];
 
   (res.write as unknown) = function (...args: any) {

@@ -83,7 +83,7 @@ export function nodeUrl(device: IDevice, basePath = ''): string {
     }
   }
   // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
-  return `${host}${basePath ? '/' + basePath : ''}`;
+  return `${host}${basePath || ''}`;
 }
 
 export async function isPortBusy(port: number) {
