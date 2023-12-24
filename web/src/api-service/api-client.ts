@@ -1,10 +1,6 @@
-import _ from 'lodash';
-
 class ApiClient {
-  public makeGETRequest(url: string, queryParams: any = {}) {
-    return fetch(
-      this.formatUrl(url + `?${new URLSearchParams(_.pickBy(queryParams, _.identity)).toString()}`),
-    ).then(this.jsonResult);
+  public makeGETRequest(url: string, queryParams: any) {
+    return fetch(this.formatUrl(url)).then(this.jsonResult);
   }
 
   public makePOSTRequest(url: string, queryParams: any, body: any) {
@@ -22,7 +18,7 @@ class ApiClient {
   }
 
   public formatUrl(url: string) {
-    return `http://localhost:31337/device-farm/api${url}`;
+    return `/device-farm/api${url}`;
   }
 
   private jsonResult(res: any) {
