@@ -64,13 +64,14 @@ function getSessionIdFromUr(url: string) {
 
 function handler(cliArgs: Record<string, any>) {
   const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '') + '/session';
+  const isHub = !hasHubArgument(cliArgs); //if hub cliArg is provided, then current appium process serves as a NODE
   return async (req: Request, res: Response, next: NextFunction) => {
     if (new RegExp(/wd-internal\//).test(req.url)) {
       req.url = req.originalUrl = req.url.replace('wd-internal/', '');
       return next();
     }
 
-    if (!req.path.startsWith(WEBDRIVER_BASE_PATH)) {
+    if (isHub && !req.path.startsWith(WEBDRIVER_BASE_PATH)) {
       log.info(
         `Recieved non webdriver request with url ${req.path}. So not proxying it to downstream.`,
       );
@@ -86,8 +87,7 @@ function handler(cliArgs: Record<string, any>) {
 
     req.headers['accept-encoding'] = 'deflate';
 
-    const shouldInterceptRequest =
-      !hasHubArgument(cliArgs) && !!SESSION_MANAGER.isValidSession(sessionId);
+    const shouldInterceptRequest = isHub && !!SESSION_MANAGER.isValidSession(sessionId);
 
     if (shouldInterceptRequest) {
       // Hack to decode gzip responses in lambdatest

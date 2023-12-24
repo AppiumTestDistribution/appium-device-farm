@@ -22,7 +22,7 @@ export class RemoteSession implements ISession {
   }
 
   getType(): SessionType {
-    return SessionType.CLOUD;
+    return SessionType.REMOTE;
   }
 
   getId(): string {

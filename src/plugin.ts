@@ -352,12 +352,13 @@ class DevicePlugin extends BasePlugin {
       }
 
       let sessionInstance: ISession;
+      const nodeWebdriverUrl = nodeUrl(device, DevicePlugin.nodeBasePath);
       if (device.nodeId === DevicePlugin.NODE_ID) {
         sessionInstance = new LocalSession(sessionId, driver, device, sessionResponse);
       } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession(sessionId, nodeUrl(device), device, sessionResponse);
+        sessionInstance = new CloudSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
       } else {
-        sessionInstance = new RemoteSession(sessionId, nodeUrl(device), device, sessionResponse);
+        sessionInstance = new RemoteSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
       }
 
       const isDashboardEnabled = !!this.pluginArgs.enableDashboard;
