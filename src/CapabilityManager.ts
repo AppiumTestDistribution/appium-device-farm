@@ -76,11 +76,14 @@ export function getDeviceFarmCapabilities(caps: ISessionCapability) {
   // Pick all capabilities that starts with df: and store it as a separate object
   const individualCapabilities = Object.keys(mergedCapabilites)
     .filter((key) => key.toLowerCase().trim().startsWith('df:'))
-    .reduce((acc: Record<string, any>, originalkey: string) => {
-      const strippedKey = originalkey.split(':')[1];
-      acc[strippedKey] = mergedCapabilites[originalkey];
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc: Record<string, any>, originalkey: string) => {
+        const strippedKey = originalkey.split(':')[1];
+        acc[strippedKey] = mergedCapabilites[originalkey];
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
   return _.merge(deviceFarmOptions, individualCapabilities);
 }

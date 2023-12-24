@@ -62,7 +62,7 @@ export function ensureTempDir() {
 }
 
 export function ensureAppiumHome(suffix = '', deleteExisting = true) {
-  const newHome = path.resolve(path.join(__dirname, `/../../temp-appium`, suffix));
+  const newHome = path.resolve(path.join(__dirname, '/../../temp-appium', suffix));
   if (!fs.existsSync(newHome)) {
     fs.mkdirSync(newHome);
   }
