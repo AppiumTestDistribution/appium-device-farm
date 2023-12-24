@@ -68,6 +68,7 @@ export interface IPluginArgs {
   newCommandTimeoutSec: number;
   cloud?: CloudConfig;
   bindHostOrIp: string;
+  enableDashboard: boolean;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -91,4 +92,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   newCommandTimeoutSec: 60,
   cloud: undefined,
   bindHostOrIp: ip.address(),
+  enableDashboard: false,
 };

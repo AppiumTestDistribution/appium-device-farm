@@ -360,9 +360,10 @@ class DevicePlugin extends BasePlugin {
         sessionInstance = new RemoteSession(sessionId, nodeUrl(device), device, sessionResponse);
       }
 
+      const isDashboardEnabled = !!this.pluginArgs.enableDashboard;
       const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
 
-      if (shouldSaveLogs) {
+      if (isDashboardEnabled && shouldSaveLogs) {
         log.info(
           `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
         );
@@ -377,7 +378,7 @@ class DevicePlugin extends BasePlugin {
         }
       } else {
         log.info(
-          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
+          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. Is DashboardEnabled: ${isDashboardEnabled}`,
         );
       }
 
