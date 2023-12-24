@@ -76,12 +76,14 @@ function handler(cliArgs: Record<string, any>) {
     const sessionId = getSessionIdFromUr(req.url);
     const proxyServer = getProxyServer();
 
-    req.headers['accept-encoding'] = 'deflate';
-    if (!sessionId || !SESSION_MANAGER.isValidSession(sessionId)) {
+    if (!sessionId) {
       return next();
     }
 
-    const shouldInterceptRequest = !hasHubArgument(cliArgs);
+    req.headers['accept-encoding'] = 'deflate';
+
+    const shouldInterceptRequest =
+      !hasHubArgument(cliArgs) && !!SESSION_MANAGER.isValidSession(sessionId);
 
     if (shouldInterceptRequest) {
       // Hack to decode gzip responses in lambdatest
