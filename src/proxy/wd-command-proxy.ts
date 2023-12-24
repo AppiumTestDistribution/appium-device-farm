@@ -63,13 +63,17 @@ function getSessionIdFromUr(url: string) {
 }
 
 function handler(cliArgs: Record<string, any>) {
+  const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '') + '/session';
   return async (req: Request, res: Response, next: NextFunction) => {
     if (new RegExp(/wd-internal\//).test(req.url)) {
       req.url = req.originalUrl = req.url.replace('wd-internal/', '');
       return next();
     }
 
-    if (!req.path.startsWith('/wd/hub')) {
+    if (!req.path.startsWith(WEBDRIVER_BASE_PATH)) {
+      log.info(
+        `Recieved non webdriver request with url ${req.path}. So not proxying it to downstream.`,
+      );
       return next();
     }
 
