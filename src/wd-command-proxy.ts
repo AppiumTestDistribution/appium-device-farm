@@ -90,7 +90,7 @@ async function handler(req: Request, res: Response, next: NextFunction) {
   }
 
   await updateCmdExecutedTime(sessionId);
-  
+
   if (remoteProxyMap.has(sessionId)) {
     // update
     if (proxyServer) {

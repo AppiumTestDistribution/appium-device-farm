@@ -112,7 +112,11 @@ describe('E2E Hub and Node', () => {
     // one of the devices should be an android device from the node
     const androidDevices = res.data.filter((device: any) => device.platform === 'android');
     expect(androidDevices.length).to.be.greaterThan(0);
-    const nodeAndroidDevices = androidDevices.filter((device: any) => device.host.includes(NODE_APPIUM_PORT.toString()) && device.host.includes(node_config.bindHostOrIp));
+    const nodeAndroidDevices = androidDevices.filter(
+      (device: any) =>
+        device.host.includes(NODE_APPIUM_PORT.toString()) &&
+        device.host.includes(node_config.bindHostOrIp),
+    );
     expect(nodeAndroidDevices.length).to.be.greaterThan(0);
   });
 

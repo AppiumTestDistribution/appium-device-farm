@@ -12,4 +12,5 @@ export interface IDevice {
   dashboard_link?: string;
   total_session_count?: number;
   totalUtilizationTimeMilliSec?: any;
+  session_id?: number;
 }

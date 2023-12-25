@@ -23,6 +23,7 @@ import {
   removeDevice,
   unblockDevice,
   blockDevice,
+  updatedAllocatedDevice,
 } from './data-service/device-service';
 import log from './logger';
 import DevicePlatform from './enums/Platform';
@@ -129,13 +130,30 @@ export async function allocateDeviceForSession(
     // log.info(`📱 Device found: ${JSON.stringify(device)}`);
     await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
+
+    // FIXME: convert this into a return value
     await updateCapabilityForDevice(capability, device);
+
+    // update newCommandTimeout for the device. 
+    // This is required so it won't get unblocked by prematurely.
+    let newCommandTimeout = firstMatch['appium:newCommandTimeout'];
+    if (!newCommandTimeout) {
+      newCommandTimeout = pluginArgs.newCommandTimeoutSec
+    }
+    updatedAllocatedDevice(device, { newCommandTimeout })
+
     return device;
   } else {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
 }
 
+/**
+ * Adjust the capability for the device
+ * @param capability 
+ * @param device 
+ * @returns 
+ */
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {

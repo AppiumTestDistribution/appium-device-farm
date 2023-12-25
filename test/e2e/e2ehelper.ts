@@ -82,28 +82,34 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
 }
 
 export function ensureHubConfig(
-  platform: 'android' | 'ios' | 'both' = 'android', 
-  iosDeviceType: 'real' | 'simulated' | 'both' = 'both', 
-  androidDeviceType: 'real' | 'simulated' | 'both' = 'both') 
-{
+  platform: 'android' | 'ios' | 'both' = 'android',
+  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  moreConfig: Partial<IPluginArgs> = {},
+) {
   return ensureConfig('hub-config.json', {
     server: {
       port: HUB_APPIUM_PORT,
       plugin: {
-        'device-farm': Object.assign(node_config, {
-          platform,
-          androidDeviceType,
-          iosDeviceType,
-          }),
+        'device-farm': Object.assign(
+          node_config,
+          {
+            platform,
+            androidDeviceType,
+            iosDeviceType,
+          },
+          moreConfig,
+        ),
       },
     },
   });
 }
 
 export function ensureNodeConfig(
-  platform: 'android' | 'ios' | 'both' = 'android', 
-  iosDeviceType: 'real' | 'simulated' | 'both' = 'both', 
+  platform: 'android' | 'ios' | 'both' = 'android',
+  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
   androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  moreConfig: Partial<IPluginArgs> = {},
 ) {
   return ensureConfig('node-config.json', {
     server: {
@@ -113,12 +119,11 @@ export function ensureNodeConfig(
           platform,
           androidDeviceType,
           iosDeviceType,
-          }),
+        }),
       },
     },
   });
 }
-
 
 function ensureConfig(filename: string, config: any) {
   const config_file = ensureTempDir() + '/' + filename;
