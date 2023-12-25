@@ -245,6 +245,7 @@ export async function updateCmdExecutedTime(sessionId: string) {
     .chain()
     .find({ session_id: sessionId })
     .update(function (device: IDevice) {
+      log.debug(`Updating lastCmdExecutedAt for device ${device.udid} in session ${sessionId}`);
       device.lastCmdExecutedAt = new Date().getTime();
     });
 }

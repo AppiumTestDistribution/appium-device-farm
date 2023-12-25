@@ -44,7 +44,7 @@ let nodeReady = false;
 describe('E2E Hub and Node', () => {
   console.log('Before all');
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig('android', 'real');
+  const hub_config_file = ensureHubConfig('android', 'real', 'simulated');
 
   // dump node config into a file
   const node_config_file = ensureNodeConfig();
@@ -112,6 +112,8 @@ describe('E2E Hub and Node', () => {
     // one of the devices should be an android device from the node
     const androidDevices = res.data.filter((device: any) => device.platform === 'android');
     expect(androidDevices.length).to.be.greaterThan(0);
+    const nodeAndroidDevices = androidDevices.filter((device: any) => device.host.includes(NODE_APPIUM_PORT.toString()) && device.host.includes(node_config.bindHostOrIp));
+    expect(nodeAndroidDevices.length).to.be.greaterThan(0);
   });
 
   it('Vertical swipe test', async () => {
