@@ -198,9 +198,9 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
       }
     });
 
-  if (filterOptions.deviceType === 'simulator') {
-    filter.state = 'Booted';
-  }
+  // if (filterOptions.deviceType === 'simulator') {
+  //   filter.state = 'Booted'; // Needs a fix
+  // }
 
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
