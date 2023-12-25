@@ -88,9 +88,11 @@ async function handler(req: Request, res: Response, next: NextFunction) {
   if (!sessionId) {
     return next();
   }
+
+  await updateCmdExecutedTime(sessionId);
+  
   if (remoteProxyMap.has(sessionId)) {
     // update
-    await updateCmdExecutedTime(sessionId);
     if (proxyServer) {
       const response = await axios({
         method: req.method,
