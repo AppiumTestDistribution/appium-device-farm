@@ -10,3 +10,5 @@ site
 appium-e2e-test
 temp-appium
 .env
+src/public/static/css/
+src/public/static/js/

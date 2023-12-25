@@ -159,6 +159,48 @@ describe('E2E Forward Request', () => {
 
     // device should have host as node_config.bindHostOrIp
     expect(busyDevice[0]).to.have.property('host').that.includes(node_config.bindHostOrIp);
+    expect(busyDevice[0]).to.have.property('host').that.not.includes(hub_config.bindHostOrIp);
+  });
+
+  it('update lastCmdExecutedAt when forwarding request', async () => {
+    await waitForHubAndNode();
+    if (hub_config.bindHostOrIp == node_config.bindHostOrIp) {
+      it.skip('node and hub should not be using the same host');
+    }
+
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    const allDevices = (
+      await axios.get(
+        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
+      )
+    ).data;
+
+    const busyDevice = allDevices.filter((device: any) => device.busy);
+    const lastCmdExecutedAt = busyDevice[0].lastCmdExecutedAt;
+
+    // lastCmdExecutedAt should not be empty
+    expect(lastCmdExecutedAt).to.not.be.undefined;
+
+    // run a command
+    await driver.getPageSource();
+
+    // check lastCmdExecutedAt
+    const newAllDevices = (
+      await axios.get(
+        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
+      )
+    ).data;
+    const newBusyDevice = newAllDevices.filter((device: any) => device.udid === busyDevice[0].udid && device.host === busyDevice[0].host);
+    const newLastCmdExecutedAt = newBusyDevice[0].lastCmdExecutedAt;
+
+    // lastCmdExecutedAt should not be empty
+    expect(newLastCmdExecutedAt).to.not.be.undefined;
+
+    // lastCmdExecutedAt should be greater than the previous one
+    expect(newLastCmdExecutedAt).to.be.greaterThan(lastCmdExecutedAt);
+
+    // print out the device
+    console.log(`Busy device: ${JSON.stringify(newBusyDevice)}`);
   });
 
   afterEach(async function () {
