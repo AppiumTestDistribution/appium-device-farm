@@ -19,7 +19,9 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-  const addedDevices = devices.map(async function (device) {
+  const addedDevices = devices.map(async function (
+    device: IDevice & { $loki?: number; meta?: object },
+  ) {
     // make sure all devices have host
     if (device.host === undefined && host !== undefined) {
       device.host = host;
@@ -39,9 +41,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       .find({ udid: device.udid, host: device.host })
       .data();
     if (isDeviceAlreadyPresent.length === 0) {
-      // @ts-ignore
       delete device['$loki'];
-      // @ts-ignore
       delete device['meta'];
       try {
         (await ADTDatabase.DeviceModel).insert({
@@ -121,6 +121,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'platformVersion':
           log.debug(`platformVersion: ${filterOptions.platformVersion}`);
+          // eslint-disable-next-line no-case-declarations
           const coercedPlatformVersion = semver.coerce(filterOptions.platformVersion);
 
           results = results.where(function (obj: IDevice) {
@@ -191,14 +192,15 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         default:
           // do not remove this line as it will help us to know if we have missed any filter options
+          // eslint-disable-next-line no-case-declarations
           const exhaustiveCheck: never = key;
           break;
       }
     });
 
-  if (filterOptions.deviceType === 'simulator') {
-    filter.state = 'Booted';
-  }
+  // if (filterOptions.deviceType === 'simulator') {
+  //   filter.state = 'Booted'; // Needs a fix
+  // }
 
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function

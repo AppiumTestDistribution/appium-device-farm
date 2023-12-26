@@ -41,20 +41,34 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { nodeUrl, spinWith, stripAppiumPrefixes, isDeviceFarmRunning, isCloud } from './helpers';
-import { addProxyHandler, registerProxyMiddlware } from './wd-command-proxy';
+import {
+  nodeUrl,
+  spinWith,
+  stripAppiumPrefixes,
+  isDeviceFarmRunning,
+  hasCloudArgument,
+} from './helpers';
+import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { addCLIArgs } from './data-service/pluginArgs';
 import Cloud from './enums/Cloud';
-import ip from 'ip';
-import _ from 'lodash';
 import { ADB } from 'appium-adb';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { PluginConfig, ServerArgs } from '@appium/types';
+import { SESSION_MANAGER } from './sessions/SessionManager';
+import { LocalSession } from './sessions/LocalSession';
+import { CloudSession } from './sessions/CloudSession';
+import { RemoteSession } from './sessions/RemoteSession';
+import { ISession } from './interfaces/ISession';
+import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
+import { getDeviceFarmCapabilities } from './CapabilityManager';
+import ip from 'ip';
+import _ from 'lodash';
+import SessionType from './enums/SessionType';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -65,8 +79,11 @@ let hasEmulators: any;
 let proxy: any;
 
 class DevicePlugin extends BasePlugin {
-  static nodeBasePath: string = '';
+  static nodeBasePath = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
+  public static NODE_ID: string;
+  public static IS_HUB = false;
+
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
     // here, CLI Args are already pluginArgs. Different case for updateServer
@@ -117,6 +134,8 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
+    DevicePlugin.NODE_ID = uuidv4();
+    log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
     // I'm transferring the CLI Args to pluginArgs here.
     DevicePlugin.nodeBasePath = cliArgs.basePath;
@@ -139,7 +158,7 @@ class DevicePlugin extends BasePlugin {
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
     expressApp.use('/device-farm', router);
-    registerProxyMiddlware(expressApp);
+    registerProxyMiddlware(expressApp, cliArgs);
 
     if (!platform)
       throw new Error(
@@ -160,7 +179,13 @@ class DevicePlugin extends BasePlugin {
       pluginArgs.skipChromeDownload === false ? await ChromeDriverManager.getInstance() : undefined;
     iosDeviceType = DevicePlugin.setIncludeSimulatorState(pluginArgs, iosDeviceType);
     const deviceTypes = { androidDeviceType, iosDeviceType };
-    const deviceManager = new DeviceFarmManager(platform, deviceTypes, cliArgs.port, pluginArgs);
+    const deviceManager = new DeviceFarmManager(
+      platform,
+      deviceTypes,
+      cliArgs.port,
+      pluginArgs,
+      DevicePlugin.NODE_ID,
+    );
     Container.set(DeviceFarmManager, deviceManager);
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
@@ -168,7 +193,7 @@ class DevicePlugin extends BasePlugin {
     await initializeStorage();
 
     log.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm`,
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
     );
 
     const hubArgument = pluginArgs.hub;
@@ -182,6 +207,7 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.sendNodeDevicesToHubIntervalMs,
       );
     } else {
+      DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
@@ -215,7 +241,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
-    if (isCloud(pluginArgs)) {
+    if (hasCloudArgument(pluginArgs)) {
       deviceTypes = 'real';
       log.info('ℹ️ Skipping Simulators as per the configuration ℹ️');
     }
@@ -280,20 +306,17 @@ class DevicePlugin extends BasePlugin {
     );
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
+    const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
 
     log.debug(
       `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
     );
     // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
-    if (
-      this.pluginArgs.hub == undefined &&
-      device.host !== undefined &&
-      !device.host.includes(this.pluginArgs.bindHostOrIp)
-    ) {
+    if (isRemoteOrCloudSession) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
     } else {
-      log.debug(`📱 Creating session on the same node`);
+      log.debug('📱 Creating session on the same node');
       session = await next();
     }
 
@@ -304,14 +327,19 @@ class DevicePlugin extends BasePlugin {
     await removePendingSession(pendingSessionId);
 
     // This is coming from the forwarded session
-    if (session instanceof Error || session.hasOwnProperty('error')) {
+    if (
+      session instanceof Error ||
+      session.hasOwnProperty('error') ||
+      (session as W3CNewSessionResponseError).error !== undefined
+    ) {
       await unblockDevice(device.udid, device.host);
       log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
       this.throwProperError(session, device.host);
-    } else if ((session as W3CNewSessionResponseError).error !== undefined) {
     } else {
-      // @ts-ignore
-      const sessionId = session.value[0];
+      const sessionId = (session as CreateSessionResponseInternal).value[0];
+      const sessionResponse = (session as CreateSessionResponseInternal).value[1];
+      const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
+
       log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
       await updatedAllocatedDevice(device, {
         busy: true,
@@ -319,9 +347,42 @@ class DevicePlugin extends BasePlugin {
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
       });
-      if (device.host !== undefined && !device.host.includes(this.pluginArgs.bindHostOrIp)) {
+      if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
+
+      let sessionInstance: ISession;
+      const nodeWebdriverUrl = nodeUrl(device, DevicePlugin.nodeBasePath);
+      if (device.nodeId === DevicePlugin.NODE_ID) {
+        sessionInstance = new LocalSession(sessionId, driver, device, sessionResponse);
+      } else if (device.hasOwnProperty('cloud')) {
+        sessionInstance = new CloudSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
+      } else {
+        sessionInstance = new RemoteSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
+      }
+
+      const isDashboardEnabled = !!this.pluginArgs.enableDashboard;
+      const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
+
+      if (isDashboardEnabled && shouldSaveLogs) {
+        log.info(
+          `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
+        );
+        SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
+
+        if (DevicePlugin.IS_HUB) {
+          await DASHBORD_EVENT_MANAGER.onSessionStarted(
+            deviceFarmCapabilities,
+            sessionInstance,
+            device,
+          );
+        }
+      } else {
+        log.info(
+          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. Is DashboardEnabled: ${isDashboardEnabled}`,
+        );
+      }
+
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     }
     return session;
@@ -350,7 +411,7 @@ class DevicePlugin extends BasePlugin {
     device: IDevice,
     caps: ISessionCapability,
   ): Promise<CreateSessionResponseInternal | Error> {
-    const remoteUrl = nodeUrl(device);
+    const remoteUrl = `${nodeUrl(device, DevicePlugin.nodeBasePath)}/session`;
     let capabilitiesToCreateSession = { capabilities: caps };
 
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
@@ -358,8 +419,6 @@ class DevicePlugin extends BasePlugin {
         desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
       });
     }
-
-    let createdSession: W3CNewSessionResponse | Error;
 
     log.info(
       `Creating session with desiredCapabilities: "${JSON.stringify(capabilitiesToCreateSession)}"`,
@@ -383,7 +442,7 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.info(`With axios config: "${JSON.stringify(config)}"`);
-    createdSession = await this.invokeSessionRequest(config);
+    const createdSession: W3CNewSessionResponse | Error = await this.invokeSessionRequest(config);
 
     if (createdSession instanceof Error) {
       return createdSession;
@@ -396,8 +455,8 @@ class DevicePlugin extends BasePlugin {
   }
 
   async invokeSessionRequest(config: any): Promise<W3CNewSessionResponse | Error> {
-    let sessionDetails: W3CNewSessionResponse;
-    let errorMessage: string;
+    let sessionDetails: W3CNewSessionResponse | null = null;
+    let errorMessage: string | null = null;
     try {
       const response = await axios(config);
       log.debug('remote node response', JSON.stringify(response.data));
@@ -419,15 +478,16 @@ class DevicePlugin extends BasePlugin {
       }
     }
 
-    // @ts-ignore
-    if (errorMessage) {
+    if (!_.isNil(errorMessage)) {
       log.error(`Error while creating session: ${errorMessage}`);
       return new Error(errorMessage);
     } else {
-      // @ts-ignore
-      log.debug(`📱 Session received with details: ${JSON.stringify(sessionDetails)}`);
-      // @ts-ignore
-      return sessionDetails;
+      log.debug(
+        `📱 Session received with details: ${JSON.stringify(
+          !sessionDetails ? {} : sessionDetails,
+        )}`,
+      );
+      return sessionDetails as W3CNewSessionResponse;
     }
   }
 

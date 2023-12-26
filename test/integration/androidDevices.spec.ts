@@ -14,6 +14,7 @@ import waitUntil from 'async-wait-until';
 import { IDevice } from '../../src/interfaces/IDevice';
 import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
 import chaiAsPromised from 'chai-as-promised';
+import { v4 as uuidv4 } from 'uuid';
 
 chai.use(chaiAsPromised);
 
@@ -22,12 +23,15 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   skipChromeDownload: true,
 });
 
+const NODE_ID = uuidv4();
+
 describe('Android Test', () => {
   const deviceManager = new DeviceFarmManager(
     'android',
     { androidDeviceType: 'both', iosDeviceType: 'both' },
     4723,
     Object.assign(pluginArgs, {}),
+    NODE_ID,
   );
 
   before(async () => {
@@ -72,6 +76,7 @@ describe('Android Test', () => {
       { androidDeviceType: 'both', iosDeviceType: 'both' },
       4723,
       Object.assign({}, DefaultPluginArgs, pluginArgs),
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);
@@ -106,6 +111,7 @@ describe('Android Test', () => {
       { androidDeviceType: 'both', iosDeviceType: 'both' },
       4723,
       pluginArgs,
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;

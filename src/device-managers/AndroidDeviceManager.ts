@@ -82,7 +82,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   private async fetchAndroidDevices(existingDeviceDetails: IDevice[], pluginArgs: IPluginArgs) {
     await this.requireSdkRoot();
-    let availableDevices: IDevice[] = [];
+    const availableDevices: IDevice[] = [];
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
     //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
 

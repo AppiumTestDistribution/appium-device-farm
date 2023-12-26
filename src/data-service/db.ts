@@ -64,8 +64,6 @@ export class ADTDatabase {
     const db = await new Promise<loki>((resolve, reject) => {
       const db = new loki(ADTDatabase.dbname(), {
         autoload: true,
-        //autosave: true,
-        //autosaveInterval: 4000,
       });
 
       db.on('autoload', () => {

@@ -12,11 +12,13 @@ import { allocateDeviceForSession } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { IDevice } from '../../src/interfaces/IDevice';
 import { remove } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 chai.should();
 chai.use(sinonChai);
-var expect = chai.expect;
-var sandbox = sinon.createSandbox();
+const expect = chai.expect;
+const sandbox = sinon.createSandbox();
+const NODE_ID = uuidv4();
 
 describe('Device Utils', () => {
   const hub1Device = {
@@ -104,6 +106,7 @@ describe('Device Utils', () => {
       { androidDeviceType: 'both', iosDeviceType: 'both' },
       4723,
       Object.assign(pluginArgs, { maxSessions: 3 }),
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);
@@ -116,7 +119,7 @@ describe('Device Utils', () => {
       },
       firstMatch: [{}],
     };
-    let allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+    const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
       capabilities,
       1000,
       1000,
@@ -127,7 +130,7 @@ describe('Device Utils', () => {
       return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
     }
 
-    let foundDevice = (
+    const foundDevice = (
       await getFilteredDevice(
         allocatedDeviceForFirstSession.udid,
         allocatedDeviceForFirstSession.host,
@@ -145,7 +148,7 @@ describe('Device Utils', () => {
     filterDeviceWithSameUDID.filter((device) => device.busy).length.should.be.equal(1);
     filterDeviceWithSameUDID.filter((device) => !device.busy).length.should.be.equal(1);
 
-    let allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(
+    const allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(
       capabilities,
       1000,
       1000,
@@ -154,7 +157,7 @@ describe('Device Utils', () => {
     // allocatedDeviceForSecondSession should not be the same as allocatedDeviceForFirstSession
     expect(allocatedDeviceForFirstSession).to.not.be.equal(allocatedDeviceForSecondSession);
 
-    let foundSecondDevice = (await ADTDatabase.DeviceModel)
+    const foundSecondDevice = (await ADTDatabase.DeviceModel)
       .chain()
       .find({
         udid: allocatedDeviceForSecondSession.udid,
@@ -314,6 +317,7 @@ describe('Device Utils', () => {
       { androidDeviceType: 'both', iosDeviceType: 'both' },
       4723,
       Object.assign(pluginArgs, { maxSessions: 3 }),
+      NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
     addNewDevice(devices);

@@ -71,19 +71,19 @@ export async function getFreePort() {
   return await getPort();
 }
 
-export function nodeUrl(device: IDevice): string {
+export function nodeUrl(device: IDevice, basePath = ''): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
-      return `${host}/wd/hub/session`;
+      return `${host}/wd/hub`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
-      }/wd/hub/session`;
+      }/wd/hub`;
     }
   }
   // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
-  return `${host}/wd/hub/session`;
+  return `${host}${basePath || ''}`;
 }
 
 export async function isPortBusy(port: number) {
@@ -101,7 +101,7 @@ export function hasHubArgument(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].hub');
 }
 
-export function isCloud(cliArgs: any) {
+export function hasCloudArgument(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].cloud');
 }
 // Standard, non-prefixed capabilities (see https://www.w3.org/TR/webdriver/#dfn-table-of-standard-capabilities)
@@ -138,14 +138,14 @@ export function stripAppiumPrefixes(caps: any) {
     caps,
     nonPrefixedCaps,
   );
-  const badPrefixedCaps = [];
+  const badPrefixedCaps: string[] = [];
 
   // Strip out the 'appium:' prefix
   for (const prefixedCap of prefixedCaps) {
     const strippedCapName =
       /** @type {import('type-fest').StringKeyOf<import('@appium/types').Capabilities<C>>} */ prefixedCap.substring(
         APPIUM_VENDOR_PREFIX.length,
-      );
+      ) as string;
 
     // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
     if (isStandardCap(strippedCapName)) {
@@ -209,5 +209,13 @@ export async function isAppiumRunningAt(url: string): Promise<boolean> {
   } catch (error: any) {
     log.info(`Appium is not running at ${url}. Error: ${error}`);
     return false;
+  }
+}
+
+export function safeParseJson(jsonString: string) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (err) {
+    return jsonString;
   }
 }
