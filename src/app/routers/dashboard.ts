@@ -29,14 +29,7 @@ async function getSessions(request: Request, response: Response) {
       build_id: buildId as any,
     },
   });
-  return response.status(200).json(
-    sessions.map((s) => {
-      return {
-        ...s,
-        live: `http://127.0.0.1:31337/device-farm/api/session/${s.id}/live_video`,
-      };
-    }),
-  );
+  return response.status(200).json(sessions);
 }
 
 async function getBuilds(request: Request, response: Response) {
