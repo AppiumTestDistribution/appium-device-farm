@@ -34,7 +34,7 @@ type E2ESetupOpts = {
  * @param {E2ESetupOpts} opts
  * @returns {void}
  */
-export function pluginE2EHarness(opts: E2ESetupOpts) {
+export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean }) {
   let {
     appiumHome,
     before,
@@ -50,6 +50,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
     pluginName,
     port,
     host,
+    enableGoIos,
   } = opts;
 
   let server: AppiumServer;
@@ -97,7 +98,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts) {
       }
 
       // find go_ios from npm
-      //env.GO_IOS = await goIosPath();
+      if (!!enableGoIos) env.GO_IOS = await goIosPath();
 
       return env;
     };

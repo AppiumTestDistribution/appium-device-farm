@@ -81,39 +81,52 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
   return newHome;
 }
 
-export function ensureHubConfig(platform = 'android', deviceType = 'both') {
-  const hub_config_file = ensureTempDir() + '/hub-config.json';
-  const config = {
+export function ensureHubConfig(
+  platform: 'android' | 'ios' | 'both' = 'android',
+  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  moreConfig: Partial<IPluginArgs> = {},
+) {
+  return ensureConfig('hub-config.json', {
     server: {
       port: HUB_APPIUM_PORT,
       plugin: {
-        'device-farm': Object.assign(hub_config, {
-          platform,
-          iosDeviceType: deviceType,
-          androidDeviceType: deviceType,
-        }),
+        'device-farm': Object.assign(
+          node_config,
+          {
+            platform,
+            androidDeviceType,
+            iosDeviceType,
+          },
+          moreConfig,
+        ),
       },
     },
-  };
-  fs.writeFileSync(hub_config_file, JSON.stringify(config));
-  return hub_config_file;
+  });
 }
 
 export function ensureNodeConfig(
-  androidDeviceType: string = 'both',
-  iosDeviceType: string = 'simulated',
+  platform: 'android' | 'ios' | 'both' = 'android',
+  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
+  moreConfig: Partial<IPluginArgs> = {},
 ) {
-  const node_config_file = ensureTempDir() + '/node-config.json';
-  fs.writeFileSync(
-    node_config_file,
-    JSON.stringify({
-      server: {
-        port: NODE_APPIUM_PORT,
-        plugin: {
-          'device-farm': Object.assign(node_config, { androidDeviceType, iosDeviceType }),
-        },
+  return ensureConfig('node-config.json', {
+    server: {
+      port: NODE_APPIUM_PORT,
+      plugin: {
+        'device-farm': Object.assign(node_config, {
+          platform,
+          androidDeviceType,
+          iosDeviceType,
+        }),
       },
-    }),
-  );
-  return node_config_file;
+    },
+  });
+}
+
+function ensureConfig(filename: string, config: any) {
+  const config_file = ensureTempDir() + '/' + filename;
+  fs.writeFileSync(config_file, JSON.stringify(config));
+  return config_file;
 }

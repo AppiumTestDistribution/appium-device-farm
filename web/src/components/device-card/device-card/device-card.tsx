@@ -60,6 +60,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       totalUtilizationTimeMilliSec,
       userBlocked,
       busy,
+      session_id,
     } = this.props.device;
 
     const deviceState = this.getDeviceState();
@@ -116,6 +117,17 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
                 title={prettyMilliseconds(totalUtilizationTimeMilliSec)}
               >
                 {prettyMilliseconds(totalUtilizationTimeMilliSec)}
+              </div>
+            </div>
+          )}
+          {session_id != null && (
+            <div className="device-info-card-container__body_row">
+              <div className="device-info-card-container__body_row_label">Session ID:</div>
+              <div
+                className="device-info-card-container__body_row_value"
+                title={session_id.toString()}
+              >
+                {session_id}
               </div>
             </div>
           )}
