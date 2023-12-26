@@ -88,8 +88,8 @@ apiRouter.get('/queues', async (req, res) => {
   res.json((await ADTDatabase.PendingSessionsModel).chain().find().data());
 });
 
-apiRouter.get('/cliArgs', (req, res) => {
-  res.json(getCLIArgs());
+apiRouter.get('/cliArgs', async (req, res) => {
+  res.json(await getCLIArgs());
 });
 
 apiRouter.get('/devices/android', async (req, res) => {
