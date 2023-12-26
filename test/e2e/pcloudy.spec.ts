@@ -63,7 +63,7 @@ describe('PCloudy Devices', () => {
   });
 
   it('Should be able to run the plugin with PCloudy config', async () => {
-    const status = (await axios.get(`${hub_url}/device-farm/api/devices`)).status;
+    const status = (await axios.get(`${hub_url}/device-farm/api/device`)).status;
     expect(status).to.be.eql(200);
   });
 

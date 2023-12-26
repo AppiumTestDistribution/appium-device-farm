@@ -106,8 +106,7 @@ describe('E2E Hub and Node', () => {
   it('should have devices on the hub', async () => {
     await waitForHubAndNode();
     // check device-farm endpoint using axios
-    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/devices`);
-    // const res = await axios.get(`http://${APPIUM_HOST}:${NODE_APPIUM_PORT}/device-farm/api/devices`);
+    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
     expect(res.status).to.equal(200);
     expect(res.data.length).to.be.greaterThan(0);
     // one of the devices should be an android device from the node
