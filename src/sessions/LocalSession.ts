@@ -1,5 +1,5 @@
 import SessionType from '../enums/SessionType';
-import { IDevice } from '../interfaces/IDevice';
+import { DeviceFarmSessionOptions } from './DeviceFarmSession';
 import { RemoteSession } from './RemoteSession';
 
 function constructBasePath(path: string) {
@@ -15,37 +15,31 @@ function constructBasePath(path: string) {
   return `${path}/wd-internal`;
 }
 
+export type LocalSessionOptions = DeviceFarmSessionOptions & {
+  driver: any;
+};
+
 export class LocalSession extends RemoteSession {
-  constructor(
-    sessionId: string,
-    private driver: any,
-    device: IDevice,
-    sessionResponse: Record<string, any>,
-  ) {
-    const { address, port, basePath } = driver.opts || driver;
-    super(
-      sessionId,
-      `http://${address}:${port}${constructBasePath(basePath)}`,
-      device,
-      sessionResponse,
-    );
+  protected driver: any;
+
+  constructor(options: LocalSessionOptions) {
+    const { address, port, basePath } = options.driver.opts || options.driver;
+    super({
+      ...options,
+      baseUrl: `http://${address}:${port}${constructBasePath(basePath)}`,
+    });
+    this.driver = options.driver;
   }
 
   getType(): SessionType {
     return SessionType.LOCAL;
   }
 
-  getId(): string {
-    return this.sessionId;
-  }
-
   getLiveVideoUrl() {
     const { address } = this.driver.opts || this.driver;
-    if (
-      this.sessionResponse['mjpegServerPort'] &&
-      !isNaN(this.sessionResponse['mjpegServerPort'])
-    ) {
-      return `http://${address}:${this.sessionResponse['mjpegServerPort']}`;
+    const mjpegServerPort = this.getCapabilities()['mjpegServerPort'];
+    if (mjpegServerPort && !isNaN(mjpegServerPort)) {
+      return `http://${address}:${mjpegServerPort}`;
     } else {
       return null;
     }

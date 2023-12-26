@@ -2,15 +2,15 @@ import apiClient from './api-client';
 
 export default class DeviceFarmApiService {
   public static getDevices() {
-    return apiClient.makeGETRequest('/devices', {});
+    return apiClient.makeGETRequest('/device', {});
   }
 
   public static getPendingSessionsCount() {
-    return apiClient.makeGETRequest('/queues/length', {});
+    return apiClient.makeGETRequest('/queue/length', {});
   }
 
   public static getPendingSessions() {
-    return apiClient.makeGETRequest('/queues', {});
+    return apiClient.makeGETRequest('/queue', {});
   }
 
   public static blockDevice(udid: string, host: string) {

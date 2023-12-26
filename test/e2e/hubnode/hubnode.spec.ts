@@ -171,9 +171,9 @@ describe('E2E Hub and Node', () => {
       remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
     ).to.eventually.be.rejected;
 
-    // check device-farm endpoint using axios: /api/queues/length
+    // check device-farm endpoint using axios: /api/queue/length
     const res = await axios.get(
-      `http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queues/length`,
+      `http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queue/length`,
     );
     expect(res.status).to.equal(200);
     expect(res.data).to.equal(0);
