@@ -10,5 +10,5 @@ site
 appium-e2e-test
 temp-appium
 .env
-src/public/
+src/public/*
 docs/reference
