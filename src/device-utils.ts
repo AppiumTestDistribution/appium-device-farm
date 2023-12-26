@@ -134,13 +134,13 @@ export async function allocateDeviceForSession(
     // FIXME: convert this into a return value
     await updateCapabilityForDevice(capability, device);
 
-    // update newCommandTimeout for the device. 
+    // update newCommandTimeout for the device.
     // This is required so it won't get unblocked by prematurely.
     let newCommandTimeout = firstMatch['appium:newCommandTimeout'];
     if (!newCommandTimeout) {
-      newCommandTimeout = pluginArgs.newCommandTimeoutSec
+      newCommandTimeout = pluginArgs.newCommandTimeoutSec;
     }
-    updatedAllocatedDevice(device, { newCommandTimeout })
+    updatedAllocatedDevice(device, { newCommandTimeout });
 
     return device;
   } else {
@@ -150,9 +150,9 @@ export async function allocateDeviceForSession(
 
 /**
  * Adjust the capability for the device
- * @param capability 
- * @param device 
- * @returns 
+ * @param capability
+ * @param device
+ * @returns
  */
 export async function updateCapabilityForDevice(capability: any, device: IDevice) {
   if (!device.hasOwnProperty('cloud')) {

@@ -12,3 +12,4 @@ temp-appium
 .env
 src/public/static/css/
 src/public/static/js/
+docs/reference

@@ -43,7 +43,9 @@ const NEW_COMMAND_TIMEOUT_SECS = 10;
 describe('E2E Forward Request', () => {
   console.log('Before all');
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig('android', 'real', 'real', {newCommandTimeoutSec: NEW_COMMAND_TIMEOUT_SECS});
+  const hub_config_file = ensureHubConfig('android', 'real', 'real', {
+    newCommandTimeoutSec: NEW_COMMAND_TIMEOUT_SECS,
+  });
 
   // dump node config into a file
   const node_config_file = ensureNodeConfig();
@@ -237,7 +239,7 @@ describe('E2E Forward Request', () => {
         `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
       )
     ).data;
-    
+
     const newBusyDevice = newAllDevices.filter(
       (device: any) => device.udid === busyDevice[0].udid && device.host === busyDevice[0].host,
     );
