@@ -85,6 +85,8 @@ function handler(cliArgs: Record<string, any>) {
       return next();
     }
 
+    await updateCmdExecutedTime(sessionId);
+
     req.headers['accept-encoding'] = 'deflate';
 
     const shouldInterceptRequest = isHub && !!SESSION_MANAGER.isValidSession(sessionId);
@@ -105,7 +107,6 @@ function handler(cliArgs: Record<string, any>) {
     }
 
     if (remoteProxyMap.has(sessionId)) {
-      await updateCmdExecutedTime(sessionId);
       if (proxyServer) {
         const response = await axios({
           method: req.method,
