@@ -1,0 +1,21 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "device-farm": {
+        "platform": "android",
+        "cloud": {
+          "cloudName": "headspin",
+          "url": "https://appium-canary.headspin.io/v0/api-token/wd/hub",
+          "devices": [
+            {
+              "platformVersion": "12",
+              "deviceName": "android",
+              "platform": "android"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
