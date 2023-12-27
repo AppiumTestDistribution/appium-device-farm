@@ -14,6 +14,6 @@ export interface Config {
 export const config = {
   cacheDir: basePath,
   databasePath: `${basePath}/device-farm.db`,
-  sessionAssetsPath: path.join(basePath, 'session'),
+  sessionAssetsPath: path.join(basePath, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
 };

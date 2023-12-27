@@ -12,7 +12,7 @@ export function prepareDirectory(sessionId: string) {
   });
 }
 
-export function saveScreenShot(sessionId: string, screenshotBase64String: string) {
+export function saveScreenShot(sessionId: string, screenshotBase64String: string): string {
   const assetPath = path.join(sessionId, SCREENSHOT_DIRECTORY, `${uuidv4()}.jpg`);
   fs.writeFileSync(
     path.join(config.sessionAssetsPath, assetPath),

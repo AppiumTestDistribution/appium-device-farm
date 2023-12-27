@@ -52,6 +52,7 @@ model SessionLog {
   body         String?
   response     String
   screenshot   String?
+  is_success   Boolean?
   // Timestamps
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

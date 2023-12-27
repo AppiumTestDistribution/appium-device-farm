@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { SESSION_MANAGER } from '../sessions/SessionManager';
-import { ISession } from '../interfaces/ISession';
 import { IDevice } from '../interfaces/IDevice';
 import { prisma } from '../prisma';
 import log from '../logger';
@@ -15,10 +14,17 @@ import { safeParseJson } from '../helpers';
 import { prepareDirectory, saveScreenShot, saveVideoRecording } from './asset-manager';
 import { dashboardCommands } from './commands';
 import { SessionStatus } from '../types/SessionStatus';
-export class DashboardEventManager {
-  private SCREENSHOT_FOR_COMMANDS = ['click', 'setUrl', 'setValue', 'performActions'];
+import { SessionLog } from '@prisma/client';
+import { DeviceFarmSession } from '../sessions/DeviceFarmSession';
 
-  async onSessionStarted(capabilities: Record<string, any>, session: ISession, device: IDevice) {
+export class DashboardEventManager {
+  // private SCREENSHOT_FOR_COMMANDS = ['click', 'setUrl', 'setValue', 'performActions'];
+
+  async onSessionStarted(
+    capabilities: Record<string, any>,
+    session: DeviceFarmSession,
+    device: IDevice,
+  ) {
     const createOptions = {
       id: session.getId(),
     } as Record<string, any>;
@@ -59,7 +65,7 @@ export class DashboardEventManager {
   }
 
   async onSessionStoped(sessionId: string) {
-    const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
+    const session: DeviceFarmSession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {
       const sessionEntry = await getSessionById(sessionId);
       const updateData: any = {
@@ -79,7 +85,7 @@ export class DashboardEventManager {
     request: Request,
     response: Response,
   ): Promise<boolean> {
-    const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
+    const session: DeviceFarmSession | undefined = SESSION_MANAGER.getSession(sessionId);
 
     if (!session) {
       return false;
@@ -114,22 +120,57 @@ export class DashboardEventManager {
     response: Response,
     responseBody: string,
   ) {
-    const session: ISession | undefined = SESSION_MANAGER.getSession(sessionId);
+    const session: DeviceFarmSession | undefined = SESSION_MANAGER.getSession(sessionId);
     if (session) {
-      const parsedBody: any = safeParseJson(responseBody) as any;
+      const parsedResponse: any = safeParseJson(responseBody) as any;
       const isSuccessResponse =
-        _.isObjectLike(parsedBody) &&
-        (parsedBody.value === null || (parsedBody.value && !parsedBody.value.error));
-      //console.log(new Date(), ` ↪ [${response.statusCode}]: ${responseBody}`);
-      let screenShotPath;
-      if (!isSuccessResponse || this.SCREENSHOT_FOR_COMMANDS.indexOf(commandName || '') >= 0) {
+        _.isObjectLike(parsedResponse) &&
+        (parsedResponse.value === null || (parsedResponse.value && !parsedResponse.value.error));
+
+      const logEntry: Partial<SessionLog> = {
+        session_id: session.getId(),
+        command_name: commandName || null,
+        body: JSON.stringify(request.body),
+        response: responseBody,
+        is_success: isSuccessResponse,
+        method: request.method,
+        title: this.getTitleFromCommandName(commandName),
+        subtitle: '',
+        screenshot: null,
+        url: request.originalUrl,
+      };
+
+      const screenShotCapability = session.getDeviceFarmOption(
+        DEVICE_FARM_CAPABILITIES.SCREENSHOT_ON_FAILURE,
+        false,
+      );
+      const shouldTakeScreenshot =
+        !_.isNil(screenShotCapability) && screenShotCapability.toString() === 'true';
+
+      if (
+        shouldTakeScreenshot &&
+        !isSuccessResponse
+        // && this.SCREENSHOT_FOR_COMMANDS.indexOf(commandName || '') >= 0
+      ) {
         const screenshot = await session.getScreenShot();
         if (screenshot) {
-          screenShotPath = saveScreenShot(session.getId(), screenshot);
+          logEntry['screenshot'] = saveScreenShot(session.getId(), screenshot);
         }
       }
-      // Save the logs to DB
+
+      await prisma.sessionLog.create({
+        data: logEntry as SessionLog,
+      });
     }
+  }
+
+  private getTitleFromCommandName(commandName: string | undefined) {
+    if (commandName) {
+      return commandName.replace(/([A-Z])/g, ' $1').replace(/^./, function (str: string) {
+        return str.toUpperCase();
+      });
+    }
+    return undefined;
   }
 }
 

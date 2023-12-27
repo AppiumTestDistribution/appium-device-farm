@@ -18,7 +18,7 @@ class ApiClient {
   }
 
   public formatUrl(url: string) {
-    return `/device-farm/api${url}`;
+    return `${process.env.REACT_APP_API_BASE_URL || 'device-farm'}/api${url}`;
   }
 
   private jsonResult(res: any) {
