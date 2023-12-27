@@ -1,8 +1,9 @@
-import { ISession } from '../interfaces/ISession';
-export class SessionManager {
-  private sessionMap: Map<string, ISession> = new Map();
+import { DeviceFarmSession } from './DeviceFarmSession';
 
-  addSession(sessionId: string, session: ISession) {
+export class SessionManager {
+  private sessionMap: Map<string, DeviceFarmSession> = new Map();
+
+  addSession(sessionId: string, session: DeviceFarmSession) {
     this.sessionMap.set(sessionId, session);
   }
 

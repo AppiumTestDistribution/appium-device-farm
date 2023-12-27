@@ -132,9 +132,7 @@ describe('E2E Forward Request', () => {
 
     // all devices
     const allDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
 
     // there should be at least one device
@@ -155,9 +153,7 @@ describe('E2E Forward Request', () => {
 
     // busy device should be on the node
     const newAllDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
     const busyDevice = newAllDevices.filter((device: any) => device.busy);
 
@@ -174,9 +170,7 @@ describe('E2E Forward Request', () => {
 
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
     const allDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
 
     const busyDevice = allDevices.filter((device: any) => device.busy);
@@ -190,9 +184,7 @@ describe('E2E Forward Request', () => {
 
     // check lastCmdExecutedAt
     const newAllDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
     const newBusyDevice = newAllDevices.filter(
       (device: any) => device.udid === busyDevice[0].udid && device.host === busyDevice[0].host,
@@ -217,9 +209,7 @@ describe('E2E Forward Request', () => {
 
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
     const allDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
 
     const busyDevice = allDevices.filter((device: any) => device.busy);
@@ -235,9 +225,7 @@ describe('E2E Forward Request', () => {
 
     // check device status
     const newAllDevices = (
-      await axios.get(
-        `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/devices`,
-      )
+      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
 
     const newBusyDevice = newAllDevices.filter(

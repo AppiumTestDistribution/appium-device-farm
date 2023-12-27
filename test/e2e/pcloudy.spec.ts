@@ -35,7 +35,7 @@ describe('PCloudy Devices', () => {
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
   it('Should be able to run the android with PCloudy config', async () => {
-    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`)).data;
+    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/device/android`)).data;
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
@@ -63,12 +63,12 @@ describe('PCloudy Devices', () => {
   });
 
   it('Should be able to run the plugin with PCloudy config', async () => {
-    const status = (await axios.get(`${hub_url}/device-farm/api/devices`)).status;
+    const status = (await axios.get(`${hub_url}/device-farm/api/device`)).status;
     expect(status).to.be.eql(200);
   });
 
   it('Should be able to get iOS devices from PCloudy config', async () => {
-    let iosDevices = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
+    const iosDevices = (await axios.get(`${hub_url}/device-farm/api/device/ios`)).data;
     //console.log(JSON.stringify(iosDevices));
     const cloudDevices = iosDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete cloudDevices[0].meta;
