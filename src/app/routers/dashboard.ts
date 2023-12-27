@@ -8,7 +8,11 @@ const MJPEG_PROXY_CACHE: Map<string, any> = new Map();
 //session gaurd
 async function isValidSession(request: Request, response: Response, next: NextFunction) {
   const sessionId = request.params.sessionId;
-  const session = SESSION_MANAGER.getSession(sessionId);
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId,
+    },
+  });
   if (!session) {
     return response.status(404).send({
       error: true,
