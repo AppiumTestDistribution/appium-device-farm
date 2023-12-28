@@ -248,7 +248,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   public async getConnectedDevices(pluginArgs: IPluginArgs) {
     const deviceList = new Map();
-    const { adbInstance: originalADB  } = await this.getAdb();
+    const { adbInstance: originalADB } = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
     const adbRemote = pluginArgs.adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
