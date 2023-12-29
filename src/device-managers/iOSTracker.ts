@@ -5,7 +5,7 @@ export class IosTracker {
 
   public static getInstance(): any {
     if (!IosTracker.instance) {
-      IosTracker.instance = new usbmux.createListener()
+      IosTracker.instance = new usbmux.createListener();
     }
 
     return IosTracker.instance;
