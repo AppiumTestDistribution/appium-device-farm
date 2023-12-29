@@ -171,9 +171,6 @@
   "appium": {
     "pluginName": "device-farm",
     "mainClass": "DevicePlugin",
-    "scripts": {
-      "install-go-ios": "./lib/src/scripts/install-go-ios.js"
-    },
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema",
       "additionalProperties": false,

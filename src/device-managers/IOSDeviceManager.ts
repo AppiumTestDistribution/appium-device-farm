@@ -12,7 +12,7 @@ import { getUtilizationTime } from '../device-utils';
 import fs from 'fs-extra';
 import Devices from './cloud/Devices';
 import NodeDevices from './NodeDevices';
-import { GoIosTracker } from './iOSTracker';
+import { IosTracker } from './iOSTracker';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 
@@ -159,7 +159,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
-    const goIosTracker = GoIosTracker.getInstance();
+    const goIosTracker = IosTracker.getInstance();
     goIosTracker.on('attached', async (udid: string) => {
       const deviceAttached = [await this.getDeviceInfo(udid, pluginArgs, this.hostPort)];
       if (pluginArgs.hub !== undefined) {
