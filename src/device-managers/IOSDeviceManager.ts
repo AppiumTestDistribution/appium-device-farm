@@ -160,28 +160,27 @@ export default class IOSDeviceManager implements IDeviceManager {
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
     const goIosTracker = GoIosTracker.getInstance();
-    await goIosTracker.start();
-    goIosTracker.on('device-connected', async (message) => {
-      const deviceAttached = [await this.getDeviceInfo(message.id, pluginArgs, this.hostPort)];
+    goIosTracker.on('attached', async (udid: string) => {
+      const deviceAttached = [await this.getDeviceInfo(udid, pluginArgs, this.hostPort)];
       if (pluginArgs.hub !== undefined) {
-        log.info(`Updating Hub with iOS device ${message.id}`);
+        log.info(`Updating Hub with iOS device ${udid}`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
         await nodeDevices.postDevicesToHub(deviceAttached, 'add');
       }
       // add device to local list
-      log.info(`iOS device with udid ${message.id} plugged! updating device list...`);
+      log.info(`iOS device with udid ${udid} plugged! updating device list...`);
       addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
     });
-    goIosTracker.on('device-removed', async (message) => {
-      const deviceRemoved: any = [{ udid: message.id, host: pluginArgs.bindHostOrIp }];
+    goIosTracker.on('detached', async (udid: string) => {
+      const deviceRemoved: any = [{ udid, host: pluginArgs.bindHostOrIp }];
       if (pluginArgs.hub !== undefined) {
-        log.info(`iOS device with udid ${message.id} unplugged! updating hub device list...`);
+        log.info(`iOS device with udid ${udid} unplugged! updating hub device list...`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
         await nodeDevices.postDevicesToHub(deviceRemoved, 'remove');
       }
 
       // remove device from local list
-      log.info(`iOS device with udid ${message.id} unplugged! updating device list...`);
+      log.info(`iOS device with udid ${udid} unplugged! updating device list...`);
       removeDevice(deviceRemoved);
     });
   }
