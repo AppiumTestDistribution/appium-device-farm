@@ -159,8 +159,8 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
-    const goIosTracker = IosTracker.getInstance();
-    goIosTracker.on('attached', async (udid: string) => {
+    const iosTracker = IosTracker.getInstance();
+    iosTracker.on('attached', async (udid: string) => {
       const deviceAttached = [await this.getDeviceInfo(udid, pluginArgs, this.hostPort)];
       if (pluginArgs.hub !== undefined) {
         log.info(`Updating Hub with iOS device ${udid}`);
@@ -171,7 +171,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       log.info(`iOS device with udid ${udid} plugged! updating device list...`);
       addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
     });
-    goIosTracker.on('detached', async (udid: string) => {
+    iosTracker.on('detached', async (udid: string) => {
       const deviceRemoved: any = [{ udid, host: pluginArgs.bindHostOrIp }];
       if (pluginArgs.hub !== undefined) {
         log.info(`iOS device with udid ${udid} unplugged! updating hub device list...`);
