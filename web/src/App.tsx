@@ -1,4 +1,3 @@
-import React from 'react';
 import './App.css';
 import DeviceExplorer from './components/device-explorer/device-explorer';
 import Header from './components/header/header';

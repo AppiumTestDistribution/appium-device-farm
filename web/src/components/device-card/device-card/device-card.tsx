@@ -1,8 +1,8 @@
 import React from 'react';
 import './device-card.css';
-import { ReactComponent as AndroidIcon } from '../../../assets/android-icon.svg';
-import { ReactComponent as AppleIcon } from '../../../assets/apple-icon.svg';
-import { ReactComponent as LinkIcon } from '../../../assets/link-icon.svg';
+import AndroidIcon from '../../../assets/android-icon.svg';
+import AppleIcon from '../../../assets/apple-icon.svg';
+import LinkIcon from '../../../assets/link-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
 import DeviceFarmApiService from '../../../api-service';
@@ -79,9 +79,9 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             {udid}
           </div>
           {['ios', 'tvos'].includes(platform) ? (
-            <AppleIcon className="device-info-card-container__device-icon" />
+            <img src={AppleIcon} className="device-info-card-container__device-icon" />
           ) : (
-            <AndroidIcon className="device-info-card-container__device-icon" />
+            <img src={AndroidIcon} className="device-info-card-container__device-icon" />
           )}
         </div>
         <div className="device-info-card-container__body">
@@ -139,7 +139,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
                 </div>
               </div>
               <div className="dashboard-link">
-                <LinkIcon className="link-icon" />
+                <img src={LinkIcon} className="link-icon" />
                 <a className="footer-deeplink" href={dashboard_link} target="_blank">
                   Appium Dashboard ({total_session_count})
                 </a>
