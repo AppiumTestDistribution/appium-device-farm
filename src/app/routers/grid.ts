@@ -16,7 +16,6 @@ import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 
-
 const SERVER_UP_TIME = new Date().toISOString();
 
 async function getDevices(request: Request, response: Response) {
@@ -136,7 +135,7 @@ async function getNodes(request: Request, response: Response<string[]>) {
 async function nodeAdbStatusOnOtherHost(
   currentHost: string,
   request: Request<{ host: string }>,
-  response: Response<{ udid: string; host: string; state: string, platform: string }[] | string>,
+  response: Response<{ udid: string; host: string; state: string; platform: string }[] | string>,
 ) {
   const { host } = request.params;
   // when host is this hub, return status from AndroidDeviceManager directly
@@ -156,9 +155,16 @@ async function nodeAdbStatusOnOtherHost(
     );
   } else {
     // find node url from database of devices
-    const devices = await (await ADTDatabase.DeviceModel).chain().find({ host }).data() as IDevice[];
+    const devices = (await (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ host })
+      .data()) as IDevice[];
     if (devices.length === 0) {
-      response.status(404).send(`Host ${host} does not have any devices listed in database. I don't know how to forward request to that host`);
+      response
+        .status(404)
+        .send(
+          `Host ${host} does not have any devices listed in database. I don't know how to forward request to that host`,
+        );
       return;
     }
     const device = devices[0];
@@ -179,7 +185,7 @@ async function nodeAdbStatusOnOtherHost(
 
 async function nodeAdbStatusOnThisHost(
   request: Request<void>,
-  response: Response<{ udid: string; host: string; state: string, platform: string }[]>,
+  response: Response<{ udid: string; host: string; state: string; platform: string }[]>,
 ) {
   const devices = await getDevicesFromDeviceManager();
   // return udid, host, state

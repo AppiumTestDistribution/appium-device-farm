@@ -7,7 +7,7 @@ import { fs } from '@appium/support';
 import ChromeDriverManager from './ChromeDriverManager';
 import { Container } from 'typedi';
 import { getUtilizationTime } from '../device-utils';
-import Adb, { DeviceWithPath } from '@devicefarmer/adbkit';
+import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
 import ip from 'ip';
@@ -17,12 +17,14 @@ import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
+import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
 
 export default class AndroidDeviceManager implements IDeviceManager {
-  private adb: any;
+  private adb: ADB | undefined;
   private adbAvailable = true;
   private abortControl: Map<string, AbortController> = new Map();
-  private tracker: any;
+  private tracker?: Tracker = undefined;
+  private remoteTrackers: { id: string; tracker: Tracker }[] = [];
 
   constructor(
     private pluginArgs: IPluginArgs,
@@ -212,8 +214,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
       if (!this.adb) {
         this.adb = await ADB.createADB({});
         const client = Adb.createClient();
-        const tracker = await client.trackDevices();
-        const originalADBTracking = this.createLocalAdbTracker(tracker, this.adb);
+        this.tracker = await client.trackDevices();
+        const originalADBTracking = this.createLocalAdbTracker(this.tracker, this.adb);
         await originalADBTracking();
       }
     } catch (e) {
@@ -265,7 +267,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
           host: adbHost,
           port: adbPort,
         });
-        const remoteAdbTracking = this.createRemoteAdbTracker(remoteAdb, originalADB);
+        const remoteAdbTracking = await this.createRemoteAdbTracker(
+          remoteAdb,
+          originalADB,
+          adbRemoteValue,
+        );
         await remoteAdbTracking();
       });
     }
@@ -316,7 +322,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
   }
 
-  public createLocalAdbTracker(tracker: any, originalADB: any) {
+  public createLocalAdbTracker(tracker: Tracker, originalADB: any) {
     const pluginArgs = this.pluginArgs;
     const adbTracker = async () => {
       try {
@@ -333,7 +339,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.onDeviceAdded(originalADB, device);
           }
         });
-        tracker.on('end', () => log.info('Tracking stopped'));
+        tracker.on('end', () => {
+          log.info('Tracking stopped');
+        });
       } catch (err: any) {
         log.error('Something went wrong:', err.stack);
       }
@@ -358,18 +366,34 @@ export default class AndroidDeviceManager implements IDeviceManager {
     this.abort(clonedDevice.udid);
   }
 
-  private createRemoteAdbTracker(adbClient: any, originalADB: any) {
+  /**
+   * Return and cache a tracker for remote adb. If tracker already exists for the given id, return the existing one.
+   * @param adbClient
+   * @param originalADB
+   * @param id
+   * @returns
+   */
+  private async createRemoteAdbTracker(adbClient: Client, originalADB: Client, id: string) {
+    let remoteTracker: Tracker;
+    // get tracker from remoteTracker list if already exists
+    const existingTracker = this.remoteTrackers.find((tracker) => tracker.id === id);
+    if (!existingTracker) {
+      const newTracker = await adbClient.trackDevices();
+      this.remoteTrackers.push({ id, tracker: newTracker });
+      remoteTracker = newTracker;
+    } else {
+      remoteTracker = existingTracker.tracker;
+    }
     const pluginArgs = this.pluginArgs;
     const adbTracking = async () => {
       try {
-        const tracker = await adbClient.trackDevices();
-        tracker.on('add', async (device: DeviceWithPath) => {
+        remoteTracker.on('add', async (device: DeviceWithPath) => {
           this.onDeviceAdded(originalADB, device);
         });
-        tracker.on('remove', async (device: DeviceWithPath) => {
+        remoteTracker.on('remove', async (device: DeviceWithPath) => {
           this.onDeviceRemoved(device, pluginArgs);
         });
-        tracker.on('change', async (device: DeviceWithPath) => {
+        remoteTracker.on('change', async (device: DeviceWithPath) => {
           if (device.type === 'offline' || device.type === 'unauthorized') {
             log.info(`Device ${device.id} is ${device.type}. Removing from list`);
             await this.onDeviceRemoved(device, pluginArgs);
@@ -377,7 +401,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
             this.onDeviceAdded(originalADB, device);
           }
         });
-        tracker.on('end', () => console.log('Tracking stopped'));
+        remoteTracker.on('end', () => console.log('Tracking stopped'));
       } catch (err: any) {
         console.error('Something went wrong:', err.stack);
       }
