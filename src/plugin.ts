@@ -493,8 +493,13 @@ class DevicePlugin extends BasePlugin {
       }
     }
 
-    if (!_.isNil(errorMessage)) {
+    // Actually errorMessage will be empty when axios is getting peer connection error/disconnected.
+    // So, let's invert the situation and return error when sessionDetails is null
+    if (_.isNil(sessionDetails)) {
       log.error(`Error while creating session: ${errorMessage}`);
+      if (_.isNil(errorMessage)) {
+        errorMessage = 'Unknown error while creating session';
+      }
       return new Error(errorMessage);
     } else {
       log.debug(
