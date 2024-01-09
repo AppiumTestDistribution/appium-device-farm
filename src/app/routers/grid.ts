@@ -238,8 +238,16 @@ function register(router: Router, pluginArgs: IPluginArgs) {
 
   // node related routes
   router.get('/node', getNodes);
-  router.get('/node/status', nodeAdbStatusOnThisHost);
+  router.get('/node/device', nodeAdbStatusOnThisHost);
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
+
+  // node status
+  router.get('/status', (request: Request<void>, response: Response<{status: string, version: string}>) => {
+    response.json({
+      status: 'ok',
+      version: process.env.npm_package_version || 'unknown (not running from npm package)',
+    });
+  });
 }
 
 export default {
