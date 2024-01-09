@@ -2,7 +2,7 @@
 import 'reflect-metadata';
 import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
-import { router } from './app';
+import { createRouter } from './app';
 import { IDevice } from './interfaces/IDevice';
 import {
   CreateSessionResponseInternal,
@@ -157,7 +157,7 @@ class DevicePlugin extends BasePlugin {
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
-    expressApp.use('/device-farm', router);
+    expressApp.use('/device-farm', createRouter(pluginArgs));
     registerProxyMiddlware(expressApp, cliArgs);
 
     if (!platform)

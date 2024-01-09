@@ -73,7 +73,7 @@ function handler(cliArgs: Record<string, any>) {
 
     if (isHub && !req.path.startsWith(WEBDRIVER_BASE_PATH)) {
       log.info(
-        `Recieved non webdriver request with url ${req.path}. So not proxying it to downstream.`,
+        `Received non-webdriver request with url ${req.path}. So, not proxying it to downstream.`,
       );
       return next();
     }
