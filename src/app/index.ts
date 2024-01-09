@@ -57,6 +57,10 @@ apiRouter.get('/cliArgs', async (req, res) => {
 staticFilesRouter.use(express.static(path.join(__dirname, '..', '..', 'public')));
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
+router.use(
+  '/ui-assets',
+  express.static(path.join(__dirname, '..', '..', 'public', 'device-farm', 'ui-assets')),
+);
 router.use(staticFilesRouter);
 
 DashboardRouter.register(apiRouter);
