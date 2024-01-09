@@ -1,15 +1,11 @@
-import './App.css';
-import DeviceExplorer from './components/device-explorer/device-explorer';
-import Header from './components/header/header';
+import RootRouter from './router/RootRouter';
+import { BrowserRouter } from 'react-router-dom';
 
 function App() {
   return (
-    <div className="app-container">
-      <Header />
-      <div className="app-body-container">
-        <DeviceExplorer />
-      </div>
-    </div>
+    <BrowserRouter>
+      <RootRouter />
+    </BrowserRouter>
   );
 }
 
