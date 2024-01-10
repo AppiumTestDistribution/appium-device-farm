@@ -76,6 +76,8 @@ export function nodeUrl(device: IDevice, basePath = ''): string {
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
       return `${host}/wd/hub`;
+    } else if (device.cloud.toLowerCase() === Cloud.HEADSPIN) {
+      return `${host}`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host

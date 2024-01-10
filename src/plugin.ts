@@ -63,12 +63,12 @@ import { SESSION_MANAGER } from './sessions/SessionManager';
 import { LocalSession } from './sessions/LocalSession';
 import { CloudSession } from './sessions/CloudSession';
 import { RemoteSession } from './sessions/RemoteSession';
-import { ISession } from './interfaces/ISession';
 import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import ip from 'ip';
 import _ from 'lodash';
 import SessionType from './enums/SessionType';
+import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -210,22 +210,25 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
-
-    // check for stale nodes
-    await setupCronCheckStaleDevices(
-      pluginArgs.checkStaleDevicesIntervalMs,
-      pluginArgs.bindHostOrIp,
-    );
-    // and release blocked devices
-    await setupCronReleaseBlockedDevices(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.newCommandTimeoutSec,
-    );
-    // and clean up pending sessions
-    await setupCronCleanPendingSessions(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.deviceAvailabilityTimeoutMs + 10000,
-    );
+    if (pluginArgs.cloud == undefined) {
+      // check for stale nodes
+      await setupCronCheckStaleDevices(
+        pluginArgs.checkStaleDevicesIntervalMs,
+        pluginArgs.bindHostOrIp,
+      );
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
+      // and clean up pending sessions
+      await setupCronCleanPendingSessions(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+      );
+    } else {
+      log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
+    }
 
     const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
@@ -351,14 +354,29 @@ class DevicePlugin extends BasePlugin {
         addProxyHandler(sessionId, device.host);
       }
 
-      let sessionInstance: ISession;
+      let sessionInstance: DeviceFarmSession;
+      const sessionOptions: DeviceFarmSessionOptions = {
+        sessionId,
+        device,
+        sessionResponse,
+        deviceFarmOption: deviceFarmCapabilities,
+      };
       const nodeWebdriverUrl = nodeUrl(device, DevicePlugin.nodeBasePath);
       if (device.nodeId === DevicePlugin.NODE_ID) {
-        sessionInstance = new LocalSession(sessionId, driver, device, sessionResponse);
+        sessionInstance = new LocalSession({
+          ...sessionOptions,
+          driver,
+        });
       } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
+        sessionInstance = new CloudSession({
+          ...sessionOptions,
+          baseUrl: nodeWebdriverUrl,
+        });
       } else {
-        sessionInstance = new RemoteSession(sessionId, nodeWebdriverUrl, device, sessionResponse);
+        sessionInstance = new RemoteSession({
+          ...sessionOptions,
+          baseUrl: nodeWebdriverUrl,
+        });
       }
 
       const isDashboardEnabled = !!this.pluginArgs.enableDashboard;

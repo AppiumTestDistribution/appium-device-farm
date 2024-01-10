@@ -266,7 +266,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
   // have an option to start the plugin before the test manually
   // this is useful to start multiple plugins in a single test
   if (before) {
-    console.log('Adding plugin startup into mocha\'s before hook');
+    console.log("Adding plugin startup into mocha's before hook");
     before(startPlugin);
   } else {
     console.log(`Please start plugin ${pluginName} manually using "startPlugin()" function`);

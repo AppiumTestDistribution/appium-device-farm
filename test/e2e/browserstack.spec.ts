@@ -41,7 +41,7 @@ describe('Browserstack Devices', () => {
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
   it('Should be able to run the android with Browerstack config', async () => {
-    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/devices/android`)).data;
+    let androidDevices = (await axios.get(`${hub_url}/device-farm/api/device/android`)).data;
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
@@ -65,12 +65,12 @@ describe('Browserstack Devices', () => {
   });
 
   it('Should be able to run the plugin with Browerstack config', async () => {
-    const status = (await axios.get(`${hub_url}/device-farm/api/devices`)).status;
+    const status = (await axios.get(`${hub_url}/device-farm/api/device`)).status;
     expect(status).to.be.eql(200);
   });
 
   it('Should be able to get iOS devices from Browerstack config', async () => {
-    let iosDevices = (await axios.get(`${hub_url}/device-farm/api/devices/ios`)).data;
+    let iosDevices = (await axios.get(`${hub_url}/device-farm/api/device/ios`)).data;
     iosDevices = iosDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete iosDevices[0].meta;
     delete iosDevices[0]['$loki'];

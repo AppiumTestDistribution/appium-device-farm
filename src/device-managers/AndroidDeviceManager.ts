@@ -22,6 +22,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private adb: any;
   private adbAvailable = true;
   private abortControl: Map<string, AbortController> = new Map();
+  private tracker: any;
 
   constructor(
     private pluginArgs: IPluginArgs,
@@ -206,15 +207,19 @@ export default class AndroidDeviceManager implements IDeviceManager {
     };
   }
 
-  private async getAdb(): Promise<ADB> {
+  private async getAdb(): Promise<any> {
     try {
       if (!this.adb) {
         this.adb = await ADB.createADB({});
+        const client = Adb.createClient();
+        const tracker = await client.trackDevices();
+        const originalADBTracking = this.createLocalAdbTracker(tracker, this.adb);
+        await originalADBTracking();
       }
     } catch (e) {
       this.adbAvailable = false;
     }
-    return this.adb;
+    return { adbInstance: this.adb, adbTracker: this.tracker };
   }
 
   async waitBootComplete(originalADB: any, udid: string): Promise<boolean | undefined> {
@@ -243,11 +248,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   public async getConnectedDevices(pluginArgs: IPluginArgs) {
     const deviceList = new Map();
-    const originalADB = await this.getAdb();
+    const { adbInstance: originalADB } = await this.getAdb();
     deviceList.set(originalADB, await originalADB.getConnectedDevices());
-    const client = Adb.createClient();
-    const originalADBTracking = this.createLocalAdbTracker(client, originalADB);
-    await originalADBTracking();
     const adbRemote = pluginArgs.adbRemote;
     if (adbRemote !== undefined && adbRemote.length > 0) {
       await asyncForEach(adbRemote, async (value: any) => {
@@ -314,11 +316,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
   }
 
-  public createLocalAdbTracker(adbClient: any, originalADB: any) {
+  public createLocalAdbTracker(tracker: any, originalADB: any) {
     const pluginArgs = this.pluginArgs;
     const adbTracker = async () => {
       try {
-        const tracker = await adbClient.trackDevices();
         tracker.on('add', async (device: DeviceWithPath) => {
           this.onDeviceAdded(originalADB, device);
         });

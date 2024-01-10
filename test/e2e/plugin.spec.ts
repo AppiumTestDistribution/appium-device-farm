@@ -55,7 +55,7 @@ describe('Basic Plugin Test', () => {
   });
 
   it('Basic Plugin API test', async () => {
-    (await axios.get(`${hub_url}/device-farm/api/devices`)).status.should.eql(200);
+    (await axios.get(`${hub_url}/device-farm/api/device`)).status.should.eql(200);
   });
 
   it('Add Android devices from node to hub', async () => {
@@ -80,18 +80,18 @@ describe('Basic Plugin Test', () => {
     ];
     const nodeDevices = new NodeDevices(hub_url);
     await nodeDevices.postDevicesToHub(nodeAndroidDevice, 'add');
-    const devices = (await axios.get(`${hub_url}/device-farm/api/devices`)).data;
+    const devices = (await axios.get(`${hub_url}/device-farm/api/device`)).data;
     devices.find((d: any) => d.udid === 'emulator-5551').should.to.be.an('object');
     nodeAndroidDevice[0].udid = 'emulator-5552';
     await nodeDevices.postDevicesToHub(nodeAndroidDevice, 'add');
-    const updatedDeviceList = (await axios.get(`${hub_url}/device-farm/api/devices`)).data;
+    const updatedDeviceList = (await axios.get(`${hub_url}/device-farm/api/device`)).data;
     //updatedDeviceList.should.have.lengthOf(2);
     updatedDeviceList.find((d: any) => d.udid === 'emulator-5552').should.to.be.an('object');
   });
 
   it('Remove Android devices from node to hub', async () => {
     const nodeDevices = new NodeDevices(hub_url);
-    const devices = (await axios.get(`${hub_url}/device-farm/api/devices`)).data;
+    const devices = (await axios.get(`${hub_url}/device-farm/api/device`)).data;
     const exptectedDevice = devices.find((d: any) => d.udid === 'emulator-5551');
     devices.find((d: any) => d.udid === 'emulator-5551').should.to.be.an('object');
     console.log('devices', exptectedDevice);
@@ -99,7 +99,7 @@ describe('Basic Plugin Test', () => {
       [{ udid: 'emulator-5551', host: '127.2.1.41' } as unknown as IDevice],
       'remove',
     );
-    const updatedDeviceList = (await axios.get(`${hub_url}/device-farm/api/devices`)).data;
+    const updatedDeviceList = (await axios.get(`${hub_url}/device-farm/api/device`)).data;
     const find = updatedDeviceList.find((d: any) => d.udid === 'emulator-5551');
     expect(find).to.be.undefined;
   });

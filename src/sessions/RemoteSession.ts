@@ -1,32 +1,26 @@
 import axios from 'axios';
 import SessionType from '../enums/SessionType';
-import { ISession } from '../interfaces/ISession';
-import { IDevice } from '../interfaces/IDevice';
+import { DeviceFarmSession, DeviceFarmSessionOptions } from './DeviceFarmSession';
 
-export class RemoteSession implements ISession {
+export type RemoteSessionOptions = DeviceFarmSessionOptions & {
+  baseUrl: any;
+};
+
+export class RemoteSession extends DeviceFarmSession {
   private isVideoAvailable = false;
+  private baseUrl: string;
 
-  constructor(
-    protected sessionId: string,
-    protected baseUrl: string,
-    private device: IDevice,
-    protected sessionResponse: Record<string, any>,
-  ) {}
+  constructor(options: RemoteSessionOptions) {
+    super(options);
+    this.baseUrl = options.baseUrl;
+  }
 
   isVideoRecordingInProgress(): boolean {
     return this.isVideoAvailable;
   }
 
-  getCapabilities(): Record<string, any> {
-    return this.sessionResponse;
-  }
-
   getType(): SessionType {
     return SessionType.REMOTE;
-  }
-
-  getId(): string {
-    return this.sessionId;
   }
 
   getScreenShot(): Promise<string> {
@@ -77,10 +71,8 @@ export class RemoteSession implements ISession {
 
   getLiveVideoUrl(): string | null {
     const url = new URL(this.baseUrl);
-    if (
-      this.sessionResponse['mjpegServerPort'] &&
-      !isNaN(this.sessionResponse['mjpegServerPort'])
-    ) {
+    const capabilities = this.getCapabilities();
+    if (capabilities['mjpegServerPort'] && !isNaN(capabilities['mjpegServerPort'])) {
       return `${url.origin}/device-farm/api/session/${this.sessionId}/live_video`;
     } else {
       return null;

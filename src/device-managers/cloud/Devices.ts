@@ -36,7 +36,7 @@ export default class Devices {
           udid: d.deviceName,
         };
       }
-      if (this.isSauceLabs() || this.isLambdaTest()) {
+      if (this.isSauceLabs() || this.isLambdaTest() || this.isHeadSpin()) {
         this.validateSchema(sauceOrLambdaSchema);
         cloudDeviceProperties = {
           name: d.deviceName,
@@ -88,5 +88,9 @@ export default class Devices {
 
   private isSauceLabs() {
     return this.cloud.cloudName.toLowerCase() === Cloud.SAUCELABS;
+  }
+
+  private isHeadSpin() {
+    return this.cloud.cloudName.toLowerCase() === Cloud.HEADSPIN;
   }
 }

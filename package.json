@@ -38,7 +38,7 @@
     "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install xcuitest",
     "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
     "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm,appium-dashboard -pa /wd/hub --plugin-device-farm-platform=ios --plugin-device-farm-max-sessions=8",
-    "run-db-migration": "((path-exists lib/src/scripts/initialize-database.js || npm run build) && node lib/src/scripts/initialize-database.js) || exit 0",
+    "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration"
   },
@@ -112,6 +112,7 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "unzipper": "^0.10.14",
+    "usbmux": "^0.1.0",
     "uuid": "^8.3.2",
     "yargs": "^17.7.2"
   },
@@ -139,7 +140,7 @@
     "@types/sinon-chai": "^3.2.12",
     "@types/tcp-port-used": "1.0.4",
     "@types/uuid": "8.3.4",
-    "@types/yargs": "17.0.29",
+    "@types/yargs": "17.0.32",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
     "@wdio/types": "^8.24.2",
@@ -170,9 +171,6 @@
   "appium": {
     "pluginName": "device-farm",
     "mainClass": "DevicePlugin",
-    "scripts": {
-      "install-go-ios": "./lib/src/scripts/install-go-ios.js"
-    },
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema",
       "additionalProperties": false,

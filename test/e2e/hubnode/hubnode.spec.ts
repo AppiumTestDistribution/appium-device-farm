@@ -106,8 +106,7 @@ describe('E2E Hub and Node', () => {
   it('should have devices on the hub', async () => {
     await waitForHubAndNode();
     // check device-farm endpoint using axios
-    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/devices`);
-    // const res = await axios.get(`http://${APPIUM_HOST}:${NODE_APPIUM_PORT}/device-farm/api/devices`);
+    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
     expect(res.status).to.equal(200);
     expect(res.data.length).to.be.greaterThan(0);
     // one of the devices should be an android device from the node
@@ -171,9 +170,9 @@ describe('E2E Hub and Node', () => {
       remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
     ).to.eventually.be.rejected;
 
-    // check device-farm endpoint using axios: /api/queues/length
+    // check device-farm endpoint using axios: /api/queue/length
     const res = await axios.get(
-      `http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queues/length`,
+      `http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/queue/length`,
     );
     expect(res.status).to.equal(200);
     expect(res.data).to.equal(0);
@@ -195,7 +194,7 @@ describe('E2E Hub and Node', () => {
     await expect(
       remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
     ).to.eventually.be.rejectedWith(
-      'An unknown server-side error occurred while processing the command. Original error: Error: Either provide \'app\' option to install \'com.nonexistent\' or consider setting \'noReset\' to \'true\' if \'com.nonexistent\' is supposed to be preinstalled.',
+      "An unknown server-side error occurred while processing the command. Original error: Error: Either provide 'app' option to install 'com.nonexistent' or consider setting 'noReset' to 'true' if 'com.nonexistent' is supposed to be preinstalled.",
     );
   });
 

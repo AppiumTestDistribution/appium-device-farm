@@ -10,6 +10,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   VIDEO_RECORDING = 'record_video',
   VIDEO_RESOLUTION = 'video_resolution',
   LIVE_VIDEO = 'live_video',
+  SCREENSHOT_ON_FAILURE = 'screenshot_on_failure',
 
   DEVICE_FARM_OPTIONS = 'df:options',
 }
