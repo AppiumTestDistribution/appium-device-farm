@@ -177,7 +177,7 @@ async function nodeAdbStatusOnOtherHost(
 
     // remove wd/hub from url
     const normalizedUrl = device.host.replace(/\/wd\/hub$/, '');
-    const url = `${normalizedUrl}/device-farm/node/status`;
+    const url = `${normalizedUrl}/device-farm/api/node/status`;
     const result = await axios.get(url);
     response.json(result.data);
   }
