@@ -238,7 +238,7 @@ function register(router: Router, pluginArgs: IPluginArgs) {
 
   // node related routes
   router.get('/node', getNodes);
-  router.get('/node/device', nodeAdbStatusOnThisHost);
+  router.get('/node/status', nodeAdbStatusOnThisHost);
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   // node status
