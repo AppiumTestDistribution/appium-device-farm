@@ -210,22 +210,25 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
-
-    // check for stale nodes
-    await setupCronCheckStaleDevices(
-      pluginArgs.checkStaleDevicesIntervalMs,
-      pluginArgs.bindHostOrIp,
-    );
-    // and release blocked devices
-    await setupCronReleaseBlockedDevices(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.newCommandTimeoutSec,
-    );
-    // and clean up pending sessions
-    await setupCronCleanPendingSessions(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.deviceAvailabilityTimeoutMs + 10000,
-    );
+    if (pluginArgs.cloud == undefined) {
+      // check for stale nodes
+      await setupCronCheckStaleDevices(
+        pluginArgs.checkStaleDevicesIntervalMs,
+        pluginArgs.bindHostOrIp,
+      );
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
+      // and clean up pending sessions
+      await setupCronCleanPendingSessions(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+      );
+    } else {
+      log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
+    }
 
     const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
