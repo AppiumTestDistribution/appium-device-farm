@@ -157,7 +157,7 @@ async function nodeAdbStatusOnOtherHost(
     // find node url from database of devices
     const devices = (await (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ host })
+      .find({ host: { $contains: host } })
       .data()) as IDevice[];
     if (devices.length === 0) {
       response
