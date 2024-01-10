@@ -264,7 +264,8 @@
   },
   "files": [
     "lib",
-    "scripts"
+    "scripts",
+    "prisma"
   ],
   "typedoc": {
     "entryPoint": "lib/src/index.js"
