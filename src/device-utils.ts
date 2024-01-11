@@ -122,7 +122,24 @@ export async function allocateDeviceForSession(
       { timeout, intervalBetweenAttempts },
     );
   } catch (err) {
-    throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
+    // figure out whether the device is simply busy or non-existent
+    // there's slight delay between last check and this check
+    // so, it's possible that the device is not busy now
+    const filterCopy = { ...filters };
+    // remove the busy flag
+    delete filterCopy.busy;
+    // remove the userBlocked flag
+    delete filterCopy.userBlocked;
+
+    const possibleDevice = await getDevice(filterCopy);
+
+    let failureReason = "No device matching request."
+    if (possibleDevice?.busy || possibleDevice?.userBlocked) {
+      failureReason = "Device is busy or blocked."
+    }
+
+    // provide friendly error message
+    throw new Error(`${failureReason}. Device request: ${JSON.stringify(filterCopy)}`);
   }
 
   const device = await getDevice(filters);
