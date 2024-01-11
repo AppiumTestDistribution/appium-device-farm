@@ -62,6 +62,9 @@ router.use(
   express.static(path.join(__dirname, '..', '..', 'public', 'device-farm', 'ui-assets')),
 );
 router.use(staticFilesRouter);
+router.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'));
+});
 
 DashboardRouter.register(apiRouter);
 GridRouter.register(apiRouter);
