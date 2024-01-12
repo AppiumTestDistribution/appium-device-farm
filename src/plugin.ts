@@ -226,6 +226,11 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.checkBlockedDevicesIntervalMs,
         pluginArgs.deviceAvailabilityTimeoutMs + 10000,
       );
+      // unblock all devices on node/hub restart
+      await unblockDeviceMatchingFilter({});
+
+      // remove stale devices
+      await removeStaleDevices(pluginArgs.bindHostOrIp);
     } else {
       log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
     }
@@ -236,11 +241,7 @@ class DevicePlugin extends BasePlugin {
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
 
-    // unblock all devices on node/hub restart
-    await unblockDeviceMatchingFilter({});
 
-    // remove stale devices
-    await removeStaleDevices(pluginArgs.bindHostOrIp);
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
