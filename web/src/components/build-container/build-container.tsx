@@ -37,7 +37,7 @@ function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: {
           <div className={`build-item ${selectedBuild?.id === build.id && "build-item_selected"} `} key={build.id} onClick={() => handleBuildClick(build)}>
             <p className='build-item_name'>{build.name}</p>
             <p className='build-item_session'>{sessions.filter((session) => session.build_id === build.id).length} SESSIONS</p>
-            <span className='build-item_time'>{timeAgo(build.createdAt)}</span>
+            <span className='build-item_time'>{timeAgo(build.updatedAt)}</span>
           </div>
         ))}
       </div>

@@ -1,10 +1,8 @@
 .build-container {
   display: flex;
   flex-direction: column;
-  margin-top: 87px;
   width: 20%;
   min-width: 240px;
-  height: calc(100vh - 87px);
   border-right: 1px solid lightgray;
   box-shadow: 0px 3px 6px #00000029;
 }
@@ -41,6 +39,7 @@
   gap: 6px;
   padding: 16px;
   border-bottom: 1px solid lightgray;
+  border-left: 8px solid transparent;
   cursor: pointer;
 }
 
@@ -49,7 +48,8 @@
 }
 
 .build-item_selected {
-  background-color: rgb(229, 240, 255);
+  background-color: #7eddff48;
+  border-left: 8px solid #15252b;
 }
 
 .build-item_name {

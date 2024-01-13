@@ -9,4 +9,15 @@
 .app-body-container {
   display: flex;
   flex: 1;
+  margin-top: 87px;
+  height: calc(100vh - 87px);
+}
+
+.build-sessions-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
 }
