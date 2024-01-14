@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import './session.css';
 import RightArrowIcon from '../../assets/right-arrow-icon.svg'
-import Header from '../../components/header/header';
 import { IBuild } from '../../interfaces/IBuild';
 import { ISession } from '../../interfaces/ISession';
 import BuildContainer from '../../components/build-container/build-container';
@@ -99,7 +98,6 @@ function Session() {
 
   return (
     <div className="app-container">
-      <Header />
       <div className="app-body-container">
         <BuildContainer selectedBuild={selectedBuild} handleBuildClick={handleSelectedBuildChange} builds={builds} sessions={sessions} />
         {selectedSession && <div className="session-container">

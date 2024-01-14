@@ -1,18 +1,3 @@
-.app-container {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-  flex-direction: column;
-  background-color: #f2f1f2;
-}
-
-.app-body-container {
-  display: flex;
-  flex: 1;
-  margin-top: 87px;
-  height: calc(100vh - 87px);
-}
-
 .build-sessions-container {
   display: flex;
   flex-direction: column;
