@@ -3,7 +3,7 @@ import BuildIcon from '../../assets/build-icon.svg';
 import { IBuild } from '../../interfaces/IBuild';
 import { ISession } from '../../interfaces/ISession';
 
-function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: { selectedBuild: IBuild | undefined, handleBuildClick: (build: IBuild) => void, builds: IBuild[], sessions: ISession[] }) {
+function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: { selectedBuild: IBuild | undefined, handleBuildClick: (buildId: string) => void, builds: IBuild[], sessions: ISession[] }) {
 
   function timeAgo(createdAt: string | number | Date) {
     const currentDate = new Date();
@@ -34,7 +34,7 @@ function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: {
       </div>
       <div className='build-list'>
         {builds.map((build) => (
-          <div className={`build-item ${selectedBuild?.id === build.id && "build-item_selected"} `} key={build.id} onClick={() => handleBuildClick(build)}>
+          <div className={`build-item ${selectedBuild?.id === build.id && "build-item_selected"} `} key={build.id} onClick={() => handleBuildClick(build.id)}>
             <p className='build-item_name'>{build.name}</p>
             <p className='build-item_session'>{sessions.filter((session) => session.build_id === build.id).length} SESSIONS</p>
             <span className='build-item_time'>{timeAgo(build.updatedAt)}</span>

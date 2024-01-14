@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 20%;
   min-width: 240px;
-  border-right: 1px solid lightgray;
+  border-right: 2px solid lightgray;
   box-shadow: 0px 3px 6px #00000029;
 }
 
@@ -13,7 +13,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 16px;
-  border-bottom: 1px solid lightgray;
+  border-bottom: 2px solid lightgray;
 }
 
 .build-header > img {

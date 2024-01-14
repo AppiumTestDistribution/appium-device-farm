@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import './builds.css';
+import './session.css';
+import RightArrowIcon from '../../assets/right-arrow-icon.svg'
 import Header from '../../components/header/header';
 import { IBuild } from '../../interfaces/IBuild';
 import { ISession } from '../../interfaces/ISession';
 import BuildContainer from '../../components/build-container/build-container';
-import SessionCard from '../../components/build-container/session-card/session-card';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import SessionInfo from '../../components/session/session-info/session-info';
 
-function Builds() {
-  const [searchParams] = useSearchParams();
+function Session() {
+  const { buildId, sessionId } = useParams();
   const navigate = useNavigate();
-  const selectedBuildId = searchParams.get("buildId");
   const [selectedBuild, setSelectedBuild] = useState<IBuild>();
+  const [selectedSession, setSelectedSession] = useState<ISession>();
   const [builds, setBuilds] = useState<IBuild[]>([]);
   const [sessions, setSessions] = useState<ISession[]>([]);
 
@@ -84,8 +85,13 @@ function Builds() {
     ]
     setBuilds(builds);
     setSessions(sessions);
-    setSelectedBuild(builds.find(build => build.id === selectedBuildId) ?? builds[0]);
-  }, [selectedBuildId]);
+    if (builds.findIndex(build => build.id === buildId) < 0 || sessions.findIndex(session => session.id === sessionId) < 0) {
+      navigate('/device-farm/builds');
+      return;
+    }
+    setSelectedBuild(builds.find(build => build.id === buildId));
+    setSelectedSession(sessions.find(session => session.id === sessionId));
+  }, [buildId, navigate, sessionId]);
 
   const handleSelectedBuildChange = (buildId: string) => {
     navigate(`/device-farm/builds?buildId=${buildId}`);
@@ -96,16 +102,17 @@ function Builds() {
       <Header />
       <div className="app-body-container">
         <BuildContainer selectedBuild={selectedBuild} handleBuildClick={handleSelectedBuildChange} builds={builds} sessions={sessions} />
-        {selectedBuild && <div className="build-sessions-container">
-          {sessions.filter(session => session.build_id === selectedBuild.id).map(session => {
-            return (
-              <SessionCard key={session.id} session={session} />
-            )
-          })}
+        {selectedSession && <div className="session-container">
+          <div className='session-header'>
+            <button onClick={() => handleSelectedBuildChange(selectedSession.build_id)}>Build</button>
+            <img src={RightArrowIcon} alt='right-arrow' />
+            <h3>{selectedSession.name || "Not Available"}</h3>
+          </div>
+          <SessionInfo session={selectedSession} />
         </div>}
       </div>
     </div>
   );
 }
 
-export default Builds;
+export default Session;

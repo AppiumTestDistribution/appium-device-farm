@@ -41,10 +41,8 @@ function SessionCard({ session }: { session: ISession }) {
     return `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
   }
 
-
-
   return (
-    <div className="build-session" key={session.id} onClick={() => navigate(`/builds/${session.build_id}/sessions/${session.id}`)}>
+    <div className="build-session" onClick={() => navigate(`/device-farm/builds/${session.build_id}/session/${session.id}`)}>
       <div className='build-session-column'>
         <div className="build-session_name">{session.name || " Not Available"}</div>
         <div className="build-session-device">
