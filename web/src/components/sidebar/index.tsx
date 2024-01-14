@@ -13,9 +13,13 @@ const Sidebar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const renderSidebarButton = (path: string, icon: string, selectedIcon: string, alt: string) => {
-    const isSelected = pathname === path;
-
+  const renderSidebarButton = (
+    isSelected: boolean,
+    path: string,
+    icon: string,
+    selectedIcon: string,
+    alt: string,
+  ) => {
     return (
       <button
         className={`sidebar-cta ${isSelected ? 'selected' : ''}`}
@@ -35,8 +39,20 @@ const Sidebar = () => {
         onClick={() => navigate(deviceFarmRoute)}
       />
       <div className="sidebar-ctas">
-        {renderSidebarButton(deviceFarmRoute, DevicesIcon, DevicesSelectedIcon, 'Devices')}
-        {renderSidebarButton(buildsRoute, BuildsIcon, BuildsSelectedIcon, 'Builds')}
+        {renderSidebarButton(
+          pathname === deviceFarmRoute,
+          deviceFarmRoute,
+          DevicesIcon,
+          DevicesSelectedIcon,
+          'Devices',
+        )}
+        {renderSidebarButton(
+          pathname.startsWith(buildsRoute),
+          buildsRoute,
+          BuildsIcon,
+          BuildsSelectedIcon,
+          'Builds',
+        )}
       </div>
     </div>
   );

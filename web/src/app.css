@@ -7,5 +7,5 @@
 .app-body-container {
   display: flex;
   flex: 1;
-  width: 100%;
+  width: calc(100vw - 75px);
 }
