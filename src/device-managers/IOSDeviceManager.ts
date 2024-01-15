@@ -169,7 +169,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
       // add device to local list
       log.info(`iOS device with udid ${udid} plugged! updating device list...`);
-      addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
+      await addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
     });
     iosTracker.on('detached', async (udid: string) => {
       const deviceRemoved: any = [{ udid, host: pluginArgs.bindHostOrIp }];
@@ -181,7 +181,7 @@ export default class IOSDeviceManager implements IDeviceManager {
 
       // remove device from local list
       log.info(`iOS device with udid ${udid} unplugged! updating device list...`);
-      removeDevice(deviceRemoved);
+      await removeDevice(deviceRemoved);
     });
   }
 
@@ -227,11 +227,11 @@ export default class IOSDeviceManager implements IDeviceManager {
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
 
     // should not be here, but we need to update the hub with simulators
-    /*if (this.pluginArgs.hub !== undefined) {
+    if (this.pluginArgs.hub !== undefined) {
       log.info('Updating Hub with Simulators');
       const nodeDevices = new NodeDevices(this.pluginArgs.hub);
       await nodeDevices.postDevicesToHub(simulators, 'add');
-    }*/
+    }
 
     return simulators;
   }

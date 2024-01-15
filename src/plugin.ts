@@ -210,22 +210,30 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
+    if (pluginArgs.cloud == undefined) {
+      // check for stale nodes
+      await setupCronCheckStaleDevices(
+        pluginArgs.checkStaleDevicesIntervalMs,
+        pluginArgs.bindHostOrIp,
+      );
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
+      // and clean up pending sessions
+      await setupCronCleanPendingSessions(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+      );
+      // unblock all devices on node/hub restart
+      await unblockDeviceMatchingFilter({});
 
-    // check for stale nodes
-    await setupCronCheckStaleDevices(
-      pluginArgs.checkStaleDevicesIntervalMs,
-      pluginArgs.bindHostOrIp,
-    );
-    // and release blocked devices
-    await setupCronReleaseBlockedDevices(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.newCommandTimeoutSec,
-    );
-    // and clean up pending sessions
-    await setupCronCleanPendingSessions(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.deviceAvailabilityTimeoutMs + 10000,
-    );
+      // remove stale devices
+      await removeStaleDevices(pluginArgs.bindHostOrIp);
+    } else {
+      log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
+    }
 
     const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
@@ -233,11 +241,7 @@ class DevicePlugin extends BasePlugin {
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
 
-    // unblock all devices on node/hub restart
-    await unblockDeviceMatchingFilter({});
 
-    // remove stale devices
-    await removeStaleDevices(pluginArgs.bindHostOrIp);
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {

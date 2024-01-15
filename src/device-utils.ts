@@ -382,7 +382,6 @@ export async function removeStaleDevices(currentHost: string) {
   const cloudHosts = nodeDevices
     .filter((device) => device.hasOwnProperty('cloud'))
     .map((device) => device.host);
-
   const aliveHosts = (await Promise.allSettled(
     nodeHosts.map(async (host) => {
       return {
@@ -391,7 +390,6 @@ export async function removeStaleDevices(currentHost: string) {
       };
     }),
   )) as { status: 'fulfilled' | 'rejected'; value: { host: string; alive: boolean } }[];
-
   const aliveCloudHosts = (await Promise.allSettled(
     cloudHosts.map(async (host) => {
       return {
@@ -403,12 +401,11 @@ export async function removeStaleDevices(currentHost: string) {
 
   // summarize alive hosts
   const allAliveHosts = [...aliveHosts, ...aliveCloudHosts]
-    .filter((item) => item.status === 'fulfilled')
+    .filter((item) => item.status === 'fulfilled' && item.value.alive)
     .map((item) => item.value.host);
-
   // stale devices are devices that's not alive
   const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
-  removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
+  await removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
   if (staleDevices.length > 0) {
     log.debug(
       `Removing device with udid(s): ${staleDevices
@@ -418,7 +415,7 @@ export async function removeStaleDevices(currentHost: string) {
   }
 
   // remove devices with no host
-  removeDevice(devicesWithNoHost.map((device) => ({ udid: device.udid, host: device.host })));
+  await removeDevice(devicesWithNoHost.map((device) => ({ udid: device.udid, host: device.host })));
   if (devicesWithNoHost.length > 0) {
     log.debug(
       `Removing device with udid(s): ${devicesWithNoHost
