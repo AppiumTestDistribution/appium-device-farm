@@ -328,16 +328,10 @@ class DevicePlugin extends BasePlugin {
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
-    // This is coming from the forwarded session
-    if (
-      session instanceof Error ||
-      session.hasOwnProperty('error') ||
-      (session as W3CNewSessionResponseError).error !== undefined
-    ) {
-      await unblockDevice(device.udid, device.host);
-      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
-      this.throwProperError(session, device.host);
-    } else {
+    // Do we have valid session response?
+    if (this.isCreateSessionResponseInternal(session)) {
+      log.debug('📱 Session response is CreateSessionResponseInternal');
+      
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
@@ -382,7 +376,7 @@ class DevicePlugin extends BasePlugin {
       const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
 
       if (isDashboardEnabled && shouldSaveLogs) {
-        log.info(
+        log.debug(
           `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
         );
         SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
@@ -395,13 +389,20 @@ class DevicePlugin extends BasePlugin {
           );
         }
       } else {
-        log.info(
-          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. Is DashboardEnabled: ${isDashboardEnabled}`,
+        log.debug(
+          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. DashboardEnabled: ${isDashboardEnabled}, shouldSaveLogs: ${shouldSaveLogs}`,
         );
       }
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+    } else {
+      // assume session is an error
+      await unblockDevice(device.udid, device.host);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
+
+      this.throwProperError(session, device.host);
     }
+
     return session;
   }
 
@@ -414,14 +415,19 @@ class DevicePlugin extends BasePlugin {
         throw new Error(errorMessage);
       } else {
         throw new Error(
-          `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+          `Unknown error while creating session: ${JSON.stringify(session)}. \nBetter look at appium log on the node: ${host}`,
         );
       }
     } else {
       throw new Error(
-        `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+        `Unknown error while creating session: ${JSON.stringify(session)}. \nBetter look at appium log on the node: ${host}`,
       );
     }
+  }
+
+  // type guard for CreateSessionResponseInternal
+  private isCreateSessionResponseInternal(something: any): something is CreateSessionResponseInternal {
+    return something.hasOwnProperty('value') && something.value.length === 3 && something.value[0] && something.value[1] && something.value[2];
   }
 
   private async forwardSessionRequest(
@@ -509,8 +515,19 @@ class DevicePlugin extends BasePlugin {
           !sessionDetails ? {} : sessionDetails,
         )}`,
       );
-      return sessionDetails as W3CNewSessionResponse;
+
+      if (this.isW3CNewSessionResponse(sessionDetails)) {
+        return sessionDetails as W3CNewSessionResponse;
+      } else {
+        return new Error(
+          `Unknown error while creating session: ${JSON.stringify(sessionDetails)}`,
+        );
+      }
     }
+  }
+
+  private isW3CNewSessionResponse(something: any): something is W3CNewSessionResponse {
+    return something.hasOwnProperty('value') && something.value.hasOwnProperty('sessionId') && something.value.hasOwnProperty('capabilities');
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
