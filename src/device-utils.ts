@@ -133,9 +133,9 @@ export async function allocateDeviceForSession(
 
     const possibleDevice = await getDevice(filterCopy);
 
-    let failureReason = "No device matching request."
+    let failureReason = 'No device matching request.';
     if (possibleDevice?.busy || possibleDevice?.userBlocked) {
-      failureReason = "Device is busy or blocked."
+      failureReason = 'Device is busy or blocked.';
     }
 
     // provide friendly error message

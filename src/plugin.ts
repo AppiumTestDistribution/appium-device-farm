@@ -240,8 +240,6 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-
-
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {

@@ -155,7 +155,9 @@ async function nodeAdbStatusOnOtherHost(
     );
   } else {
     // find node url from database of devices
-    const devices = (await (await ADTDatabase.DeviceModel)
+    const devices = (await (
+      await ADTDatabase.DeviceModel
+    )
       .chain()
       .find({ host: { $contains: host } })
       .data()) as IDevice[];
@@ -242,12 +244,15 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   // node status
-  router.get('/status', (request: Request<void>, response: Response<{status: string, version: string}>) => {
-    response.json({
-      status: 'ok',
-      version: process.env.npm_package_version || 'unknown (not running from npm package)',
-    });
-  });
+  router.get(
+    '/status',
+    (request: Request<void>, response: Response<{ status: string; version: string }>) => {
+      response.json({
+        status: 'ok',
+        version: process.env.npm_package_version || 'unknown (not running from npm package)',
+      });
+    },
+  );
 }
 
 export default {
