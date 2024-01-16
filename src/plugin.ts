@@ -69,6 +69,7 @@ import ip from 'ip';
 import _ from 'lodash';
 import SessionType from './enums/SessionType';
 import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
+import { ADTDatabase } from './data-service/db';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -145,6 +146,12 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
+
+    if (pluginArgs.removeDevicesFromDatabaseBeforeRunningThePlugin) {
+      log.info('🔴 Removing all devices from database before running the plugin. You asked for it!');
+      await initializeStorage();
+      (await ADTDatabase.DeviceModel).removeDataOnly();
+    }
 
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;

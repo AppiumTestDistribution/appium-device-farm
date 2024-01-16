@@ -69,6 +69,9 @@ export interface IPluginArgs {
   cloud?: CloudConfig;
   bindHostOrIp: string;
   enableDashboard: boolean;
+
+  // development purposes
+  removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -93,4 +96,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   cloud: undefined,
   bindHostOrIp: ip.address(),
   enableDashboard: false,
+  removeDevicesFromDatabaseBeforeRunningThePlugin: false,
 };

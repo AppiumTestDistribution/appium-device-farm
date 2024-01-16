@@ -7,7 +7,6 @@ import type { Options } from '@wdio/types';
 import 'dotenv/config';
 import axios from 'axios';
 import { expect } from 'chai';
-import { unblockDeviceMatchingFilter } from '../../../../src/data-service/device-service';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
 chai.use(chaiAsPromised);
@@ -118,12 +117,13 @@ describe('Browser Stack: Quirks', () => {
   }
   it('handles empty session id when app is invalid', async () => {
     capabilities['appium:app'] = 'bs://invalid-app-id';
-
     const initialBusyDevices = await busyDevices();
+    console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
+
     expect(remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO)).to.eventually.throw();
 
     const currentBusyDevices = await busyDevices();
-    console.log(`Allocated devices: ${JSON.stringify(currentBusyDevices)}`);
+    console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
 
     // the same number of devices should be busy
     expect(currentBusyDevices.length).to.equal(initialBusyDevices.length);
