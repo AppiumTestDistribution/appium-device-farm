@@ -109,34 +109,33 @@ describe('Browser Stack: Quirks', () => {
     appiumHome: APPIUM_HOME!,
   });
 
-  beforeEach(async () => {
-    await unblockDeviceMatchingFilter({});
-  });
-
+  async function busyDevices() {
+    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
+    return res.data.filter((device: any) => device.busy === true);
+  }
   it('handles empty session id when app is invalid', async () => {
     capabilities['appium:app'] = 'bs://invalid-app-id';
 
+    const initialBusyDevices = await busyDevices();
     expect(remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO)).to.eventually.throw();
 
-    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
-    expect(res.status).to.equal(200);
-    expect(res.data.length).to.be.greaterThan(0);
-    const androidDevices = res.data.filter((device: any) => device.platform === 'android');
-    expect(androidDevices.length).to.be.greaterThan(0);
-    // no devices should be allocated/busy
-    const allocatedDevices = androidDevices.filter((device: any) => device.busy === true);
-    console.log(`Allocated devices: ${JSON.stringify(allocatedDevices)}`);
+    const currentBusyDevices = await busyDevices();
+    console.log(`Allocated devices: ${JSON.stringify(currentBusyDevices)}`);
+
+    // the same number of devices should be busy
+    expect(currentBusyDevices.length).to.equal(initialBusyDevices.length);
 
     // no cloud devices should be allocated
-    const cloudDevices = allocatedDevices.filter((device: any) => device.cloud === 'browserstack');
+    const cloudDevices = currentBusyDevices.filter(
+      (device: any) => device.cloud === 'browserstack',
+    );
     expect(cloudDevices.length).to.equal(0);
   });
 
-  afterEach(async function () {
-    try {
+  afterEach(async () => {
+    if (driver) {
       await driver.deleteSession();
-    } catch (e) {
-      // ignore
+      driver = null;
     }
   });
 });

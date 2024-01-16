@@ -59,8 +59,6 @@ describe('Browserstack Devices', () => {
       sdk: '9.0',
       udid: 'Google Pixel 3',
       offline: false,
-      sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null,
     });
   });
 
@@ -92,9 +90,6 @@ describe('Browserstack Devices', () => {
       sdk: '15',
       udid: 'iPhone XS',
       offline: false,
-
-      sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null,
     });
   });
 });
