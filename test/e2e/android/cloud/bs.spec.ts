@@ -80,7 +80,12 @@ describe('BrowserStack: Plugin Test', () => {
 
   afterEach(async () => {
     if (driver) {
-      await driver.deleteSession();
+      try {
+        await driver.deleteSession();
+      } catch (ign) {
+        console.log(ign);
+      }
+
       driver = null;
     }
   });
@@ -137,7 +142,12 @@ describe('Browser Stack: Quirks', () => {
 
   afterEach(async () => {
     if (driver) {
-      await driver.deleteSession();
+      try {
+        await driver.deleteSession();
+      } catch (ign) {
+        console.log(ign);
+      }
+
       driver = null;
     }
   });

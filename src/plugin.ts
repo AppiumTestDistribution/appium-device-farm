@@ -148,7 +148,9 @@ class DevicePlugin extends BasePlugin {
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
 
     if (pluginArgs.removeDevicesFromDatabaseBeforeRunningThePlugin) {
-      log.info('🔴 Removing all devices from database before running the plugin. You asked for it!');
+      log.info(
+        '🔴 Removing all devices from database before running the plugin. You asked for it!',
+      );
       await initializeStorage();
       (await ADTDatabase.DeviceModel).removeDataOnly();
     }
