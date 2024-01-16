@@ -4,6 +4,7 @@
     "plugin": {
       "device-farm": {
         "platform": "both",
+        "removeDevicesFromDatabaseBeforeRunningThePlugin": true,
         "cloud":
           {
             "cloudName": "browserstack",

@@ -59,5 +59,10 @@ describe('Plugin Test', () => {
     await textButton.click();
   });
 
-  afterEach(async () => await driver.deleteSession());
+  afterEach(async () => {
+    if (driver) {
+      await driver.deleteSession();
+      driver = null;
+    }
+  });
 });

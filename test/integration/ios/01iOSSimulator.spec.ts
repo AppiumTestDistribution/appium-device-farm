@@ -152,7 +152,7 @@ describe('Max sessions CLI argument test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"simulator","busy":false,"userBlocked":false}',
+          'Device is busy or blocked.. Device request: {"platform":"ios","name":"iPhone","deviceType":"simulator"}',
         ),
     );
   });

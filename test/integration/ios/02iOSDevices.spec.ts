@@ -57,7 +57,7 @@ describe('IOS Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"ios","name":"iPhone","deviceType":"real","busy":false,"userBlocked":false}',
+          'No device matching request.. Device request: {"platform":"ios","name":"iPhone","deviceType":"real"}',
         ),
     );
   });

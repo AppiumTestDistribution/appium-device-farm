@@ -2,7 +2,7 @@
 import 'reflect-metadata';
 import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
-import { router } from './app';
+import { createRouter } from './app';
 import { IDevice } from './interfaces/IDevice';
 import {
   CreateSessionResponseInternal,
@@ -69,6 +69,7 @@ import ip from 'ip';
 import _ from 'lodash';
 import SessionType from './enums/SessionType';
 import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
+import { ADTDatabase } from './data-service/db';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -146,6 +147,14 @@ class DevicePlugin extends BasePlugin {
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
 
+    if (pluginArgs.removeDevicesFromDatabaseBeforeRunningThePlugin) {
+      log.info(
+        '🔴 Removing all devices from database before running the plugin. You asked for it!',
+      );
+      await initializeStorage();
+      (await ADTDatabase.DeviceModel).removeDataOnly();
+    }
+
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
@@ -157,7 +166,7 @@ class DevicePlugin extends BasePlugin {
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
 
-    expressApp.use('/device-farm', router);
+    expressApp.use('/device-farm', createRouter(pluginArgs));
     registerProxyMiddlware(expressApp, cliArgs);
 
     if (!platform)
@@ -240,8 +249,6 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-
-
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -330,16 +337,10 @@ class DevicePlugin extends BasePlugin {
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
-    // This is coming from the forwarded session
-    if (
-      session instanceof Error ||
-      session.hasOwnProperty('error') ||
-      (session as W3CNewSessionResponseError).error !== undefined
-    ) {
-      await unblockDevice(device.udid, device.host);
-      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
-      this.throwProperError(session, device.host);
-    } else {
+    // Do we have valid session response?
+    if (this.isCreateSessionResponseInternal(session)) {
+      log.debug('📱 Session response is CreateSessionResponseInternal');
+
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
@@ -384,7 +385,7 @@ class DevicePlugin extends BasePlugin {
       const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
 
       if (isDashboardEnabled && shouldSaveLogs) {
-        log.info(
+        log.debug(
           `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
         );
         SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
@@ -397,13 +398,20 @@ class DevicePlugin extends BasePlugin {
           );
         }
       } else {
-        log.info(
-          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. Is DashboardEnabled: ${isDashboardEnabled}`,
+        log.debug(
+          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. DashboardEnabled: ${isDashboardEnabled}, shouldSaveLogs: ${shouldSaveLogs}`,
         );
       }
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+    } else {
+      // assume session is an error
+      await unblockDevice(device.udid, device.host);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
+
+      this.throwProperError(session, device.host);
     }
+
     return session;
   }
 
@@ -416,14 +424,31 @@ class DevicePlugin extends BasePlugin {
         throw new Error(errorMessage);
       } else {
         throw new Error(
-          `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+          `Unknown error while creating session: ${JSON.stringify(
+            session,
+          )}. \nBetter look at appium log on the node: ${host}`,
         );
       }
     } else {
       throw new Error(
-        `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+        `Unknown error while creating session: ${JSON.stringify(
+          session,
+        )}. \nBetter look at appium log on the node: ${host}`,
       );
     }
+  }
+
+  // type guard for CreateSessionResponseInternal
+  private isCreateSessionResponseInternal(
+    something: any,
+  ): something is CreateSessionResponseInternal {
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.length === 3 &&
+      something.value[0] &&
+      something.value[1] &&
+      something.value[2]
+    );
   }
 
   private async forwardSessionRequest(
@@ -497,8 +522,13 @@ class DevicePlugin extends BasePlugin {
       }
     }
 
-    if (!_.isNil(errorMessage)) {
+    // Actually errorMessage will be empty when axios is getting peer connection error/disconnected.
+    // So, let's invert the situation and return error when sessionDetails is null
+    if (_.isNil(sessionDetails)) {
       log.error(`Error while creating session: ${errorMessage}`);
+      if (_.isNil(errorMessage)) {
+        errorMessage = 'Unknown error while creating session';
+      }
       return new Error(errorMessage);
     } else {
       log.debug(
@@ -506,8 +536,21 @@ class DevicePlugin extends BasePlugin {
           !sessionDetails ? {} : sessionDetails,
         )}`,
       );
-      return sessionDetails as W3CNewSessionResponse;
+
+      if (this.isW3CNewSessionResponse(sessionDetails)) {
+        return sessionDetails as W3CNewSessionResponse;
+      } else {
+        return new Error(`Unknown error while creating session: ${JSON.stringify(sessionDetails)}`);
+      }
     }
+  }
+
+  private isW3CNewSessionResponse(something: any): something is W3CNewSessionResponse {
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.hasOwnProperty('sessionId') &&
+      something.value.hasOwnProperty('capabilities')
+    );
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {

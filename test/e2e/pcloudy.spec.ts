@@ -57,8 +57,6 @@ describe('PCloudy Devices', () => {
       udid: 'GOOGLE',
       userBlocked: false,
       offline: false,
-      sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null,
     });
   });
 
@@ -92,8 +90,6 @@ describe('PCloudy Devices', () => {
       sdk: '15.1',
       udid: 'APPLE',
       offline: false,
-      sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null,
       name: 'APPLE',
     });
   });

@@ -130,7 +130,7 @@ describe('Android Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","busy":false,"userBlocked":false}',
+          'Device is busy or blocked.. Device request: {"platform":"android"}',
         ),
     );
   });

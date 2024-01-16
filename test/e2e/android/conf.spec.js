@@ -27,5 +27,10 @@ describe('Plugin Test', () => {
     await driver.$('~login').click();
   });
 
-  afterEach(async () => await driver.deleteSession());
+  afterEach(async () => {
+    if (driver) {
+      await driver.deleteSession();
+      driver = null;
+    }
+  });
 });

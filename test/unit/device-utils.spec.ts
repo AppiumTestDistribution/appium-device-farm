@@ -179,7 +179,7 @@ describe('Device Utils', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","udid":"emulator-5555","busy":false,"userBlocked":false}',
+          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
         ),
     );
   });

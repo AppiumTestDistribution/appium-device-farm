@@ -181,7 +181,7 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
     const timeoutMs = 30000;
     const result = await axios({
       method: 'get',
-      url: `${host}/device-farm`,
+      url: `${host}/device-farm/api/status`,
       timeout: timeoutMs,
       headers: {
         'Content-Type': 'application/json',
