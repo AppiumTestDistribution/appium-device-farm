@@ -57,8 +57,6 @@ describe('PCloudy Devices', () => {
       udid: 'GOOGLE',
       userBlocked: false,
       offline: false,
-      sessionStartTime: 0,
-      totalUtilizationTimeMilliSec: null,
     });
   });
 
