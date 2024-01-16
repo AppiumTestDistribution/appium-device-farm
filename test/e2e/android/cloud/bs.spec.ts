@@ -79,8 +79,11 @@ describe('BrowserStack: Plugin Test', () => {
     console.log('Successfully swiped');
   });
 
-  afterEach(async function () {
-    await driver.deleteSession();
+  afterEach(async () => {
+    if (driver) {
+      await driver.deleteSession();
+      driver = null;
+    }
   });
 });
 
