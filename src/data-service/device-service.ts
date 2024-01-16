@@ -320,9 +320,10 @@ export async function unblockDeviceMatchingFilter(filter: object) {
         }
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
         await setUtilizationTime(device.udid, totalUtilization);
-        deviceModel.findAndUpdate((data: IDevice) => {
-          return data.udid === device.udid && data.host === device.host;
-        },
+        deviceModel.findAndUpdate(
+          (data: IDevice) => {
+            return data.udid === device.udid && data.host === device.host;
+          },
           function (device: IDevice) {
             // log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;

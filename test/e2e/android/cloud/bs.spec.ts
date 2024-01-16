@@ -126,7 +126,7 @@ describe('Browser Stack: Quirks', () => {
     // no devices should be allocated/busy
     const allocatedDevices = androidDevices.filter((device: any) => device.busy === true);
     console.log(`Allocated devices: ${JSON.stringify(allocatedDevices)}`);
-  
+
     // no cloud devices should be allocated
     const cloudDevices = allocatedDevices.filter((device: any) => device.cloud === 'browserstack');
     expect(cloudDevices.length).to.equal(0);

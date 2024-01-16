@@ -331,7 +331,7 @@ class DevicePlugin extends BasePlugin {
     // Do we have valid session response?
     if (this.isCreateSessionResponseInternal(session)) {
       log.debug('📱 Session response is CreateSessionResponseInternal');
-      
+
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
@@ -415,19 +415,31 @@ class DevicePlugin extends BasePlugin {
         throw new Error(errorMessage);
       } else {
         throw new Error(
-          `Unknown error while creating session: ${JSON.stringify(session)}. \nBetter look at appium log on the node: ${host}`,
+          `Unknown error while creating session: ${JSON.stringify(
+            session,
+          )}. \nBetter look at appium log on the node: ${host}`,
         );
       }
     } else {
       throw new Error(
-        `Unknown error while creating session: ${JSON.stringify(session)}. \nBetter look at appium log on the node: ${host}`,
+        `Unknown error while creating session: ${JSON.stringify(
+          session,
+        )}. \nBetter look at appium log on the node: ${host}`,
       );
     }
   }
 
   // type guard for CreateSessionResponseInternal
-  private isCreateSessionResponseInternal(something: any): something is CreateSessionResponseInternal {
-    return something.hasOwnProperty('value') && something.value.length === 3 && something.value[0] && something.value[1] && something.value[2];
+  private isCreateSessionResponseInternal(
+    something: any,
+  ): something is CreateSessionResponseInternal {
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.length === 3 &&
+      something.value[0] &&
+      something.value[1] &&
+      something.value[2]
+    );
   }
 
   private async forwardSessionRequest(
@@ -519,15 +531,17 @@ class DevicePlugin extends BasePlugin {
       if (this.isW3CNewSessionResponse(sessionDetails)) {
         return sessionDetails as W3CNewSessionResponse;
       } else {
-        return new Error(
-          `Unknown error while creating session: ${JSON.stringify(sessionDetails)}`,
-        );
+        return new Error(`Unknown error while creating session: ${JSON.stringify(sessionDetails)}`);
       }
     }
   }
 
   private isW3CNewSessionResponse(something: any): something is W3CNewSessionResponse {
-    return something.hasOwnProperty('value') && something.value.hasOwnProperty('sessionId') && something.value.hasOwnProperty('capabilities');
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.hasOwnProperty('sessionId') &&
+      something.value.hasOwnProperty('capabilities')
+    );
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
