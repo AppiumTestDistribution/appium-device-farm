@@ -140,9 +140,10 @@ describe('E2E Forward Request - Prevent Forwarding', () => {
       1000,
     );
 
+    // all android devices coming from node
     const androidDevices = initialDevices.filter((device: any) => device.platform === 'android');
     const nodeDevices = initialDevices.filter((device: any) =>
-      device.host.includes(node_config.bindHostOrIp),
+      device.host.includes(node_config.bindHostOrIp) && device.platform === 'android',
     );
 
     console.log(`initialDevices: ${JSON.stringify(initialDevices)}`);
