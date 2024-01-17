@@ -153,7 +153,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'udid':
           // udid is an array
-          if (filterOptions.udid.length > 0) filter.udid = { $contains: filterOptions.udid };
+          if (filterOptions.udid.length > 0) filter.udid = { $in: filterOptions.udid };
           break;
         case 'deviceType':
           filter.deviceType = filterOptions.deviceType;
