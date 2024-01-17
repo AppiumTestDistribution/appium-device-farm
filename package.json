@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.4.7-rc.0",
+  "version": "8.4.7-rc.2",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/src/index.js",
   "scripts": {
@@ -144,8 +144,8 @@
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
     "@wdio/types": "^8.24.2",
-    "appium-uiautomator2-driver": "^2.32.3",
-    "appium-xcuitest-driver": "^5.7.0",
+    "appium-uiautomator2-driver": "^2.42.1",
+    "appium-xcuitest-driver": "^5.14.0",
     "babel-eslint": "10.1.0",
     "chai": "4.3.10",
     "chai-as-promised": "^7.1.1",

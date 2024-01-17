@@ -290,7 +290,7 @@ export function getDeviceFiltersFromCapability(
       : undefined,
     name,
     deviceType,
-    udid: udids?.length ? udids[0] : capability['appium:udid'],
+    udid: udids?.length ? udids : capability['appium:udid'],
     busy: false,
     userBlocked: false,
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
