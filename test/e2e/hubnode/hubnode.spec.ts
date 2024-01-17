@@ -45,7 +45,10 @@ let nodeReady = false;
 describe('E2E Hub and Node', () => {
   console.log('Before all');
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig('android', 'real', 'simulated');
+  const hub_config_file = ensureHubConfig({
+    platform: 'android',
+    androidDeviceType: 'real',
+  });
 
   // dump node config into a file
   const node_config_file = ensureNodeConfig();

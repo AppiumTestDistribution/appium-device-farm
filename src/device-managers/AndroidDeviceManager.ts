@@ -29,6 +29,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   constructor(
     private pluginArgs: IPluginArgs,
     private hostPort: number,
+    private nodeId: string,
   ) {}
 
   private initiateAbortControl(deviceUdid: string) {
@@ -309,6 +310,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
         log.info(`Cannot get device info for ${newDevice.udid}. Skipping`);
         return;
       }
+
+      // assign node id
+      trackedDevice.nodeId = this.nodeId;
 
       log.info(`Adding device ${newDevice.udid} to list!`);
       if (this.pluginArgs.hub != undefined) {

@@ -35,6 +35,7 @@ import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
+import { node } from 'appium/support';
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
@@ -345,12 +346,16 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
   return devices;
 }
 
-export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {
+export async function refreshSimulatorState(
+  pluginArgs: IPluginArgs,
+  hostPort: number,
+  nodeId: string,
+) {
   if (timer) {
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort, nodeId).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }

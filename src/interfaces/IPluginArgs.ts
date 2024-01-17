@@ -72,6 +72,7 @@ export interface IPluginArgs {
 
   // development purposes
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
+  preventSessionForwarding?: boolean;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -97,4 +98,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   bindHostOrIp: ip.address(),
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
+  preventSessionForwarding: false,
 };

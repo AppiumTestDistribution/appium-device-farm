@@ -15,11 +15,13 @@ import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
+import { DevicePlugin } from '../plugin';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
     private pluginArgs: IPluginArgs,
     private hostPort: number,
+    private nodeId: string,
   ) {}
   /**
    * Method to get all ios devices and simulators
@@ -161,7 +163,10 @@ export default class IOSDeviceManager implements IDeviceManager {
   async trackIOSDevices(pluginArgs: IPluginArgs) {
     const iosTracker = IosTracker.getInstance();
     iosTracker.on('attached', async (udid: string) => {
-      const deviceAttached = [await this.getDeviceInfo(udid, pluginArgs, this.hostPort)];
+      const newDevice = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
+      newDevice.nodeId = this.nodeId;
+
+      const deviceAttached = [newDevice];
       if (pluginArgs.hub !== undefined) {
         log.info(`Updating Hub with iOS device ${udid}`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
@@ -255,6 +260,9 @@ export default class IOSDeviceManager implements IDeviceManager {
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
 
     for await (const device of buildSimulators) {
+      if (device.nodeId === undefined) {
+        device.nodeId = this.nodeId;
+      }
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);

@@ -27,6 +27,7 @@ type E2ESetupOpts = {
   pluginName: string;
   port: number;
   host: string;
+  appiumLogFile?: string;
 };
 
 /**
@@ -51,6 +52,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
     port,
     host,
     enableGoIos,
+    appiumLogFile,
   } = opts;
 
   let server: AppiumServer;
@@ -218,6 +220,9 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
       }
       if (configFile) {
         serverArgs.push(`--config=${configFile}`);
+      }
+      if (appiumLogFile) {
+        serverArgs.push(`--log=${appiumLogFile}`);
       }
       console.log(`APPIUM_HOME=${env.APPIUM_HOME} GO_IOS=${env.GO_IOS}`);
       console.log(`${info} Running: ${process.execPath} ${serverArgs.join(' ')}`);

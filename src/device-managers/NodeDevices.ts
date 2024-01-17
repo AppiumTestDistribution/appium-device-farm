@@ -14,10 +14,11 @@ export default class NodeDevices {
   async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: string) {
     // DeviceWithPath -> new device
     // DeviceUpdate -> removed device
-    log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
+    const deviceFarmHost = this.host.replace(/\/wd\/hub$/, '');
+    log.info(`Updating remote android devices ${deviceFarmHost}/device-farm/api/register`);
     try {
       const status = (
-        await axios.post(`${this.host}/device-farm/api/register`, devices, {
+        await axios.post(`${deviceFarmHost}/device-farm/api/register`, devices, {
           params: {
             type: arg,
           },

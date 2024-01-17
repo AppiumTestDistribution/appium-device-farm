@@ -205,14 +205,15 @@ class DevicePlugin extends BasePlugin {
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
     );
 
-    const hubArgument = pluginArgs.hub;
+    log.debug(`What is my pluginArgs: ${JSON.stringify(pluginArgs)}`);
+    log.debug(`What is my hubArgument: ${JSON.stringify(pluginArgs.hub)}`);
 
-    if (hubArgument !== undefined) {
-      log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
+    if (!_.isNil(pluginArgs.hub)) {
+      log.info(`📣📣📣 I'm a node and my hub is ${pluginArgs.hub}`);
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(
         pluginArgs.bindHostOrIp,
-        hubArgument,
+        pluginArgs.hub,
         pluginArgs.sendNodeDevicesToHubIntervalMs,
       );
     } else {
@@ -244,10 +245,10 @@ class DevicePlugin extends BasePlugin {
       log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
     }
 
-    const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
+    const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, pluginArgs.hub);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(pluginArgs, cliArgs.port);
+      await refreshSimulatorState(pluginArgs, cliArgs.port, DevicePlugin.NODE_ID);
     }
   }
 
@@ -320,12 +321,22 @@ class DevicePlugin extends BasePlugin {
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
 
     log.debug(
+      `allocated device.nodeId: ${device.nodeId} vs pluginArgs.nodeId: ${DevicePlugin.NODE_ID}`,
+    );
+
+    log.debug(
       `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
     );
     // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
     if (isRemoteOrCloudSession) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
-      session = await this.forwardSessionRequest(device, caps);
+      if (!!this.pluginArgs.preventSessionForwarding) {
+        session = new Error(
+          `Session forwarding is disabled. Please enable it by setting "preventSessionForwarding" to false in plugin args`,
+        );
+      } else {
+        session = await this.forwardSessionRequest(device, caps);
+      }
     } else {
       log.debug('📱 Creating session on the same node');
       session = await next();

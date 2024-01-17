@@ -4,6 +4,7 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
+import { DevicePlugin } from '../plugin';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
@@ -35,6 +36,11 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       } as unknown as Partial<IDevice>,
       device,
     );
+
+    // fixme: pass node id from function parameter
+    if (device.nodeId === undefined) {
+      device.nodeId = DevicePlugin.NODE_ID;
+    }
 
     const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel)
       .chain()

@@ -15,6 +15,8 @@ import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
 import { hub_config, node_config } from '../e2ehelper';
+import sinon from 'sinon';
+import DevicePlugin from '../../../src';
 chai.use(chaiAsPromised);
 
 let driver: any;
@@ -41,10 +43,11 @@ const capabilities = {
 const NEW_COMMAND_TIMEOUT_SECS = 10;
 
 describe('E2E Forward Request', () => {
-  console.log('Before all');
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig('android', 'real', 'real', {
+  const hub_config_file = ensureHubConfig({
     newCommandTimeoutSec: NEW_COMMAND_TIMEOUT_SECS,
+    platform: 'android',
+    androidDeviceType: 'both',
   });
 
   // dump node config into a file
@@ -157,6 +160,8 @@ describe('E2E Forward Request', () => {
     ).data;
     const busyDevice = newAllDevices.filter((device: any) => device.busy);
 
+    console.log(`Busy device: ${JSON.stringify(busyDevice)}`);
+
     // device should have host as node_config.bindHostOrIp
     expect(busyDevice[0]).to.have.property('host').that.includes(node_config.bindHostOrIp);
     expect(busyDevice[0]).to.have.property('host').that.not.includes(hub_config.bindHostOrIp);
@@ -201,7 +206,7 @@ describe('E2E Forward Request', () => {
     console.log(`Busy device: ${JSON.stringify(newBusyDevice)}`);
   });
 
-  it.only('does not unblock device when cmd is sent before newCommandTimeoutSec', async () => {
+  it('does not unblock device when cmd is sent before newCommandTimeoutSec', async () => {
     await waitForHubAndNode();
     if (hub_config.bindHostOrIp == node_config.bindHostOrIp) {
       it.skip('node and hub should not be using the same host');
