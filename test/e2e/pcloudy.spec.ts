@@ -6,6 +6,7 @@ import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
 import ip from 'ip';
 import { IDevice } from '../../src/interfaces/IDevice';
+import { del } from 'node-persist';
 
 describe('PCloudy Devices', () => {
   // dump hub config into a file
@@ -39,6 +40,7 @@ describe('PCloudy Devices', () => {
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
+    delete androidDevices[0].nodeId;
     expect(androidDevices[0]).to.deep.equal({
       platform: 'android',
       host: 'https://device.pcloudy.com/appiumcloud',
@@ -71,6 +73,7 @@ describe('PCloudy Devices', () => {
     const cloudDevices = iosDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete cloudDevices[0].meta;
     delete cloudDevices[0]['$loki'];
+    delete cloudDevices[0].nodeId;
     //delete cloudDevices[0].udid;
     //delete cloudDevices[0].name;
     expect(cloudDevices[0]).to.deep.equal({

@@ -45,6 +45,7 @@ describe('Browserstack Devices', () => {
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
+    delete androidDevices[0].nodeId;
     expect(androidDevices[0]).to.deep.equal({
       deviceName: 'Google Pixel 3',
       os_version: '9.0',
@@ -72,6 +73,7 @@ describe('Browserstack Devices', () => {
     iosDevices = iosDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete iosDevices[0].meta;
     delete iosDevices[0]['$loki'];
+    delete iosDevices[0].nodeId;
     expect(iosDevices[0]).to.deep.equal({
       deviceName: 'iPhone XS',
       os_version: '15',

@@ -18,7 +18,7 @@
     "test-parallel-lt": "mocha --require ts-node/register -p ./test/e2e/android/cloud/lambdaTest.spec.ts --exit --timeout 260000",
     "test-parallel-ios-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/confIOS.ts --exit --timeout 260000",
     "test-e2e": "mocha --require ts-node/register ./test/e2e/plugin.spec.* --exit --timeout=999999",
-    "test-e2e-hubnode": "mocha -r ts-node/register ./test/e2e/hubnode/forward-request-prevent-forward.spec.ts --plugin-device-farm-platform=both --exit --timeout=999999",
+    "test-e2e-hubnode": "mocha -r ts-node/register ./test/e2e/hubnode/*.spec.ts --plugin-device-farm-platform=both --exit --timeout=999999",
     "test-e2e-browserstack": "mocha --require ts-node/register ./test/e2e/browserstack.spec.ts --exit --timeout 999999",
     "test-e2e-pcloudy": "mocha --require ts-node/register ./test/e2e/pcloudy.spec.ts --exit --timeout 999999",
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.ts --timeout 90000 --exit",
