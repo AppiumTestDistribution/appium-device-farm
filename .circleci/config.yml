@@ -20,7 +20,7 @@ jobs:
   android:
     machine:
       image: android:202102-01
-    resource_class: xlarge
+    resource_class: large
     steps:
       - checkout
       - run:
