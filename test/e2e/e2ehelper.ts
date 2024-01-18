@@ -43,13 +43,13 @@ export const HUB_APPIUM_PORT = 4723;
 export const NODE_APPIUM_PORT = 4724;
 export const PLUGIN_PATH = path.resolve(__dirname + '/../..');
 
-export const hub_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
+export const default_hub_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
   hub: undefined,
   bindHostOrIp: localIp,
 });
 
-export const node_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
-  hub: `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}`,
+export const default_node_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
+  hub: `http://${default_hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}`,
   bindHostOrIp: alternateIp,
 });
 
@@ -81,13 +81,13 @@ function ensureAppiumHome(suffix = '', deleteExisting = true) {
   return newHome;
 }
 
-function ensureHubConfig(moreConfig: Partial<IPluginArgs> = {}) {
-  const finalConfig = Object.assign({}, hub_config, moreConfig);
+function ensureHubConfig(moreConfig: Partial<IPluginArgs> = {}, configPrefix = 'hub') {
+  const finalConfig = Object.assign({}, default_hub_config, moreConfig);
 
   // make sure there's no hub defined
   delete finalConfig.hub;
 
-  return ensureConfig('hub-config.json', {
+  return ensureConfig(`${configPrefix}-config.json`, {
     server: {
       port: HUB_APPIUM_PORT,
       plugin: {
@@ -97,15 +97,15 @@ function ensureHubConfig(moreConfig: Partial<IPluginArgs> = {}) {
   });
 }
 
-function ensureNodeConfig(moreConfig: Partial<IPluginArgs> = {}) {
-  const finalConfig = Object.assign({}, node_config, moreConfig);
+function ensureNodeConfig(moreConfig: Partial<IPluginArgs> = {}, configPrefix = 'node') {
+  const finalConfig = Object.assign({}, default_node_config, moreConfig);
 
   // bail when hub is not defined
   if (!finalConfig.hub) {
     throw new Error('Hub is not defined in node config');
   }
 
-  return ensureConfig('node-config.json', {
+  return ensureConfig(`${configPrefix}-config.json`, {
     server: {
       port: NODE_APPIUM_PORT,
       plugin: {
@@ -117,8 +117,15 @@ function ensureNodeConfig(moreConfig: Partial<IPluginArgs> = {}) {
 
 function ensureConfig(filename: string, config: any) {
   const config_file = ensureTempDir() + '/' + filename;
+  // delete existing config file
+  if (fs.existsSync(config_file)) fs.unlinkSync(config_file);
   fs.writeFileSync(config_file, JSON.stringify(config));
   return config_file;
+}
+
+function configReader(config_file: string) {
+  const config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
+  return config.server.plugin['device-farm'];
 }
 
 // wait until condition is true or timeout
@@ -138,4 +145,4 @@ export async function waitForCondition(
   throw new Error(`Timeout waiting for condition`);
 }
 
-export { ensureHubConfig, ensureNodeConfig, ensureAppiumHome, ensureTempDir };
+export { ensureHubConfig, ensureNodeConfig, ensureAppiumHome, ensureTempDir, configReader };

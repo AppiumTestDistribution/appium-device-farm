@@ -83,9 +83,9 @@ describe('Android Device Manager', function () {
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
-    expect(androidDevices.getDevices({ androidDeviceType: 'both' }, [])).to.eventually.be.equal(
-      deviceList,
-    );
+    await expect(
+      androidDevices.getDevices({ androidDeviceType: 'both' }, []),
+    ).to.eventually.be.equal(deviceList);
     expect(getConnectedDevicesStub.called).to.be.true;
 
     console.log('devices', devices);

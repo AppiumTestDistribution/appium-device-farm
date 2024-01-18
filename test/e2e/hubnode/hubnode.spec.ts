@@ -10,8 +10,8 @@ import {
   ensureAppiumHome,
   ensureHubConfig,
   ensureNodeConfig,
-  hub_config,
-  node_config,
+  default_hub_config,
+  default_node_config,
 } from '../e2ehelper';
 import { Options } from '@wdio/types';
 import axios from 'axios';
@@ -45,13 +45,16 @@ let nodeReady = false;
 describe('E2E Hub and Node', () => {
   console.log('Before all');
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig({
-    platform: 'android',
-    androidDeviceType: 'real',
-  });
+  const hub_config_file = ensureHubConfig(
+    {
+      platform: 'android',
+      androidDeviceType: 'real',
+    },
+    'hubnode-hub',
+  );
 
   // dump node config into a file
-  const node_config_file = ensureNodeConfig();
+  const node_config_file = ensureNodeConfig({}, 'hubnode-node');
 
   // setup appium home
   const APPIUM_HOME = ensureAppiumHome('hub', true);
@@ -66,7 +69,7 @@ describe('E2E Hub and Node', () => {
     after: global.after,
     configFile: hub_config_file,
     pluginName: 'device-farm',
-    host: hub_config.bindHostOrIp,
+    host: default_hub_config.bindHostOrIp,
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
     driverName: 'uiautomator2',
@@ -83,7 +86,7 @@ describe('E2E Hub and Node', () => {
     configFile: node_config_file,
     pluginName: 'device-farm',
     port: NODE_APPIUM_PORT,
-    host: node_config.bindHostOrIp,
+    host: default_node_config.bindHostOrIp,
     driverSource: 'npm',
     driverName: 'uiautomator2',
     driverSpec: 'appium-uiautomator2-driver',
@@ -118,7 +121,7 @@ describe('E2E Hub and Node', () => {
     const nodeAndroidDevices = androidDevices.filter(
       (device: any) =>
         device.host.includes(NODE_APPIUM_PORT.toString()) &&
-        device.host.includes(node_config.bindHostOrIp),
+        device.host.includes(default_node_config.bindHostOrIp),
     );
     expect(nodeAndroidDevices.length).to.be.greaterThan(0);
   });

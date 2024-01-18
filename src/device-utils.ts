@@ -318,10 +318,23 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
+/**
+ * Get all devices from system, compares it with the existing devices in the database.
+ * Clean up non-existing devices from the database and add new devices to the database.
+ * Also, send device list update to the hub if the hub is running.
+ * @param host
+ * @param hubArgument
+ * @returns
+ */
 export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
-  const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
-  if (devices.length === 0) {
-    log.warn('No devices found');
+  const existingDevices = await getAllDevices();
+  const devices: IDevice[] = await getDeviceManager().getDevices(existingDevices);
+  const noLongerExistingDevices = existingDevices.filter((device) => {
+    return !devices.some((newDevice) => newDevice.udid === device.udid);
+  });
+
+  if (devices.length === 0 && noLongerExistingDevices.length === 0) {
+    log.warn('No devices removed or added found');
     return [];
   }
 
@@ -333,14 +346,28 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
   if (hubArgument) {
     if (await isDeviceFarmRunning(hubArgument)) {
       const nodeDevices = new NodeDevices(hubArgument);
+      // add new devices to the hub
       try {
         await nodeDevices.postDevicesToHub(devices, 'add');
       } catch (error) {
-        log.error(`Cannot send device list update. Reason: ${error}`);
+        log.error(`Cannot send device list to add. Reason: ${error}`);
+      }
+
+      // remove non-existing devices from the hub
+      try {
+        await nodeDevices.postDevicesToHub(noLongerExistingDevices, 'remove');
+      } catch (error) {
+        log.error(`Cannot send device list to remove. Reason: ${error}`);
       }
     } else {
       log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
+  } else {
+    // remove non-existing devices from the database
+    log.debug(`Removing non-existent device(s): ${JSON.stringify(noLongerExistingDevices)}`);
+    await removeDevice(
+      noLongerExistingDevices.map((device) => ({ udid: device.udid, host: device.host })),
+    );
   }
 
   return devices;

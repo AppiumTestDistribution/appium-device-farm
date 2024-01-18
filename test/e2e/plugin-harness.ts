@@ -9,6 +9,8 @@ import path from 'path';
 import yaml from 'js-yaml';
 import fs from 'fs';
 import ip from 'ip';
+import find from 'find-process';
+import waitUntil from 'async-wait-until';
 
 type PluginHarnessServerArgs = { subcommand: string; configFile: string };
 
@@ -230,6 +232,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
       exec(process.execPath, serverArgs, {
         env,
       });
+
       return waitServer(host ?? ip.address(), port ?? 4723, 60);
     }
 
@@ -260,9 +263,27 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
   }
 
   async function stopPlugin() {
-    if (server) {
-      await server.close();
-    }
+    console.log(`${info} Stopping plugin "${pluginName}"`);
+
+    // find process with name "appium" and the right config param argument, and wait until exit
+    await waitUntil(
+      async () => {
+        const processes = await find('name', 'appium');
+        console.log(`${info} Found ${processes.length} appium processes`);
+        const myProcess = processes.find((p: any) => {
+          return p.cmd.includes(`--config=${configFile}`);
+        });
+        console.log(`myProcess: ${JSON.stringify(myProcess, null, 2)}`);
+
+        // send SIGTERM to the process
+        if (myProcess) {
+          process.kill(myProcess.pid, 'SIGTERM');
+        }
+        return myProcess === undefined;
+      },
+      60000,
+      1000,
+    );
   }
 
   // clean it after test

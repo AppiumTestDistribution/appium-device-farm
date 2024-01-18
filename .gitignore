@@ -12,3 +12,4 @@ temp-appium
 .env
 src/public/*
 docs/reference
+*.log

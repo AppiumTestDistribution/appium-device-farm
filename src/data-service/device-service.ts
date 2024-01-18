@@ -5,6 +5,7 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import { DevicePlugin } from '../plugin';
+import { IPluginArgs } from '../interfaces/IPluginArgs';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {

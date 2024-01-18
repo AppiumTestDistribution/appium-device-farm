@@ -9,20 +9,19 @@ import {
   ensureAppiumHome,
   ensureHubConfig,
   ensureNodeConfig,
-  waitForCondition,
 } from '../e2ehelper';
 import { Options } from '@wdio/types';
 import axios from 'axios';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
-import { hub_config, node_config } from '../e2ehelper';
+import { default_hub_config, default_node_config } from '../e2ehelper';
 chai.use(chaiAsPromised);
 
 let driver: any;
 
 const WDIO_PARAMS = {
   connectionRetryCount: 0,
-  hostname: hub_config.bindHostOrIp,
+  hostname: default_hub_config.bindHostOrIp,
   port: HUB_APPIUM_PORT,
   logLevel: 'info',
   path: '/',
@@ -41,22 +40,26 @@ const capabilities = {
 
 const NEW_COMMAND_TIMEOUT_SECS = 10;
 
-describe('E2E Forward Request - Prevent Forwarding', () => {
+describe('E2E Forward Request - No Forward for Hub Devices', () => {
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig({
-    newCommandTimeoutSec: NEW_COMMAND_TIMEOUT_SECS,
-    preventSessionForwarding: true,
-    removeDevicesFromDatabaseBeforeRunningThePlugin: true,
-    platform: 'ios',
-  });
+  const hub_config_file = ensureHubConfig(
+    {
+      newCommandTimeoutSec: NEW_COMMAND_TIMEOUT_SECS,
+      removeDevicesFromDatabaseBeforeRunningThePlugin: true,
+      preventSessionForwarding: true,
+      platform: 'android',
+    },
+    'hub-no-forward-request',
+  );
 
   // dump node config into a file
-  const node_config_file = ensureNodeConfig({
-    hub: `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/wd/hub`,
-    removeDevicesFromDatabaseBeforeRunningThePlugin: true,
-    platform: 'android',
-    sendNodeDevicesToHubIntervalMs: 1000,
-  });
+  const node_config_file = ensureNodeConfig(
+    {
+      removeDevicesFromDatabaseBeforeRunningThePlugin: true,
+      platform: 'ios',
+    },
+    'node-no-forward-request',
+  );
 
   // setup appium home
   const APPIUM_HOME = ensureAppiumHome('hub', true);
@@ -71,7 +74,7 @@ describe('E2E Forward Request - Prevent Forwarding', () => {
     after: global.after,
     configFile: hub_config_file,
     pluginName: 'device-farm',
-    host: hub_config.bindHostOrIp,
+    host: default_hub_config.bindHostOrIp,
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
     driverName: 'uiautomator2',
@@ -79,7 +82,6 @@ describe('E2E Forward Request - Prevent Forwarding', () => {
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME!,
-    appiumLogFile: './hub-prevent-forward.log',
   });
 
   // run node
@@ -89,14 +91,13 @@ describe('E2E Forward Request - Prevent Forwarding', () => {
     configFile: node_config_file,
     pluginName: 'device-farm',
     port: NODE_APPIUM_PORT,
-    host: node_config.bindHostOrIp,
+    host: default_node_config.bindHostOrIp,
     driverSource: 'npm',
     driverName: 'uiautomator2',
     driverSpec: 'appium-uiautomator2-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME_NODE!,
-    appiumLogFile: './node-prevent-forward.log',
   });
 
   async function waitForHubAndNode() {
@@ -113,59 +114,48 @@ describe('E2E Forward Request - Prevent Forwarding', () => {
     }
   }
 
-  it('can not forward session when preventSessionForwarding is set to false', async () => {
+  it('should not forward request for device in the hub itself', async () => {
     await waitForHubAndNode();
-    if (hub_config.bindHostOrIp == node_config.bindHostOrIp) {
+    if (default_hub_config.bindHostOrIp == default_node_config.bindHostOrIp) {
       it.skip('node and hub should not be using the same host');
     }
 
     const initialDevices = (
-      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
+      await axios.get(
+        `http://${default_hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`,
+      )
     ).data;
 
     // all devices must have nodeId
     expect(initialDevices.filter((device: any) => device.nodeId === undefined).length).to.equal(0);
 
-    console.log(`Waiting for android devices to be available`);
-    // wait until there are android devices
-    await waitForCondition(
-      async () => {
-        // use axios to get the devices
-        const res = await axios.get(
-          `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`,
-        );
-        return res.data.filter((device: any) => device.platform === 'android').length > 0;
-      },
-      20000,
-      1000,
-    );
-
-    // all android devices coming from node
     const androidDevices = initialDevices.filter((device: any) => device.platform === 'android');
-    const nodeDevices = initialDevices.filter((device: any) =>
-      device.host.includes(node_config.bindHostOrIp) && device.platform === 'android',
-    );
 
-    console.log(`initialDevices: ${JSON.stringify(initialDevices)}`);
     console.log(`androidDevices: ${JSON.stringify(androidDevices)}`);
-    console.log(`nodeDevices: ${JSON.stringify(nodeDevices)}`);
 
-    // there should be android devices
-    expect(androidDevices.length).to.be.greaterThan(0);
-
-    // android devices and node devices should be equal
-    expect(androidDevices.length).to.equal(nodeDevices.length);
-
-    expect(remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO)).to.eventually.throw();
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
 
     const allDevices = (
-      await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
+      await axios.get(
+        `http://${default_hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`,
+      )
     ).data;
 
     const busyDevice = allDevices.filter((device: any) => device.busy);
 
-    // no device should be busy
-    expect(busyDevice.length).to.equal(0);
+    // check device status
+    const newAllDevices = (
+      await axios.get(
+        `http://${default_hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`,
+      )
+    ).data;
+
+    const newBusyDevice = newAllDevices.filter(
+      (device: any) => device.udid === busyDevice[0].udid && device.host === busyDevice[0].host,
+    );
+
+    // device should be busy
+    expect(newBusyDevice[0].busy).to.be.true;
   });
 
   afterEach(async function () {

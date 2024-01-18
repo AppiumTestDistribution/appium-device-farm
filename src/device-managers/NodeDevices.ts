@@ -11,7 +11,7 @@ export default class NodeDevices {
     this.host = host;
   }
 
-  async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: string) {
+  async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: 'add' | 'remove') {
     // DeviceWithPath -> new device
     // DeviceUpdate -> removed device
     const deviceFarmHost = this.host.replace(/\/wd\/hub$/, '');
@@ -25,7 +25,7 @@ export default class NodeDevices {
         })
       ).status;
       if (status === 200) {
-        if (arg === 'add') {
+        if (arg.toLowerCase() === 'add') {
           log.info(`Pushed devices to hub ${JSON.stringify(devices)}`);
         } else {
           log.info(`Removed device and pushed information to hub ${JSON.stringify(devices)}`);

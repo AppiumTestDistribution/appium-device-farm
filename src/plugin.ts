@@ -327,19 +327,30 @@ class DevicePlugin extends BasePlugin {
     log.debug(
       `device.host: ${device.host} and pluginArgs.bindHostOrIp: ${this.pluginArgs.bindHostOrIp}`,
     );
-    // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
-    if (isRemoteOrCloudSession) {
-      log.debug(`📱 Forwarding session request to ${device.host}`);
-      if (!!this.pluginArgs.preventSessionForwarding) {
-        session = new Error(
-          `Session forwarding is disabled. Please enable it by setting "preventSessionForwarding" to false in plugin args`,
-        );
-      } else {
-        session = await this.forwardSessionRequest(device, caps);
-      }
-    } else {
+
+    if (!_.isNil(this.pluginArgs.hub)) {
+      // I am a node, create the session on the same node
       log.debug('📱 Creating session on the same node');
       session = await next();
+    } else {
+      // I am a hub.
+      // Check whether the device is on the same node or not.
+      if (isRemoteOrCloudSession) {
+        // If the device is not on the same node, forward the session request.
+        log.debug(`📱 Need to forward session request to ${device.host}`);
+        // Unless preventSessionForwarding is set to true
+        if (this.pluginArgs.preventSessionForwarding) {
+          session = new Error(
+            `Requested device is available on the node. However, session forwarding is disabled. Please enable it by setting "preventSessionForwarding" to false in plugin args`,
+          );
+        } else {
+          session = await this.forwardSessionRequest(device, caps);
+        }
+      } else {
+        // If the device is on the same node, create the session on the same node.
+        log.debug('📱 Creating session on the hub');
+        session = await next();
+      }
     }
 
     // non-forwarded session can also be an error

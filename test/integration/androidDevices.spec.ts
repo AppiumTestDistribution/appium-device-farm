@@ -37,7 +37,7 @@ describe('Android Test', () => {
   before(async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
     // adb devices should return devices
-    expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
+    await expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
       0,
       'No devices detected. Is adb running? Is there at least one device connected?',
     );
