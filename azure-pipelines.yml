@@ -55,6 +55,9 @@ jobs:
         nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -verbose -no-boot-anim -no-audio -no-window -gpu swiftshader_indirect > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo '---'
         $ANDROID_HOME/platform-tools/adb devices
+        $ANDROID_HOME/platform-tools/adb kill-server
+        echo '----devices after kill server----'
+        $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
     - script: |
         npm run build --if-present
