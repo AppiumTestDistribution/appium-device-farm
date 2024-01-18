@@ -1,8 +1,5 @@
 # .circleci/config.yml
 version: 2.1
-orbs:
-  macos: circleci/macos@2.3.6
-
 jobs:
   iOS:
     macos:
@@ -20,8 +17,34 @@ jobs:
             node -v 
             npm ci
             npm run integration-ios
+  android:
+    machine:
+      image: android:202102-01
+    resource_class: xlarge
+    steps:
+      - checkout
+      - run:
+          name: Create avd
+          command: |
+            SYSTEM_IMAGES="system-images;android-29;default;x86"
+            sdkmanager "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
+      - run:
+          name: Launch emulator
+          command: |
+            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          background: true
+      - run:
+          name: Wait for emulator to start
+          command: |
+            circle-android wait-for-boot
+      - run:
+          name: Run UI tests
+          command: |
+            adb devices          
 
 workflows:
   build:
     jobs:
       - iOS
+      - android
