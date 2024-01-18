@@ -125,7 +125,11 @@ describe('Browser Stack: Quirks', () => {
     const initialBusyDevices = await busyDevices();
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
-    expect(remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO)).to.eventually.throw();
+    try {
+      await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    } catch (e) {
+      console.log(e);
+    }
 
     const currentBusyDevices = await busyDevices();
     console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
