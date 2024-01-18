@@ -61,116 +61,116 @@ jobs:
         npm run integration-android
       displayName: "Android Integration Test"
 
-# - job: E2EPluginTest
-#   pool:
-#     vmImage: 'macOS-latest'
-#
-#   steps:
-#    - task: NodeTool@0.200.0
-#      inputs:
-#       versionSpec: '16.x'
-#
-#    - script: |
-#        npm ci
-#        npm run test-e2e
-#      displayName: 'E2E Test'
-#
-# - job: E2EHubAndNodeTest
-#   pool:
-#     vmImage: 'macOS-latest'
-#
-#   steps:
-#    - task: NodeTool@0.200.0
-#      inputs:
-#       versionSpec: '16.x'
-#
-#    - bash: |
-#        echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
-#      displayName: "install Android image"
-#    - script: |
-#        $ANDROID_HOME/emulator/emulator -list-avds
-#        echo '---'
-#        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
-#        echo '---'
-#        $ANDROID_HOME/emulator/emulator -list-avds
-#      displayName: "create AVD"
-#    - script: |
-#        $ANDROID_HOME/platform-tools/adb devices
-#        echo '---'
-#        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-#        echo '---'
-#        $ANDROID_HOME/platform-tools/adb devices
-#      displayName: "start Android emulator"
-#    - script: |
-#        npm ci
-#
-#        npm run test-e2e-hubnode
-#      displayName: 'E2E Hub and Node Test'
-#
-# - job: E2EPluginBrowserStackTest
-#   pool:
-#     vmImage: 'macOS-latest'
-#
-#   steps:
-#    - task: NodeTool@0.200.0
-#      inputs:
-#       versionSpec: '16.x'
-#
-#    - script: |
-#        npm ci
-#
-#        npm run test-e2e-browserstack
-#      displayName: 'E2E Test'
-#
-# - job: E2EPluginPCloudy
-#   pool:
-#     vmImage: 'macOS-latest'
-#
-#   steps:
-#    - task: NodeTool@0.200.0
-#      inputs:
-#       versionSpec: '16.x'
-#
-#    - script: |
-#        npm ci
-#
-#        npm run test-e2e-pcloudy
-#      displayName: 'E2E Test'
-#
-# - job: BrowserStack_mac
-#   pool:
-#     vmImage: 'macOS-latest'
-#
-#   steps:
-#    - task: NodeTool@0.200.0
-#      inputs:
-#       versionSpec: '16.x'
-#
-#    - script: |
-#        npm ci
-#
-#        export CLOUD_USERNAME=$BS_USERNAME
-#        export CLOUD_KEY=$BS_PASSWORD
-#        export BS_ANDROID_CLOUD_APP=$BS_ANDROID_CLOUD_APP
-#        npm run test-parallel-bs
-#      displayName: 'E2E Test'
-#
-# - job: BrowserStack_Linux_IOS
-#   pool:
-#     vmImage: 'ubuntu-latest'
-#
-#   steps:
-#     - task: NodeTool@0.200.0
-#       inputs:
-#         versionSpec: '16.x'
-#
-#     - script: |
-#         npm ci
-#         export CLOUD_USERNAME=$BS_USERNAME
-#         export CLOUD_KEY=$BS_PASSWORD
-#         export BS_IOS_CLOUD_APP=$BS_IOS_CLOUD_APP
-#         npm run test-parallel-ios-bs
-#       displayName: 'E2E Test BS Linux'
+ - job: E2EPluginTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - script: |
+        npm ci
+        npm run test-e2e
+      displayName: 'E2E Test'
+
+ - job: E2EHubAndNodeTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - bash: |
+        echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
+      displayName: "install Android image"
+    - script: |
+        $ANDROID_HOME/emulator/emulator -list-avds
+        echo '---'
+        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
+        echo '---'
+        $ANDROID_HOME/emulator/emulator -list-avds
+      displayName: "create AVD"
+    - script: |
+        $ANDROID_HOME/platform-tools/adb devices
+        echo '---'
+        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        echo '---'
+        $ANDROID_HOME/platform-tools/adb devices
+      displayName: "start Android emulator"
+    - script: |
+        npm ci
+
+        npm run test-e2e-hubnode
+      displayName: 'E2E Hub and Node Test'
+
+ - job: E2EPluginBrowserStackTest
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - script: |
+        npm ci
+
+        npm run test-e2e-browserstack
+      displayName: 'E2E Test'
+
+ - job: E2EPluginPCloudy
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - script: |
+        npm ci
+
+        npm run test-e2e-pcloudy
+      displayName: 'E2E Test'
+
+ - job: BrowserStack_mac
+   pool:
+     vmImage: 'macOS-latest'
+
+   steps:
+    - task: NodeTool@0.200.0
+      inputs:
+       versionSpec: '16.x'
+
+    - script: |
+        npm ci
+
+        export CLOUD_USERNAME=$BS_USERNAME
+        export CLOUD_KEY=$BS_PASSWORD
+        export BS_ANDROID_CLOUD_APP=$BS_ANDROID_CLOUD_APP
+        npm run test-parallel-bs
+      displayName: 'E2E Test'
+
+ - job: BrowserStack_Linux_IOS
+   pool:
+     vmImage: 'ubuntu-latest'
+
+   steps:
+     - task: NodeTool@0.200.0
+       inputs:
+         versionSpec: '16.x'
+
+     - script: |
+         npm ci
+         export CLOUD_USERNAME=$BS_USERNAME
+         export CLOUD_KEY=$BS_PASSWORD
+         export BS_IOS_CLOUD_APP=$BS_IOS_CLOUD_APP
+         npm run test-parallel-ios-bs
+       displayName: 'E2E Test BS Linux'
 
 # - job: Sauce
 #   pool:
