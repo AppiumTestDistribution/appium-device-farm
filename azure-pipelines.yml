@@ -151,7 +151,7 @@ jobs:
         
         export CLOUD_USERNAME=$BS_USERNAME
         export CLOUD_KEY=$BS_PASSWORD
-
+        export BS_ANDROID_CLOUD_APP=$BS_ANDROID_CLOUD_APP
         npm run test-parallel-bs
       displayName: 'E2E Test'
 
@@ -168,7 +168,7 @@ jobs:
          npm ci
          export CLOUD_USERNAME=$BS_USERNAME
          export CLOUD_KEY=$BS_PASSWORD
-         
+         export BS_IOS_CLOUD_APP=$BS_IOS_CLOUD_APP
          npm run test-parallel-ios-bs
        displayName: 'E2E Test BS Linux'
 
@@ -202,6 +202,6 @@ jobs:
          npm ci
          export CLOUD_USERNAME=$LT_USERNAME
          export CLOUD_KEY=$LT_PASSWORD
-
+         export LT_CLOUD_APP=$LT_CLOUD_APP
          npm run test-parallel-lt
        displayName: 'E2E Test'
