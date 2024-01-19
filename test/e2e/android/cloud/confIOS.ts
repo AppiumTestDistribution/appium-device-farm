@@ -14,14 +14,16 @@ const WDIO_PARAMS = {
   logLevel: 'info',
 };
 const capabilities = {
-  platformName: 'ios',
-  'appium:automationName': 'XCUITest',
+  platformName: 'iOS',
+  'appium:automationName': 'xcuitest',
   'appium:app': 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
     sessionName: 'LoginTest',
   },
+  'appium:udid': 'iPhone XS',
+  'appium:deviceName': 'iPhone XS',
 };
 let driver: any;
 describe('Plugin Test', () => {
@@ -42,8 +44,8 @@ describe('Plugin Test', () => {
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
-    driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverName: 'xcuitest',
+    driverSpec: 'appium-xcuitest-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME!,

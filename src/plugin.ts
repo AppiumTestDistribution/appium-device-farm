@@ -318,7 +318,10 @@ class DevicePlugin extends BasePlugin {
     );
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
-    const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
+    const isRemoteOrCloudSession =
+      !device.nodeId ||
+      device.nodeId !== DevicePlugin.NODE_ID ||
+      (device.hasOwnProperty('cloud') && _.isNil(device.cloud));
 
     log.debug(
       `allocated device.nodeId: ${device.nodeId} vs pluginArgs.nodeId: ${DevicePlugin.NODE_ID}`,
