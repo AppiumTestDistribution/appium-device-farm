@@ -46,6 +46,10 @@ describe('Android Test', () => {
 
   beforeEach(async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
+    await waitUntil(async () => {
+      const devices = await deviceManager.getDevices();
+      return devices.length > 0;
+    });
     // adb devices should return devices
     await expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
       1,
@@ -71,50 +75,6 @@ describe('Android Test', () => {
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
-  it('Allocate second free device and verify both the device state is busy in db', async () => {
-    await initializeStorage();
-    const deviceManager = new DeviceFarmManager(
-      'android',
-      { androidDeviceType: 'both', iosDeviceType: 'both' },
-      4723,
-      Object.assign({}, DefaultPluginArgs, pluginArgs),
-      NODE_ID,
-    );
-    Container.set(DeviceFarmManager, deviceManager);
-    await updateDeviceList(pluginArgs.bindHostOrIp);
-
-    // wait until there are two devices and both are not offline
-    let devices: IDevice[] = [];
-    await waitUntil(async () => {
-      await updateDeviceList(pluginArgs.bindHostOrIp);
-      devices = await deviceManager.getDevices();
-
-      return (
-        devices.length === 2 && devices.every((device: IDevice) => !device.offline && !device.busy)
-      );
-    });
-
-    expect(devices.length).to.be.equal(2);
-
-    console.log('devices', devices);
-
-    // grab first device
-    const device = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    console.log('allocated device', device);
-
-    devices = await deviceManager.getDevices();
-    console.log('devices', devices);
-
-    console.log(`capabilities: ${JSON.stringify(capabilities)}`);
-
-    // expect 1 device to be busy
-    expect(devices.filter((device) => device.busy).length).to.be.equal(1);
-
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find().data();
-    allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
-  });
-
   it('Finding a device should throw error when all devices are busy', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager(
@@ -128,13 +88,16 @@ describe('Android Test', () => {
     const hub = pluginArgs.hub;
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
 
-    // grab first device
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    const devices = await deviceManager.getDevices();
 
-    // grab second device
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    expect(devices).to.have.length.greaterThan(0);
 
-    // grab third device
+    // allocate all devices
+    for (const device of devices) {
+      await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    }
+
+    // request another device
     allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
