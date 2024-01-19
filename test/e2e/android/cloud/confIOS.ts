@@ -16,7 +16,7 @@ const WDIO_PARAMS = {
 const capabilities = {
   platformName: 'iOS',
   'appium:automationName': 'xcuitest',
-  'appium:app': 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
+  'appium:app': process.env.BS_IOS_CLOUD_APP ?? 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',

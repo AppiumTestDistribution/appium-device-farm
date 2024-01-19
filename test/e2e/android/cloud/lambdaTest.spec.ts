@@ -19,7 +19,7 @@ const capabilities = {
   platformName: 'Android',
   'appium:isRealMobile': true,
   'appium:appiumVersion': '2.0',
-  'appium:app': process.env.CLOUD_APP ?? 'lt://APP10160361451697712441620971',
+  'appium:app': process.env.LT_CLOUD_APP ?? 'lt://APP1016045801683541346785801',
   'appium:build': 'ATDDevs',
   'appium:name': 'Device-Farm Plugin',
   'appium:project': 'Appium Device Farm',
