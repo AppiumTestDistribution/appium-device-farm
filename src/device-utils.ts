@@ -263,7 +263,6 @@ export function getDeviceFiltersFromCapability(
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
 
-  console.log(`process.env.UDIDS: ${process.env.UDIDS}`)
   if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
