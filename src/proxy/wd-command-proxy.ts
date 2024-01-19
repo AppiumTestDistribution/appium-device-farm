@@ -63,7 +63,7 @@ function getSessionIdFromUr(url: string) {
 }
 
 function handler(cliArgs: Record<string, any>) {
-  const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '') + '/session';
+  const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '').replace(/\/$/, '') + '/session';
   const isHub = !hasHubArgument(cliArgs); //if hub cliArg is provided, then current appium process serves as a NODE
   return async (req: Request, res: Response, next: NextFunction) => {
     if (new RegExp(/wd-internal\//).test(req.url)) {

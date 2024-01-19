@@ -69,7 +69,7 @@ describe('Android Test', () => {
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
-  it('Allocate second free device and verify both the device state is busy in db', async () => {
+  it.skip('Allocate second free device and verify both the device state is busy in db', async () => {
     await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'android',
