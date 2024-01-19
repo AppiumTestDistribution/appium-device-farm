@@ -24,21 +24,24 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
 }
 
 export async function androidCapabilities(caps: ISessionCapability, freeDevice: IDevice) {
-  caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:systemPort'] = await getPort();
-  caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
-  caps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
-  caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
+  const clonedCaps = _.cloneDeep(caps);
+  clonedCaps.firstMatch[0]['appium:udid'] = freeDevice.udid;
+  clonedCaps.firstMatch[0]['appium:systemPort'] = await getPort();
+  clonedCaps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
+  clonedCaps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
+  clonedCaps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
-    caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
+  clonedCaps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
+    clonedCaps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }
-  deleteAlwaysMatch(caps, 'appium:udid');
-  deleteAlwaysMatch(caps, 'appium:systemPort');
-  deleteAlwaysMatch(caps, 'appium:chromeDriverPort');
-  deleteAlwaysMatch(caps, 'appium:adbRemoteHost');
-  deleteAlwaysMatch(caps, 'appium:adbPort');
+  deleteAlwaysMatch(clonedCaps, 'appium:udid');
+  deleteAlwaysMatch(clonedCaps, 'appium:systemPort');
+  deleteAlwaysMatch(clonedCaps, 'appium:chromeDriverPort');
+  deleteAlwaysMatch(clonedCaps, 'appium:adbRemoteHost');
+  deleteAlwaysMatch(clonedCaps, 'appium:adbPort');
+
+  return clonedCaps;
 }
 
 export async function iOSCapabilities(
@@ -53,12 +56,13 @@ export async function iOSCapabilities(
     derivedDataPath?: string;
   },
 ) {
-  caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
-  caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
-  caps.firstMatch[0]['appium:derivedDataPath'] = freeDevice.derivedDataPath;
+  const clonedCaps = _.cloneDeep(caps);
+  clonedCaps.firstMatch[0]['appium:udid'] = freeDevice.udid;
+  clonedCaps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
+  clonedCaps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
+  clonedCaps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
+  clonedCaps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
+  clonedCaps.firstMatch[0]['appium:derivedDataPath'] = freeDevice.derivedDataPath;
   const deleteMatch = [
     'appium:derivedDataPath',
     'appium:platformVersion',
@@ -67,7 +71,9 @@ export async function iOSCapabilities(
     'appium:udid',
     'appium:deviceName',
   ];
-  deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
+  deleteMatch.forEach((value) => deleteAlwaysMatch(clonedCaps, value));
+
+  return clonedCaps;
 }
 
 export function getDeviceFarmCapabilities(caps: ISessionCapability) {

@@ -1,3 +1,4 @@
+import { getAllDevices } from '../data-service/device-service';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
@@ -35,7 +36,14 @@ export class DeviceFarmManager {
     }
   }
 
-  public async getDevices(existingDeviceDetails?: Array<IDevice>): Promise<IDevice[]> {
+  /**
+   * Update list of devices by merging new devices with existing devices data.
+   * Busy state of existing devices will be preserved.
+   * @param existingDeviceDetails 
+   * @returns 
+   */
+  public async getDevices(): Promise<IDevice[]> {
+    const  existingDeviceDetails = await getAllDevices();
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(

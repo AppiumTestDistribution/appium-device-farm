@@ -299,10 +299,9 @@ class DevicePlugin extends BasePlugin {
     /**
      *  Wait untill a free device is available for the given capabilities
      */
-    const device = await commandsQueueGuard.acquire(
+    const deviceAndCaps = await commandsQueueGuard.acquire(
       DEVICE_MANAGER_LOCK_NAME,
-      async (): Promise<IDevice> => {
-        //await refreshDeviceList();
+      async (): Promise<{device: IDevice, capability: ISessionCapability}> => {
         try {
           return await allocateDeviceForSession(
             caps,
@@ -316,6 +315,11 @@ class DevicePlugin extends BasePlugin {
         }
       },
     );
+
+    // allocated device
+    const device = deviceAndCaps.device;
+    // updated caps
+    caps = deviceAndCaps.capability;
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
     const isRemoteOrCloudSession =

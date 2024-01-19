@@ -5,7 +5,6 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import { DevicePlugin } from '../plugin';
-import { IPluginArgs } from '../interfaces/IPluginArgs';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
@@ -150,6 +149,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           else filter.name = { $ne: undefined };
           break;
         case 'busy':
+          log.debug(`busy: ${filterOptions.busy}`);
           filter.busy = filterOptions.busy;
           break;
         case 'offline':
@@ -211,11 +211,11 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
 
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
-  /*
+  /*log.debug(`filter: ${JSON.stringify(filter)}`)
+  log.debug(`filterOptions: ${JSON.stringify(filterOptions)}`)
   log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);
   log.debug(`all devices: ${JSON.stringify(deviceModel.chain().find().data())}`);
   log.debug(`basic filter applied devices: ${JSON.stringify(deviceModel.chain().find(basicFilter).data())}`);
-  log.debug(`filter: ${JSON.stringify(filter)}`);
   log.debug(`results: ${JSON.stringify(matchingDevices)}`);
   */
 

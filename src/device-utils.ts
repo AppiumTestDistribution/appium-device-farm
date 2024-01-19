@@ -96,9 +96,9 @@ export async function allocateDeviceForSession(
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
   pluginArgs: IPluginArgs,
-): Promise<IDevice> {
+): Promise<{device: IDevice, capability: ISessionCapability}> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  // log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
 
   // log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
@@ -146,11 +146,10 @@ export async function allocateDeviceForSession(
   const device = await getDevice(filters);
   if (device != undefined) {
     // log.info(`📱 Device found: ${JSON.stringify(device)}`);
-    await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
+    await blockDevice(device.udid, device.host);
 
-    // FIXME: convert this into a return value
-    await updateCapabilityForDevice(capability, device);
+    const newCap = await updateCapabilityForDevice(capability, device);
 
     // update newCommandTimeout for the device.
     // This is required so it won't get unblocked by prematurely.
@@ -158,9 +157,9 @@ export async function allocateDeviceForSession(
     if (!newCommandTimeout) {
       newCommandTimeout = pluginArgs.newCommandTimeoutSec;
     }
-    updatedAllocatedDevice(device, { newCommandTimeout });
+    await updatedAllocatedDevice(device, { newCommandTimeout });
 
-    return device;
+    return {device, capability: newCap};
   } else {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
@@ -172,12 +171,12 @@ export async function allocateDeviceForSession(
  * @param device
  * @returns
  */
-export async function updateCapabilityForDevice(capability: any, device: IDevice) {
+export async function updateCapabilityForDevice(capability: any, device: IDevice): Promise<ISessionCapability> {
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
-      await androidCapabilities(capability, device);
+      return await androidCapabilities(capability, device);
     } else {
-      await iOSCapabilities(capability, device);
+      return await iOSCapabilities(capability, device);
     }
   } else {
     log.info('Updating cloud capability for Device');
@@ -264,6 +263,7 @@ export function getDeviceFiltersFromCapability(
       ? getDeviceTypeFromApp(capability['appium:app'] as string)
       : undefined;
 
+  console.log(`process.env.UDIDS: ${process.env.UDIDS}`)
   if (deviceType?.startsWith('sim') && pluginArgs.iosDeviceType === 'real') {
     throw new Error(
       'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
@@ -301,6 +301,7 @@ export function getDeviceFiltersFromCapability(
     caps = { ...caps, name };
   }
 
+  log.debug(`Device filters: ${JSON.stringify(caps)}`);
   return caps;
 }
 
@@ -328,7 +329,7 @@ export async function getBusyDevicesCount() {
  */
 export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
   const existingDevices = await getAllDevices();
-  const devices: IDevice[] = await getDeviceManager().getDevices(existingDevices);
+  const devices: IDevice[] = await getDeviceManager().getDevices();
   const noLongerExistingDevices = existingDevices.filter((device) => {
     return !devices.some((newDevice) => newDevice.udid === device.udid);
   });
