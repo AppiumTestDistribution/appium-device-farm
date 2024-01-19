@@ -39,11 +39,11 @@ export class DeviceFarmManager {
   /**
    * Update list of devices by merging new devices with existing devices data.
    * Busy state of existing devices will be preserved.
-   * @param existingDeviceDetails 
-   * @returns 
+   * @param existingDeviceDetails
+   * @returns
    */
   public async getDevices(): Promise<IDevice[]> {
-    const  existingDeviceDetails = await getAllDevices();
+    const existingDeviceDetails = await getAllDevices();
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(

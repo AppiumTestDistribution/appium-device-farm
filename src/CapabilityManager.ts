@@ -31,7 +31,7 @@ export async function androidCapabilities(caps: ISessionCapability, freeDevice: 
   clonedCaps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
   clonedCaps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
-  clonedCaps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
+    clonedCaps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     clonedCaps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }

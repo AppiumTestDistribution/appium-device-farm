@@ -95,7 +95,7 @@ export async function allocateDeviceForSession(
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
   pluginArgs: IPluginArgs,
-): Promise<{device: IDevice, capability: ISessionCapability}> {
+): Promise<{ device: IDevice; capability: ISessionCapability }> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
@@ -158,7 +158,7 @@ export async function allocateDeviceForSession(
     }
     await updatedAllocatedDevice(device, { newCommandTimeout });
 
-    return {device, capability: newCap};
+    return { device, capability: newCap };
   } else {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
@@ -170,7 +170,10 @@ export async function allocateDeviceForSession(
  * @param device
  * @returns
  */
-export async function updateCapabilityForDevice(capability: any, device: IDevice): Promise<ISessionCapability> {
+export async function updateCapabilityForDevice(
+  capability: any,
+  device: IDevice,
+): Promise<ISessionCapability> {
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
       return await androidCapabilities(capability, device);

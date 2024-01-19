@@ -301,7 +301,7 @@ class DevicePlugin extends BasePlugin {
      */
     const deviceAndCaps = await commandsQueueGuard.acquire(
       DEVICE_MANAGER_LOCK_NAME,
-      async (): Promise<{device: IDevice, capability: ISessionCapability}> => {
+      async (): Promise<{ device: IDevice; capability: ISessionCapability }> => {
         try {
           return await allocateDeviceForSession(
             caps,

@@ -87,7 +87,10 @@ describe('Max sessions CLI argument test', () => {
     };
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.device.udid }).data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: device.device.udid })
+      .data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 

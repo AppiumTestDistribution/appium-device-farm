@@ -63,7 +63,6 @@ describe('Android Test', () => {
     await cleanPendingSessions(0);
     await unblockDeviceMatchingFilter({});
 
-    
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = (await ADTDatabase.DeviceModel)
       .chain()
@@ -83,7 +82,6 @@ describe('Android Test', () => {
     );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);
-    
 
     // wait until there are two devices and both are not offline
     let devices: IDevice[] = [];
@@ -91,7 +89,9 @@ describe('Android Test', () => {
       await updateDeviceList(pluginArgs.bindHostOrIp);
       devices = await deviceManager.getDevices();
 
-      return devices.length === 2 && devices.every((device: IDevice) => !device.offline && !device.busy);
+      return (
+        devices.length === 2 && devices.every((device: IDevice) => !device.offline && !device.busy)
+      );
     });
 
     expect(devices.length).to.be.equal(2);
@@ -127,7 +127,7 @@ describe('Android Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    
+
     // grab first device
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
 
@@ -136,7 +136,10 @@ describe('Android Test', () => {
 
     // grab third device
     allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error).to.be.an('error').with.property('message').contains('Device is busy or blocked.. Device request: {"platform":"android"'),
+      expect(error)
+        .to.be.an('error')
+        .with.property('message')
+        .contains('Device is busy or blocked.. Device request: {"platform":"android"'),
     );
   });
 });
