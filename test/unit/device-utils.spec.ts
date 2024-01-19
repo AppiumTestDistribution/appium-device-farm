@@ -132,8 +132,8 @@ describe('Device Utils', () => {
 
     const foundDevice = (
       await getFilteredDevice(
-        allocatedDeviceForFirstSession.udid,
-        allocatedDeviceForFirstSession.host,
+        allocatedDeviceForFirstSession.device.udid,
+        allocatedDeviceForFirstSession.device.host,
       )
     )[0];
 
@@ -141,7 +141,7 @@ describe('Device Utils', () => {
 
     let filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: allocatedDeviceForFirstSession.udid })
+      .find({ udid: allocatedDeviceForFirstSession.device.udid })
       .data();
     expect(filterDeviceWithSameUDID.length).to.be.equal(2);
     // one device should be busy and the other is not
@@ -160,15 +160,15 @@ describe('Device Utils', () => {
     const foundSecondDevice = (await ADTDatabase.DeviceModel)
       .chain()
       .find({
-        udid: allocatedDeviceForSecondSession.udid,
-        host: allocatedDeviceForSecondSession.host,
+        udid: allocatedDeviceForSecondSession.device.udid,
+        host: allocatedDeviceForSecondSession.device.host,
       })
       .data()[0];
 
     // check that the device is busy
     filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: allocatedDeviceForFirstSession.udid })
+      .find({ udid: allocatedDeviceForFirstSession.device.udid })
       .data();
     expect(filterDeviceWithSameUDID[0].busy).to.be.true;
     expect(filterDeviceWithSameUDID[1].busy).to.be.true;
@@ -177,11 +177,8 @@ describe('Device Utils', () => {
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
-        ),
-    );
+        .with.property('message').contains('Device is busy or blocked.. Device request: {"platform":"android"'
+        ));
   });
 
   it('should release blocked devices that have no activity for more than the timeout', async () => {

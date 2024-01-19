@@ -87,7 +87,7 @@ describe('Max sessions CLI argument test', () => {
     };
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid }).data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.device.udid }).data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -193,7 +193,7 @@ describe('IOS Simulator Test', () => {
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -232,7 +232,7 @@ describe('IOS Simulator Test', () => {
 
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -269,7 +269,7 @@ describe('IOS Simulator Test', () => {
 
       const allocatedSimulator = (await ADTDatabase.DeviceModel)
         .chain()
-        .find({ udid: device.udid })
+        .find({ udid: device.device.udid })
         .data();
       const foundSimulator = allocatedSimulator[0];
       expect(foundSimulator.busy).to.be.true;
@@ -329,7 +329,7 @@ describe('Boot simulator test', async () => {
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });

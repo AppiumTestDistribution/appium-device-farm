@@ -149,7 +149,6 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           else filter.name = { $ne: undefined };
           break;
         case 'busy':
-          log.debug(`busy: ${filterOptions.busy}`);
           filter.busy = filterOptions.busy;
           break;
         case 'offline':

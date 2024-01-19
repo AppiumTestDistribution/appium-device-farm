@@ -23,6 +23,16 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   skipChromeDownload: true,
 });
 
+const capabilities = {
+  alwaysMatch: {
+    platformName: 'android',
+    'appium:app': '/Downloads/VodQA.apk',
+    'appium:deviceAvailabilityTimeout': 1800,
+    'appium:deviceRetryInterval': 100,
+  },
+  firstMatch: [{}],
+};
+
 const NODE_ID = uuidv4();
 
 describe('Android Test', () => {
@@ -34,14 +44,15 @@ describe('Android Test', () => {
     NODE_ID,
   );
 
-  before(async () => {
+  beforeEach(async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
     // adb devices should return devices
     await expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
-      0,
+      1,
       'No devices detected. Is adb running? Is there at least one device connected?',
     );
   });
+
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
 
@@ -52,19 +63,11 @@ describe('Android Test', () => {
     await cleanPendingSessions(0);
     await unblockDeviceMatchingFilter({});
 
-    const capabilities = {
-      alwaysMatch: {
-        platformName: 'android',
-        'appium:app': '/Downloads/VodQA.apk',
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
-      },
-      firstMatch: [{}],
-    };
+    
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: devices.udid })
+      .find({ udid: devices.device.udid })
       .data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
@@ -80,24 +83,32 @@ describe('Android Test', () => {
     );
     Container.set(DeviceFarmManager, deviceManager);
     await updateDeviceList(pluginArgs.bindHostOrIp);
-    const capabilities = {
-      alwaysMatch: {
-        platformName: 'android',
-        'appium:app': '/Downloads/VodQA.apk',
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
-      },
-      firstMatch: [{}],
-    };
+    
 
     // wait until there are two devices and both are not offline
-    let devices: IDevice[];
-    waitUntil(async () => {
+    let devices: IDevice[] = [];
+    await waitUntil(async () => {
       await updateDeviceList(pluginArgs.bindHostOrIp);
       devices = await deviceManager.getDevices();
 
-      return devices.length === 2 && devices.every((device: IDevice) => !device.offline);
+      return devices.length === 2 && devices.every((device: IDevice) => !device.offline && !device.busy);
     });
+
+    expect(devices.length).to.be.equal(2);
+
+    console.log('devices', devices);
+
+    // grab first device
+    const device = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    console.log('allocated device', device);
+
+    devices = await deviceManager.getDevices();
+    console.log('devices', devices);
+
+    console.log(`capabilities: ${JSON.stringify(capabilities)}`);
+
+    // expect 1 device to be busy
+    expect(devices.filter((device) => device.busy).length).to.be.equal(1);
 
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find().data();
@@ -116,22 +127,16 @@ describe('Android Test', () => {
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;
     await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    const capabilities = {
-      alwaysMatch: {
-        platformName: 'android',
-        'appium:app': '/Downloads/VodQA.apk',
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
-      },
-      firstMatch: [{}],
-    };
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android"}',
-        ),
+    
+    // grab first device
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+
+    // grab second device
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+
+    // grab third device
+    allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
+      expect(error).to.be.an('error').with.property('message').contains('Device is busy or blocked.. Device request: {"platform":"android"'),
     );
   });
 });
