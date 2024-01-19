@@ -35,7 +35,6 @@ import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
-import { node } from 'appium/support';
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',

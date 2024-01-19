@@ -15,7 +15,6 @@ import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
-import { DevicePlugin } from '../plugin';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
