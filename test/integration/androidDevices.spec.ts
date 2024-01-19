@@ -52,7 +52,7 @@ describe('Android Test', () => {
     });
     // adb devices should return devices
     await expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
-      1,
+      0,
       'No devices detected. Is adb running? Is there at least one device connected?',
     );
   });
