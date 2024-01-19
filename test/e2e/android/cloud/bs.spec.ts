@@ -9,6 +9,7 @@ import axios from 'axios';
 import { expect } from 'chai';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
+import _ from 'lodash';
 chai.use(chaiAsPromised);
 
 const APPIUM_HOST = ip.address();
@@ -121,11 +122,12 @@ describe('Browser Stack: Quirks', () => {
     return res.data.filter((device: any) => device.busy === true);
   }
   it('handles empty session id when app is invalid', async () => {
-    capabilities['appium:app'] = 'bs://invalid-app-id';
+    const invalid_app_caps = _.cloneDeep(capabilities);
+    invalid_app_caps['appium:app'] = 'bs://invalid-app-id';
     const initialBusyDevices = await busyDevices();
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
-    await expect(remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO)).to.be.rejected;
+    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO)).to.be.rejected;
 
     const currentBusyDevices = await busyDevices();
     console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
