@@ -62,6 +62,11 @@ describe('BrowserStack: Plugin Test', () => {
 
   it('Vertical swipe test', async () => {
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
+    const currentBusyDevices = await busyDevices();
+    console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
+
+    // the same number of devices should be busy
+    expect(currentBusyDevices.length).to.equal(1);
     await driver.performActions([
       {
         type: 'pointer',
@@ -91,7 +96,10 @@ describe('BrowserStack: Plugin Test', () => {
     }
   });
 });
-
+async function busyDevices() {
+  const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
+  return res.data.filter((device: any) => device.busy === true);
+}
 describe('Browser Stack: Quirks', () => {
   // dump hub config into a file
   const hub_config_file = path.join(__dirname, '../../../../serverConfig/bs-config.json');
@@ -117,10 +125,6 @@ describe('Browser Stack: Quirks', () => {
     appiumHome: APPIUM_HOME!,
   });
 
-  async function busyDevices() {
-    const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
-    return res.data.filter((device: any) => device.busy === true);
-  }
   it('handles empty session id when app is invalid', async () => {
     const invalid_app_caps = _.cloneDeep(capabilities);
     invalid_app_caps['appium:app'] = 'bs://invalid-app-id';

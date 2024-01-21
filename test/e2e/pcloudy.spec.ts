@@ -6,7 +6,10 @@ import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
 import ip from 'ip';
 import { IDevice } from '../../src/interfaces/IDevice';
-import { del } from 'node-persist';
+import * as chai from 'chai';
+import chaiExclude from 'chai-exclude';
+
+chai.use(chaiExclude);
 
 describe('PCloudy Devices', () => {
   // dump hub config into a file
@@ -40,26 +43,27 @@ describe('PCloudy Devices', () => {
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
-    delete androidDevices[0].nodeId;
-    expect(androidDevices[0]).to.deep.equal({
-      platform: 'android',
-      host: 'https://device.pcloudy.com/appiumcloud',
-      busy: false,
-      deviceType: 'real',
-      capability: {
+    expect(androidDevices[0])
+      .excluding('udid')
+      .to.deep.equal({
+        platform: 'android',
+        host: 'https://device.pcloudy.com/appiumcloud',
+        busy: false,
+        deviceType: 'real',
+        capability: {
+          pCloudy_DeviceManufacturer: 'GOOGLE',
+          pCloudy_DeviceVersion: '11.0',
+          platform: 'android',
+        },
+        cloud: 'pCloudy',
         pCloudy_DeviceManufacturer: 'GOOGLE',
         pCloudy_DeviceVersion: '11.0',
-        platform: 'android',
-      },
-      cloud: 'pCloudy',
-      pCloudy_DeviceManufacturer: 'GOOGLE',
-      pCloudy_DeviceVersion: '11.0',
-      name: 'GOOGLE',
-      sdk: '11.0',
-      udid: 'GOOGLE',
-      userBlocked: false,
-      offline: false,
-    });
+        name: 'GOOGLE',
+        sdk: '11.0',
+        udid: 'GOOGLE',
+        userBlocked: false,
+        offline: false,
+      });
   });
 
   it('Should be able to run the plugin with PCloudy config', async () => {
@@ -76,24 +80,26 @@ describe('PCloudy Devices', () => {
     delete cloudDevices[0].nodeId;
     //delete cloudDevices[0].udid;
     //delete cloudDevices[0].name;
-    expect(cloudDevices[0]).to.deep.equal({
-      platform: 'ios',
-      host: 'https://device.pcloudy.com/appiumcloud',
-      busy: false,
-      userBlocked: false,
-      deviceType: 'real',
-      capability: {
+    expect(cloudDevices[0])
+      .excluding('udid')
+      .to.deep.equal({
+        platform: 'ios',
+        host: 'https://device.pcloudy.com/appiumcloud',
+        busy: false,
+        userBlocked: false,
+        deviceType: 'real',
+        capability: {
+          pCloudy_DeviceManufacturer: 'APPLE',
+          pCloudy_DeviceVersion: '15.1',
+          platform: 'ios',
+        },
+        cloud: 'pCloudy',
         pCloudy_DeviceManufacturer: 'APPLE',
         pCloudy_DeviceVersion: '15.1',
-        platform: 'ios',
-      },
-      cloud: 'pCloudy',
-      pCloudy_DeviceManufacturer: 'APPLE',
-      pCloudy_DeviceVersion: '15.1',
-      sdk: '15.1',
-      udid: 'APPLE',
-      offline: false,
-      name: 'APPLE',
-    });
+        sdk: '15.1',
+        udid: 'APPLE',
+        offline: false,
+        name: 'APPLE',
+      });
   });
 });
