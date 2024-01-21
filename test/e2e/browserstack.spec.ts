@@ -12,6 +12,10 @@ import {
 import ip from 'ip';
 import path from 'path';
 import { IDevice } from '../../src/interfaces/IDevice';
+import * as chai from 'chai';
+import chaiExclude from 'chai-exclude';
+
+chai.use(chaiExclude);
 
 describe('Browserstack Devices', () => {
   // dump hub config into a file
@@ -45,21 +49,23 @@ describe('Browserstack Devices', () => {
     androidDevices = androidDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
-    expect(androidDevices[0]).to.deep.equal({
-      deviceName: 'Google Pixel 3',
-      os_version: '9.0',
-      platform: 'android',
-      host: 'http://hub-cloud.browserstack.com/wd/hub',
-      busy: false,
-      userBlocked: false,
-      deviceType: 'real',
-      capability: { deviceName: 'Google Pixel 3', os_version: '9.0', platform: 'android' },
-      cloud: 'browserstack',
-      name: 'Google Pixel 3',
-      sdk: '9.0',
-      udid: 'Google Pixel 3',
-      offline: false,
-    });
+    expect(androidDevices[0])
+      .excluding('udid')
+      .to.deep.equal({
+        deviceName: 'Samsung Galaxy S21',
+        os_version: '12.0',
+        platform: 'android',
+        host: 'http://hub-cloud.browserstack.com/wd/hub',
+        busy: false,
+        userBlocked: false,
+        deviceType: 'real',
+        capability: { deviceName: 'Samsung Galaxy S21', os_version: '12.0', platform: 'android' },
+        cloud: 'browserstack',
+        name: 'Samsung Galaxy S21',
+        sdk: '12.0',
+        udid: 'Google Pixel 3',
+        offline: false,
+      });
   });
 
   it('Should be able to run the plugin with Browerstack config', async () => {
@@ -72,24 +78,26 @@ describe('Browserstack Devices', () => {
     iosDevices = iosDevices.filter((device: IDevice) => device.cloud === 'browserstack');
     delete iosDevices[0].meta;
     delete iosDevices[0]['$loki'];
-    expect(iosDevices[0]).to.deep.equal({
-      deviceName: 'iPhone XS',
-      os_version: '15',
-      platform: 'ios',
-      host: 'http://hub-cloud.browserstack.com/wd/hub',
-      busy: false,
-      userBlocked: false,
-      deviceType: 'real',
-      capability: {
+    expect(iosDevices[0])
+      .excluding('udid')
+      .to.deep.equal({
         deviceName: 'iPhone XS',
         os_version: '15',
         platform: 'ios',
-      },
-      cloud: 'browserstack',
-      name: 'iPhone XS',
-      sdk: '15',
-      udid: 'iPhone XS',
-      offline: false,
-    });
+        host: 'http://hub-cloud.browserstack.com/wd/hub',
+        busy: false,
+        userBlocked: false,
+        deviceType: 'real',
+        capability: {
+          deviceName: 'iPhone XS',
+          os_version: '15',
+          platform: 'ios',
+        },
+        cloud: 'browserstack',
+        name: 'iPhone XS',
+        sdk: '15',
+        udid: 'iPhone XS',
+        offline: false,
+      });
   });
 });

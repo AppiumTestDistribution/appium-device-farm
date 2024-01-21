@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.4.7-rc.3",
+  "version": "8.4.7-rc.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/src/index.js",
   "scripts": {
@@ -149,6 +149,7 @@
     "babel-eslint": "10.1.0",
     "chai": "4.3.10",
     "chai-as-promised": "^7.1.1",
+    "chai-exclude": "^2.1.0",
     "dotenv": "^16.3.1",
     "eslint": "8.52.0",
     "eslint-config-prettier": "9.0.0",
