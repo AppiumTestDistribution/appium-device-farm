@@ -4,6 +4,8 @@ import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 import ip from 'ip';
 import { Options } from '@wdio/types';
+import axios from 'axios';
+import waitUntil from 'async-wait-until';
 
 const APPIUM_HOST = ip.address();
 const APPIUM_PORT = 4723;
@@ -16,14 +18,13 @@ const WDIO_PARAMS = {
 const capabilities = {
   platformName: 'iOS',
   'appium:automationName': 'xcuitest',
-  'appium:app': process.env.BS_IOS_CLOUD_APP ?? 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
+  'appium:app': process.env.BS_IOS_CLOUD_APP ?? 'bs://444bd0308813ae0dc236f8cd461c02d3afa7901d',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
     sessionName: 'LoginTest',
   },
-  'appium:udid': 'iPhone XS',
-  'appium:deviceName': 'iPhone XS',
+  'appium:deviceName': 'iPhone 14',
 };
 let driver: any;
 describe('Plugin Test', () => {
@@ -52,6 +53,15 @@ describe('Plugin Test', () => {
   });
 
   beforeEach(async () => {
+    // wait until ios cloud devices are available
+    await waitUntil(async () => {
+      const devices = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device/ios`);
+      const iosDevices = devices.data.filter((device: any) => device.cloud === 'browserstack' && device.platform.toLowerCase() === 'ios');
+      console.log(`iOS devices: ${JSON.stringify(iosDevices)}`);
+      return iosDevices.length > 0;
+    }, 1000);
+    
+    
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
   });
 

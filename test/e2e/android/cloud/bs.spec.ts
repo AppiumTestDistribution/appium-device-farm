@@ -10,6 +10,7 @@ import { expect } from 'chai';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
 import _ from 'lodash';
+import waitUntil from 'async-wait-until';
 chai.use(chaiAsPromised);
 
 const APPIUM_HOST = ip.address();
@@ -96,10 +97,12 @@ describe('BrowserStack: Plugin Test', () => {
     }
   });
 });
+
 async function busyDevices() {
   const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
   return res.data.filter((device: any) => device.busy === true);
 }
+
 describe('Browser Stack: Quirks', () => {
   // dump hub config into a file
   const hub_config_file = path.join(__dirname, '../../../../serverConfig/bs-config.json');
@@ -131,14 +134,15 @@ describe('Browser Stack: Quirks', () => {
     const initialBusyDevices = await busyDevices();
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
-    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO)).to.be.rejected;
+    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO)).to.be.eventually.rejected;
 
+    await waitUntil(async () => {
+      const currentBusyDevices = await busyDevices();
+      console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
+      return currentBusyDevices.length === initialBusyDevices.length;
+    }, 1000);
+    
     const currentBusyDevices = await busyDevices();
-    console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
-
-    // the same number of devices should be busy
-    expect(currentBusyDevices.length).to.equal(initialBusyDevices.length);
-
     // no cloud devices should be allocated
     const cloudDevices = currentBusyDevices.filter(
       (device: any) => device.cloud === 'browserstack',

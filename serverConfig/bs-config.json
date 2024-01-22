@@ -21,8 +21,8 @@
                 "platform": "android"
               },
               {
-                "deviceName": "iPhone XS",
-                "os_version": "15",
+                "deviceName": "iPhone 14",
+                "os_version": "16",
                 "platform": "ios"
               }
             ]

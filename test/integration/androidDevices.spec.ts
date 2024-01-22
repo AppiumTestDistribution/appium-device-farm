@@ -11,7 +11,6 @@ import {
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import ip from 'ip';
 import waitUntil from 'async-wait-until';
-import { IDevice } from '../../src/interfaces/IDevice';
 import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
 import chaiAsPromised from 'chai-as-promised';
 import { v4 as uuidv4 } from 'uuid';
