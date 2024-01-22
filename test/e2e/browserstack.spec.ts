@@ -48,7 +48,7 @@ describe('Browserstack Devices', () => {
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0])
-      .excluding('udid')
+      .excluding(['udid', 'nodeId'])
       .to.deep.equal({
         deviceName: 'Samsung Galaxy S21',
         os_version: '12.0',
@@ -77,24 +77,24 @@ describe('Browserstack Devices', () => {
     delete iosDevices[0].meta;
     delete iosDevices[0]['$loki'];
     expect(iosDevices[0])
-      .excluding('udid')
+      .excluding(['udid', 'nodeId'])
       .to.deep.equal({
-        deviceName: 'iPhone XS',
-        os_version: '15',
+        deviceName: 'iPhone 14',
+        os_version: '16',
         platform: 'ios',
         host: 'http://hub-cloud.browserstack.com/wd/hub',
         busy: false,
         userBlocked: false,
         deviceType: 'real',
         capability: {
-          deviceName: 'iPhone XS',
-          os_version: '15',
+          deviceName: 'iPhone 14',
+          os_version: '16',
           platform: 'ios',
         },
         cloud: 'browserstack',
-        name: 'iPhone XS',
-        sdk: '15',
-        udid: 'iPhone XS',
+        name: 'iPhone 14',
+        sdk: '16',
+        udid: 'iPhone 14',
         offline: false,
       });
   });
