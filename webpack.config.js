@@ -2,12 +2,30 @@ const path = require('path');
 const fs = require('fs');
 var nodeExternals = require('webpack-node-externals');
 var WebpackObfuscator = require('webpack-obfuscator');
+const RemovePlugin = require('remove-files-webpack-plugin');
+const filesToKeepInLib = [/src\/scripts/g, /config.js/g, /main.js/g];
+
+//Remove all files that are already bundled from lib folder
+const distCleanUpPlugin = new RemovePlugin({
+  after: {
+    root: './lib',
+    test: [
+      {
+        folder: './src',
+        method: (file) => {
+          return filesToKeepInLib.reduce((flag, f) => flag && !new RegExp(f).test(file), true);
+        },
+        recursive: true,
+      },
+    ],
+  },
+});
 
 class CreateLoaderFile {
   apply(compiler) {
     compiler.hooks.emit.tapAsync('FileListPlugin', (compilation, callback) => {
-      const loaderFile = 'module.exports = { DevicePlugin : require("./bundle.js").default }';
-      const outputPath = path.join(compilation.outputOptions.path, 'loader.js');
+      const loaderFile = 'module.exports = { DevicePlugin : require("../bundle.js").default }';
+      const outputPath = path.join(compilation.outputOptions.path, 'src', 'main.js');
       fs.writeFileSync(outputPath, loaderFile);
       callback();
     });
@@ -38,5 +56,6 @@ module.exports = {
       identifierNamesGenerator: 'mangled-shuffled',
     }),
     new CreateLoaderFile(),
+    distCleanUpPlugin,
   ],
 };
