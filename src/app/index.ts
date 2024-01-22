@@ -55,7 +55,7 @@ apiRouter.get('/cliArgs', async (req, res) => {
   res.json(await getCLIArgs());
 });
 
-staticFilesRouter.use(express.static(path.join(__dirname, '..', '..', 'public')));
+staticFilesRouter.use(express.static(path.join(__dirname, 'public')));
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
 router.use(staticFilesRouter);

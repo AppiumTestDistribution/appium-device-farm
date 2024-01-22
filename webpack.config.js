@@ -1,5 +1,7 @@
 const path = require('path');
 var nodeExternals = require('webpack-node-externals');
+var WebpackObfuscator = require('webpack-obfuscator');
+
 module.exports = {
   entry: ['./lib/src/index.js'],
   externals: [nodeExternals()],
@@ -15,4 +17,12 @@ module.exports = {
     node: true,
   },
   mode: 'production',
+  plugins: [
+    new WebpackObfuscator({
+      rotateStringArray: true,
+      splitStrings: true,
+      target: 'node',
+      identifierNamesGenerator: 'mangled-shuffled',
+    }),
+  ],
 };
