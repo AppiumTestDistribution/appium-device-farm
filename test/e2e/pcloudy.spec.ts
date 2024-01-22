@@ -44,7 +44,8 @@ describe('PCloudy Devices', () => {
     delete androidDevices[0].meta;
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0])
-      .excluding('udid')
+      .excluding(['udid', 'nodeId'])
+      .excluding('nodeId')
       .to.deep.equal({
         platform: 'android',
         host: 'https://device.pcloudy.com/appiumcloud',
@@ -77,11 +78,8 @@ describe('PCloudy Devices', () => {
     const cloudDevices = iosDevices.filter((device: IDevice) => device.cloud === 'pCloudy');
     delete cloudDevices[0].meta;
     delete cloudDevices[0]['$loki'];
-    delete cloudDevices[0].nodeId;
-    //delete cloudDevices[0].udid;
-    //delete cloudDevices[0].name;
     expect(cloudDevices[0])
-      .excluding('udid')
+      .excluding(['udid', 'nodeId'])
       .to.deep.equal({
         platform: 'ios',
         host: 'https://device.pcloudy.com/appiumcloud',
