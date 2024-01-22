@@ -8,8 +8,9 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'lib'),
-    library: 'DevicePlugin',
-    libraryTarget: 'umd',
+    library: {
+      type: 'umd',
+    },
   },
   optimization: { minimize: true },
   target: 'node',
