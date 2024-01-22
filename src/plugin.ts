@@ -70,6 +70,7 @@ import _ from 'lodash';
 import SessionType from './enums/SessionType';
 import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
 import { ADTDatabase } from './data-service/db';
+import { deviceLogs } from '../pw-wdio-appium/sample';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -124,6 +125,7 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
+    deviceLogs();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {
