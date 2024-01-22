@@ -1,6 +1,18 @@
 const path = require('path');
+const fs = require('fs');
 var nodeExternals = require('webpack-node-externals');
 var WebpackObfuscator = require('webpack-obfuscator');
+
+class CreateLoaderFile {
+  apply(compiler) {
+    compiler.hooks.emit.tapAsync('FileListPlugin', (compilation, callback) => {
+      const loaderFile = 'module.exports = { DevicePlugin : require("./bundle.js").default }';
+      const outputPath = path.join(compilation.outputOptions.path, 'loader.js');
+      fs.writeFileSync(outputPath, loaderFile);
+      callback();
+    });
+  }
+}
 
 module.exports = {
   entry: ['./lib/src/index.js'],
@@ -25,5 +37,6 @@ module.exports = {
       target: 'node',
       identifierNamesGenerator: 'mangled-shuffled',
     }),
+    new CreateLoaderFile(),
   ],
 };

@@ -2,7 +2,7 @@
   "name": "appium-device-farm",
   "version": "8.4.7-rc.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
-  "main": "./lib/src/loader.js",
+  "main": "./lib/loader.js",
   "scripts": {
     "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
