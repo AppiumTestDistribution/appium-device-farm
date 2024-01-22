@@ -24,6 +24,7 @@ const WDIO_PARAMS = {
 const capabilities = {
   platformName: 'android',
   'appium:automationName': 'UiAutomator2',
+  'appium:app': process.env.BS_ANDROID_CLOUD_APP ?? 'bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
