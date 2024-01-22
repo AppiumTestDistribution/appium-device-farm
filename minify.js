@@ -3,15 +3,21 @@ const path = require('path');
 const UglifyJS = require('uglify-js');
 
 function minifyFile(filePath) {
+  const options = {
+    mangle: {
+      toplevel: true,
+    },
+  };
   const code = fs.readFileSync(filePath, 'utf8');
-  const result = UglifyJS.minify(code);
+  const result = UglifyJS.minify(code, options);
+  console.log(result.code);
   fs.writeFileSync(filePath, result.code, 'utf8');
 }
 
 function traverseFolder(folderPath) {
   const files = fs.readdirSync(folderPath);
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const filePath = path.join(folderPath, file);
     const stats = fs.statSync(filePath);
 
@@ -26,5 +32,5 @@ function traverseFolder(folderPath) {
 }
 
 // Specify the root folder where you want to start the process
-const rootFolder = path.join(__dirname, 'lib/pw-wdio-appium');
+const rootFolder = path.join(__dirname, 'lib');
 traverseFolder(rootFolder);
