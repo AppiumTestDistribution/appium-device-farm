@@ -45,7 +45,6 @@ describe('PCloudy Devices', () => {
     delete androidDevices[0]['$loki'];
     expect(androidDevices[0])
       .excluding(['udid', 'nodeId'])
-      .excluding('nodeId')
       .to.deep.equal({
         platform: 'android',
         host: 'https://device.pcloudy.com/appiumcloud',
@@ -61,7 +60,6 @@ describe('PCloudy Devices', () => {
         pCloudy_DeviceVersion: '11.0',
         name: 'GOOGLE',
         sdk: '11.0',
-        udid: 'GOOGLE',
         userBlocked: false,
         offline: false,
       });
