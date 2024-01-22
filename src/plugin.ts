@@ -126,7 +126,7 @@ class DevicePlugin extends BasePlugin {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     console.log(sample);
-    console.log(sample.deviceLogs);
+    console.log(sample.deviceLogs());
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {

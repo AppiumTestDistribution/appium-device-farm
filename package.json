@@ -2,7 +2,7 @@
   "name": "appium-device-farm",
   "version": "8.4.7-rc.4",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
-  "main": "./lib/src/index.js",
+  "main": "./lib/bundle.js",
   "scripts": {
     "build:docs": "appium-docs build --reference=false",
     "publish:docs": "appium-docs build --deploy --push -b docs-site -m 'docs: auto-build docs for appium-device-farm@%s' --alias latest",
@@ -24,7 +24,8 @@
     "integration-android": "mocha -r ts-node/register ./test/integration/androidDevices.spec.ts --timeout 90000 --exit",
     "integration-ios": "mocha -r ts-node/register ./test/integration/ios/*.spec.ts --timeout 260000 --exit",
     "integration-ios2": "mocha -r ts-node/register ./test/integration/ios/02iOSDevices.spec.ts --timeout 260000 --exit",
-    "build": "npx tsc -b && npm run copy-files",
+    "build": "rm -rf lib && npx tsc -b && npm run bundle && npm run copy-files",
+    "bundle": "node minify.js && webpack",
     "build-web-and-plugin": "npx tsc -b && npm run buildAndCopyWeb && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
@@ -32,7 +33,7 @@
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier-check": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --check --verbose",
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' 'test/**/*.ts' --write --single-quote",
-    "appium-home": "rm -rf rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
+    "appium-home": "rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "clear-cache": "rm -rf $HOME/.cache/appium-device-farm",
     "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install xcuitest",
@@ -168,7 +169,8 @@
     "uglifyjs-folder": "^3.3.0",
     "vite": "^4.5.0",
     "wait-on": "7.0.1",
-    "webdriverio": "^8.20.4"
+    "webdriverio": "^8.20.4",
+    "webpack-node-externals": "^3.0.0"
   },
   "appium": {
     "pluginName": "device-farm",

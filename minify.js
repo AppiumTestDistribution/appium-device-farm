@@ -7,11 +7,13 @@ function minifyFile(filePath) {
     mangle: {
       toplevel: true,
     },
+    compress: true,
   };
   const code = fs.readFileSync(filePath, 'utf8');
   const result = UglifyJS.minify(code, options);
-  console.log(result.code);
-  fs.writeFileSync(filePath, result.code, 'utf8');
+  if (result.code) {
+    fs.writeFileSync(filePath, result.code, 'utf8');
+  }
 }
 
 function traverseFolder(folderPath) {
@@ -32,5 +34,5 @@ function traverseFolder(folderPath) {
 }
 
 // Specify the root folder where you want to start the process
-const rootFolder = path.join(__dirname, 'lib');
-traverseFolder(rootFolder);
+traverseFolder(path.join(__dirname, 'lib', 'src'));
+traverseFolder(path.join(__dirname, 'lib', 'pw-wdio-appium'));
