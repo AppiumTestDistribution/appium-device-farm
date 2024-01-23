@@ -157,7 +157,7 @@ export async function allocateDeviceForSession(
     if (!newCommandTimeout) {
       newCommandTimeout = pluginArgs.newCommandTimeoutSec;
     }
-    updatedAllocatedDevice(device, { newCommandTimeout });
+    await updatedAllocatedDevice(device, { newCommandTimeout });
 
     return device;
   } else {
@@ -292,6 +292,7 @@ export function getDeviceFiltersFromCapability(
     udid: udids?.length ? udids : capability['appium:udid'],
     busy: false,
     userBlocked: false,
+    host: capability['host'],
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
   };
@@ -299,7 +300,6 @@ export function getDeviceFiltersFromCapability(
   if (name !== undefined) {
     caps = { ...caps, name };
   }
-
   return caps;
 }
 
@@ -367,6 +367,7 @@ export async function setupCronCheckStaleDevices(intervalMs: number, currentHost
  */
 export async function removeStaleDevices(currentHost: string) {
   const allDevices = await getAllDevices();
+  console.log(allDevices, currentHost)
   const nodeDevices = allDevices.filter((device) => {
     // devices that's not from this node ip address
     return device.host !== undefined && !device.host.includes(currentHost);

@@ -36,6 +36,7 @@ describe('Device filter tests', () => {
       udid: '21112-1111-1111-111',
       minSDK: undefined,
       maxSDK: undefined,
+      host: undefined,
       busy: false,
       userBlocked: false,
     });
@@ -63,6 +64,7 @@ describe('Device filter tests', () => {
       platform: 'ios',
       platformVersion: '14.0',
       name: 'iPhone',
+      host: undefined,
       deviceType: 'simulator',
       udid: undefined,
       minSDK: undefined,
@@ -86,6 +88,7 @@ describe('Device filter tests', () => {
     const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
+      host: undefined,
       platformVersion: undefined,
       name: 'iPhone',
       deviceType: 'simulator',

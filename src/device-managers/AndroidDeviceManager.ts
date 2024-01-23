@@ -10,7 +10,6 @@ import { getUtilizationTime } from '../device-utils';
 import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
-import ip from 'ip';
 import NodeDevices from './NodeDevices';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
@@ -318,7 +317,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       }
 
       // node also need a copy of devices, otherwise it cannot serve requests
-      addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
+      await addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
     }
   }
 
@@ -327,7 +326,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const adbTracker = async () => {
       try {
         tracker.on('add', async (device: DeviceWithPath) => {
-          this.onDeviceAdded(originalADB, device);
+          await this.onDeviceAdded(originalADB, device);
         });
         tracker.on('remove', async (device: DeviceWithPath) => {
           await this.onDeviceRemoved(device, pluginArgs);
@@ -336,7 +335,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           if (device.type === 'offline' || device.type === 'unauthorized') {
             await this.onDeviceRemoved(device, pluginArgs);
           } else {
-            this.onDeviceAdded(originalADB, device);
+            await this.onDeviceAdded(originalADB, device);
           }
         });
         tracker.on('end', () => {
@@ -362,7 +361,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
 
     // node also need a copy of devices, otherwise it cannot serve requests
-    removeDevice([clonedDevice]);
+    await removeDevice([clonedDevice]);
     this.abort(clonedDevice.udid);
   }
 
@@ -388,17 +387,17 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const adbTracking = async () => {
       try {
         remoteTracker.on('add', async (device: DeviceWithPath) => {
-          this.onDeviceAdded(originalADB, device);
+          await this.onDeviceAdded(originalADB, device);
         });
         remoteTracker.on('remove', async (device: DeviceWithPath) => {
-          this.onDeviceRemoved(device, pluginArgs);
+          await this.onDeviceRemoved(device, pluginArgs);
         });
         remoteTracker.on('change', async (device: DeviceWithPath) => {
           if (device.type === 'offline' || device.type === 'unauthorized') {
             log.info(`Device ${device.id} is ${device.type}. Removing from list`);
             await this.onDeviceRemoved(device, pluginArgs);
           } else {
-            this.onDeviceAdded(originalADB, device);
+            await this.onDeviceAdded(originalADB, device);
           }
         });
         remoteTracker.on('end', () => console.log('Tracking stopped'));
