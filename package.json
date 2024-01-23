@@ -25,7 +25,7 @@
     "integration-ios": "mocha -r ts-node/register ./test/integration/ios/*.spec.ts --timeout 260000 --exit",
     "integration-ios2": "mocha -r ts-node/register ./test/integration/ios/02iOSDevices.spec.ts --timeout 260000 --exit",
     "build": "rm -rf lib && npx tsc -b && npm run copy-files",
-    "bundle": "npm run build && node minify.js && webpack",
+    "bundle": "npm run build && webpack",
     "build-web-and-plugin": "npx tsc -b && npm run buildAndCopyWeb && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",

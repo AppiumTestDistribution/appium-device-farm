@@ -48,14 +48,16 @@ module.exports = {
     node: true,
   },
   mode: 'production',
+  devtool: 'nosources-source-map',
   plugins: [
     new WebpackObfuscator({
       rotateStringArray: true,
       splitStrings: true,
       target: 'node',
       identifierNamesGenerator: 'mangled-shuffled',
+      sourceMap: true,
     }),
     new CreateLoaderFile(),
-    distCleanUpPlugin,
+    //distCleanUpPlugin,
   ],
 };
