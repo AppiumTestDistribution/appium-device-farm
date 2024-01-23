@@ -97,7 +97,7 @@ class DevicePlugin extends BasePlugin {
     }
   }
 
-  onUnexpectedShutdown(driver: any, cause: any) {
+  async onUnexpectedShutdown(driver: any, cause: any) {
     const deviceFilter = {
       session_id: driver.sessionId ? driver.sessionId : undefined,
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
@@ -105,9 +105,9 @@ class DevicePlugin extends BasePlugin {
 
     if (this.pluginArgs.hub !== undefined) {
       // send unblock request to hub. Should we unblock the whole devices from this node?
-      new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
+      await new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
     } else {
-      unblockDeviceMatchingFilter(deviceFilter);
+      await unblockDeviceMatchingFilter(deviceFilter);
     }
 
     log.info(
