@@ -294,6 +294,7 @@ export function getDeviceFiltersFromCapability(
     udid: udids?.length ? udids : capability['appium:udid'],
     busy: false,
     userBlocked: false,
+    host: capability['host'],
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
   };
@@ -301,8 +302,6 @@ export function getDeviceFiltersFromCapability(
   if (name !== undefined) {
     caps = { ...caps, name };
   }
-
-  log.debug(`Device filters: ${JSON.stringify(caps)}`);
   return caps;
 }
 
