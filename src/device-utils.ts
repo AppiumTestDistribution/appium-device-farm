@@ -367,7 +367,6 @@ export async function setupCronCheckStaleDevices(intervalMs: number, currentHost
  */
 export async function removeStaleDevices(currentHost: string) {
   const allDevices = await getAllDevices();
-  console.log(allDevices, currentHost)
   const nodeDevices = allDevices.filter((device) => {
     // devices that's not from this node ip address
     return device.host !== undefined && !device.host.includes(currentHost);
