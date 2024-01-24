@@ -1,3 +1,0 @@
-[submodule "modules"]
-	path = modules
-	url = https://github.com/AppiumTestDistribution/device-farm-pro.git
