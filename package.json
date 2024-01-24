@@ -86,6 +86,7 @@
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "download": "^8.0.0",
+    "eventemitter2": "^6.4.9",
     "express": "^4.17.3",
     "fs-extra": "^11.1.1",
     "get-port": "^5.1.1",

@@ -10,7 +10,6 @@ import {
   userUnblockDevice,
 } from '../../data-service/device-service';
 import log from '../../logger';
-import { Query, Send, Params } from 'express-serve-static-core';
 import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
@@ -173,7 +172,7 @@ async function nodeAdbStatusOnOtherHost(
 
     // if device is a cloud device, return error
     if (device.cloud) {
-      response.status(400).send(`Getting status from cloud node is not supported`);
+      response.status(400).send('Getting status from cloud node is not supported');
       return;
     }
 

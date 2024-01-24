@@ -47,6 +47,7 @@ import {
   stripAppiumPrefixes,
   isDeviceFarmRunning,
   hasCloudArgument,
+  loadExternalModules,
 } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -59,17 +60,14 @@ import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { PluginConfig, ServerArgs } from '@appium/types';
-import { SESSION_MANAGER } from './sessions/SessionManager';
-import { LocalSession } from './sessions/LocalSession';
-import { CloudSession } from './sessions/CloudSession';
-import { RemoteSession } from './sessions/RemoteSession';
-import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import ip from 'ip';
 import _ from 'lodash';
-import SessionType from './enums/SessionType';
-import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
 import { ADTDatabase } from './data-service/db';
+import EventBus from './notifier/event-bus';
+import { IDeviceFarmSessionOptions } from './interfaces/IDeviceFarmSession';
+import { config as pluginConfig } from './config';
+import { SessionCreatedEvent } from './events/session-created-event';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -124,6 +122,7 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
+    const externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {
@@ -135,6 +134,7 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
+    externalModule.onPluginLoaded(cliArgs, pluginArgs, pluginConfig, EventBus);
     DevicePlugin.NODE_ID = uuidv4();
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
@@ -165,9 +165,10 @@ class DevicePlugin extends BasePlugin {
       log.info('proxy is not required for axios');
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
-
     expressApp.use('/device-farm', createRouter(pluginArgs));
-    registerProxyMiddlware(expressApp, cliArgs);
+
+    registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
+    externalModule.updateServer(expressApp, httpServer);
 
     if (!platform)
       throw new Error(
@@ -356,52 +357,16 @@ class DevicePlugin extends BasePlugin {
         addProxyHandler(sessionId, device.host);
       }
 
-      let sessionInstance: DeviceFarmSession;
-      const sessionOptions: DeviceFarmSessionOptions = {
-        sessionId,
-        device,
-        sessionResponse,
-        deviceFarmOption: deviceFarmCapabilities,
-      };
-      const nodeWebdriverUrl = nodeUrl(device, DevicePlugin.nodeBasePath);
-      if (device.nodeId === DevicePlugin.NODE_ID) {
-        sessionInstance = new LocalSession({
-          ...sessionOptions,
-          driver,
-        });
-      } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession({
-          ...sessionOptions,
-          baseUrl: nodeWebdriverUrl,
-        });
-      } else {
-        sessionInstance = new RemoteSession({
-          ...sessionOptions,
-          baseUrl: nodeWebdriverUrl,
-        });
-      }
-
-      const isDashboardEnabled = !!this.pluginArgs.enableDashboard;
-      const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
-
-      if (isDashboardEnabled && shouldSaveLogs) {
-        log.debug(
-          `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
-        );
-        SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
-
-        if (DevicePlugin.IS_HUB) {
-          await DASHBORD_EVENT_MANAGER.onSessionStarted(
-            deviceFarmCapabilities,
-            sessionInstance,
-            device,
-          );
-        }
-      } else {
-        log.debug(
-          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. DashboardEnabled: ${isDashboardEnabled}, shouldSaveLogs: ${shouldSaveLogs}`,
-        );
-      }
+      EventBus.fire(
+        new SessionCreatedEvent({
+          sessionId,
+          device,
+          sessionResponse,
+          deviceFarmCapabilities,
+          pluginNodeId: DevicePlugin.NODE_ID,
+          driver: driver,
+        }),
+      );
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
     } else {

@@ -4,6 +4,13 @@ var nodeExternals = require('webpack-node-externals');
 var WebpackObfuscator = require('webpack-obfuscator');
 const RemovePlugin = require('remove-files-webpack-plugin');
 const filesToKeepInLib = [/src\/scripts/g, /config.js/g, /main.js/g];
+const filesToGenerate = [
+  {
+    override: true,
+    path: '${LIB_DIRECTORY}/src/main.js',
+    contents: 'module.exports = { DevicePlugin : require("../bundle.js").default }',
+  },
+];
 
 //Remove all files that are already bundled from lib folder
 const CleanUpLibFolder = new RemovePlugin({
@@ -21,12 +28,20 @@ const CleanUpLibFolder = new RemovePlugin({
   },
 });
 
-class CreateLoaderFile {
+class DynamicFileGenerator {
   apply(compiler) {
     compiler.hooks.emit.tapAsync('CreateFilePlugin', (compilation, callback) => {
-      const loaderFile = 'module.exports = { DevicePlugin : require("../bundle.js").default }';
-      const outputPath = path.join(compilation.outputOptions.path, 'src', 'main.js');
-      fs.writeFileSync(outputPath, loaderFile);
+      for (const file of filesToGenerate) {
+        const fPath = file.path.replace('${LIB_DIRECTORY}', compilation.outputOptions.path);
+        const dir = path.dirname(fPath);
+        if (!file.override && fs.existsSync(fPath)) {
+          break;
+        }
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(fPath, file.contents);
+      }
       callback();
     });
   }
@@ -57,7 +72,7 @@ module.exports = {
       identifierNamesGenerator: 'mangled-shuffled',
       sourceMap: true,
     }),
-    new CreateLoaderFile(),
+    new DynamicFileGenerator(),
     CleanUpLibFolder,
   ],
 };
