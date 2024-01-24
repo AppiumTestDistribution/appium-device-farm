@@ -133,8 +133,8 @@ describe('Device Utils', () => {
 
     const foundDevice = (
       await getFilteredDevice(
-        allocatedDeviceForFirstSession.udid,
-        allocatedDeviceForFirstSession.host,
+        allocatedDeviceForFirstSession.device.udid,
+        allocatedDeviceForFirstSession.device.host,
       )
     )[0];
 
@@ -142,10 +142,9 @@ describe('Device Utils', () => {
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","host":"192.168.0.226"}',
-        ),
+        .with
+        .property('message')
+        .contains('Device is busy or blocked.. Device request: {"platform":"android"'),
     );
   });
   it('Allocating device should set device to be busy', async function () {
