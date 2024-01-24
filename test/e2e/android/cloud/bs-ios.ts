@@ -55,13 +55,16 @@ describe('Plugin Test', () => {
   beforeEach(async () => {
     // wait until ios cloud devices are available
     await waitUntil(async () => {
-      const devices = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device/ios`);
-      const iosDevices = devices.data.filter((device: any) => device.cloud === 'browserstack' && device.platform.toLowerCase() === 'ios');
+      const devices = await axios.get(
+        `http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device/ios`,
+      );
+      const iosDevices = devices.data.filter(
+        (device: any) => device.cloud === 'browserstack' && device.platform.toLowerCase() === 'ios',
+      );
       console.log(`iOS devices: ${JSON.stringify(iosDevices)}`);
       return iosDevices.length > 0;
     }, 1000);
-    
-    
+
     driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
   });
 

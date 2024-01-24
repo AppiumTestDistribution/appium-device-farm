@@ -2,11 +2,7 @@
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import axios from 'axios';
 import { expect } from 'chai';
-import {
-  ensureAppiumHome,
-  HUB_APPIUM_PORT,
-  PLUGIN_PATH,
-} from './e2ehelper';
+import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
 import ip from 'ip';
 import path from 'path';
 import { IDevice } from '../../src/interfaces/IDevice';

@@ -142,8 +142,7 @@ describe('Device Utils', () => {
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
       expect(error)
         .to.be.an('error')
-        .with
-        .property('message')
+        .with.property('message')
         .contains('Device is busy or blocked.. Device request: {"platform":"android"'),
     );
   });

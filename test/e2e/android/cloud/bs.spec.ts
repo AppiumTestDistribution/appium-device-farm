@@ -135,14 +135,15 @@ describe('Browser Stack: Quirks', () => {
     const initialBusyDevices = await busyDevices();
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
-    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO)).to.be.eventually.rejected;
+    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO))
+      .to.be.eventually.rejected;
 
     await waitUntil(async () => {
       const currentBusyDevices = await busyDevices();
       console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
       return currentBusyDevices.length === initialBusyDevices.length;
     }, 1000);
-    
+
     const currentBusyDevices = await busyDevices();
     // no cloud devices should be allocated
     const cloudDevices = currentBusyDevices.filter(
