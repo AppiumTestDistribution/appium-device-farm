@@ -6,7 +6,7 @@ const RemovePlugin = require('remove-files-webpack-plugin');
 const filesToKeepInLib = [/src\/scripts/g, /config.js/g, /main.js/g];
 
 //Remove all files that are already bundled from lib folder
-const distCleanUpPlugin = new RemovePlugin({
+const CleanUpLibFolder = new RemovePlugin({
   after: {
     root: './lib',
     test: [
@@ -23,7 +23,7 @@ const distCleanUpPlugin = new RemovePlugin({
 
 class CreateLoaderFile {
   apply(compiler) {
-    compiler.hooks.emit.tapAsync('FileListPlugin', (compilation, callback) => {
+    compiler.hooks.emit.tapAsync('CreateFilePlugin', (compilation, callback) => {
       const loaderFile = 'module.exports = { DevicePlugin : require("../bundle.js").default }';
       const outputPath = path.join(compilation.outputOptions.path, 'src', 'main.js');
       fs.writeFileSync(outputPath, loaderFile);
@@ -58,6 +58,6 @@ module.exports = {
       sourceMap: true,
     }),
     new CreateLoaderFile(),
-    //distCleanUpPlugin,
+    CleanUpLibFolder,
   ],
 };

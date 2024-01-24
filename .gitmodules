@@ -1,3 +1,3 @@
-[submodule "pw-wdio-appium"]
-	path = pw-wdio-appium
-	url = https://github.com/AppiumTestDistribution/pw-wdio-appium.git
+[submodule "modules"]
+	path = modules
+	url = https://github.com/AppiumTestDistribution/device-farm-pro.git
