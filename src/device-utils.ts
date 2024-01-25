@@ -196,9 +196,13 @@ export async function initializeStorage() {
   await fs.promises.mkdir(basePath, { recursive: true });
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const storage = require('node-persist');
-  const localStorage = storage.create({ dir: basePath });
-  await localStorage.init();
-  Container.set('LocalStorage', localStorage);
+  try {
+    const localStorage = storage.create({ dir: basePath });
+    await localStorage.init();
+    Container.set('LocalStorage', localStorage);
+  } catch (err) {
+    log.error(`Failed to initialize storage: Error ${err}`);
+  }
 }
 
 function getStorage() {
@@ -226,7 +230,7 @@ export async function getUtilizationTime(udid: string) {
       //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
     }
   } catch (err) {
-    log.error(`Failed to fetch Utilization Time \n ${err}`);
+    log.error(`Failed to fetch utilization time \n ${err}`);
   }
 
   return 0;
@@ -238,7 +242,12 @@ export async function getUtilizationTime(udid: string) {
  * @param utilizationTime
  */
 export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  await getStorage().setItem(udid, utilizationTime);
+  try {
+    await getStorage().setItem(udid, utilizationTime);
+  } catch (err) {
+    log.error(`Failed to set utilization time \n ${err}`);
+  }
+  
 }
 
 /**
