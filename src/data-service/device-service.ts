@@ -2,7 +2,6 @@ import { ADTDatabase } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
-import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import { DevicePlugin } from '../plugin';
 
@@ -328,7 +327,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
           utilization = 0;
         }
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-        await setUtilizationTime(device.udid, totalUtilization);
+        // await setUtilizationTime(device.udid, totalUtilization);
         deviceModel.findAndUpdate(
           (data: IDevice) => {
             return data.udid === device.udid && data.host === device.host;

@@ -28,8 +28,6 @@ import {
 import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
-import fs from 'fs';
-import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
@@ -191,49 +189,22 @@ export async function updateCapabilityForDevice(
  * @returns storage
  */
 export async function initializeStorage() {
-  log.info('Initializing storage');
-  const basePath = cachePath('storage');
-  await fs.promises.mkdir(basePath, { recursive: true });
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const storage = require('node-persist');
-  try {
-    const localStorage = storage.create({ dir: basePath });
-    await localStorage.init();
-    Container.set('LocalStorage', localStorage);
-  } catch (err) {
-    log.error(`Failed to initialize storage: Error ${err}`);
-  }
+  log.debug('Storage disabled due to node-persist issue');
 }
-
-function getStorage() {
-  try {
-    Container.get('LocalStorage');
-  } catch (err) {
-    log.error(`Failed to get LocalStorage: Error ${err}`);
-    initializeStorage();
-  }
-  return Container.get('LocalStorage') as LocalStorage;
-}
-
 /**
  * Gets utlization time for a device from storage
  * Returns 0 if the device has not been used an thus utilization time has not been saved
  * @param udid
  * @returns number
  */
-export async function getUtilizationTime(udid: string) {
-  try {
-    const value = await getStorage().getItem(udid);
-    if (value !== undefined && value && !isNaN(value)) {
-      return value;
-    } else {
-      //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
-    }
-  } catch (err) {
-    log.error(`Failed to fetch utilization time \n ${err}`);
+export async function getUtilizationTime(udid: string): Promise<number> {
+  const deviceModel = await ADTDatabase.DeviceModel;
+  const device = await deviceModel.findOne({ udid: udid });
+  if (device != undefined) {
+    return device.utilizationTime;
+  } else {
+    return 0;
   }
-
-  return 0;
 }
 
 /**
@@ -242,12 +213,7 @@ export async function getUtilizationTime(udid: string) {
  * @param utilizationTime
  */
 export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  try {
-    await getStorage().setItem(udid, utilizationTime);
-  } catch (err) {
-    log.error(`Failed to set utilization time \n ${err}`);
-  }
-  
+  log.debug(`setUtilizationTime: disabled due to node-persist issue`);
 }
 
 /**
