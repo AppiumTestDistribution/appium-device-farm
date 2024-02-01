@@ -146,7 +146,7 @@
     "@wdio/types": "^8.24.2",
     "appium-uiautomator2-driver": "^2.42.1",
     "appium-xcuitest-driver": "^5.14.0",
-    "babel-eslint": "10.1.0",
+    "@babel/eslint-parser": "7.11.0",
     "chai": "4.3.10",
     "chai-as-promised": "^7.1.1",
     "chai-exclude": "^2.1.0",
