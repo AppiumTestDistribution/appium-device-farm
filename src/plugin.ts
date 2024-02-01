@@ -146,15 +146,8 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
-
-    if (pluginArgs.removeDevicesFromDatabaseBeforeRunningThePlugin) {
-      log.info(
-        '🔴 Removing all devices from database before running the plugin. You asked for it!',
-      );
-      await initializeStorage();
-      (await ADTDatabase.DeviceModel).removeDataOnly();
-    }
-
+    await initializeStorage();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
@@ -199,7 +192,6 @@ class DevicePlugin extends BasePlugin {
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
     await addCLIArgs(cliArgs);
-    await initializeStorage();
 
     log.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,

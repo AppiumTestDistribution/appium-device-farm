@@ -1,10 +1,10 @@
 /* eslint-disable no-prototype-builtins */
 import {
-  isMac,
-  checkIfPathIsAbsolute,
-  isDeviceFarmRunning,
   cachePath,
+  checkIfPathIsAbsolute,
   isAppiumRunningAt,
+  isDeviceFarmRunning,
+  isMac,
 } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
@@ -16,13 +16,13 @@ import { IDevice } from './interfaces/IDevice';
 import { Container } from 'typedi';
 import { DeviceFarmManager } from './device-managers';
 import {
+  addNewDevice,
+  blockDevice,
   getAllDevices,
   getDevice,
-  setSimulatorState,
-  addNewDevice,
   removeDevice,
+  setSimulatorState,
   unblockDevice,
-  blockDevice,
   updatedAllocatedDevice,
 } from './data-service/device-service';
 import log from './logger';
@@ -199,12 +199,12 @@ export async function initializeStorage() {
   Container.set('LocalStorage', localStorage);
 }
 
-function getStorage() {
+async function getStorage() {
   try {
     Container.get('LocalStorage');
   } catch (err) {
     log.error(`Failed to get LocalStorage: Error ${err}`);
-    initializeStorage();
+    await initializeStorage();
   }
   return Container.get('LocalStorage') as LocalStorage;
 }
@@ -217,8 +217,8 @@ function getStorage() {
  */
 export async function getUtilizationTime(udid: string) {
   try {
-    const value = await getStorage().getItem(udid);
-    if (value !== undefined && value && !isNaN(value)) {
+    const value = (await getStorage()).getItem(udid);
+    if (value !== undefined && value && !isNaN(await value)) {
       return value;
     } else {
       //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
@@ -236,7 +236,7 @@ export async function getUtilizationTime(udid: string) {
  * @param utilizationTime
  */
 export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  await getStorage().setItem(udid, utilizationTime);
+  await (await getStorage()).setItem(udid, utilizationTime);
 }
 
 /**
@@ -427,12 +427,10 @@ export async function removeStaleDevices(currentHost: string) {
 
 export async function unblockCandidateDevices() {
   const allDevices = await getAllDevices();
-  const busyDevices = allDevices.filter((device) => {
-    const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
+  return allDevices.filter((device) => {
     // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}`);
-    return isCandidate;
+    return device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
   });
-  return busyDevices;
 }
 
 export async function releaseBlockedDevices(newCommandTimeout: number) {
