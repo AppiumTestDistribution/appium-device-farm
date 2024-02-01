@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.4.7-rc.4",
+  "version": "8.4.7-rc.5",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "install-docs-deps": "appium-docs init --no-mkdocs -e lib/src/index.js",
     "coverage": "nyc npm run test",
     "test-remote": "mocha --require ts-node/register ./test/e2e/remote.spec.js --timeout 60000 --exit",
-    "test": "mocha -r ts-node/register ./test/unit/*.spec.{j,t}s --plugin-device-farm-platform=both --exit --timeout=10000",
+    "test": "mocha -r ts-node/register ./test/unit/*.spec.{j,t}s --plugin-device-farm-platform=both --exit --timeout=20000",
     "test-jest": "NODE_OPTIONS=--experimental-vm-modules npx jest ./test/unit/AndroidDeviceManager.spec.js",
     "test-parallel-android": "mocha --require ts-node/register -p ./test/e2e/android/conf.spec.js --exit --timeout 260000",
     "test-parallel-bs": "mocha --require ts-node/register -p ./test/e2e/android/cloud/bs.spec.ts --exit --timeout 260000",

@@ -161,6 +161,9 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
         case 'session_id':
           filter.session_id = filterOptions.session_id;
           break;
+        case 'host':
+          filter.host = { $contains: filterOptions.host };
+          break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {
             // log.debug(`minSDK: ${filterOptions.minSDK}`);
