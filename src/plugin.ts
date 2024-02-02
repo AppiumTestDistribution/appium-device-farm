@@ -76,7 +76,7 @@ let androidDeviceType: any;
 let iosDeviceType: any;
 let hasEmulators: any;
 let proxy: any;
-
+let externalModule: any;
 class DevicePlugin extends BasePlugin {
   static nodeBasePath = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
@@ -122,7 +122,7 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
-    const externalModule = await loadExternalModules();
+    externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {
@@ -348,8 +348,7 @@ class DevicePlugin extends BasePlugin {
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
-
-      EventBus.fire(
+      await EventBus.fire(
         new SessionCreatedEvent({
           sessionId,
           device,

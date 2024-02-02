@@ -1,20 +1,16 @@
-import EventEmitter2 from 'eventemitter2';
 import { EventListener } from './event-listener';
 import { Event } from './event';
+import Emittery from 'emittery';
 
 export class EventBus {
-  private delegate: EventEmitter2 = new EventEmitter2();
+  private delegate: Emittery = new Emittery();
 
   addListener<T>(listener: EventListener<T>) {
-    this.delegate.addListener(listener.getEventName(), listener.getHandler());
+    this.delegate.on(listener.getEventName(), listener.getHandler());
   }
 
-  fire<T>(event: Event<T>) {
-    this.delegate.emit(event.getEventName(), event.getData());
-  }
-
-  removeAll() {
-    this.delegate.removeAllListeners();
+  async fire<T>(event: Event<T>) {
+    await this.delegate.emit(event.getEventName(), event.getData());
   }
 }
 

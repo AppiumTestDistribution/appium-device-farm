@@ -13,6 +13,8 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
+  'appium:build': 'DeviceFarm BuildName 2',
+  'appium:record_video': true,
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };
@@ -23,12 +25,18 @@ describe('Plugin Test', () => {
   });
 
   it('Vertical swipe test', async () => {
+    await driver.executeScript('devicefarm: setSessionName', [{ name: 'DeviceFarm SliderTest' }]);
     console.log(await driver.capabilities.deviceUDID);
-    await driver.$('~login').click();
+    await driver.$('~logins').click();
   });
 
-  afterEach(async () => {
+  afterEach(async function () {
     if (driver) {
+      await driver.executeScript('devicefarm: setSessionStatus', [
+        {
+          status: this.currentTest.state,
+        },
+      ]);
       await driver.deleteSession();
       driver = null;
     }

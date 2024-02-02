@@ -55,6 +55,10 @@ function handler(cliArgs: Record<string, any>, middlewares: ExpressMiddleware[])
   const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '').replace(/\/$/, '') + '/session';
   const isHub = !hasHubArgument(cliArgs); //if hub cliArg is provided, then current appium process serves as a NODE
   return async (req: Request, res: Response, next: NextFunction) => {
+    if (new RegExp(/wd-internal\//).test(req.url)) {
+      req.url = req.originalUrl = req.url.replace('wd-internal/', '');
+      return next();
+    }
     if (isHub && !req.path.startsWith(WEBDRIVER_BASE_PATH)) {
       log.info(
         `Received non-webdriver request with url ${req.path}. So, not proxying it to downstream.`,
