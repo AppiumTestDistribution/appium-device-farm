@@ -18,6 +18,7 @@ jobs:
        git submodule update --init --recursive
     - script: |
         npm ci
+        npm run bundle
         npm test
       displayName: 'npm test'
     - script: |
