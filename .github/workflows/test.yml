@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dashboard-module
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        token: ${{ secrets.PAT_TOKEN }}
+    - name: Run script
+      run: |
+        # Add your script commands here
+        npm ci
+        npm run bundle
