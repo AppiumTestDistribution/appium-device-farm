@@ -3,18 +3,16 @@ trigger:
 
 jobs:
  - job: UnitTest
-   env:
-   CI_PAT: $(PAT_ENV_VARIABLE) 
+   
    pool:
      vmImage: 'macOS-latest'
-
    steps:
     - task: NodeTool@0.200.0
       inputs:
        versionSpec: '20.x'
     - script: |
        git config --file .gitmodules --get-regexp url | while read url; do
-         git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.CI_PAT }}:${{ secrets.CI_PAT }}@github.com\//")
+         git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.PAT_ENV_VARIABLE }}:${{ secrets.PAT_ENV_VARIABLE }}@github.com\//")
        done
        git submodule sync
        git submodule update --init --recursive
