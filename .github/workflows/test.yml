@@ -8,10 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
 
     steps:
     - name: Checkout repository with submodules
-      uses: actions/checkout@v4.2.0
+      uses: actions/checkout@v3
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
