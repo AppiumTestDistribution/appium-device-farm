@@ -5,3 +5,5 @@ steps:
        done
        git submodule sync
        git submodule update --init --recursive
+       npm ci
+       npm run bundle
