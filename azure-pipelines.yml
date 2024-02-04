@@ -12,7 +12,7 @@ jobs:
        versionSpec: '20.x'
     - script: |
        git config --file .gitmodules --get-regexp url | while read url; do
-         git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.PAT_ENV_VARIABLE }}:${{ secrets.PAT_ENV_VARIABLE }}@github.com\//")
+         git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/$PAT_ENV_VARIABLE:$PAT_ENV_VARIABLE@github.com\//")
        done
        git submodule sync
        git submodule update --init --recursive
