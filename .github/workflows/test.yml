@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout repository with submodules
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.2.0
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
@@ -20,3 +20,4 @@ jobs:
         # Add your script commands here
         npm ci
         npm run bundle
+        npm test
