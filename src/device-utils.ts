@@ -44,6 +44,7 @@ const customCapability = {
   udids: 'appium:udids',
   minSDK: 'appium:minSDK',
   maxSDK: 'appium:maxSDK',
+  filterByHost: 'appium:filterByHost',
 };
 
 let timer: any;
@@ -281,7 +282,6 @@ export function getDeviceFiltersFromCapability(
   } else if (capability[customCapability.iphoneOnly]) {
     name = 'iPhone';
   }
-
   let caps = {
     platform,
     platformVersion: capability['appium:platformVersion']
@@ -292,7 +292,7 @@ export function getDeviceFiltersFromCapability(
     udid: udids?.length ? udids : capability['appium:udid'],
     busy: false,
     userBlocked: false,
-    host: capability['host'],
+    filterByHost: capability[customCapability.filterByHost],
     minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
     maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
   };
