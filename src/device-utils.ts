@@ -1,10 +1,10 @@
 /* eslint-disable no-prototype-builtins */
 import {
-  isMac,
-  checkIfPathIsAbsolute,
-  isDeviceFarmRunning,
   cachePath,
+  checkIfPathIsAbsolute,
   isAppiumRunningAt,
+  isDeviceFarmRunning,
+  isMac,
 } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
@@ -16,13 +16,13 @@ import { IDevice } from './interfaces/IDevice';
 import { Container } from 'typedi';
 import { DeviceFarmManager } from './device-managers';
 import {
+  addNewDevice,
+  blockDevice,
   getAllDevices,
   getDevice,
-  setSimulatorState,
-  addNewDevice,
   removeDevice,
+  setSimulatorState,
   unblockDevice,
-  blockDevice,
   updatedAllocatedDevice,
 } from './data-service/device-service';
 import log from './logger';
@@ -205,15 +205,6 @@ export async function getUtilizationTime(udid: string): Promise<number> {
   } else {
     return 0;
   }
-}
-
-/**
- * Sets utilization time for a device to storage
- * @param udid
- * @param utilizationTime
- */
-export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  log.debug(`setUtilizationTime: disabled due to node-persist issue`);
 }
 
 /**
@@ -435,12 +426,10 @@ export async function removeStaleDevices(currentHost: string) {
 
 export async function unblockCandidateDevices() {
   const allDevices = await getAllDevices();
-  const busyDevices = allDevices.filter((device) => {
-    const isCandidate = device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
+  return allDevices.filter((device) => {
     // log.debug(`Checking if device ${device.udid} from ${device.host} is a candidate to be released: ${isCandidate}`);
-    return isCandidate;
+    return device.busy && !device.userBlocked && device.lastCmdExecutedAt != undefined;
   });
-  return busyDevices;
 }
 
 export async function releaseBlockedDevices(newCommandTimeout: number) {

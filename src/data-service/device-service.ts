@@ -302,7 +302,7 @@ export async function blockDevice(udid: string, host: string) {
 }
 
 export async function unblockDevice(udid: string, host: string) {
-  unblockDeviceMatchingFilter({ udid, host });
+  await unblockDeviceMatchingFilter({ udid, host });
 }
 
 export async function unblockDeviceMatchingFilter(filter: object) {
