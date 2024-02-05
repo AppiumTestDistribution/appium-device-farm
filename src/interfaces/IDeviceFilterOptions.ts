@@ -13,5 +13,5 @@ export interface IDeviceFilterOptions {
   minSDK?: string;
   maxSDK?: string;
   session_id?: string;
-  host?: string;
+  filterByHost?: string;
 }

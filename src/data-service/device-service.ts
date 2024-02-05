@@ -161,8 +161,8 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
         case 'session_id':
           filter.session_id = filterOptions.session_id;
           break;
-        case 'host':
-          filter.host = { $contains: filterOptions.host };
+        case 'filterByHost':
+          filter.host = { $contains: filterOptions.filterByHost };
           break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {
@@ -204,7 +204,6 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // if (filterOptions.deviceType === 'simulator') {
   //   filter.state = 'Booted'; // Needs a fix
   // }
-
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
   /*
