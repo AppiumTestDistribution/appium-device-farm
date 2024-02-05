@@ -85,6 +85,5 @@ export function getDeviceFarmCapabilities(caps: ISessionCapability) {
       },
       {} as Record<string, any>,
     );
-
   return _.merge(deviceFarmOptions, individualCapabilities);
 }

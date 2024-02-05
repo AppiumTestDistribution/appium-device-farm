@@ -13,8 +13,10 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:build': 'DeviceFarm BuildName 2',
-  'appium:record_video': true,
+  'df:build': 'DeviceFarm BuildName 4',
+  'df:options': {
+    record_video: true,
+  },
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };

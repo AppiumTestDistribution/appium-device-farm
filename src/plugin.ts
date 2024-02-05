@@ -337,7 +337,6 @@ class DevicePlugin extends BasePlugin {
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
-
       log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
       await updatedAllocatedDevice(device, {
         busy: true,
