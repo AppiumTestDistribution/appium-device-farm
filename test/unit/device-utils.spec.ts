@@ -302,9 +302,7 @@ describe('Device Utils', () => {
 
   it('Block and unblock device', async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
-    // mock setUtilizationTime
-    sandbox.stub(DeviceUtils, <any>'setUtilizationTime').callsFake(sinon.fake());
-
+  
     const unbusyDevices = devices.map((device) => ({
       ...device,
       busy: false,
