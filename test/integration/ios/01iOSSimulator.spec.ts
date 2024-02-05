@@ -5,7 +5,6 @@ import { Container } from 'typedi';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initializeStorage,
   cleanPendingSessions,
 } from '../../../src/device-utils';
 import { ADTDatabase } from '../../../src/data-service/db';
@@ -44,7 +43,7 @@ async function initDeviceFarm(iosDeviceType: string) {
     remote: [`http://${ip.address()}:4723`],
     iosDeviceType: iosDeviceType,
   });
-  await initializeStorage();
+  
   const deviceManager = new DeviceFarmManager(
     'ios',
     {
@@ -121,7 +120,6 @@ describe('Max sessions CLI argument test', () => {
   });
 
   it('Throw error when all sessions occupied', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'simulated', androidDeviceType: 'real' },
@@ -167,7 +165,7 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
-    await initializeStorage();
+
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -205,7 +203,6 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -245,7 +242,6 @@ describe('IOS Simulator Test', () => {
 
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
-      await initializeStorage();
       const deviceManager = new DeviceFarmManager(
         'ios',
         { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -307,7 +303,6 @@ describe('Boot simulator test', async () => {
   });
 
   it('Should pick Booted simulator when app path has .app', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },

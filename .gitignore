@@ -13,3 +13,5 @@ temp-appium
 src/public/*
 docs/reference
 *.log
+devices.json
+simulators.json

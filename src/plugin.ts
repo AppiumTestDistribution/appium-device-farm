@@ -26,7 +26,6 @@ import {
   setupCronReleaseBlockedDevices,
   setupCronUpdateDeviceList,
   deviceType,
-  initializeStorage,
   isIOS,
   refreshSimulatorState,
   setupCronCheckStaleDevices,
@@ -146,7 +145,6 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
-    await initializeStorage();
     (await ADTDatabase.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;

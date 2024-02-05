@@ -5,7 +5,6 @@ import { ADTDatabase } from '../../src/data-service/db';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initializeStorage,
   cleanPendingSessions,
 } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
@@ -57,8 +56,6 @@ describe('Android Test', () => {
   });
 
   it('Allocate free device and verify the device state is busy in db', async () => {
-    await initializeStorage();
-
     await deviceManager.getDevices();
     Container.set(DeviceFarmManager, deviceManager);
     const hub = pluginArgs.hub;
@@ -75,7 +72,6 @@ describe('Android Test', () => {
   });
 
   it('Finding a device should throw error when all devices are busy', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'android',
       { androidDeviceType: 'both', iosDeviceType: 'both' },

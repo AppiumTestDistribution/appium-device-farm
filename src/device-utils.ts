@@ -185,13 +185,6 @@ export async function updateCapabilityForDevice(
 }
 
 /**
- * Sets up node-persist storage in local cache
- * @returns storage
- */
-export async function initializeStorage() {
-  log.debug('Storage disabled due to node-persist issue');
-}
-/**
  * Gets utlization time for a device from storage
  * Returns 0 if the device has not been used an thus utilization time has not been saved
  * @param udid
