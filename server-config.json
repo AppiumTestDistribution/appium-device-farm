@@ -4,7 +4,8 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
-        "skipChromeDownload": true
+        "skipChromeDownload": true,
+        "hub": "http://10.211.55.3:31337"
       }
     }
   }

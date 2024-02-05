@@ -282,7 +282,7 @@ export function getDeviceFiltersFromCapability(
   } else if (capability[customCapability.iphoneOnly]) {
     name = 'iPhone';
   }
- console.log(capability)
+  console.log(capability);
   let caps = {
     platform,
     platformVersion: capability['appium:platformVersion']
