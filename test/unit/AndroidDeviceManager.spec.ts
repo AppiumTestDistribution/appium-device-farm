@@ -10,6 +10,7 @@ import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { ADTDatabase } from '../../src/data-service/db';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
 import chaiAsPromised from 'chai-as-promised';
+import { v4 as uuidv4 } from 'uuid';
 
 chai.use(chaiAsPromised);
 
@@ -51,9 +52,10 @@ describe('Android Device Manager', function () {
   }
 
   it('Android Device List to have added state', async () => {
-    const androidDevices = new AndroidDeviceManager(
+    const androidDeviceManager = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -64,26 +66,29 @@ describe('Android Device Manager', function () {
     // console.log('deviceList', deviceList);
 
     const getConnectedDevicesStub = sandbox
-      .stub(androidDevices, 'getConnectedDevices')
+      .stub(androidDeviceManager, 'getConnectedDevices')
       .returns(Promise.resolve(deviceList));
-    const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
+    const getDeviceVersion = sandbox.stub(androidDeviceManager, <any>'getDeviceVersion');
     getDeviceVersion.onFirstCall().returns(Promise.resolve('9'));
     getDeviceVersion.onSecondCall().returns(Promise.resolve('13'));
-    sandbox.stub(androidDevices, <any>'getDeviceName').returns(Promise.resolve('sdk_phone_x86'));
     sandbox
-      .stub(androidDevices, 'getChromeVersion')
+      .stub(androidDeviceManager, <any>'getDeviceName')
+      .returns(Promise.resolve('sdk_phone_x86'));
+    sandbox
+      .stub(androidDeviceManager, 'getChromeVersion')
       .returns(Promise.resolve('/var/path/chromedriver'));
-    const realDevice = sandbox.stub(androidDevices, <any>'isRealDevice');
-    realDevice.onFirstCall().returns(Promise.resolve(false));
-    realDevice.onSecondCall().returns(Promise.resolve(true));
+    const isRealDevice = sandbox.stub(androidDeviceManager, <any>'isRealDevice');
+    isRealDevice.onFirstCall().returns(Promise.resolve(false));
+    isRealDevice.onSecondCall().returns(Promise.resolve(true));
     sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(Promise.resolve(0));
 
-    const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
+    const devices = await androidDeviceManager.getDevices({ androidDeviceType: 'both' }, []);
 
-    expect(androidDevices.getDevices({ androidDeviceType: 'both' }, [])).to.eventually.be.equal(
-      deviceList,
-    );
+    expect(getDeviceVersion.calledTwice).to.be.true;
+    expect(getDeviceVersion.calledWith(adb, 'emulator-5554')).to.be.true;
+    expect(getDeviceVersion.calledWith(cloneAdb, 'emulator-5555')).to.be.true;
+    expect(isRealDevice.calledTwice).to.be.true;
     expect(getConnectedDevicesStub.called).to.be.true;
 
     console.log('devices', devices);
@@ -132,6 +137,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -177,6 +183,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -225,7 +232,7 @@ describe('Android Device Manager', function () {
       skipChromeDownload: true,
       remoteMachineProxyIP: 'http://10.1.1.1:3333',
     });
-    const androidDevices = new AndroidDeviceManager(pluginArgs, 4723);
+    const androidDevices = new AndroidDeviceManager(pluginArgs, 4723, uuidv4());
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -271,6 +278,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -315,6 +323,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     adb = await getAdbOriginal();
     sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));

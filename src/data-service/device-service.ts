@@ -2,8 +2,8 @@ import { ADTDatabase } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
-import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
+import { DevicePlugin } from '../plugin';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
@@ -35,6 +35,11 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       } as unknown as Partial<IDevice>,
       device,
     );
+
+    // fixme: pass node id from function parameter
+    if (device.nodeId === undefined) {
+      device.nodeId = DevicePlugin.NODE_ID;
+    }
 
     const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel)
       .chain()
@@ -207,11 +212,11 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
 
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
-  /*
+  /*log.debug(`filter: ${JSON.stringify(filter)}`)
+  log.debug(`filterOptions: ${JSON.stringify(filterOptions)}`)
   log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);
   log.debug(`all devices: ${JSON.stringify(deviceModel.chain().find().data())}`);
   log.debug(`basic filter applied devices: ${JSON.stringify(deviceModel.chain().find(basicFilter).data())}`);
-  log.debug(`filter: ${JSON.stringify(filter)}`);
   log.debug(`results: ${JSON.stringify(matchingDevices)}`);
   */
 
@@ -322,7 +327,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
           utilization = 0;
         }
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-        await setUtilizationTime(device.udid, totalUtilization);
+        // await setUtilizationTime(device.udid, totalUtilization);
         deviceModel.findAndUpdate(
           (data: IDevice) => {
             return data.udid === device.udid && data.host === device.host;

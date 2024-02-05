@@ -177,6 +177,8 @@ export function stripAppiumPrefixes(caps: any) {
 }
 
 export async function isDeviceFarmRunning(host: string): Promise<boolean> {
+  // remove /wd/hub from host
+  host = host.replace('/wd/hub', '');
   try {
     const timeoutMs = 30000;
     const result = await axios({

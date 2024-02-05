@@ -6,7 +6,6 @@ import ip from 'ip';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initializeStorage,
 } from '../../../src/device-utils';
 import { ADTDatabase } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
@@ -26,7 +25,6 @@ describe('IOS Test', () => {
   });
 
   it('Throw error when no device is found for given capabilities', async () => {
-    await initializeStorage();
     (await ADTDatabase.CLIArgs)
       .chain()
       .find()
@@ -63,7 +61,6 @@ describe('IOS Test', () => {
   });
 
   it('Should throw error if the IPA does not match with device type real', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },

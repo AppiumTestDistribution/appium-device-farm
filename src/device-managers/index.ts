@@ -1,6 +1,8 @@
+import { getAllDevices } from '../data-service/device-service';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
+import log from '../logger';
 import { Platform } from '../types/Platform';
 import AndroidDeviceManager from './AndroidDeviceManager';
 import IOSDeviceManager from './IOSDeviceManager';
@@ -22,16 +24,26 @@ export class DeviceFarmManager {
     this.deviceTypes = deviceTypes;
     this.nodeId = nodeId;
     if (platform.toLowerCase() === 'both') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
+      log.debug('Initializing device managers for both android and ios');
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort, this.nodeId));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort, this.nodeId));
     } else if (platform.toLowerCase() === 'android') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
+      log.debug('Initializing device managers for android');
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort, this.nodeId));
     } else if (platform.toLowerCase() === 'ios') {
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
+      log.debug('Initializing device managers for ios');
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort, this.nodeId));
     }
   }
 
-  public async getDevices(existingDeviceDetails?: Array<IDevice>): Promise<IDevice[]> {
+  /**
+   * Update list of devices by merging new devices with existing devices data.
+   * Busy state of existing devices will be preserved.
+   * @param existingDeviceDetails
+   * @returns
+   */
+  public async getDevices(): Promise<IDevice[]> {
+    const existingDeviceDetails = await getAllDevices();
     const devices: IDevice[] = [];
     for (const deviceManager of this.deviceManagers) {
       devices.push(

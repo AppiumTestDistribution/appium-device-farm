@@ -9,6 +9,8 @@ import axios from 'axios';
 import { expect } from 'chai';
 import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
+import _ from 'lodash';
+import waitUntil from 'async-wait-until';
 chai.use(chaiAsPromised);
 
 const APPIUM_HOST = ip.address();
@@ -21,7 +23,8 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'android',
-  'appium:app': process.env.BS_ANDROID_CLOUD_APP ?? 'bs://3c67a275efebca08ac1ee900fc35d979f846f12a',
+  'appium:automationName': 'UiAutomator2',
+  'appium:app': process.env.BS_ANDROID_CLOUD_APP ?? 'bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
@@ -95,10 +98,12 @@ describe('BrowserStack: Plugin Test', () => {
     }
   });
 });
+
 async function busyDevices() {
   const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm/api/device`);
   return res.data.filter((device: any) => device.busy === true);
 }
+
 describe('Browser Stack: Quirks', () => {
   // dump hub config into a file
   const hub_config_file = path.join(__dirname, '../../../../serverConfig/bs-config.json');
@@ -125,22 +130,21 @@ describe('Browser Stack: Quirks', () => {
   });
 
   it('handles empty session id when app is invalid', async () => {
-    capabilities['appium:app'] = 'bs://invalid-app-id';
+    const invalid_app_caps = _.cloneDeep(capabilities);
+    invalid_app_caps['appium:app'] = 'bs://invalid-app-id';
     const initialBusyDevices = await busyDevices();
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
-    try {
-      await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
-    } catch (e) {
-      console.log(e);
-    }
+    await expect(remote({ ...WDIO_PARAMS, capabilities: invalid_app_caps } as Options.WebdriverIO))
+      .to.be.eventually.rejected;
+
+    await waitUntil(async () => {
+      const currentBusyDevices = await busyDevices();
+      console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
+      return currentBusyDevices.length === initialBusyDevices.length;
+    }, 1000);
 
     const currentBusyDevices = await busyDevices();
-    console.log(`currentBusyDevices: ${JSON.stringify(currentBusyDevices)}`);
-
-    // the same number of devices should be busy
-    expect(currentBusyDevices.length).to.equal(initialBusyDevices.length);
-
     // no cloud devices should be allocated
     const cloudDevices = currentBusyDevices.filter(
       (device: any) => device.cloud === 'browserstack',

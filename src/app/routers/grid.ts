@@ -10,7 +10,6 @@ import {
   userUnblockDevice,
 } from '../../data-service/device-service';
 import log from '../../logger';
-import { Query, Send, Params } from 'express-serve-static-core';
 import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
@@ -69,7 +68,10 @@ async function getDeviceByPlatform(request: Request, response: Response) {
   return response.status(200).send(devices);
 }
 
-async function registerNode(request: Request, response: Response) {
+async function registerNode(
+  request: Request<void, void, IDevice[], { type: 'add' | 'remove' }>,
+  response: Response,
+) {
   const requestBody = request.body;
   const { type } = request.query;
   if (type === 'add') {
@@ -155,12 +157,10 @@ async function nodeAdbStatusOnOtherHost(
     );
   } else {
     // find node url from database of devices
-    const devices = (await (
-      await ADTDatabase.DeviceModel
-    )
+    const devices = (await ADTDatabase.DeviceModel)
       .chain()
       .find({ host: { $contains: host } })
-      .data()) as IDevice[];
+      .data() as IDevice[];
     if (devices.length === 0) {
       response
         .status(404)

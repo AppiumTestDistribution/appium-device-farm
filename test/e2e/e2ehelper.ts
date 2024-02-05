@@ -43,17 +43,17 @@ export const HUB_APPIUM_PORT = 4723;
 export const NODE_APPIUM_PORT = 4724;
 export const PLUGIN_PATH = path.resolve(__dirname + '/../..');
 
-export const hub_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
+export const default_hub_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
   hub: undefined,
   bindHostOrIp: localIp,
 });
 
-export const node_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
-  hub: `http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}`,
+export const default_node_config: IPluginArgs = Object.assign({}, DefaultPluginArgs, {
+  hub: `http://${default_hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}`,
   bindHostOrIp: alternateIp,
 });
 
-export function ensureTempDir() {
+function ensureTempDir() {
   const tempDir = path.resolve(__dirname + '/../../temp-appium');
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir);
@@ -61,7 +61,7 @@ export function ensureTempDir() {
   return tempDir;
 }
 
-export function ensureAppiumHome(suffix = '', deleteExisting = true) {
+function ensureAppiumHome(suffix = '', deleteExisting = true) {
   const newHome = path.resolve(path.join(__dirname, '/../../temp-appium', suffix));
   if (!fs.existsSync(newHome)) {
     fs.mkdirSync(newHome);
@@ -81,45 +81,35 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
   return newHome;
 }
 
-export function ensureHubConfig(
-  platform: 'android' | 'ios' | 'both' = 'android',
-  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
-  androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
-  moreConfig: Partial<IPluginArgs> = {},
-) {
-  return ensureConfig('hub-config.json', {
+function ensureHubConfig(moreConfig: Partial<IPluginArgs> = {}, configPrefix = 'hub') {
+  const finalConfig = Object.assign({}, default_hub_config, moreConfig);
+
+  // make sure there's no hub defined
+  delete finalConfig.hub;
+
+  return ensureConfig(`${configPrefix}-config.json`, {
     server: {
       port: HUB_APPIUM_PORT,
       plugin: {
-        'device-farm': Object.assign(
-          node_config,
-          {
-            platform,
-            androidDeviceType,
-            iosDeviceType,
-          },
-          moreConfig,
-        ),
+        'device-farm': finalConfig,
       },
     },
   });
 }
 
-export function ensureNodeConfig(
-  platform: 'android' | 'ios' | 'both' = 'android',
-  iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
-  androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
-  moreConfig: Partial<IPluginArgs> = {},
-) {
-  return ensureConfig('node-config.json', {
+function ensureNodeConfig(moreConfig: Partial<IPluginArgs> = {}, configPrefix = 'node') {
+  const finalConfig = Object.assign({}, default_node_config, moreConfig);
+
+  // bail when hub is not defined
+  if (!finalConfig.hub) {
+    throw new Error('Hub is not defined in node config');
+  }
+
+  return ensureConfig(`${configPrefix}-config.json`, {
     server: {
       port: NODE_APPIUM_PORT,
       plugin: {
-        'device-farm': Object.assign(node_config, {
-          platform,
-          androidDeviceType,
-          iosDeviceType,
-        }),
+        'device-farm': finalConfig,
       },
     },
   });
@@ -127,6 +117,32 @@ export function ensureNodeConfig(
 
 function ensureConfig(filename: string, config: any) {
   const config_file = ensureTempDir() + '/' + filename;
+  // delete existing config file
+  if (fs.existsSync(config_file)) fs.unlinkSync(config_file);
   fs.writeFileSync(config_file, JSON.stringify(config));
   return config_file;
 }
+
+function configReader(config_file: string) {
+  const config = JSON.parse(fs.readFileSync(config_file, 'utf8'));
+  return config.server.plugin['device-farm'];
+}
+
+// wait until condition is true or timeout
+export async function waitForCondition(
+  condition: () => Promise<boolean>,
+  timeoutMs: number,
+  intervalMs: number = 1000,
+) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    console.log(`Waiting for condition to be true`);
+    if (await condition()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new Error(`Timeout waiting for condition`);
+}
+
+export { ensureHubConfig, ensureNodeConfig, ensureAppiumHome, ensureTempDir, configReader };

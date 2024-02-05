@@ -28,8 +28,6 @@ import {
 import log from './logger';
 import DevicePlatform from './enums/Platform';
 import _ from 'lodash';
-import fs from 'fs';
-import { LocalStorage } from 'node-persist';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
@@ -95,9 +93,9 @@ export async function allocateDeviceForSession(
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
   pluginArgs: IPluginArgs,
-): Promise<IDevice> {
+): Promise<{ device: IDevice; capability: ISessionCapability }> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  // log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
 
   // log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
@@ -145,11 +143,10 @@ export async function allocateDeviceForSession(
   const device = await getDevice(filters);
   if (device != undefined) {
     // log.info(`📱 Device found: ${JSON.stringify(device)}`);
-    await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
+    await blockDevice(device.udid, device.host);
 
-    // FIXME: convert this into a return value
-    await updateCapabilityForDevice(capability, device);
+    const newCap = await updateCapabilityForDevice(capability, device);
 
     // update newCommandTimeout for the device.
     // This is required so it won't get unblocked by prematurely.
@@ -159,7 +156,7 @@ export async function allocateDeviceForSession(
     }
     await updatedAllocatedDevice(device, { newCommandTimeout });
 
-    return device;
+    return { device, capability: newCap };
   } else {
     throw new Error(`No device found for filters: ${JSON.stringify(filters)}`);
   }
@@ -171,12 +168,15 @@ export async function allocateDeviceForSession(
  * @param device
  * @returns
  */
-export async function updateCapabilityForDevice(capability: any, device: IDevice) {
+export async function updateCapabilityForDevice(
+  capability: any,
+  device: IDevice,
+): Promise<ISessionCapability> {
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
-      await androidCapabilities(capability, device);
+      return await androidCapabilities(capability, device);
     } else {
-      await iOSCapabilities(capability, device);
+      return await iOSCapabilities(capability, device);
     }
   } else {
     log.info('Updating cloud capability for Device');
@@ -185,58 +185,19 @@ export async function updateCapabilityForDevice(capability: any, device: IDevice
 }
 
 /**
- * Sets up node-persist storage in local cache
- * @returns storage
- */
-export async function initializeStorage() {
-  log.info('Initializing storage');
-  const basePath = cachePath('storage');
-  await fs.promises.mkdir(basePath, { recursive: true });
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const storage = require('node-persist');
-  const localStorage = storage.create({ dir: basePath });
-  await localStorage.init();
-  Container.set('LocalStorage', localStorage);
-}
-
-async function getStorage() {
-  try {
-    Container.get('LocalStorage');
-  } catch (err) {
-    log.error(`Failed to get LocalStorage: Error ${err}`);
-    await initializeStorage();
-  }
-  return Container.get('LocalStorage') as LocalStorage;
-}
-
-/**
  * Gets utlization time for a device from storage
  * Returns 0 if the device has not been used an thus utilization time has not been saved
  * @param udid
  * @returns number
  */
-export async function getUtilizationTime(udid: string) {
-  try {
-    const value = (await getStorage()).getItem(udid);
-    if (value !== undefined && value && !isNaN(await value)) {
-      return value;
-    } else {
-      //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
-    }
-  } catch (err) {
-    log.error(`Failed to fetch Utilization Time \n ${err}`);
+export async function getUtilizationTime(udid: string): Promise<number> {
+  const deviceModel = await ADTDatabase.DeviceModel;
+  const device = await deviceModel.findOne({ udid: udid });
+  if (device != undefined) {
+    return device.utilizationTime;
+  } else {
+    return 0;
   }
-
-  return 0;
-}
-
-/**
- * Sets utilization time for a device to storage
- * @param udid
- * @param utilizationTime
- */
-export async function setUtilizationTime(udid: string, utilizationTime: number) {
-  await (await getStorage()).setItem(udid, utilizationTime);
 }
 
 /**
@@ -317,10 +278,23 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
+/**
+ * Get all devices from system, compares it with the existing devices in the database.
+ * Clean up non-existing devices from the database and add new devices to the database.
+ * Also, send device list update to the hub if the hub is running.
+ * @param host
+ * @param hubArgument
+ * @returns
+ */
 export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
-  const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
-  if (devices.length === 0) {
-    log.warn('No devices found');
+  const existingDevices = await getAllDevices();
+  const devices: IDevice[] = await getDeviceManager().getDevices();
+  const noLongerExistingDevices = existingDevices.filter((device) => {
+    return !devices.some((newDevice) => newDevice.udid === device.udid);
+  });
+
+  if (devices.length === 0 && noLongerExistingDevices.length === 0) {
+    log.warn('No devices removed or added found');
     return [];
   }
 
@@ -332,25 +306,43 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
   if (hubArgument) {
     if (await isDeviceFarmRunning(hubArgument)) {
       const nodeDevices = new NodeDevices(hubArgument);
+      // add new devices to the hub
       try {
         await nodeDevices.postDevicesToHub(devices, 'add');
       } catch (error) {
-        log.error(`Cannot send device list update. Reason: ${error}`);
+        log.error(`Cannot send device list to add. Reason: ${error}`);
+      }
+
+      // remove non-existing devices from the hub
+      try {
+        await nodeDevices.postDevicesToHub(noLongerExistingDevices, 'remove');
+      } catch (error) {
+        log.error(`Cannot send device list to remove. Reason: ${error}`);
       }
     } else {
       log.warn(`Not sending device update since hub ${hubArgument} is not running`);
     }
+  } else {
+    // remove non-existing devices from the database
+    log.debug(`Removing non-existent device(s): ${JSON.stringify(noLongerExistingDevices)}`);
+    await removeDevice(
+      noLongerExistingDevices.map((device) => ({ udid: device.udid, host: device.host })),
+    );
   }
 
   return devices;
 }
 
-export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {
+export async function refreshSimulatorState(
+  pluginArgs: IPluginArgs,
+  hostPort: number,
+  nodeId: string,
+) {
   if (timer) {
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort, nodeId).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }

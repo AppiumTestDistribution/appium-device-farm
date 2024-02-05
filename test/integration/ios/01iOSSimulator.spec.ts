@@ -5,7 +5,6 @@ import { Container } from 'typedi';
 import {
   updateDeviceList,
   allocateDeviceForSession,
-  initializeStorage,
   cleanPendingSessions,
 } from '../../../src/device-utils';
 import { ADTDatabase } from '../../../src/data-service/db';
@@ -44,7 +43,7 @@ async function initDeviceFarm(iosDeviceType: string) {
     remote: [`http://${ip.address()}:4723`],
     iosDeviceType: iosDeviceType,
   });
-  await initializeStorage();
+  
   const deviceManager = new DeviceFarmManager(
     'ios',
     {
@@ -87,7 +86,10 @@ describe('Max sessions CLI argument test', () => {
     };
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid }).data();
+    const allDeviceIds = (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: device.device.udid })
+      .data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -118,7 +120,6 @@ describe('Max sessions CLI argument test', () => {
   });
 
   it('Throw error when all sessions occupied', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'simulated', androidDeviceType: 'real' },
@@ -164,7 +165,7 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPhone simulator when app path has .app extension and set busy status to true', async () => {
-    await initializeStorage();
+
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -193,7 +194,7 @@ describe('IOS Simulator Test', () => {
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -202,7 +203,6 @@ describe('IOS Simulator Test', () => {
   });
 
   it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -232,7 +232,7 @@ describe('IOS Simulator Test', () => {
 
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     const foundSimulator = allocatedSimulator[0];
     expect(foundSimulator.busy).to.be.true;
@@ -242,7 +242,6 @@ describe('IOS Simulator Test', () => {
 
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
-      await initializeStorage();
       const deviceManager = new DeviceFarmManager(
         'ios',
         { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -269,7 +268,7 @@ describe('IOS Simulator Test', () => {
 
       const allocatedSimulator = (await ADTDatabase.DeviceModel)
         .chain()
-        .find({ udid: device.udid })
+        .find({ udid: device.device.udid })
         .data();
       const foundSimulator = allocatedSimulator[0];
       expect(foundSimulator.busy).to.be.true;
@@ -304,7 +303,6 @@ describe('Boot simulator test', async () => {
   });
 
   it('Should pick Booted simulator when app path has .app', async () => {
-    await initializeStorage();
     const deviceManager = new DeviceFarmManager(
       'ios',
       { iosDeviceType: 'both', androidDeviceType: 'real' },
@@ -329,7 +327,7 @@ describe('Boot simulator test', async () => {
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
-      .find({ udid: device.udid })
+      .find({ udid: device.device.udid })
       .data();
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });
