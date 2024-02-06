@@ -24,10 +24,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private abortControl: Map<string, AbortController> = new Map();
   private tracker?: Tracker = undefined;
   private remoteTrackers: { id: string; tracker: Tracker }[] = [];
-
   constructor(
     private pluginArgs: IPluginArgs,
     private hostPort: number,
+    private nodeId: string,
   ) {}
 
   private initiateAbortControl(deviceUdid: string) {
@@ -310,14 +310,18 @@ export default class AndroidDeviceManager implements IDeviceManager {
       }
 
       log.info(`Adding device ${newDevice.udid} to list!`);
+      const deviceTracked = {
+        ...trackedDevice,
+        nodeId: this.nodeId,
+      };
       if (this.pluginArgs.hub != undefined) {
         log.info(`Updating Hub with device ${newDevice.udid}`);
         const nodeDevices = new NodeDevices(this.pluginArgs.hub);
-        await nodeDevices.postDevicesToHub([trackedDevice], 'add');
+        await nodeDevices.postDevicesToHub([deviceTracked], 'add');
       }
 
       // node also need a copy of devices, otherwise it cannot serve requests
-      await addNewDevice([trackedDevice], this.pluginArgs.bindHostOrIp);
+      await addNewDevice([deviceTracked], this.pluginArgs.bindHostOrIp);
     }
   }
 

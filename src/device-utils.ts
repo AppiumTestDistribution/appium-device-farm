@@ -35,6 +35,7 @@ import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
+import { v4 as uuidv4 } from 'uuid';
 
 const customCapability = {
   deviceTimeOut: 'appium:deviceAvailabilityTimeout',
@@ -350,7 +351,7 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
     clearInterval(timer);
   }
   timer = setInterval(async () => {
-    const simulators = await new IOSDeviceManager(pluginArgs, hostPort).getSimulators();
+    const simulators = await new IOSDeviceManager(pluginArgs, hostPort, uuidv4()).getSimulators();
     await setSimulatorState(simulators);
   }, 10000);
 }
