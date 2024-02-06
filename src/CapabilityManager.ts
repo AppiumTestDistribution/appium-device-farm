@@ -6,13 +6,19 @@ import { IDevice } from './interfaces/IDevice';
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
   SESSION_NAME = 'name',
-
   VIDEO_RECORDING = 'record_video',
   VIDEO_RESOLUTION = 'video_resolution',
   LIVE_VIDEO = 'live_video',
   SCREENSHOT_ON_FAILURE = 'screenshot_on_failure',
-
   DEVICE_FARM_OPTIONS = 'df:options',
+  DEVICE_TIMEOUT = 'deviceAvailabilityTimeout',
+  DEVICE_QUERY_INTERVAL = 'deviceRetryInterval',
+  iPHONEONLY = 'iPhoneOnly',
+  iPADONLY = 'iPadOnly',
+  UDIDS = 'udids',
+  MIN_SDK = 'minSDK',
+  MAX_SDK = 'maxSDK',
+  FILTER_BY_HOST = 'filterByHost',
 }
 
 function isCapabilityAlreadyPresent(caps: ISessionCapability, capabilityName: string) {

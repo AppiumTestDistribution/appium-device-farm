@@ -116,7 +116,7 @@ describe('Device Utils', () => {
         'appium:app': '/Downloads/VodQA.apk',
         'appium:deviceAvailabilityTimeout': 1800,
         'appium:deviceRetryInterval': 100,
-        'appium:filterByHost': '192.168.0.226',
+        'df:filterByHost': '192.168.0.226',
       },
       firstMatch: [{}],
     };

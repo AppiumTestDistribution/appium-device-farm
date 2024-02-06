@@ -325,7 +325,6 @@ describe('Boot simulator test', async () => {
       firstMatch: [{}],
     };
     const devices = await deviceManager.getDevices();
-    console.log('devices: ', devices);
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ADTDatabase.DeviceModel)
       .chain()
