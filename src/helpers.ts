@@ -226,6 +226,7 @@ export function safeParseJson(jsonString: string) {
 
 export async function loadExternalModules(): Promise<IExternalModuleLoader> {
   // eslint-disable-next-line
+  // @ts-ignore
   return import(/* webpackMode: "eager" */ './modules')
     .then((externalModule) => {
       console.log(externalModule);

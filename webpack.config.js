@@ -7,8 +7,13 @@ const filesToKeepInLib = [/src\/scripts/g, /config.js/g, /main.js/g];
 const filesToGenerate = [
   {
     override: true,
-    path: '${LIB_DIRECTORY}/src/main.js',
+    path: 'lib/src/main.js',
     contents: 'module.exports = { DevicePlugin : require("../bundle.js").default }',
+  },
+  {
+    override: false,
+    path: 'lib/src/modules/index.js',
+    contents: 'module.exports = require("../fake-module-loader.js").FakeModuleLoader;',
   },
 ];
 
@@ -30,9 +35,9 @@ const CleanUpLibFolder = new RemovePlugin({
 
 class DynamicFileGenerator {
   apply(compiler) {
-    compiler.hooks.emit.tapAsync('CreateFilePlugin', (compilation, callback) => {
+    compiler.hooks.compile.tap('CreateFilePlugin', () => {
       for (const file of filesToGenerate) {
-        const fPath = file.path.replace('${LIB_DIRECTORY}', compilation.outputOptions.path);
+        const fPath = file.path;
         const dir = path.dirname(fPath);
         if (!file.override && fs.existsSync(fPath)) {
           break;
@@ -42,7 +47,6 @@ class DynamicFileGenerator {
         }
         fs.writeFileSync(fPath, file.contents);
       }
-      callback();
     });
   }
 }
@@ -65,6 +69,7 @@ module.exports = {
   mode: 'production',
   devtool: 'nosources-source-map',
   plugins: [
+    new DynamicFileGenerator(),
     new WebpackObfuscator({
       rotateStringArray: true,
       splitStrings: true,
@@ -72,7 +77,6 @@ module.exports = {
       identifierNamesGenerator: 'mangled-shuffled',
       sourceMap: true,
     }),
-    new DynamicFileGenerator(),
     CleanUpLibFolder,
   ],
 };
