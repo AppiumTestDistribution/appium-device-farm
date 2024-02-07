@@ -10,10 +10,11 @@ import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { ADTDatabase } from '../../src/data-service/db';
 import { DeviceWithPath } from '@devicefarmer/adbkit';
 import chaiAsPromised from 'chai-as-promised';
+import { v4 as uuidv4 } from 'uuid';
 
 chai.use(chaiAsPromised);
 
-var sandbox = sinon.createSandbox();
+const sandbox = sinon.createSandbox();
 
 let adb: any;
 let cloneAdb;
@@ -54,6 +55,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -132,6 +134,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -177,6 +180,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -225,7 +229,7 @@ describe('Android Device Manager', function () {
       skipChromeDownload: true,
       remoteMachineProxyIP: 'http://10.1.1.1:3333',
     });
-    const androidDevices = new AndroidDeviceManager(pluginArgs, 4723);
+    const androidDevices = new AndroidDeviceManager(pluginArgs, 4723, uuidv4());
     const deviceList = new Map();
     adb = await getAdbOriginal();
     deviceList.set(adb, [
@@ -271,6 +275,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     const deviceList = new Map();
     adb = await getAdbOriginal();
@@ -315,6 +320,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
       4723,
+      uuidv4(),
     );
     adb = await getAdbOriginal();
     sandbox.stub(androidDevices, <any>'waitBootComplete').throwsException(new Error('Adb timeout'));

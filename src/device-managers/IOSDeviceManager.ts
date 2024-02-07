@@ -20,6 +20,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   constructor(
     private pluginArgs: IPluginArgs,
     private hostPort: number,
+    private nodeId: string,
   ) {}
   /**
    * Method to get all ios devices and simulators
@@ -161,15 +162,19 @@ export default class IOSDeviceManager implements IDeviceManager {
   async trackIOSDevices(pluginArgs: IPluginArgs) {
     const iosTracker = IosTracker.getInstance();
     iosTracker.on('attached', async (udid: string) => {
-      const deviceAttached = [await this.getDeviceInfo(udid, pluginArgs, this.hostPort)];
+      const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
+      const deviceTracked: IDevice = {
+        ...deviceAttached,
+        nodeId: this.nodeId,
+      };
       if (pluginArgs.hub !== undefined) {
         log.info(`Updating Hub with iOS device ${udid}`);
         const nodeDevices = new NodeDevices(pluginArgs.hub);
-        await nodeDevices.postDevicesToHub(deviceAttached, 'add');
+        await nodeDevices.postDevicesToHub([deviceTracked], 'add');
       }
       // add device to local list
       log.info(`iOS device with udid ${udid} plugged! updating device list...`);
-      await addNewDevice(deviceAttached, pluginArgs.bindHostOrIp);
+      await addNewDevice([deviceTracked], pluginArgs.bindHostOrIp);
     });
     iosTracker.on('detached', async (udid: string) => {
       const deviceRemoved: any = [{ udid, host: pluginArgs.bindHostOrIp }];
