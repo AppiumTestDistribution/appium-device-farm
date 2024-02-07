@@ -152,7 +152,7 @@ describe('Max sessions CLI argument test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'Device is busy or blocked.. Device request: {"platform":"ios","name":"iPhone","deviceType":"simulator"}',
+          'Device is busy or blocked.. Device request: {"platform":"ios","deviceType":"simulator"}',
         ),
     );
   });
@@ -183,9 +183,9 @@ describe('IOS Simulator Test', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true,
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
+        'df:iPhoneOnly': true,
+        'df:deviceAvailabilityTimeout': 1800,
+        'df:deviceRetryInterval': 100,
       },
       firstMatch: [{}],
     };
