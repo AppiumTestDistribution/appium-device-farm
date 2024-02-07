@@ -6,7 +6,8 @@ on:
       - dashboard-module
 
 jobs:
-  build:
+  buildWithSubmodule:
+    name: Build with Submodule
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,3 +24,19 @@ jobs:
         # Add your script commands here
         npm ci
         npm run bundle
+
+  buildWithOutSubmodule:
+    name: Build with Out Submodule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+      - name: Run script
+        run: |
+          npm ci
+          npm run bundle
+    
