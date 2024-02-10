@@ -1,0 +1,49 @@
+.capabilities {
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  margin: 16px;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tab-header {
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  padding: 8px 16px;
+  border-bottom: 1px solid gray;
+}
+
+.tab-header.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+}
+
+.tab-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.key-value-pair {
+  display: flex;
+  font-size: 14px;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.key {
+  font-weight: bold;
+  margin: 0;
+  width: 200px;
+  margin-right: 8px;
+}
+
+.value {
+  color: gray;
+  margin: 0;
+  width: 50%;
+}
