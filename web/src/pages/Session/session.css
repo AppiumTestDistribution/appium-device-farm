@@ -35,3 +35,7 @@
 .session-header > h3 {
   font-size: 18px;
 }
+
+.session-body {
+  display: flex;
+}

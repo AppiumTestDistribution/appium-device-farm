@@ -1,0 +1,48 @@
+.session-logs {
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 16px;
+  border: 1px solid #808080;
+}
+
+.session-logs .tabs {
+  display: flex;
+}
+
+.session-logs .tab-header {
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  padding: 16px;
+  border-bottom: 1px solid gray;
+}
+
+.session-logs .tab-header.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+}
+
+.tab-filter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #15252b;
+  font-weight: 600;
+  padding: 16px;
+}
+
+.tab-filter .checkbox-container {
+  color: whitesmoke;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-logs .tab-content {
+  max-height: 400px;
+  overflow-y: auto;
+}

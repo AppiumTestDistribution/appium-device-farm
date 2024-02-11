@@ -1,0 +1,74 @@
+.session-logs .text-log {
+  padding: 16px 8px;
+  border-bottom: 1px solid gray;
+}
+
+.session-logs .text-log-header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.text-log-header .title {
+  font-weight: 600;
+  width: 200px;
+}
+
+.text-log-header .accessibility {
+  color: gray;
+  width: 220px;
+}
+
+.text-log-header .time-difference {
+  display: flex;
+  color: gray;
+  width: 80px;
+  font-size: 14px;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-log-header .dropdown-button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+.text-log-header .dropdown-button.hidden {
+  visibility: hidden;
+}
+
+.text-log-header .dropdown-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.text-log-header .time-difference img {
+  height: 16px;
+  width: 16px;
+}
+
+.session-logs .text-log-response {
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid lightgray;
+  background-color: whitesmoke;
+  overflow: auto;
+}
+
+.session-logs .text-log-response span {
+  font-size: 14px;
+  margin: 0;
+}
+
+.session-logs .text-log-response p {
+  font-size: 14px;
+  font-weight: 600;
+  color: #808080;
+  margin: 0 0 8px 0;
+}
+
+.text-log-screenshot {
+  margin: 8px;
+}

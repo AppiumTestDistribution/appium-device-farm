@@ -7,6 +7,7 @@ import BuildContainer from '../../components/build-container/build-container';
 import { useNavigate, useParams } from 'react-router-dom';
 import SessionInfo from '../../components/session/session-info/session-info';
 import Capabilities from '../../components/session/capabilities/capabilities';
+import SessionLogs from '../../components/session/session-logs/session-logs';
 
 function Session() {
   const { buildId, sessionId } = useParams();
@@ -108,7 +109,10 @@ function Session() {
             <h3>{selectedSession.name || "Not Available"}</h3>
           </div>
           <SessionInfo session={selectedSession} />
-          <Capabilities session={selectedSession} />
+          <div className='session-body'>
+            <Capabilities session={selectedSession} />
+            <SessionLogs />
+          </div>
         </div>}
       </div>
     </div>
