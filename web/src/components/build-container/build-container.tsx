@@ -1,9 +1,25 @@
 import './build-container.css';
-import BuildIcon from '../../assets/build-icon.svg';
+import ToolsIcon from '../../assets/tools-icon.svg';
+import TimeIcon from '../../assets/time-icon.svg';
+import AndroidIcon from '../../assets/android-new-icon.svg';
+import AppleIcon from '../../assets/apple-new-icon.svg';
 import { IBuild } from '../../interfaces/IBuild';
 import { ISession } from '../../interfaces/ISession';
+import { useNavigate } from 'react-router-dom';
 
-function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: { selectedBuild: IBuild | undefined, handleBuildClick: (buildId: string) => void, builds: IBuild[], sessions: ISession[] }) {
+function BuildContainer({
+  selectedBuild,
+  handleBuildClick,
+  builds,
+  sessions,
+}: {
+  selectedBuild: IBuild | undefined;
+  handleBuildClick: (buildId: string) => void;
+  builds: IBuild[];
+  sessions: ISession[];
+}) {
+  const path = window.location.pathname;
+  const navigate = useNavigate();
 
   function timeAgo(createdAt: string | number | Date) {
     const currentDate = new Date();
@@ -16,29 +32,81 @@ function BuildContainer({ selectedBuild, handleBuildClick, builds, sessions }: {
     const days = Math.floor(hours / 24);
 
     if (days > 0) {
-      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
     } else if (hours > 0) {
-      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
     } else if (minutes > 0) {
-      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
     } else {
-      return `${seconds} ${seconds === 1 ? 'second' : 'seconds'} ago`;
+      return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
     }
   }
 
+  const buildId = path.match(/builds\/(.+?)\//)?.[1];
+  const sessionId = path.match(/session\/(.+?)$/)?.[1];
+  console.log({ buildId, sessionId });
+
   return (
     <div className="build-container">
-      <div className='build-header'>
-        <img src={BuildIcon} alt='build-icon' />
+      <div className="build-header">
+        <img src={ToolsIcon} alt="build-icon" />
         <h3>All Builds</h3>
       </div>
-      <div className='build-list'>
+      <div className="build-list">
         {builds.map((build) => (
-          <div className={`build-item ${selectedBuild?.id === build.id && "build-item_selected"} `} key={build.id} onClick={() => handleBuildClick(build.id)}>
-            <p className='build-item_name'>{build.name}</p>
-            <p className='build-item_session'>{sessions.filter((session) => session.build_id === build.id).length} SESSIONS</p>
-            <span className='build-item_time'>{timeAgo(build.updatedAt)}</span>
-          </div>
+          <>
+            <div
+              className={`build-item ${
+                selectedBuild?.id === build.id && !sessionId && 'build-item_selected'
+              } `}
+              key={build.id}
+              onClick={() => handleBuildClick(build.id)}
+            >
+              <p className="build-item_name">{build.name}</p>
+              <div className="build-item_details">
+                <div className="build-item_details_item">
+                  <img src={TimeIcon} className="details-item_icon" />
+                  <span>
+                    {sessions.filter((session) => session.build_id === build.id).length} sessions
+                  </span>
+                </div>
+                <div className="build-item_details_item">
+                  <img src={TimeIcon} className="details-item_icon" />
+                  <span>{timeAgo(build.updatedAt)} ago</span>
+                </div>
+              </div>
+            </div>
+            {selectedBuild?.id === build.id && (
+              <div className="build-item_sessions">
+                {sessions
+                  .filter((session) => session.build_id === build.id)
+                  .map((session) => (
+                    <div
+                      key={session.build_id}
+                      className={`build-item_session ${
+                        sessionId === session.id && 'build-item_session_selected'
+                      }`}
+                      onClick={() =>
+                        navigate(`/device-farm/builds/${session.build_id}/session/${session.id}`)
+                      }
+                    >
+                      <div className="build-item_session_name">
+                        {session.name || 'Not Available'}
+                      </div>
+                      <div className="build-item_session_details">
+                        <div className="build-item_session_details_item">
+                          <img
+                            src={session.device_platform === 'android' ? AndroidIcon : AppleIcon}
+                            alt="device platform"
+                          />
+                          <span>{session.device_name}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </>
         ))}
       </div>
     </div>

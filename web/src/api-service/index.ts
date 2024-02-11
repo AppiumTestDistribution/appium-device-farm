@@ -21,7 +21,7 @@ export default class DeviceFarmApiService {
     return apiClient.makePOSTRequest('/unblock', {}, { udid, host });
   }
 
-  public static getAllBuilds() {
+  public static getBuilds() {
     return apiClient.makeGETRequest('/build', {});
   }
 
