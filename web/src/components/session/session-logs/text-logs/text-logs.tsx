@@ -4,6 +4,7 @@ import UpArrowIcon from '../../../../assets/up-arrow-icon.svg';
 import DownArrowIcon from '../../../../assets/down-arrow-icon.svg';
 import { ISessionLogs } from '../../../../interfaces/ISessionLogs';
 import { useState } from 'react';
+import ReactJson from 'react-json-view';
 
 interface TextLogsProps {
   sessionLogs: ISessionLogs[];
@@ -11,11 +12,7 @@ interface TextLogsProps {
   showErrorsOnly: boolean;
 }
 
-function TextLogs({
-  sessionLogs,
-  showImages,
-  showErrorsOnly,
-}: TextLogsProps) {
+function TextLogs({ sessionLogs, showImages, showErrorsOnly }: TextLogsProps) {
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
 
   return (
@@ -33,32 +30,58 @@ function TextLogs({
 
           return (
             <div key={sessionLog.id} className="text-log">
-              <div className='text-log-header'>
+              <div className="text-log-header">
                 <div className="title">{sessionLog.title}</div>
-                <div className="accessibility">{body.using && body.value && `[${body.using}=${body.value}]`}</div>
+                <div className="accessibility">
+                  {body.using && body.value && `[${body.using}=${body.value}]`}
+                </div>
                 <div className="time-difference">
                   {timeDifference !== null && (
-                    <><img src={TimeIcon} alt="time" /><span>{timeDifference} ms</span></>
+                    <>
+                      <img src={TimeIcon} alt="time" />
+                      <span>{timeDifference} ms</span>
+                    </>
                   )}
                 </div>
                 <button
-                  className={`dropdown-button ${formattedBody === "{}" && "hidden"}`}
-                  onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}>
+                  className={`dropdown-button ${formattedBody === '{}' && 'hidden'}`}
+                  onClick={() => setOpenDropdownIndex(openDropdownIndex === index ? null : index)}
+                >
                   <img
                     src={openDropdownIndex === index ? UpArrowIcon : DownArrowIcon}
                     alt="dropdown"
                   />
                 </button>
               </div>
-              {showImages && sessionLog.screenshot && <img className='text-log-screenshot' src={sessionLog.screenshot} alt="screenshot" /> }
-              <div className='text-log-response'>
+              {showImages && sessionLog.screenshot && (
+                <img className="text-log-screenshot" src={sessionLog.screenshot} alt="screenshot" />
+              )}
+              <div className="text-log-response">
                 <p>RESPONSE</p>
-                <span>{formattedResponse}</span>
+                {formattedResponse.startsWith('{') || formattedResponse.startsWith('[') ? (
+                  <ReactJson
+                    src={JSON.parse(formattedResponse)}
+                    theme="rjv-default"
+                    displayDataTypes={false}
+                    name={null}
+                  />
+                ) : (
+                  <span className="text-log-response-value">{formattedResponse}</span>
+                )}
               </div>
               {openDropdownIndex === index && (
-                <div className='text-log-response'>
+                <div className="text-log-response">
                   <p>PARAMS</p>
-                  <span>{formattedBody}</span>
+                  {formattedBody.startsWith('{') || formattedBody.startsWith('[') ? (
+                    <ReactJson
+                      src={JSON.parse(formattedBody)}
+                      theme="rjv-default"
+                      displayDataTypes={false}
+                      name={null}
+                    />
+                  ) : (
+                    <span>{formattedBody}</span>
+                  )}
                 </div>
               )}
             </div>

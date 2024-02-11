@@ -60,6 +60,7 @@
 .session-logs .text-log-response span {
   font-size: 14px;
   margin: 0;
+  color: rgb(203, 75, 22);
 }
 
 .session-logs .text-log-response p {
