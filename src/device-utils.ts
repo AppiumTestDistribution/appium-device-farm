@@ -8,7 +8,12 @@ import {
 } from './helpers';
 import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
-import { androidCapabilities, iOSCapabilities } from './CapabilityManager';
+import {
+  androidCapabilities,
+  DEVICE_FARM_CAPABILITIES,
+  getDeviceFarmCapabilities,
+  iOSCapabilities,
+} from './CapabilityManager';
 import waitUntil from 'async-wait-until';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
@@ -36,17 +41,6 @@ import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
-
-const customCapability = {
-  deviceTimeOut: 'appium:deviceAvailabilityTimeout',
-  deviceQueryInterval: 'appium:deviceRetryInterval',
-  iphoneOnly: 'appium:iPhoneOnly',
-  ipadOnly: 'appium:iPadOnly',
-  udids: 'appium:udids',
-  minSDK: 'appium:minSDK',
-  maxSDK: 'appium:maxSDK',
-  filterByHost: 'appium:filterByHost',
-};
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -100,12 +94,14 @@ export async function allocateDeviceForSession(
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   // log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
-  const filters = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+  const deviceFarmCapabilities = getDeviceFarmCapabilities(capability);
+  const filters = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
 
   // log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
-  const timeout = firstMatch[customCapability.deviceTimeOut] || deviceTimeOutMs;
+  const timeout =
+    deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
   const intervalBetweenAttempts =
-    firstMatch[customCapability.deviceQueryInterval] || deviceQueryIntervalMs;
+    deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_QUERY_INTERVAL] || deviceQueryIntervalMs;
 
   try {
     await waitUntil(
@@ -245,15 +241,19 @@ export async function setUtilizationTime(udid: string, utilizationTime: number) 
  * Method to get the device filters from the custom session capability
  * This filter will be used as in the query to find the free device from the databse
  * @param capability
+ * @param deviceFarmCapabilities
+ * @param pluginArgs
  * @returns IDeviceFilterOptions
  */
 export function getDeviceFiltersFromCapability(
   capability: any,
+  deviceFarmCapabilities: any,
   pluginArgs: IPluginArgs,
 ): IDeviceFilterOptions {
+  console.log(capability, deviceFarmCapabilities);
   const platform: Platform = capability['platformName'].toLowerCase();
-  const udids = capability[customCapability.udids]
-    ? capability[customCapability.udids].split(',').map(_.trim)
+  const udids = capability[DEVICE_FARM_CAPABILITIES.UDIDS]
+    ? capability[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
     : process.env.UDIDS?.split(',').map(_.trim);
   /* Based on the app file extension, we will decide whether to run the
    * test on real device or simulator.
@@ -278,9 +278,9 @@ export function getDeviceFiltersFromCapability(
   }
 
   let name: string | undefined = undefined;
-  if (capability[customCapability.ipadOnly]) {
+  if (deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.iPADONLY]) {
     name = 'iPad';
-  } else if (capability[customCapability.iphoneOnly]) {
+  } else if (deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.iPHONEONLY]) {
     name = 'iPhone';
   }
   let caps = {
@@ -293,9 +293,13 @@ export function getDeviceFiltersFromCapability(
     udid: udids?.length ? udids : capability['appium:udid'],
     busy: false,
     userBlocked: false,
-    filterByHost: capability[customCapability.filterByHost],
-    minSDK: capability[customCapability.minSDK] ? capability[customCapability.minSDK] : undefined,
-    maxSDK: capability[customCapability.maxSDK] ? capability[customCapability.maxSDK] : undefined,
+    filterByHost: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.FILTER_BY_HOST],
+    minSDK: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MIN_SDK]
+      ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MIN_SDK]
+      : undefined,
+    maxSDK: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MAX_SDK]
+      ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MAX_SDK]
+      : undefined,
   };
 
   if (name !== undefined) {

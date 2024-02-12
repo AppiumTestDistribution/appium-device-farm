@@ -8,7 +8,6 @@ import axios from 'axios';
 import { config } from '../config';
 import _ from 'lodash';
 
-import DashboardRouter from './routers/dashboard';
 import GridRouter from './routers/grid';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
 
@@ -55,13 +54,12 @@ apiRouter.get('/cliArgs', async (req, res) => {
   res.json(await getCLIArgs());
 });
 
-staticFilesRouter.use(express.static(path.join(__dirname, '..', '..', 'public')));
+staticFilesRouter.use(express.static(path.join(__dirname, 'public')));
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
 router.use(staticFilesRouter);
 
 function createRouter(pluginArgs: IPluginArgs) {
-  DashboardRouter.register(apiRouter);
   GridRouter.register(apiRouter, pluginArgs);
   return router;
 }

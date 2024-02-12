@@ -4,6 +4,7 @@ import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../integration/cliArgs';
 import { ADTDatabase } from '../../src/data-service/db';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { getDeviceFarmCapabilities } from '../../src/CapabilityManager';
 
 const pluginArgs = DefaultPluginArgs;
 
@@ -20,14 +21,15 @@ describe('Device filter tests', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.ipa',
-        'appium:iPhoneOnly': true,
+        'df:iPhoneOnly': true,
         'appium:platformVersion': '14.0',
         'appium:udid': '21112-1111-1111-111',
       },
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+    const deviceFarmCapabilities = getDeviceFarmCapabilities(capabilities);
+    const filter = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       platformVersion: '14.0',
@@ -53,13 +55,14 @@ describe('Device filter tests', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true,
+        'df:iPhoneOnly': true,
         'appium:platformVersion': '14.0',
       },
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+    const deviceFarmCapabilities = getDeviceFarmCapabilities(capabilities);
+    const filter = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       platformVersion: '14.0',
@@ -79,13 +82,16 @@ describe('Device filter tests', () => {
       alwaysMatch: {
         platformName: 'iOS',
         'appium:app': '/Downloads/VodQA.app',
-        'appium:iPhoneOnly': true,
-        'appium:minSDK': '10.2.0',
+        'df:minSDK': '10.2.0',
+        'df:options': {
+          iPhoneOnly: true,
+        },
       },
       firstMatch: [{}],
     };
     const firstMatch = Object.assign({}, capabilities.firstMatch[0], capabilities.alwaysMatch);
-    const filter = getDeviceFiltersFromCapability(firstMatch, pluginArgs);
+    const deviceFarmCapabilities = getDeviceFarmCapabilities(capabilities);
+    const filter = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
     expect(filter).to.deep.equal({
       platform: 'ios',
       filterByHost: undefined,

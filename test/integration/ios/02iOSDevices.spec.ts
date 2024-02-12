@@ -57,7 +57,7 @@ describe('IOS Test', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device matching request.. Device request: {"platform":"ios","name":"iPhone","deviceType":"real"}',
+          'No device matching request.. Device request: {"platform":"ios","deviceType":"real"}',
         ),
     );
   });

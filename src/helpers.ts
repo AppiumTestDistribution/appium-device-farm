@@ -11,6 +11,8 @@ import normalizeUrl from 'normalize-url';
 import ora from 'ora';
 import asyncWait from 'async-wait-until';
 import axios from 'axios';
+import { FakeModuleLoader } from './fake-module-loader';
+import { IExternalModuleLoader } from './interfaces/IExternalModule';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -220,4 +222,24 @@ export function safeParseJson(jsonString: string) {
   } catch (err) {
     return jsonString;
   }
+}
+
+export async function loadExternalModules(): Promise<IExternalModuleLoader> {
+  // eslint-disable-next-line
+  // @ts-ignore
+  return import(/* webpackMode: "eager" */ './modules')
+    .then((externalModule) => {
+      console.log(externalModule);
+      return new (externalModule as any).default();
+    })
+    .catch((err) => new FakeModuleLoader());
+}
+
+export function getSessionIdFromUrl(url: string) {
+  const SESSION_ID_PATTERN = /\/session\/([^/]+)/;
+  const match = SESSION_ID_PATTERN.exec(url);
+  if (match) {
+    return match[1];
+  }
+  return null;
 }
