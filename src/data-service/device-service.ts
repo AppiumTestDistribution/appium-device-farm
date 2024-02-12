@@ -128,10 +128,10 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
             const coercedSDK = semver.coerce(obj.sdk);
             // log.debug(`coerced obj SDK: ${coercedSDK}`);
             if (coercedSDK && coercedPlatformVersion) {
-              /*log.debug(
-                `coerced obj SDK: ${coercedSDK} == coercedPlatformVersion: ${coercedPlatformVersion}`,
-              );*/
-              return semver.eq(coercedSDK, coercedPlatformVersion);
+              log.debug(
+                `coerced obj SDK: ${coercedSDK} == filterOptions.platformVersion: ${filterOptions.platformVersion}`,
+              );
+              return semver.satisfies(coercedSDK, filterOptions.platformVersion as string);
             }
             return false;
           });
