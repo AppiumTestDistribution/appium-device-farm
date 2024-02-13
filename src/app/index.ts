@@ -59,12 +59,9 @@ router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
 router.use(
   '/ui-assets',
-  express.static(path.join(__dirname, '..', '..', 'public', 'device-farm', 'ui-assets')),
+  express.static(path.join(__dirname, 'public', 'device-farm', 'ui-assets')),
 );
 router.use(staticFilesRouter);
-router.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'));
-});
 
 function createRouter(pluginArgs: IPluginArgs) {
   GridRouter.register(apiRouter, pluginArgs);
