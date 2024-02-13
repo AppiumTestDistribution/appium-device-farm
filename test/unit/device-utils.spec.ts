@@ -99,6 +99,55 @@ describe('Device Utils', () => {
     sandbox.restore();
   });
 
+  it('Allocate devices for session with host filter', async () => {
+    (await ADTDatabase.DeviceModel).removeDataOnly();
+    const deviceManager = new DeviceFarmManager(
+      'android',
+      { androidDeviceType: 'both', iosDeviceType: 'both' },
+      4723,
+      Object.assign(pluginArgs, { maxSessions: 3 }),
+      NODE_ID,
+    );
+    Container.set(DeviceFarmManager, deviceManager);
+    await addNewDevice(devices);
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'android',
+        'appium:app': '/Downloads/VodQA.apk',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+        'df:filterByHost': '192.168.0.226',
+      },
+      firstMatch: [{}],
+    };
+    const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+      capabilities,
+      1000,
+      1000,
+      pluginArgs,
+    );
+
+    async function getFilteredDevice(udid: string, host: string) {
+      return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
+    }
+
+    const foundDevice = (
+      await getFilteredDevice(
+        allocatedDeviceForFirstSession.udid,
+        allocatedDeviceForFirstSession.host,
+      )
+    )[0];
+
+    expect(foundDevice.busy).to.be.true;
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
+      expect(error)
+        .to.be.an('error')
+        .with.property(
+          'message',
+          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"192.168.0.226"}',
+        ),
+    );
+  });
   it('Allocating device should set device to be busy', async function () {
     (await ADTDatabase.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
@@ -109,7 +158,7 @@ describe('Device Utils', () => {
       NODE_ID,
     );
     Container.set(DeviceFarmManager, deviceManager);
-    addNewDevice(devices);
+    await addNewDevice(devices);
     const capabilities = {
       alwaysMatch: {
         platformName: 'android',
@@ -179,7 +228,7 @@ describe('Device Utils', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'No device found for filters: {"platform":"android","udid":"emulator-5555","busy":false,"userBlocked":false}',
+          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
         ),
     );
   });

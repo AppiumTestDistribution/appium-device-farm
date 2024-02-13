@@ -2,7 +2,7 @@
 import 'reflect-metadata';
 import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
-import { router } from './app';
+import { createRouter } from './app';
 import { IDevice } from './interfaces/IDevice';
 import {
   CreateSessionResponseInternal,
@@ -47,6 +47,7 @@ import {
   stripAppiumPrefixes,
   isDeviceFarmRunning,
   hasCloudArgument,
+  loadExternalModules,
 } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -59,16 +60,14 @@ import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import NodeDevices from './device-managers/NodeDevices';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { PluginConfig, ServerArgs } from '@appium/types';
-import { SESSION_MANAGER } from './sessions/SessionManager';
-import { LocalSession } from './sessions/LocalSession';
-import { CloudSession } from './sessions/CloudSession';
-import { RemoteSession } from './sessions/RemoteSession';
-import { DASHBORD_EVENT_MANAGER } from './dashboard/event-manager';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import ip from 'ip';
 import _ from 'lodash';
-import SessionType from './enums/SessionType';
-import { DeviceFarmSession, DeviceFarmSessionOptions } from './sessions/DeviceFarmSession';
+import { ADTDatabase } from './data-service/db';
+import EventBus from './notifier/event-bus';
+import { IDeviceFarmSessionOptions } from './interfaces/IDeviceFarmSession';
+import { config as pluginConfig } from './config';
+import { SessionCreatedEvent } from './events/session-created-event';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -77,7 +76,7 @@ let androidDeviceType: any;
 let iosDeviceType: any;
 let hasEmulators: any;
 let proxy: any;
-
+let externalModule: any;
 class DevicePlugin extends BasePlugin {
   static nodeBasePath = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
@@ -96,7 +95,7 @@ class DevicePlugin extends BasePlugin {
     }
   }
 
-  onUnexpectedShutdown(driver: any, cause: any) {
+  async onUnexpectedShutdown(driver: any, cause: any) {
     const deviceFilter = {
       session_id: driver.sessionId ? driver.sessionId : undefined,
       udid: driver.caps && driver.caps.udid ? driver.caps.udid : undefined,
@@ -104,9 +103,9 @@ class DevicePlugin extends BasePlugin {
 
     if (this.pluginArgs.hub !== undefined) {
       // send unblock request to hub. Should we unblock the whole devices from this node?
-      new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
+      await new NodeDevices(this.pluginArgs.hub).unblockDevice(deviceFilter);
     } else {
-      unblockDeviceMatchingFilter(deviceFilter);
+      await unblockDeviceMatchingFilter(deviceFilter);
     }
 
     log.info(
@@ -123,6 +122,7 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
+    externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {
@@ -134,6 +134,7 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
+    externalModule.onPluginLoaded(cliArgs, pluginArgs, pluginConfig, EventBus);
     DevicePlugin.NODE_ID = uuidv4();
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
@@ -145,7 +146,8 @@ class DevicePlugin extends BasePlugin {
     }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
-
+    await initializeStorage();
+    (await ADTDatabase.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
@@ -156,9 +158,10 @@ class DevicePlugin extends BasePlugin {
       log.info('proxy is not required for axios');
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
+    expressApp.use('/device-farm', createRouter(pluginArgs));
 
-    expressApp.use('/device-farm', router);
-    registerProxyMiddlware(expressApp, cliArgs);
+    registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
+    externalModule.updateServer(expressApp, httpServer);
 
     if (!platform)
       throw new Error(
@@ -190,7 +193,6 @@ class DevicePlugin extends BasePlugin {
     if (chromeDriverManager) Container.set(ChromeDriverManager, chromeDriverManager);
 
     await addCLIArgs(cliArgs);
-    await initializeStorage();
 
     log.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
@@ -210,34 +212,36 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
+    if (pluginArgs.cloud == undefined) {
+      // check for stale nodes
+      await setupCronCheckStaleDevices(
+        pluginArgs.checkStaleDevicesIntervalMs,
+        pluginArgs.bindHostOrIp,
+      );
+      // and release blocked devices
+      await setupCronReleaseBlockedDevices(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.newCommandTimeoutSec,
+      );
+      // and clean up pending sessions
+      await setupCronCleanPendingSessions(
+        pluginArgs.checkBlockedDevicesIntervalMs,
+        pluginArgs.deviceAvailabilityTimeoutMs + 10000,
+      );
+      // unblock all devices on node/hub restart
+      await unblockDeviceMatchingFilter({});
 
-    // check for stale nodes
-    await setupCronCheckStaleDevices(
-      pluginArgs.checkStaleDevicesIntervalMs,
-      pluginArgs.bindHostOrIp,
-    );
-    // and release blocked devices
-    await setupCronReleaseBlockedDevices(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.newCommandTimeoutSec,
-    );
-    // and clean up pending sessions
-    await setupCronCleanPendingSessions(
-      pluginArgs.checkBlockedDevicesIntervalMs,
-      pluginArgs.deviceAvailabilityTimeoutMs + 10000,
-    );
+      // remove stale devices
+      await removeStaleDevices(pluginArgs.bindHostOrIp);
+    } else {
+      log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
+    }
 
     const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
-
-    // unblock all devices on node/hub restart
-    await unblockDeviceMatchingFilter({});
-
-    // remove stale devices
-    await removeStaleDevices(pluginArgs.bindHostOrIp);
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -326,20 +330,13 @@ class DevicePlugin extends BasePlugin {
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
-    // This is coming from the forwarded session
-    if (
-      session instanceof Error ||
-      session.hasOwnProperty('error') ||
-      (session as W3CNewSessionResponseError).error !== undefined
-    ) {
-      await unblockDevice(device.udid, device.host);
-      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
-      this.throwProperError(session, device.host);
-    } else {
+    // Do we have valid session response?
+    if (this.isCreateSessionResponseInternal(session)) {
+      log.debug('📱 Session response is CreateSessionResponseInternal');
+
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
-
       log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
       await updatedAllocatedDevice(device, {
         busy: true,
@@ -350,56 +347,26 @@ class DevicePlugin extends BasePlugin {
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
-
-      let sessionInstance: DeviceFarmSession;
-      const sessionOptions: DeviceFarmSessionOptions = {
-        sessionId,
-        device,
-        sessionResponse,
-        deviceFarmOption: deviceFarmCapabilities,
-      };
-      const nodeWebdriverUrl = nodeUrl(device, DevicePlugin.nodeBasePath);
-      if (device.nodeId === DevicePlugin.NODE_ID) {
-        sessionInstance = new LocalSession({
-          ...sessionOptions,
-          driver,
-        });
-      } else if (device.hasOwnProperty('cloud')) {
-        sessionInstance = new CloudSession({
-          ...sessionOptions,
-          baseUrl: nodeWebdriverUrl,
-        });
-      } else {
-        sessionInstance = new RemoteSession({
-          ...sessionOptions,
-          baseUrl: nodeWebdriverUrl,
-        });
-      }
-
-      const isDashboardEnabled = !!this.pluginArgs.enableDashboard;
-      const shouldSaveLogs = sessionInstance.getType() !== SessionType.CLOUD;
-
-      if (isDashboardEnabled && shouldSaveLogs) {
-        log.info(
-          `Adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map`,
-        );
-        SESSION_MANAGER.addSession(sessionInstance.getId(), sessionInstance);
-
-        if (DevicePlugin.IS_HUB) {
-          await DASHBORD_EVENT_MANAGER.onSessionStarted(
-            deviceFarmCapabilities,
-            sessionInstance,
-            device,
-          );
-        }
-      } else {
-        log.info(
-          `Not adding the session ${sessionInstance.getId()} with type ${sessionInstance.getType()} to session map. Is DashboardEnabled: ${isDashboardEnabled}`,
-        );
-      }
+      await EventBus.fire(
+        new SessionCreatedEvent({
+          sessionId,
+          device,
+          sessionResponse,
+          deviceFarmCapabilities,
+          pluginNodeId: DevicePlugin.NODE_ID,
+          driver: driver,
+        }),
+      );
 
       log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+    } else {
+      // assume session is an error
+      await unblockDevice(device.udid, device.host);
+      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
+
+      this.throwProperError(session, device.host);
     }
+
     return session;
   }
 
@@ -412,14 +379,31 @@ class DevicePlugin extends BasePlugin {
         throw new Error(errorMessage);
       } else {
         throw new Error(
-          `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+          `Unknown error while creating session: ${JSON.stringify(
+            session,
+          )}. \nBetter look at appium log on the node: ${host}`,
         );
       }
     } else {
       throw new Error(
-        `Unknown error while creating session. Better look at appium log on the node: ${host}`,
+        `Unknown error while creating session: ${JSON.stringify(
+          session,
+        )}. \nBetter look at appium log on the node: ${host}`,
       );
     }
+  }
+
+  // type guard for CreateSessionResponseInternal
+  private isCreateSessionResponseInternal(
+    something: any,
+  ): something is CreateSessionResponseInternal {
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.length === 3 &&
+      something.value[0] &&
+      something.value[1] &&
+      something.value[2]
+    );
   }
 
   private async forwardSessionRequest(
@@ -493,8 +477,13 @@ class DevicePlugin extends BasePlugin {
       }
     }
 
-    if (!_.isNil(errorMessage)) {
+    // Actually errorMessage will be empty when axios is getting peer connection error/disconnected.
+    // So, let's invert the situation and return error when sessionDetails is null
+    if (_.isNil(sessionDetails)) {
       log.error(`Error while creating session: ${errorMessage}`);
+      if (_.isNil(errorMessage)) {
+        errorMessage = 'Unknown error while creating session';
+      }
       return new Error(errorMessage);
     } else {
       log.debug(
@@ -502,8 +491,21 @@ class DevicePlugin extends BasePlugin {
           !sessionDetails ? {} : sessionDetails,
         )}`,
       );
-      return sessionDetails as W3CNewSessionResponse;
+
+      if (this.isW3CNewSessionResponse(sessionDetails)) {
+        return sessionDetails as W3CNewSessionResponse;
+      } else {
+        return new Error(`Unknown error while creating session: ${JSON.stringify(sessionDetails)}`);
+      }
     }
+  }
+
+  private isW3CNewSessionResponse(something: any): something is W3CNewSessionResponse {
+    return (
+      something.hasOwnProperty('value') &&
+      something.value.hasOwnProperty('sessionId') &&
+      something.value.hasOwnProperty('capabilities')
+    );
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {

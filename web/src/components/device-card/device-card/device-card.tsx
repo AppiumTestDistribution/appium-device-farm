@@ -71,6 +71,33 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       hostName = host.split(':')[1].replace('//', '');
     }
 
+    const blockButton = () => {
+      if (busy) {
+        return;
+      }
+      if (!userBlocked) {
+        return (
+          <button
+            className="device-info-card__body_block-device"
+            onClick={() => this.blockDevice(udid, host)}
+          >
+            <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
+            Block Device
+          </button>
+        );
+      } else {
+        return (
+          <button
+            className="device-info-card__body_unblock-device"
+            onClick={() => this.unblockDevice(udid, host)}
+          >
+            <img src={CancelRedIcon} className="device-info-card__body_block-device-icon" />
+            Unblock Device
+          </button>
+        );
+      }
+    };
+
     return (
       <div className={`device-info-card-container ${this.getStatusClassName()}`}>
         <div className={`device-state ${deviceState}`}>{deviceState}</div>
@@ -147,32 +174,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             </div>
           )}
         </div>
-        <div className="device-info-card-container__footer_wrapper">
-          {busy && userBlocked && (
-            <button
-              className="device-info-card__body_unblock-device"
-              onClick={() => this.unblockDevice(udid, host)}
-            >
-              <img src={CancelRedIcon} className="device-info-card__body_block-device-icon" />
-              Unblock Device
-            </button>
-          )}
-          {!busy && (
-            <button
-              className="device-info-card__body_block-device"
-              onClick={() => this.blockDevice(udid, host)}
-            >
-              <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
-              Block Device
-            </button>
-          )}
-          {busy && !userBlocked && (
-            <button className="device-info-card__body_block-device-disabled">
-              <img src={CancelGreenIcon} className="device-info-card__body_block-device-icon" />
-              Block Device
-            </button>
-          )}
-        </div>
+        <div className="device-info-card-container__footer_wrapper">{blockButton()}</div>
       </div>
     );
   }

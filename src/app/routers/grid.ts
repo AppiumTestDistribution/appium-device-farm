@@ -10,6 +10,10 @@ import {
   userUnblockDevice,
 } from '../../data-service/device-service';
 import log from '../../logger';
+import { DeviceFarmManager } from '../../device-managers';
+import Container from 'typedi';
+import { IPluginArgs } from '../../interfaces/IPluginArgs';
+import { IDevice } from '../../interfaces/IDevice';
 
 const SERVER_UP_TIME = new Date().toISOString();
 
@@ -102,22 +106,152 @@ async function unBlockDevice(request: Request, response: Response) {
   });
 }
 
-async function getQueuedSessionLength(request: Request, response: Response) {
+async function getQueuedSessionLength(request: Request<void>, response: Response<number>) {
   response.json((await ADTDatabase.PendingSessionsModel).chain().find().count());
 }
 
-async function getQueuedSessionRequests(request: Request, response: Response) {
+async function getQueuedSessionRequests(request: Request<void>, response: Response<unknown[]>) {
   response.json((await ADTDatabase.PendingSessionsModel).chain().find().data());
 }
 
-function register(router: Router) {
+async function getNodes(request: Request, response: Response<string[]>) {
+  // unfortunately, lokijs does not support field projection
+  const nodes = await (
+    await ADTDatabase.DeviceModel
+  )
+    .chain()
+    .find()
+    .data()
+    .map((node) => {
+      // return ony host
+      return node.host;
+    });
+  // unique nodes
+  const uniqueNodes = _.uniq(nodes);
+  response.json(uniqueNodes);
+}
+
+async function nodeAdbStatusOnOtherHost(
+  currentHost: string,
+  request: Request<{ host: string }>,
+  response: Response<{ udid: string; host: string; state: string; platform: string }[] | string>,
+) {
+  const { host } = request.params;
+  // when host is this hub, return status from AndroidDeviceManager directly
+  // otherwise, forward request to the node
+  log.info(`currentHost: ${currentHost}, host: ${host}`);
+  if (host === currentHost) {
+    const devices = await getDevicesFromDeviceManager();
+    response.json(
+      devices.map((device) => {
+        return {
+          udid: device.udid,
+          host: device.host,
+          state: device.state,
+          platform: device.platform,
+        };
+      }),
+    );
+  } else {
+    // find node url from database of devices
+    const devices = (await (
+      await ADTDatabase.DeviceModel
+    )
+      .chain()
+      .find({ host: { $contains: host } })
+      .data()) as IDevice[];
+    if (devices.length === 0) {
+      response
+        .status(404)
+        .send(
+          `Host ${host} does not have any devices listed in database. I don't know how to forward request to that host`,
+        );
+      return;
+    }
+    const device = devices[0];
+
+    // if device is a cloud device, return error
+    if (device.cloud) {
+      response.status(400).send('Getting status from cloud node is not supported');
+      return;
+    }
+
+    // remove wd/hub from url
+    const normalizedUrl = device.host.replace(/\/wd\/hub$/, '');
+    const url = `${normalizedUrl}/device-farm/api/node/status`;
+    const result = await axios.get(url);
+    response.json(result.data);
+  }
+}
+
+async function nodeAdbStatusOnThisHost(
+  request: Request<void>,
+  response: Response<{ udid: string; host: string; state: string; platform: string }[]>,
+) {
+  const devices = await getDevicesFromDeviceManager();
+  // return udid, host, state
+  response.json(
+    devices.map((device) => {
+      return {
+        udid: device.udid,
+        host: device.host,
+        state: device.state,
+        platform: device.platform,
+      };
+    }),
+  );
+}
+
+/**
+ * Returns all devices from all device managers (this host only)
+ * @returns IDevice[]
+ */
+async function getDevicesFromDeviceManager() {
+  const dfm = Container.get(DeviceFarmManager);
+  const instances = await dfm.deviceInstances();
+
+  // return devices from all device managers
+  const devices = [];
+  for (const instance of instances) {
+    const instanceDevices = await instance.getDevices(
+      {
+        androidDeviceType: 'both',
+        iosDeviceType: 'both',
+      },
+      [],
+    );
+    devices.push(...instanceDevices);
+  }
+
+  return devices;
+}
+
+function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', getDevices);
   router.get('/device/:platform', getDeviceByPlatform);
   router.post('/register', registerNode);
   router.post('/block', blockDevice);
   router.post('/unblock', unBlockDevice);
+
+  // session related
   router.get('/queue/length', getQueuedSessionLength);
   router.get('/queue', getQueuedSessionRequests);
+
+  // node related routes
+  router.get('/node', getNodes);
+  router.get('/node/status', nodeAdbStatusOnThisHost);
+  router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
+
+  // node status
+  router.get(
+    '/status',
+    (request: Request<void>, response: Response<{ status: string; version: string }>) => {
+      response.json({
+        status: 'ok',
+        version: process.env.npm_package_version || 'unknown (not running from npm package)',
+      });
+    },
+  );
 }
 
 export default {

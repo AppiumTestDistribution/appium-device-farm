@@ -10,6 +10,7 @@ import {
 import logger from '../../logger';
 import { Schema, Validator } from 'jsonschema';
 import { CloudConfig, CloudDevice } from '../../interfaces/IPluginArgs';
+import { v4 as uuidv4 } from 'uuid';
 
 export default class Devices {
   private devices: CloudDevice[];
@@ -33,15 +34,13 @@ export default class Devices {
         cloudDeviceProperties = {
           name: d.deviceName,
           sdk: d['os_version'],
-          udid: d.deviceName,
         };
       }
-      if (this.isSauceLabs() || this.isLambdaTest()) {
+      if (this.isSauceLabs() || this.isLambdaTest() || this.isHeadSpin()) {
         this.validateSchema(sauceOrLambdaSchema);
         cloudDeviceProperties = {
           name: d.deviceName,
           sdk: d.platformVersion,
-          udid: d.deviceName,
         };
       }
       if (this.isPCloudy()) {
@@ -49,12 +48,12 @@ export default class Devices {
         cloudDeviceProperties = {
           name: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,
           sdk: d?.pCloudy_DeviceVersion || d?.platformVersion,
-          udid: d?.pCloudy_DeviceFullName || d?.pCloudy_DeviceManufacturer,
         };
       }
       return Object.assign({}, ...devicesByPlatform, {
         host: this.cloud.url,
         busy: false,
+        udid: uuidv4(),
         userBlocked: false,
         deviceType: 'real',
         capability: d,
@@ -88,5 +87,9 @@ export default class Devices {
 
   private isSauceLabs() {
     return this.cloud.cloudName.toLowerCase() === Cloud.SAUCELABS;
+  }
+
+  private isHeadSpin() {
+    return this.cloud.cloudName.toLowerCase() === Cloud.HEADSPIN;
   }
 }

@@ -43,3 +43,27 @@ User can block/unblock devices from Dashboard manually. These devices will not b
 
 Once automation picks the device user cannot manually unblock, it's responsible for the automation script.
 
+## Dashboard
+
+To reflect the test status on dashboard. 
+
+WDIO
+```
+      await driver.executeScript('devicefarm: setSessionStatus', [
+        {
+          status: 'passed', //passed or failed
+        },
+      ]);
+```
+
+
+To reflect the test name on dashboard.
+
+WDIO 
+```
+      await driver.executeScript('devicefarm: setSessionName', [
+        {
+          name: 'Test Name',
+        },
+      ]);
+```

@@ -15,7 +15,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'ios',
-  'appium:app': 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
+  'appium:app': process.env.BS_IOS_CLOUD_APP ?? 'bs://6585528cee5f3b2700b54250c12d81bd7f235a3c',
   'bstack:options': {
     projectName: 'Login',
     buildName: '1.1',
@@ -41,8 +41,8 @@ describe('Plugin Test', () => {
     pluginName: 'device-farm',
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
-    driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverName: 'xcuitest',
+    driverSpec: 'appium-xcuitest-driver',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME!,
@@ -59,5 +59,10 @@ describe('Plugin Test', () => {
     await textButton.click();
   });
 
-  afterEach(async () => await driver.deleteSession());
+  afterEach(async () => {
+    if (driver) {
+      await driver.deleteSession();
+      driver = null;
+    }
+  });
 });

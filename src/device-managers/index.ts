@@ -22,12 +22,12 @@ export class DeviceFarmManager {
     this.deviceTypes = deviceTypes;
     this.nodeId = nodeId;
     if (platform.toLowerCase() === 'both') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort, nodeId));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort, nodeId));
     } else if (platform.toLowerCase() === 'android') {
-      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort));
+      this.deviceManagers.push(new AndroidDeviceManager(pluginArgs, hostPort, nodeId));
     } else if (platform.toLowerCase() === 'ios') {
-      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort));
+      this.deviceManagers.push(new IOSDeviceManager(pluginArgs, hostPort, nodeId));
     }
   }
 

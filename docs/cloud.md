@@ -32,3 +32,11 @@ CLOUD_KEY="apiKey" CLOUD_USERNAME="useremail" appium server -ka 800 --use-plugin
 ```
 Make sure all `appiumVersion: 2.0` in your capabilities.
 Refer on LambdaTest config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/lt-config.json)
+
+
+### HeadSpin
+
+```
+appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/hs-config.json
+```
+Refer on HeadSpin config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/hs-config.json).

@@ -4,14 +4,20 @@
     "plugin": {
       "device-farm": {
         "platform": "both",
+        "removeDevicesFromDatabaseBeforeRunningThePlugin": true,
         "cloud":
           {
             "cloudName": "browserstack",
             "url": "http://hub-cloud.browserstack.com/wd/hub",
             "devices": [
               {
-                "deviceName": "Google Pixel 3",
-                "os_version": "9.0",
+                "deviceName": "Samsung Galaxy S21",
+                "os_version": "12.0",
+                "platform": "android"
+              },
+              {
+                "deviceName": "Samsung Galaxy S21",
+                "os_version": "12.0",
                 "platform": "android"
               },
               {

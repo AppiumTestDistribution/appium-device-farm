@@ -11,6 +11,8 @@ import normalizeUrl from 'normalize-url';
 import ora from 'ora';
 import asyncWait from 'async-wait-until';
 import axios from 'axios';
+import { FakeModuleLoader } from './fake-module-loader';
+import { IExternalModuleLoader } from './interfaces/IExternalModule';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -76,6 +78,8 @@ export function nodeUrl(device: IDevice, basePath = ''): string {
   if (device.hasOwnProperty('cloud')) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
       return `${host}/wd/hub`;
+    } else if (device.cloud.toLowerCase() === Cloud.HEADSPIN) {
+      return `${host}`;
     } else {
       return `https://${process.env.CLOUD_USERNAME}:${process.env.CLOUD_KEY}@${
         new URL(device.host).host
@@ -179,7 +183,7 @@ export async function isDeviceFarmRunning(host: string): Promise<boolean> {
     const timeoutMs = 30000;
     const result = await axios({
       method: 'get',
-      url: `${host}/device-farm`,
+      url: `${host}/device-farm/api/status`,
       timeout: timeoutMs,
       headers: {
         'Content-Type': 'application/json',
@@ -218,4 +222,24 @@ export function safeParseJson(jsonString: string) {
   } catch (err) {
     return jsonString;
   }
+}
+
+export async function loadExternalModules(): Promise<IExternalModuleLoader> {
+  // eslint-disable-next-line
+  // @ts-ignore
+  return import(/* webpackMode: "eager" */ './modules')
+    .then((externalModule) => {
+      console.log(externalModule);
+      return new (externalModule as any).default();
+    })
+    .catch((err) => new FakeModuleLoader());
+}
+
+export function getSessionIdFromUrl(url: string) {
+  const SESSION_ID_PATTERN = /\/session\/([^/]+)/;
+  const match = SESSION_ID_PATTERN.exec(url);
+  if (match) {
+    return match[1];
+  }
+  return null;
 }

@@ -153,13 +153,16 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           break;
         case 'udid':
           // udid is an array
-          if (filterOptions.udid.length > 0) filter.udid = { $contains: filterOptions.udid };
+          if (filterOptions.udid.length > 0) filter.udid = { $in: filterOptions.udid };
           break;
         case 'deviceType':
           filter.deviceType = filterOptions.deviceType;
           break;
         case 'session_id':
           filter.session_id = filterOptions.session_id;
+          break;
+        case 'filterByHost':
+          filter.host = { $contains: filterOptions.filterByHost };
           break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {
@@ -201,7 +204,6 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // if (filterOptions.deviceType === 'simulator') {
   //   filter.state = 'Booted'; // Needs a fix
   // }
-
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
   /*
@@ -294,7 +296,7 @@ export async function blockDevice(udid: string, host: string) {
 }
 
 export async function unblockDevice(udid: string, host: string) {
-  unblockDeviceMatchingFilter({ udid, host });
+  await unblockDeviceMatchingFilter({ udid, host });
 }
 
 export async function unblockDeviceMatchingFilter(filter: object) {
@@ -321,7 +323,9 @@ export async function unblockDeviceMatchingFilter(filter: object) {
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
         await setUtilizationTime(device.udid, totalUtilization);
         deviceModel.findAndUpdate(
-          { udid: device.udid, host: device.host },
+          (data: IDevice) => {
+            return data.udid === device.udid && data.host === device.host;
+          },
           function (device: IDevice) {
             // log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
