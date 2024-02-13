@@ -1,5 +1,5 @@
 cd web
-npm install
+npm install --force
 npm run build
 cd ..
 rm -rf src/public
