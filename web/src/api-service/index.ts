@@ -22,14 +22,14 @@ export default class DeviceFarmApiService {
   }
 
   public static getBuilds() {
-    return apiClient.makeGETRequest('/build', {});
+    return apiClient.makeGETRequest('/dashboard/build', {});
   }
 
   public static getSessions() {
-    return apiClient.makeGETRequest('/session', {});
+    return apiClient.makeGETRequest('/dashboard/session', {});
   }
 
   public static getSessionLogs(sessionId: string) {
-    return apiClient.makeGETRequest(`/session/${sessionId}/session_log`, {});
+    return apiClient.makeGETRequest(`/dashboard/session/${sessionId}/session_log`, {});
   }
 }
