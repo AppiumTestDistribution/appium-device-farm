@@ -30,6 +30,7 @@ function Capabilities({ session }: CapabilitiesProps) {
 
   return (
     <div className="capabilities">
+      <video controls src={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`}/>
       <div className="tabs">
         <div
           className={`tab-header ${activeTab === ActiveTab.DesiredCapabilities ? 'active' : ''}`}

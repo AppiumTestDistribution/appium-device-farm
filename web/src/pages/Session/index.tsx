@@ -34,8 +34,6 @@ function Session() {
         }
         setSelectedBuild(builds.find((build: any) => build.id === buildId));
         setSelectedSession(sessions.find((session: any) => session.id === sessionId));
-        console.log('*****', JSON.stringify(builds, null, 2));
-        console.log('*****', JSON.stringify(sessions, null, 2));
       } catch (error) {
         console.log(error);
       }
