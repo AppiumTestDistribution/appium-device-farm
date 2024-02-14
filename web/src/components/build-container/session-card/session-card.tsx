@@ -58,7 +58,7 @@ function SessionCard({ session }: { session: ISession }) {
         </div>
       </div>
       <div className="build-session_status">
-        <p>{session.status}</p>
+        <p style={{ color: getColor(session.status)}}>{session.status}</p>
       </div>
       <div className="build-session_time">
         <p>{runningTime(session.startTime, session.endTime)}</p>
@@ -67,4 +67,14 @@ function SessionCard({ session }: { session: ISession }) {
   );
 }
 
+const getColor = (value: string) => {
+  console.log('Value', value);
+  if (value === 'passed') {
+    return 'green';
+  } else if(value === 'failed') {
+    return 'red';
+  } else {
+    return 'yellow';
+  }
+};
 export default SessionCard;

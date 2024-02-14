@@ -13,7 +13,6 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'df:build': 'DeviceFarm BuildName 66',
   'df:options': {
     record_video: true,
     screenshot_on_failure: true,
@@ -31,7 +30,7 @@ describe('Plugin Test', () => {
     await driver.executeScript('devicefarm: setSessionName', [{ name: 'SliderTest Example' }]);
     await driver.pause(3000);
     await driver.$('~login').click();
-    await driver.$('~slider12').click();
+    await driver.$('~slider1').click();
   });
 
   afterEach(async function () {
