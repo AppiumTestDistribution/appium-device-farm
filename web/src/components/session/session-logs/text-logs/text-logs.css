@@ -72,4 +72,6 @@
 
 .text-log-screenshot {
   margin: 8px;
+  width: 50%;
+  height: auto;
 }

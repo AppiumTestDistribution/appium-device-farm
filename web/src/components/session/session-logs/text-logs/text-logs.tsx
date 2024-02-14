@@ -10,9 +10,10 @@ interface TextLogsProps {
   sessionLogs: ISessionLogs[];
   showImages: boolean;
   showErrorsOnly: boolean;
+  baseUrl: any;
 }
 
-function TextLogs({ sessionLogs, showImages, showErrorsOnly }: TextLogsProps) {
+function TextLogs({ sessionLogs, showImages, showErrorsOnly, baseUrl }: TextLogsProps) {
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
 
   return (
@@ -54,7 +55,7 @@ function TextLogs({ sessionLogs, showImages, showErrorsOnly }: TextLogsProps) {
                 </button>
               </div>
               {showImages && sessionLog.screenshot && (
-                <img className="text-log-screenshot" src={sessionLog.screenshot} alt="screenshot" />
+                <img className="text-log-screenshot" src={`${baseUrl}/device-farm/assets/${sessionLog.screenshot}`} alt="screenshot" />
               )}
               <div className="text-log-response">
                 <p>RESPONSE</p>

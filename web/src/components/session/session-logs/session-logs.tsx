@@ -12,6 +12,7 @@ enum ActiveTab {
 }
 
 function SessionLogs({ sessionId }: any) {
+  const [url, setBaseUrl ] = useState<string>();
   const [sessionLogs, setSessionLogs] = useState<ISessionLogs[]>([]);
   const [showImages, setShowImages] = useState(false);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
@@ -22,6 +23,9 @@ function SessionLogs({ sessionId }: any) {
       try {
         const sessionLogs = await DeviceFarmApiService.getSessionLogs(sessionId);
         setSessionLogs(sessionLogs);
+        const baseURL = window.location.protocol + '//' + window.location.host;
+        setBaseUrl(baseURL);
+        console.log('Base URL:', url);
       } catch (error) {
         console.log(error);
       }
@@ -87,6 +91,7 @@ function SessionLogs({ sessionId }: any) {
             sessionLogs={sessionLogs}
             showImages={showImages}
             showErrorsOnly={showErrorsOnly}
+            baseUrl={url}
           />
         )}
       </div>
