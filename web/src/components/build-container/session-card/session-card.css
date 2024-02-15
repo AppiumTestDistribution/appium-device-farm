@@ -25,7 +25,7 @@
 }
 
 .build-session_name {
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 600;
   color: #212121;
 }
@@ -49,7 +49,7 @@
 }
 
 .build-session-device p {
-  font-size: 14px;
+  font-size: 11px;
   margin: 0;
   font-weight: 400;
 }

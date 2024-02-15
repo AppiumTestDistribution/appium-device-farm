@@ -1,5 +1,5 @@
 .capabilities {
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
   max-width: 440px;
@@ -30,7 +30,7 @@
 
 .key-value-pair {
   display: flex;
-  font-size: 14px;
+  font-size: 12px;
   margin: 16px 0;
   width: 100%;
 }

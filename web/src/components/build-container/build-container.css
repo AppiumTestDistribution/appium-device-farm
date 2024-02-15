@@ -35,7 +35,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 28px 20px;
+  padding: 11px 27px;
   border-top: 1px solid #f2f1f2;
   border-bottom: 1px solid #f2f1f2;
   cursor: pointer;
@@ -51,7 +51,7 @@
 }
 
 .build-item_name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0 0 12px 0;
   white-space: nowrap;
@@ -79,7 +79,7 @@
 }
 
 .build-item_session {
-  padding: 16px 16px;
+  padding: 7px 7px;
   cursor: pointer;
 }
 
@@ -88,7 +88,7 @@
 }
 
 .build-item_session_name {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   margin: 0 0 12px 0;
   white-space: nowrap;
