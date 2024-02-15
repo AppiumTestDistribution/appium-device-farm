@@ -28,7 +28,7 @@ describe('Plugin Test', () => {
 
   it('Vertical swipe test', async () => {
     await driver.executeScript('devicefarm: setSessionName', [{ name: 'SliderTest Example' }]);
-    await driver.pause(3000);
+    await driver.pause(20000);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
   });

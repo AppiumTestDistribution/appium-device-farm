@@ -27,10 +27,19 @@ function Capabilities({ session }: CapabilitiesProps) {
   const handleTabClick = (tab: ActiveTab) => {
     setActiveTab(tab);
   };
+  function getVideoUrl() {
+    console.log('Session', session);
+    if(session.has_live_video) {
+      console.log(`${window.location.protocol + '//' + window.location.host}/device-farm/api/dashboard/session/${session.id}/live_video`)
+      return `${window.location.protocol + '//' + window.location.host}/device-farm/api/dashboard/session/${session.id}/live_video`;
+    } else {
+      return `${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`;
+    }
+  }
 
   return (
     <div className="capabilities">
-      <video controls src={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`}/>
+      <video controls src={getVideoUrl()}/>
       <div className="download">
         <a
           href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`}
