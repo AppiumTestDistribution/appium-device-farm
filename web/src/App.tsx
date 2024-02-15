@@ -1,18 +1,18 @@
 import RootRouter from './router/RootRouter';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import Sidebar from './components/sidebar';
 import './app.css';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="app-container">
         <Sidebar />
         <div className="app-body-container">
           <RootRouter />
         </div>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

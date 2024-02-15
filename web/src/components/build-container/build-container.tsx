@@ -86,9 +86,7 @@ function BuildContainer({
                       className={`build-item_session ${
                         sessionId === session.id && 'build-item_session_selected'
                       }`}
-                      onClick={() =>
-                        navigate(`/device-farm/builds/${session.build_id}/session/${session.id}`)
-                      }
+                      onClick={() => navigate(`/builds/${session.build_id}/session/${session.id}`)}
                     >
                       <div className="build-item_session_name">
                         {session.name || 'Not Available'}

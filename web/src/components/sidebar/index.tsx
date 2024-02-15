@@ -7,8 +7,8 @@ import DevicesSelectedIcon from '../../assets/devices-icon-selected.svg';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
-  const deviceFarmRoute = '/device-farm/';
-  const buildsRoute = '/device-farm/builds';
+  const deviceFarmRoute = '/';
+  const buildsRoute = '/builds';
 
   const { pathname } = useLocation();
   const navigate = useNavigate();

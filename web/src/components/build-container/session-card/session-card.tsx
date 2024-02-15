@@ -1,7 +1,7 @@
 import { ISession } from '../../../interfaces/ISession';
-import AndroidIcon from '../../../assets/android-new-icon.svg'
-import AppleIcon from '../../../assets/apple-new-icon.svg'
-import MobileIcon from '../../../assets/mobile-icon.svg'
+import AndroidIcon from '../../../assets/android-new-icon.svg';
+import AppleIcon from '../../../assets/apple-new-icon.svg';
+import MobileIcon from '../../../assets/mobile-icon.svg';
 import './session-card.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,23 +42,33 @@ function SessionCard({ session }: { session: ISession }) {
   }
 
   return (
-    <div className="build-session" onClick={() => navigate(`/device-farm/builds/${session.build_id}/session/${session.id}`)}>
-      <div className='build-session-column'>
-        <div className="build-session_name">{session.name || " Not Available"}</div>
+    <div
+      className="build-session"
+      onClick={() => navigate(`/builds/${session.build_id}/session/${session.id}`)}
+    >
+      <div className="build-session-column">
+        <div className="build-session_name">{session.name || ' Not Available'}</div>
         <div className="build-session-device">
           <div className="build-session-device_name">
             <img src={MobileIcon} alt="device icon" />
             <p>{session.device_name}</p>
           </div>
           <div className="build-session-device_platform">
-            <img src={session.device_platform === 'android' ? AndroidIcon : AppleIcon} alt="device platform" />
-            <p>{session.device_platform} {session.device_version}</p>
+            <img
+              src={session.device_platform === 'android' ? AndroidIcon : AppleIcon}
+              alt="device platform"
+            />
+            <p>
+              {session.device_platform} {session.device_version}
+            </p>
           </div>
-          <p className="build-session-device_last_updated">Last updated {timeAgo(session.updatedAt)}</p>
+          <p className="build-session-device_last_updated">
+            Last updated {timeAgo(session.updatedAt)}
+          </p>
         </div>
       </div>
       <div className="build-session_status">
-        <p style={{ color: getColor(session.status)}}>{session.status}</p>
+        <p style={{ color: getColor(session.status) }}>{session.status}</p>
       </div>
       <div className="build-session_time">
         <p>{runningTime(session.startTime, session.endTime)}</p>
@@ -71,7 +81,7 @@ const getColor = (value: string) => {
   console.log('Value', value);
   if (value === 'passed') {
     return 'green';
-  } else if(value === 'failed') {
+  } else if (value === 'failed') {
     return 'red';
   } else {
     return 'yellow';

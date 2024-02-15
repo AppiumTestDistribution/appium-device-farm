@@ -32,7 +32,7 @@ function Builds() {
   }, [selectedBuildId]);
 
   const handleSelectedBuildChange = (buildId: string) => {
-    navigate(`/device-farm/builds?buildId=${buildId}`);
+    navigate(`/builds?buildId=${buildId}`);
   };
 
   return (

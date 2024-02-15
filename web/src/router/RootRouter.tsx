@@ -6,9 +6,9 @@ import Session from '../pages/Session';
 function RootRouter() {
   return (
     <Routes>
-      <Route path="/device-farm" element={<DeviceFarm />} />
-      <Route path="/device-farm/builds" element={<Builds />} />
-      <Route path="/device-farm/builds/:buildId/session/:sessionId" element={<Session />} />
+      <Route path="/" element={<DeviceFarm />} />
+      <Route path="/builds" element={<Builds />} />
+      <Route path="/builds/:buildId/session/:sessionId" element={<Session />} />
     </Routes>
   );
 }

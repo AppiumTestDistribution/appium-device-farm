@@ -27,23 +27,44 @@ function Capabilities({ session }: CapabilitiesProps) {
   const handleTabClick = (tab: ActiveTab) => {
     setActiveTab(tab);
   };
-  function getVideoUrl() {
-    console.log('Session', session);
-    if(session.has_live_video) {
-      console.log(`${window.location.protocol + '//' + window.location.host}/device-farm/api/dashboard/session/${session.id}/live_video`)
-      return `${window.location.protocol + '//' + window.location.host}/device-farm/api/dashboard/session/${session.id}/live_video`;
+
+  function getVideoCompoment() {
+    if (session.has_live_video) {
+      const source = `${
+        window.location.protocol + '//' + window.location.host
+      }/device-farm/api/dashboard/session/${session.id}/live_video`;
+      return (
+        <img
+          src={source}
+          style={{
+            maxHeight: '40%',
+          }}
+        />
+      );
     } else {
-      return `${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`;
+      return (
+        <video
+          controls
+          src={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
+            session.video_recording
+          }`}
+        />
+      );
     }
   }
 
   return (
     <div className="capabilities">
-      <video controls src={getVideoUrl()}/>
+      {getVideoCompoment()}
       <div className="download">
         <a
-          href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${session.video_recording}`}
-          download={session.video_recording}>Download</a>
+          href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
+            session.video_recording
+          }`}
+          download={session.video_recording}
+        >
+          Download
+        </a>
       </div>
       <div className="tabs">
         <div
@@ -60,8 +81,10 @@ function Capabilities({ session }: CapabilitiesProps) {
         </div>
       </div>
       <div className="tab-content">
-        {activeTab === ActiveTab.DesiredCapabilities && renderKeyValuePairs(session.desired_capabilities)}
-        {activeTab === ActiveTab.SessionCapabilities && renderKeyValuePairs(session.session_capabilities)}
+        {activeTab === ActiveTab.DesiredCapabilities &&
+          renderKeyValuePairs(session.desired_capabilities)}
+        {activeTab === ActiveTab.SessionCapabilities &&
+          renderKeyValuePairs(session.session_capabilities)}
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ function Session() {
           builds.findIndex((build: any) => build.id === buildId) < 0 ||
           sessions.findIndex((session: any) => session.id === sessionId) < 0
         ) {
-          navigate('/device-farm/builds');
+          navigate('/builds');
           return;
         }
         setSelectedBuild(builds.find((build: any) => build.id === buildId));
@@ -42,7 +42,7 @@ function Session() {
   }, [buildId, navigate, sessionId]);
 
   const handleSelectedBuildChange = (buildId: string) => {
-    navigate(`/device-farm/builds?buildId=${buildId}`);
+    navigate(`/builds?buildId=${buildId}`);
   };
 
   return (
