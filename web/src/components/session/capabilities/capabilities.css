@@ -50,3 +50,15 @@
   margin: 0;
   width: 50%;
 }
+
+.download {
+  width: 50%;
+  color: rgb(255, 255, 255);
+  background: rgb(111, 199, 107);
+  padding: 5px;
+  margin-right: 10px;
+  margin-left: 100px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+}
