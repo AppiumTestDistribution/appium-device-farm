@@ -51,7 +51,14 @@ class DynamicFileGenerator {
   }
 }
 
+const getExtendedWebpackConfig = function () {
+  return fs.existsSync(path.join(__dirname, 'src/modules/webpack.config.js'))
+    ? './src/modules/webpack.config.js'
+    : undefined;
+};
+
 module.exports = {
+  extends: getExtendedWebpackConfig(),
   entry: ['./lib/src/index.js'],
   externals: [nodeExternals()],
   output: {
