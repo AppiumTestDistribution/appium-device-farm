@@ -16,6 +16,7 @@ const capabilities = {
   'df:options': {
     record_video: true,
     screenshot_on_failure: true,
+    build: new Date().toISOString(),
   },
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
