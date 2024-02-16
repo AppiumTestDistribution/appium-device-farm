@@ -7,10 +7,15 @@ const env = {
 };
 
 function executeCmd(cmd: string) {
-  execSync(cmd, {
-    env,
-    stdio: 'inherit',
-  });
+  try {
+    execSync(cmd, {
+      env,
+      stdio: 'inherit',
+    });
+  } catch (err) {
+    console.log('Error initializing database:');
+    console.log(err);
+  }
 }
 
 async function main() {
