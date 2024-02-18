@@ -229,13 +229,13 @@ export async function loadExternalModules(): Promise<IExternalModuleLoader> {
 
   // eslint-disable-next-line
   // @ts-ignore
-  // return import(/* webpackMode: "eager" */ './modules')
-  //   .then((externalModule) => {
-  //     console.log(externalModule);
-  //     return new (externalModule as any).default();
-  //   })
-  //   .catch((err) => );
-  return new FakeModuleLoader();
+  return import(/* webpackMode: "eager" */ './modules')
+    .then((externalModule) => {
+      console.log(externalModule);
+      return new (externalModule as any).default();
+    })
+    .catch((err) => new FakeModuleLoader());
+  //return new FakeModuleLoader();
 }
 
 export function getSessionIdFromUrl(url: string) {
