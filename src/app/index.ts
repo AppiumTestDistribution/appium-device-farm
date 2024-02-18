@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-
+import fs from 'fs';
 import { getCLIArgs } from '../data-service/pluginArgs';
 import cors from 'cors';
 import AsyncLock from 'async-lock';
@@ -54,7 +54,15 @@ apiRouter.get('/cliArgs', async (req, res) => {
   res.json(await getCLIArgs());
 });
 
-staticFilesRouter.use(express.static(path.join(__dirname, 'public')));
+if (
+  fs.existsSync(path.join(__dirname, 'public')) &&
+  fs.statSync(path.join(__dirname, 'public')).isDirectory()
+) {
+  staticFilesRouter.use(express.static(path.join(__dirname, 'public')));
+} else {
+  staticFilesRouter.use(express.static(path.join(__dirname, '..', '..', 'public')));
+}
+
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
 router.use(staticFilesRouter);
