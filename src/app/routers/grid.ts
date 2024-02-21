@@ -39,7 +39,7 @@ async function getDevices(request: Request, response: Response) {
       deviceSessionMap[session.udid].push(session);
     });
     devices = devices.map((d) => {
-      d.dashboard_link = `${dashboardPluginUrl}?device_udid=${d.udid}&start_time=${SERVER_UP_TIME}`;
+      d.dashboard_link = `${dashboardPluginUrl}?deviceUDID=${d.udid}&start_time=${SERVER_UP_TIME}`;
       d.total_session_count = deviceSessionMap[d.udid]?.length || 0;
       return d;
     });

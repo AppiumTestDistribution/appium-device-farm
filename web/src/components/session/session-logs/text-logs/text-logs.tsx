@@ -20,7 +20,7 @@ function TextLogs({ sessionLogs, showImages, showErrorsOnly, baseUrl }: TextLogs
     <div className="text-logs">
       {sessionLogs
         .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-        .filter((sessionLog) => (showErrorsOnly ? !sessionLog.is_success : sessionLog.is_success))
+        .filter((sessionLog) => (showErrorsOnly ? !sessionLog.isSuccess : sessionLog.isSuccess))
         .map((sessionLog, index, array) => {
           const currentTime = new Date(sessionLog.createdAt);
           const nextTime = index < array.length - 1 ? new Date(array[index + 1].createdAt) : null;
@@ -55,7 +55,11 @@ function TextLogs({ sessionLogs, showImages, showErrorsOnly, baseUrl }: TextLogs
                 </button>
               </div>
               {showImages && sessionLog.screenshot && (
-                <img className="text-log-screenshot" src={`${baseUrl}/device-farm/assets/${sessionLog.screenshot}`} alt="screenshot" />
+                <img
+                  className="text-log-screenshot"
+                  src={`${baseUrl}/device-farm/assets/${sessionLog.screenshot}`}
+                  alt="screenshot"
+                />
               )}
               <div className="text-log-response">
                 <p>RESPONSE</p>

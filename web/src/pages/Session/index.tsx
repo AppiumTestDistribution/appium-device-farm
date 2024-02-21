@@ -57,7 +57,7 @@ function Session() {
         {selectedSession && (
           <div className="session-container">
             <div className="session-header">
-              <button onClick={() => handleSelectedBuildChange(selectedSession.build_id)}>
+              <button onClick={() => handleSelectedBuildChange(selectedSession.buildId)}>
                 Build
               </button>
               <img src={RightArrowIcon} alt="right-arrow" />

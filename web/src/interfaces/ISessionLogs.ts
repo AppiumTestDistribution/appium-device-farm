@@ -1,7 +1,7 @@
 export interface ISessionLogs {
   id: string;
   session_id: string;
-  command_name: string;
+  commandName: string;
   url: string;
   method: string;
   title: string;
@@ -9,7 +9,7 @@ export interface ISessionLogs {
   body: string;
   response: string;
   screenshot: string | null;
-  is_success: boolean;
+  isSuccess: boolean;
   createdAt: string;
   updatedAt: string;
 }

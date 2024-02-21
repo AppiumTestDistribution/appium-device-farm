@@ -44,22 +44,22 @@ function SessionCard({ session }: { session: ISession }) {
   return (
     <div
       className="build-session"
-      onClick={() => navigate(`/builds/${session.build_id}/session/${session.id}`)}
+      onClick={() => navigate(`/builds/${session.buildId}/session/${session.id}`)}
     >
       <div className="build-session-column">
         <div className="build-session_name">{session.name || ' Not Available'}</div>
         <div className="build-session-device">
           <div className="build-session-device_name">
             <img src={MobileIcon} alt="device icon" />
-            <p>{session.device_name}</p>
+            <p>{session.deviceName}</p>
           </div>
-          <div className="build-session-device_platform">
+          <div className="build-session-devicePlatform">
             <img
-              src={session.device_platform === 'android' ? AndroidIcon : AppleIcon}
+              src={session.devicePlatform === 'android' ? AndroidIcon : AppleIcon}
               alt="device platform"
             />
             <p>
-              {session.device_platform} {session.device_version}
+              {session.devicePlatform} {session.deviceVersion}
             </p>
           </div>
           <p className="build-session-device_last_updated">

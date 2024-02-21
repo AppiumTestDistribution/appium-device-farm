@@ -17,23 +17,23 @@ model Build {
 
 model Session {
   id                   String       @id
-  build_id             String?
-  build                Build?       @relation(fields: [build_id], references: [id])
+  buildId             String?
+  build                Build?       @relation(fields: [buildId], references: [id])
   name                 String?
   status               String       @default("running")
-  desired_capabilities String
-  session_capabilities String
-  node_id              String
-  has_live_video       Boolean
-  video_recording      String?
+  desiredCapabilities String
+  sessionCapabilities String
+  nodeId              String
+  hasLiveVideo       Boolean
+  videoRecording      String?
   startTime            DateTime     @default(now())
   endTime              DateTime?
-  failure_reason       String?
+  failureReason       String?
   //device properties
-  device_udid          String
-  device_platform      String
-  device_version       String
-  device_name          String?
+  deviceUDID          String
+  devicePlatform      String
+  deviceVersion       String
+  deviceName          String?
   // Timestamps
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
@@ -44,7 +44,7 @@ model SessionLog {
   id           String   @id @default(uuid())
   session_id   String
   session      Session  @relation(fields: [session_id], references: [id])
-  command_name String?
+  commandName String?
   url          String
   method       String
   title        String
@@ -52,7 +52,7 @@ model SessionLog {
   body         String?
   response     String
   screenshot   String?
-  is_success   Boolean?
+  isSuccess   Boolean?
   // Timestamps
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

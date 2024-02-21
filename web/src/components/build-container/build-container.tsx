@@ -67,7 +67,7 @@ function BuildContainer({
                 <div className="build-item_details_item">
                   <img src={TimeIcon} className="details-item_icon" />
                   <span>
-                    {sessions.filter((session) => session.build_id === build.id).length} sessions
+                    {sessions.filter((session) => session.buildId === build.id).length} sessions
                   </span>
                 </div>
                 <div className="build-item_details_item">
@@ -79,14 +79,14 @@ function BuildContainer({
             {selectedBuild?.id === build.id && (
               <div className="build-item_sessions">
                 {sessions
-                  .filter((session) => session.build_id === build.id)
+                  .filter((session) => session.buildId === build.id)
                   .map((session) => (
                     <div
-                      key={session.build_id}
+                      key={session.buildId}
                       className={`build-item_session ${
                         sessionId === session.id && 'build-item_session_selected'
                       }`}
-                      onClick={() => navigate(`/builds/${session.build_id}/session/${session.id}`)}
+                      onClick={() => navigate(`/builds/${session.buildId}/session/${session.id}`)}
                     >
                       <div className="build-item_session_name">
                         {session.name || 'Not Available'}
@@ -94,10 +94,10 @@ function BuildContainer({
                       <div className="build-item_session_details">
                         <div className="build-item_session_details_item">
                           <img
-                            src={session.device_platform === 'android' ? AndroidIcon : AppleIcon}
+                            src={session.devicePlatform === 'android' ? AndroidIcon : AppleIcon}
                             alt="device platform"
                           />
-                          <span>{session.device_name}</span>
+                          <span>{session.deviceName}</span>
                         </div>
                       </div>
                     </div>

@@ -47,7 +47,7 @@ function Builds() {
         {selectedBuild && (
           <div className="build-sessions-container">
             {sessions
-              .filter((session) => session.build_id === selectedBuild.id)
+              .filter((session) => session.buildId === selectedBuild.id)
               .map((session) => {
                 return <SessionCard key={session.id} session={session} />;
               })}

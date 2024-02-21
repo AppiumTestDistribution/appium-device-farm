@@ -29,10 +29,10 @@ function Capabilities({ session }: CapabilitiesProps) {
   };
 
   function getVideoCompoment() {
-    if (session.has_live_video) {
+    if (session.hasLiveVideo) {
       const source = `${
         window.location.protocol + '//' + window.location.host
-      }/device-farm/api/dashboard/session/${session.id}/live_video`;
+      }/device-farm/api/dashboard/session/${session.id}/liveVideo`;
       return (
         <img
           src={source}
@@ -46,7 +46,7 @@ function Capabilities({ session }: CapabilitiesProps) {
         <video
           controls
           src={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
-            session.video_recording
+            session.videoRecording
           }`}
         />
       );
@@ -59,9 +59,9 @@ function Capabilities({ session }: CapabilitiesProps) {
       <div className="download">
         <a
           href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
-            session.video_recording
+            session.videoRecording
           }`}
-          download={session.video_recording}
+          download={session.videoRecording}
         >
           Download
         </a>
@@ -82,9 +82,9 @@ function Capabilities({ session }: CapabilitiesProps) {
       </div>
       <div className="tab-content">
         {activeTab === ActiveTab.DesiredCapabilities &&
-          renderKeyValuePairs(session.desired_capabilities)}
+          renderKeyValuePairs(session.desiredCapabilities)}
         {activeTab === ActiveTab.SessionCapabilities &&
-          renderKeyValuePairs(session.session_capabilities)}
+          renderKeyValuePairs(session.sessionCapabilities)}
       </div>
     </div>
   );

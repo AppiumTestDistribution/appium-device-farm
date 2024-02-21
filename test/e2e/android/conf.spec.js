@@ -14,8 +14,8 @@ const capabilities = {
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
   'df:options': {
-    record_video: true,
-    screenshot_on_failure: true,
+    recordVideo: true,
+    screenshotOnFailure: true,
     build: new Date().toISOString(),
   },
   'appium:app':
