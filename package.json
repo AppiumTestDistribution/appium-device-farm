@@ -83,7 +83,7 @@
     "appium-ios-device": "^2.7.6",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.12",
-    "axios": "^0.27.2",
+    "axios": "^0.28.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "download": "^8.0.0",
