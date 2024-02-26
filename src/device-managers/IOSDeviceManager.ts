@@ -254,6 +254,11 @@ export default class IOSDeviceManager implements IDeviceManager {
         ),
       );
     }
+    if (this.pluginArgs.bootedSimulators) {
+      filteredSimulators = flattenValued.filter((device) => {
+        return device.state === 'Booted';
+      });
+    }
     //log.debug(`Filtered Simulators: ${JSON.stringify(filteredSimulators)}`);
 
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
