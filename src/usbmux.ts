@@ -219,7 +219,7 @@ class UsbmuxdError extends Error {
       this.message += ', Err #' + number;
     }
     if (number === 2) this.message += ": Device isn't connected";
-    if (number === 3) this.message += ': Port isn\'t available or open';
+    if (number === 3) this.message += ": Port isn't available or open";
     if (number === 5) this.message += ': Malformed request';
   }
 }
