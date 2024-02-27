@@ -72,6 +72,7 @@ export interface IPluginArgs {
 
   // development purposes
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
+  bootedSimulators?: boolean;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

@@ -34,7 +34,8 @@
         "checkStaleDevicesIntervalMs": 30000,
         "checkBlockedDevicesIntervalMs": 30000,
         "newCommandTimeoutSec": 60,
-        "bindHostOrIp": "127.0.0.0"
+        "bindHostOrIp": "127.0.0.0",
+        "bootedSimulators": true
       }
     }
   }
