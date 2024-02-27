@@ -86,7 +86,7 @@
     "axios": "^1.6.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
-    "download": "^3.3.0",
+    "download": "^8.0.0",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
     "express": "^4.17.3",
