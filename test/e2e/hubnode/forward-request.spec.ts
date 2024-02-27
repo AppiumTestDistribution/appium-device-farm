@@ -141,8 +141,8 @@ describe('E2E Forward Request', () => {
     // wait until there is at least one device
 
     // one of the device should come from node
-    const nodeDevice = allDevices.filter(
-      (device: any) => device.host?.includes(node_config.bindHostOrIp),
+    const nodeDevice = allDevices.filter((device: any) =>
+      device.host?.includes(node_config.bindHostOrIp),
     );
 
     expect(nodeDevice).to.not.be.undefined;
