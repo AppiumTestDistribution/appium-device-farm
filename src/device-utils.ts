@@ -41,6 +41,7 @@ import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADTDatabase } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
+import debugLog from './debugLog';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -93,11 +94,11 @@ export async function allocateDeviceForSession(
   pluginArgs: IPluginArgs,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
-  // log.debug(`firstMatch: ${JSON.stringify(firstMatch)}`);
+  debugLog(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const deviceFarmCapabilities = getDeviceFarmCapabilities(capability);
   const filters = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
 
-  // log.debug(`Device allocation request for filter: ${JSON.stringify(filters)}`);
+  debugLog(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout =
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
   const intervalBetweenAttempts =
