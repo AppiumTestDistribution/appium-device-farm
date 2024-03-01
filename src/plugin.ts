@@ -65,9 +65,9 @@ import ip from 'ip';
 import _ from 'lodash';
 import { ADTDatabase } from './data-service/db';
 import EventBus from './notifier/event-bus';
-import { IDeviceFarmSessionOptions } from './interfaces/IDeviceFarmSession';
 import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
+import debugLog from './debugLog';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -319,9 +319,11 @@ class DevicePlugin extends BasePlugin {
     if (isRemoteOrCloudSession) {
       log.debug(`📱 Forwarding session request to ${device.host}`);
       session = await this.forwardSessionRequest(device, caps);
+      debugLog(`📱Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
       session = await next();
+      debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
 
     // non-forwarded session can also be an error
@@ -371,6 +373,7 @@ class DevicePlugin extends BasePlugin {
   }
 
   throwProperError(session: any, host: string) {
+    debugLog(`Inside throwProperError: ${JSON.stringify(session)}`);
     if (session instanceof Error) {
       throw session;
     } else if (session.hasOwnProperty('error')) {
@@ -442,7 +445,7 @@ class DevicePlugin extends BasePlugin {
 
     log.info(`With axios config: "${JSON.stringify(config)}"`);
     const createdSession: W3CNewSessionResponse | Error = await this.invokeSessionRequest(config);
-
+    debugLog(`📱 Session Creation response: ${JSON.stringify(createdSession)}`);
     if (createdSession instanceof Error) {
       return createdSession;
     } else {
