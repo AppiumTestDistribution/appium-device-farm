@@ -116,7 +116,7 @@ describe('Device Utils', () => {
         'appium:app': '/Downloads/VodQA.apk',
         'appium:deviceAvailabilityTimeout': 1800,
         'appium:deviceRetryInterval': 100,
-        'df:filterByHost': '192.168.0.226',
+        'df:filterByHost': 'http://192.168.0.226:4723',
       },
       firstMatch: [{}],
     };
@@ -144,7 +144,7 @@ describe('Device Utils', () => {
         .to.be.an('error')
         .with.property(
           'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"192.168.0.226"}',
+          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"http://192.168.0.226:4723"}',
         ),
     );
   });
