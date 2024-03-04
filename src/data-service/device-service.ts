@@ -112,6 +112,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // for every keys in filterOptions, add it to the filter or modify the results query
   type FilterOptionsKey = keyof IDeviceFilterOptions;
   const filterOptionKeys = Object.keys(filterOptions) as FilterOptionsKey[];
+  debugLog(filterOptionKeys);
   filterOptionKeys
     .filter((key) => filterOptions[key] !== undefined)
     .forEach((key: FilterOptionsKey) => {
@@ -162,7 +163,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           filter.session_id = filterOptions.session_id;
           break;
         case 'filterByHost':
-          filter.host = { $contains: filterOptions.filterByHost };
+          filter.host = filterOptions.filterByHost;
           break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {

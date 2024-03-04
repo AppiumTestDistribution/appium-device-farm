@@ -251,7 +251,6 @@ export function getDeviceFiltersFromCapability(
   deviceFarmCapabilities: any,
   pluginArgs: IPluginArgs,
 ): IDeviceFilterOptions {
-  console.log(capability, deviceFarmCapabilities);
   const platform: Platform = capability['platformName'].toLowerCase();
   const udids = capability[DEVICE_FARM_CAPABILITIES.UDIDS]
     ? capability[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
