@@ -96,7 +96,7 @@ function handler(cliArgs: Record<string, any>, middlewares: ExpressMiddleware[])
           log.info(
             `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`,
           );
-          unblockDeviceMatchingFilter({ session_id: sessionId });
+          await unblockDeviceMatchingFilter({ session_id: sessionId });
           removeProxyHandler(sessionId);
         }
       } else {
