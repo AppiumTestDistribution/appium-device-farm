@@ -243,7 +243,11 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
         ...updateData,
       });
     });
-  log.info(`Updated allocated device: "${JSON.stringify(device)}"`);
+  const updatedDevicestatus = (await ADTDatabase.DeviceModel)
+    .chain()
+    .find({ udid: device.udid, host: device.host })
+    .data();
+  log.info(`Updated allocated device: "${JSON.stringify(updatedDevicestatus)}"`);
 }
 
 export async function updateCmdExecutedTime(sessionId: string) {
