@@ -68,6 +68,8 @@ import EventBus from './notifier/event-bus';
 import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
+import http from 'http';
+import * as https from 'https';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -369,26 +371,26 @@ class DevicePlugin extends BasePlugin {
     } else {
       // Case: Success in creating session on the node but for some reason the hub gets an error from node
       // in this case the device in node is busy and hub unblocks the device.
-      if (isRemoteOrCloudSession) {
-        try {
-          debugLog('Blocking device on the node');
-          const timeoutMs = 30000;
-          const result = await axios({
-            method: 'post',
-            url: `${device.host}/device-farm/api/block`,
-            timeout: timeoutMs,
-            data: { udid: device.udid, host: device.host },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-
-          return result.status == 200;
-        } catch (error: any) {
-          log.info(`Device Farm is not running at ${device.host}. Error: ${error}`);
-          return false;
-        }
-      }
+      // if (isRemoteOrCloudSession) {
+      //   try {
+      //     debugLog('Blocking device on the node');
+      //     const timeoutMs = 30000;
+      //     const result = await axios({
+      //       method: 'post',
+      //       url: `${device.host}/device-farm/api/block`,
+      //       timeout: timeoutMs,
+      //       data: { udid: device.udid, host: device.host },
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //       },
+      //     });
+      //
+      //     return result.status == 200;
+      //   } catch (error: any) {
+      //     log.info(`Device Farm is not running at ${device.host}. Error: ${error}`);
+      //     return false;
+      //   }
+      // }
       await unblockDevice(device.udid, device.host);
       log.info(
         `${pendingSessionId} 📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`,
@@ -456,6 +458,9 @@ class DevicePlugin extends BasePlugin {
     const config: any = {
       method: 'post',
       url: remoteUrl,
+      timeout: 62000,
+      httpAgent: new http.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
+      httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
       headers: {
         'Content-Type': 'application/json',
       },
