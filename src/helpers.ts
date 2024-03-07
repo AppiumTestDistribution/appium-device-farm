@@ -242,7 +242,7 @@ export async function registerErrorHandlers() {
   process.on('unhandledRejection', (reason, p) => {
     log.error('******  UnhandledRejection ******');
     log.error('Reason:  ' + reason);
-    log.error((reason as any)?.stack ? (reason as any)?.stack : 'Stacktrace not available');
+    log.error((reason as any)?.stack || 'Stacktrace not available');
     log.error('Promise: ', p);
   });
   process.on('uncaughtException', function (exception) {
