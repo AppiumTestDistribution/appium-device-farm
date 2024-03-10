@@ -1,0 +1,12 @@
+{
+  "server": {
+    "port": 31338,
+    "plugin": {
+      "device-farm": {
+        "platform": "android",
+        "skipChromeDownload": true,
+        "hub": "http://192.168.1.16:31337"
+      }
+    }
+  }
+}
