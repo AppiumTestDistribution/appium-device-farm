@@ -8,43 +8,43 @@ generator client {
 }
 
 model Build {
-  id        String    @id @default(uuid())
-  name      String?
-  sessions  Session[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                String    @id @default(uuid())
+  name              String?
+  sessions          Session[]
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
 }
 
 model Session {
-  id                   String       @id
-  buildId             String?
-  build                Build?       @relation(fields: [buildId], references: [id])
-  name                 String?
-  status               String       @default("running")
-  desiredCapabilities String
-  sessionCapabilities String
-  nodeId              String
-  hasLiveVideo       Boolean
-  videoRecording      String?
-  startTime            DateTime     @default(now())
-  endTime              DateTime?
-  failureReason       String?
+  id                 String       @id
+  build_id           String?
+  build              Build?       @relation(fields: [build_id], references: [id])
+  name               String?
+  status             String       @default("running")
+  desired_capabilities String
+  session_capabilities String
+  node_id            String
+  has_live_video     Boolean
+  video_recording    String?
+  start_time         DateTime     @default(now())
+  end_time           DateTime?
+  failure_reason     String?
   //device properties
-  deviceUDID          String
-  devicePlatform      String
-  deviceVersion       String
-  deviceName          String?
+  device_udid        String
+  device_platform    String
+  device_version     String
+  device_name        String?
   // Timestamps
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  SessionLog           SessionLog[]
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+  session_logs       SessionLog[]
 }
 
 model SessionLog {
   id           String   @id @default(uuid())
   session_id   String
   session      Session  @relation(fields: [session_id], references: [id])
-  commandName String?
+  command_name String?
   url          String
   method       String
   title        String
@@ -52,8 +52,8 @@ model SessionLog {
   body         String?
   response     String
   screenshot   String?
-  isSuccess   Boolean?
+  is_success   Boolean?
   // Timestamps
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 }
