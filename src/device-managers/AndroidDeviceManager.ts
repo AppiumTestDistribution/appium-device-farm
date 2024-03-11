@@ -17,6 +17,30 @@ import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
+import {
+  allowRecordingPermissions,
+  bringStreamingActivityToBack,
+  checkIfStreamingAppIsInstalled,
+  forwardPort,
+  installStreamingApp,
+  removeAllPortForwarding,
+  startStreamingActivity,
+} from '../modules/androidStreaming';
+
+async function streamAndroid(
+  adbInstance: any,
+  device: { udid: string; state: string },
+  systemPort: number,
+) {
+  if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
+    log.info('Streaming app is not installed. Installing now');
+    await installStreamingApp(adbInstance, device.udid);
+  }
+  await allowRecordingPermissions(adbInstance, device.udid);
+  await startStreamingActivity(adbInstance, device.udid);
+  await bringStreamingActivityToBack(adbInstance, device.udid);
+  await forwardPort(adbInstance, device.udid, systemPort);
+}
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -89,6 +113,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
 
     for (const [adbInstance, devices] of connectedDevices) {
+      for await (const device of devices) {
+        await removeAllPortForwarding(adbInstance, device.udid);
+      }
+    }
+    for (const [adbInstance, devices] of connectedDevices) {
       log.debug(
         `fetchAndroidDevices from host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
       );
@@ -153,6 +182,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
     let deviceInfo;
+    await streamAndroid(adbInstance, device, systemPort);
 
     try {
       deviceInfo = await Promise.all([

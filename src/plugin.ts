@@ -65,9 +65,10 @@ import ip from 'ip';
 import _ from 'lodash';
 import { ADTDatabase } from './data-service/db';
 import EventBus from './notifier/event-bus';
-import { IDeviceFarmSessionOptions } from './interfaces/IDeviceFarmSession';
 import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
+import path from 'path';
+import { downloadFile } from './modules/downloadApk';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -120,6 +121,12 @@ class DevicePlugin extends BasePlugin {
     httpServer: any,
     cliArgs: ServerArgs,
   ): Promise<void> {
+    // Specify the destination path where you want to save the downloaded file
+    const destinationPath = path.join(__dirname, 'stream.apk');
+    const fileUrl =
+      'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
+    await downloadFile(fileUrl, destinationPath);
+    console.log(destinationPath);
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -167,7 +174,6 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
-
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});
