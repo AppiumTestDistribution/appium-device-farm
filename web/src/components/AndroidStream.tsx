@@ -6,11 +6,13 @@ const AndroidStream = () => {
   useEffect(() => {
     const getWebSocketPort = () => {
       const queryParams = `${window.location.hash}`;
-      return queryParams.split('?port=')[1] || '8004'; // Default port is '8002'
+      const port = queryParams.split('?')[1].split('=')[1] || '8004'; // Default port is '8002'
+      const host = queryParams.split('?')[2].split('=')[1] || '127.0.0.1';
+      return { port, host }
     };
 
-    const wsPort = getWebSocketPort();
-    const wsUrl = `ws://127.0.0.1:${wsPort}`;
+    const { host, port} = getWebSocketPort();
+    const wsUrl = `ws://${host}:${port}`;
     const ws = new WebSocket(wsUrl);
 
     const handleWebSocketMessage = (event: { data: any }) => {
