@@ -69,6 +69,7 @@ import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
 import path from 'path';
 import { downloadFile } from './modules/downloadApk';
+import Adb from '@devicefarmer/adbkit';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -126,7 +127,32 @@ class DevicePlugin extends BasePlugin {
     const fileUrl =
       'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
     await downloadFile(fileUrl, destinationPath);
+    const client = Adb.createClient();
+    const apk = destinationPath;
+
+    const installStreamingApk = async () => {
+      try {
+        const devices = await client.listDevices();
+
+        await Promise.all(
+          devices.map(async (device) => {
+            try {
+              const selectedDevice = client.getDevice(device.id);
+              await selectedDevice.install(apk);
+              console.log(`Installed ${apk} on device ${device.id}`);
+            } catch (installError: any) {
+              console.error(`Failed to install ${apk} on device ${device.id}: ${installError}`);
+            }
+          }),
+        );
+
+        console.log(`Installed ${apk} on all connected devices`);
+      } catch (err: any) {
+        console.error('Something went wrong:', err);
+      }
+    };
     console.log(destinationPath);
+    await installStreamingApk();
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();

@@ -112,11 +112,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
     //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
 
-    for (const [adbInstance, devices] of connectedDevices) {
-      for await (const device of devices) {
-        await removeAllPortForwarding(adbInstance, device.udid);
-      }
-    }
+    // for (const [adbInstance, devices] of connectedDevices) {
+    //   for await (const device of devices) {
+    //     await removeAllPortForwarding(adbInstance, device.udid);
+    //   }
+    // }
     for (const [adbInstance, devices] of connectedDevices) {
       log.debug(
         `fetchAndroidDevices from host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
