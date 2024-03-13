@@ -39,7 +39,7 @@ Refer on LambdaTest config [here](https://github.com/AppiumTestDistribution/appi
 ```
 appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/hs-config.json
 or
-# In this with -pa case, please drop `/wd/hub` from 'url' in hs-config.jso
+# In this with -pa case, please drop `/wd/hub` from 'url' in hs-config.json
 appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/hs-config.json -pa /wd/hub
 ```
 Refer on HeadSpin config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/hs-config.json).
