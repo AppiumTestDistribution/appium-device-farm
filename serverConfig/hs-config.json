@@ -6,7 +6,7 @@
         "platform": "android",
         "cloud": {
           "cloudName": "headspin",
-          "url": "https://appium-canary.headspin.io/v0/api-token/wd/hub",
+          "url": "https://appium-dev.headspin.io/v0/api-token/wd/hub",
           "devices": [
             {
               "platformVersion": "12",
