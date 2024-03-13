@@ -4,9 +4,10 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
+        "remoteConnectionTimeout": 120000,
         "cloud": {
           "cloudName": "headspin",
-          "url": "https://appium-canary.headspin.io/v0/api-token/wd/hub",
+          "url": "https://appium-canary.headspin.io/v0//wd/hub",
           "devices": [
             {
               "platformVersion": "12",

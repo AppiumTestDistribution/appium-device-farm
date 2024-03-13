@@ -458,7 +458,7 @@ class DevicePlugin extends BasePlugin {
     const config: any = {
       method: 'post',
       url: remoteUrl,
-      timeout: 62000,
+      timeout: this.pluginArgs.remoteConnectionTimeout,
       httpAgent: new http.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
       httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
       headers: {
