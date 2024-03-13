@@ -257,6 +257,9 @@
         },
         "bootedSimulators": {
           "type": "boolean"
+        },
+        "remoteConnectionTimeout": {
+          "type": "number"
         }
       },
       "title": "Appium device farm plugin",
