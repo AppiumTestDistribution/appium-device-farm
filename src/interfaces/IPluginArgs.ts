@@ -73,6 +73,7 @@ export interface IPluginArgs {
   // development purposes
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
   bootedSimulators?: boolean;
+  remoteConnectionTimeout?: number;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -98,4 +99,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   bindHostOrIp: ip.address(),
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
+  remoteConnectionTimeout: 60000,
 };
