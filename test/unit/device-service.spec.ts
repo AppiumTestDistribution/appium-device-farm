@@ -220,6 +220,30 @@ describe('Get device', () => {
     expect(device?.sdk).to.be.eql('10');
   });
 
+  it('Get android device based on filter with platformVersion wildcard', async () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '10.*',
+    } as unknown as IDeviceFilterOptions;
+    const device = await getDevice(filterOptions);
+    expect(device?.sdk).to.be.eql('10');
+  });
+
+  it('Get android simulator based on filter with platformVersion range', async () => {
+    const filterOptions = {
+      platform: 'android',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '10.0.1 - 14.1.0'
+    } as unknown as IDeviceFilterOptions;
+    const device = await getDevice(filterOptions);
+    expect(device?.sdk).to.be.eql('11');
+  });
+
   it('Get ios simulator based on filter with platform', async () => {
     const filterOptions = {
       platform: 'ios',
@@ -238,6 +262,30 @@ describe('Get device', () => {
       busy: false,
       offline: false,
       platformVersion: '14.0',
+    } as unknown as IDeviceFilterOptions;
+    const device = await getDevice(filterOptions);
+    expect(device?.sdk).to.be.eql('14.0');
+  });
+
+  it('Get ios simulator based on filter with platformVersion wildcard', async () => {
+    const filterOptions = {
+      platform: 'ios',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '15.*',
+    } as unknown as IDeviceFilterOptions;
+    const device = await getDevice(filterOptions);
+    expect(device?.sdk).to.be.eql('15');
+  });
+
+  it('Get ios simulator based on filter with platformVersion range', async () => {
+    const filterOptions = {
+      platform: 'ios',
+      name: '',
+      busy: false,
+      offline: false,
+      platformVersion: '14 - 14.1.0',
     } as unknown as IDeviceFilterOptions;
     const device = await getDevice(filterOptions);
     expect(device?.sdk).to.be.eql('14.0');
