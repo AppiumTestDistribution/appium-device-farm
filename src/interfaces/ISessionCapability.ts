@@ -1,6 +1,7 @@
 export type ISessionCapability = {
   firstMatch: any[];
   alwaysMatch: any;
+  pendingSessionId?: any;
 };
 
 export type ISessionResponseWithValidSession = {

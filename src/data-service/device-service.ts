@@ -4,7 +4,7 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
-
+import debugLog from '../debugLog';
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
@@ -112,6 +112,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // for every keys in filterOptions, add it to the filter or modify the results query
   type FilterOptionsKey = keyof IDeviceFilterOptions;
   const filterOptionKeys = Object.keys(filterOptions) as FilterOptionsKey[];
+  debugLog(filterOptionKeys);
   filterOptionKeys
     .filter((key) => filterOptions[key] !== undefined)
     .forEach((key: FilterOptionsKey) => {
@@ -162,7 +163,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
           filter.session_id = filterOptions.session_id;
           break;
         case 'filterByHost':
-          filter.host = { $contains: filterOptions.filterByHost };
+          filter.host = filterOptions.filterByHost;
           break;
         case 'minSDK':
           if (semver.coerce(filterOptions.minSDK)) {
@@ -206,13 +207,13 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // }
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
-  /*
-  log.debug(`basic filter: ${JSON.stringify(basicFilter)}`);
-  log.debug(`all devices: ${JSON.stringify(deviceModel.chain().find().data())}`);
-  log.debug(`basic filter applied devices: ${JSON.stringify(deviceModel.chain().find(basicFilter).data())}`);
-  log.debug(`filter: ${JSON.stringify(filter)}`);
-  log.debug(`results: ${JSON.stringify(matchingDevices)}`);
-  */
+  debugLog(`basic filter: ${JSON.stringify(basicFilter)}`);
+  debugLog(`all devices: ${JSON.stringify(deviceModel.chain().find().data())}`);
+  debugLog(
+    `basic filter applied devices: ${JSON.stringify(deviceModel.chain().find(basicFilter).data())}`,
+  );
+  debugLog(`filter: ${JSON.stringify(filter)}`);
+  debugLog(`results: ${JSON.stringify(matchingDevices)}`);
 
   return matchingDevices;
 }
@@ -242,6 +243,11 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
         ...updateData,
       });
     });
+  const updatedDevicestatus = (await ADTDatabase.DeviceModel)
+    .chain()
+    .find({ udid: device.udid, host: device.host })
+    .data();
+  log.info(`Updated allocated device: "${JSON.stringify(updatedDevicestatus)}"`);
 }
 
 export async function updateCmdExecutedTime(sessionId: string) {
@@ -309,7 +315,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
   }
 
   if (devices !== undefined) {
-    // log.debug(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
+    debugLog(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
     await Promise.all(
       devices.map(async (device) => {
@@ -327,7 +333,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
             return data.udid === device.udid && data.host === device.host;
           },
           function (device: IDevice) {
-            // log.debug(`Unblocking device ${device.udid} from host ${device.host}`);
+            debugLog(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
             device.busy = false;
             device.lastCmdExecutedAt = undefined;

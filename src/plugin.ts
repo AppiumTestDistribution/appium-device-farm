@@ -70,6 +70,9 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import path from 'path';
 import { downloadFile } from './modules/downloadApk';
 import Adb from '@devicefarmer/adbkit';
+import debugLog from './debugLog';
+import http from 'http';
+import * as https from 'https';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -349,27 +352,32 @@ class DevicePlugin extends BasePlugin {
     );
     // if device is not on the same node, forward the session request. Unless hub is not defined then create session on the same node
     if (isRemoteOrCloudSession) {
-      log.debug(`📱 Forwarding session request to ${device.host}`);
+      log.debug(`📱${pendingSessionId} --- Forwarding session request to ${device.host}`);
+      caps['pendingSessionId'] = pendingSessionId;
       session = await this.forwardSessionRequest(device, caps);
+      debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
       session = await next();
+      debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
 
     // non-forwarded session can also be an error
-    log.debug('📱 Session response: ', JSON.stringify(session));
+    log.debug(`📱 ${pendingSessionId} Session response: `, JSON.stringify(session));
 
     log.debug(`📱 Removing pending session with capability_id: ${pendingSessionId}`);
     await removePendingSession(pendingSessionId);
 
     // Do we have valid session response?
     if (this.isCreateSessionResponseInternal(session)) {
-      log.debug('📱 Session response is CreateSessionResponseInternal');
+      log.debug(`${pendingSessionId} 📱 Session response is CreateSessionResponseInternal`);
 
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
-      log.info(`📱 Device UDID ${device.udid} blocked for session ${sessionId}`);
+      log.info(
+        `📱 ${pendingSessionId} ----- Device UDID ${device.udid} blocked for session ${sessionId}`,
+      );
       await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
@@ -390,19 +398,44 @@ class DevicePlugin extends BasePlugin {
         }),
       );
 
-      log.info(`📱 Updating Device ${device.udid} with session ID ${sessionId}`);
+      log.info(
+        `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
+      );
     } else {
-      // assume session is an error
+      // Case: Success in creating session on the node but for some reason the hub gets an error from node
+      // in this case the device in node is busy and hub unblocks the device.
+      // if (isRemoteOrCloudSession) {
+      //   try {
+      //     debugLog('Blocking device on the node');
+      //     const timeoutMs = 30000;
+      //     const result = await axios({
+      //       method: 'post',
+      //       url: `${device.host}/device-farm/api/block`,
+      //       timeout: timeoutMs,
+      //       data: { udid: device.udid, host: device.host },
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //       },
+      //     });
+      //
+      //     return result.status == 200;
+      //   } catch (error: any) {
+      //     log.info(`Device Farm is not running at ${device.host}. Error: ${error}`);
+      //     return false;
+      //   }
+      // }
       await unblockDevice(device.udid, device.host);
-      log.info(`📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`);
-
+      log.info(
+        `${pendingSessionId} 📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`,
+      );
       this.throwProperError(session, device.host);
     }
-
+    debugLog(`${pendingSessionId} 📱 Returning session: ${JSON.stringify(session)}`);
     return session;
   }
 
   throwProperError(session: any, host: string) {
+    debugLog(`Inside throwProperError: ${JSON.stringify(session)}`);
     if (session instanceof Error) {
       throw session;
     } else if (session.hasOwnProperty('error')) {
@@ -458,6 +491,9 @@ class DevicePlugin extends BasePlugin {
     const config: any = {
       method: 'post',
       url: remoteUrl,
+      timeout: this.pluginArgs.remoteConnectionTimeout,
+      httpAgent: new http.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
+      httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -474,7 +510,7 @@ class DevicePlugin extends BasePlugin {
 
     log.info(`With axios config: "${JSON.stringify(config)}"`);
     const createdSession: W3CNewSessionResponse | Error = await this.invokeSessionRequest(config);
-
+    debugLog(`📱 Session Creation response: ${JSON.stringify(createdSession)}`);
     if (createdSession instanceof Error) {
       return createdSession;
     } else {

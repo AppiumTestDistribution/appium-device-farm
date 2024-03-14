@@ -238,6 +238,20 @@ export async function loadExternalModules(): Promise<IExternalModuleLoader> {
   //return new FakeModuleLoader();
 }
 
+export async function registerErrorHandlers() {
+  process.on('unhandledRejection', (reason, p) => {
+    log.error('******  UnhandledRejection ******');
+    log.error('Reason:  ' + reason);
+    log.error((reason as any)?.stack || 'Stacktrace not available');
+    log.error('Promise: ', p);
+  });
+  process.on('uncaughtException', function (exception) {
+    log.error('****** UncaughtException ******');
+    log.error('Error: ' + exception);
+    log.error(exception.stack || 'Stacktrace not available');
+  });
+}
+
 export function getSessionIdFromUrl(url: string) {
   const SESSION_ID_PATTERN = /\/session\/([^/]+)/;
   const match = SESSION_ID_PATTERN.exec(url);
