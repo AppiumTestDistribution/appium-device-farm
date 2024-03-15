@@ -73,14 +73,18 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
 
     const liveStreaming = () => {
       return (
-        <button
-          className="device-info-card__body_block-device"
-          onClick={() =>
-            (window.location.href = `#/androidStream?port=${this.props.device.systemPort}?host=${this.props.device.host.split(':')[1].replace('//', '')}`)
-          }
-        >
-          Live Stream
-        </button>
+        <div style={{ paddingLeft: '2px' }}>
+          <button
+            className="device-info-card__body_stream-device"
+            onClick={() =>
+              (window.location.href = `#/androidStream?port=${
+                this.props.device.systemPort
+              }?host=${this.props.device.host.split(':')[1].replace('//', '')}`)
+            }
+          >
+            Live Stream
+          </button>
+        </div>
       );
     };
     const blockButton = () => {
@@ -187,8 +191,8 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           )}
         </div>
         <div className="device-info-card-container__footer_wrapper">
-          <div>{blockButton()}</div>
-          <div>{liveStreaming()}</div>
+          {blockButton()}
+          {liveStreaming()}
         </div>
       </div>
     );

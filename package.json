@@ -36,9 +36,9 @@
     "appium-home": "rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
     "clear-cache": "rm -rf $HOME/.cache/appium-device-farm",
-    "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install xcuitest",
+    "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install uiautomator2",
     "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
-    "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=ios --plugin-device-farm-max-sessions=8",
+    "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android --plugin-device-farm-max-sessions=8",
     "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration"

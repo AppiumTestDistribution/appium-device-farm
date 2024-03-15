@@ -142,13 +142,27 @@
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 3px;
-  width: 280px;
-  position: absolute;
+  width: 140px;
   bottom: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
+}
+
+.device-info-card__body_stream-device {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  width: 140px;
+  bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
+  color: #0bb785;
 }
 
 .device-info-card__body_block-device-icon {
