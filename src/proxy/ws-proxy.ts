@@ -1,12 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import ip from 'ip';
-
-const wsServer = new WebSocketServer({
-  host: ip.address(),
-  port: 8080,
-});
-
 export function adbStreamingWebSocket(ADB_STREAMING_PORT: number) {
+  const wsServer = new WebSocketServer({
+    host: ip.address(),
+    port: ADB_STREAMING_PORT,
+  });
   wsServer.on('connection', (feSocket) => {
     const adbStreamingOriginalSocket = new WebSocket(`ws://localhost:${ADB_STREAMING_PORT}`);
 
