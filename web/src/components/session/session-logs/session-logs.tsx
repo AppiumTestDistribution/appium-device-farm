@@ -12,7 +12,7 @@ enum ActiveTab {
 }
 
 function SessionLogs({ sessionId }: any) {
-  const [url, setBaseUrl ] = useState<string>();
+  const [url, setBaseUrl] = useState<string>();
   const [sessionLogs, setSessionLogs] = useState<ISessionLogs[]>([]);
   const [showImages, setShowImages] = useState(false);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);

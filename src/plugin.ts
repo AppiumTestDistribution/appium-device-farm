@@ -73,6 +73,8 @@ import Adb from '@devicefarmer/adbkit';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
+// import { runAndroidAdbServer } from './device-managers/AdbServer';
+import { execSync } from 'child_process';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -126,36 +128,7 @@ class DevicePlugin extends BasePlugin {
     cliArgs: ServerArgs,
   ): Promise<void> {
     // Specify the destination path where you want to save the downloaded file
-    const destinationPath = path.join(__dirname, 'stream.apk');
-    const fileUrl =
-      'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
-    await downloadFile(fileUrl, destinationPath);
-    const client = Adb.createClient();
-    const apk = destinationPath;
 
-    const installStreamingApk = async () => {
-      try {
-        const devices = await client.listDevices();
-
-        await Promise.all(
-          devices.map(async (device) => {
-            try {
-              const selectedDevice = client.getDevice(device.id);
-              await selectedDevice.install(apk);
-              console.log(`Installed ${apk} on device ${device.id}`);
-            } catch (installError: any) {
-              console.error(`Failed to install ${apk} on device ${device.id}: ${installError}`);
-            }
-          }),
-        );
-
-        console.log(`Installed ${apk} on all connected devices`);
-      } catch (err: any) {
-        console.error('Something went wrong:', err);
-      }
-    };
-    console.log(destinationPath);
-    await installStreamingApk();
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -248,6 +221,40 @@ class DevicePlugin extends BasePlugin {
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
     if (pluginArgs.cloud == undefined) {
+      // runAndroidAdbServer();
+      // setTimeout(() => {
+      //   console.log('Script completed with sleep.');
+      // }, 5000);
+      const destinationPath = path.join(__dirname, 'stream.apk');
+      const fileUrl =
+        'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
+      await downloadFile(fileUrl, destinationPath);
+      const client = Adb.createClient();
+      const apk = destinationPath;
+
+      const installStreamingApk = async () => {
+        try {
+          const devices = await client.listDevices();
+
+          await Promise.all(
+            devices.map(async (device) => {
+              try {
+                const selectedDevice = client.getDevice(device.id);
+                await selectedDevice.install(apk);
+                console.log(`Installed ${apk} on device ${device.id}`);
+              } catch (installError: any) {
+                console.error(`Failed to install ${apk} on device ${device.id}: ${installError}`);
+              }
+            }),
+          );
+
+          console.log(`Installed ${apk} on all connected devices`);
+        } catch (err: any) {
+          console.error('Something went wrong:', err);
+        }
+      };
+      console.log(destinationPath);
+      await installStreamingApk();
       // check for stale nodes
       await setupCronCheckStaleDevices(
         pluginArgs.checkStaleDevicesIntervalMs,
@@ -286,19 +293,6 @@ class DevicePlugin extends BasePlugin {
     }
     return deviceTypes;
   }
-
-  static async waitForRemoteDeviceFarmToBeRunning(host: string) {
-    await spinWith(
-      `Waiting for device farm server ${host} to be up and running\n`,
-      async () => {
-        return await isDeviceFarmRunning(host);
-      },
-      (msg: any) => {
-        throw new Error(`Failed: ${msg}`);
-      },
-    );
-  }
-
   async createSession(
     next: () => any,
     driver: any,

@@ -71,6 +71,18 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       hostName = host.split(':')[1].replace('//', '');
     }
 
+    const liveStreaming = () => {
+      return (
+        <button
+          className="device-info-card__body_block-device"
+          onClick={() =>
+            (window.location.href = `#/androidStream?port=${this.props.device.systemPort}?host=${this.props.device.host.split(':')[1].replace('//', '')}`)
+          }
+        >
+          Live Stream
+        </button>
+      );
+    };
     const blockButton = () => {
       if (busy) {
         return;
@@ -174,7 +186,10 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             </div>
           )}
         </div>
-        <div className="device-info-card-container__footer_wrapper">{blockButton()}</div>
+        <div className="device-info-card-container__footer_wrapper">
+          <div>{blockButton()}</div>
+          <div>{liveStreaming()}</div>
+        </div>
       </div>
     );
   }

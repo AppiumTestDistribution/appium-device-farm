@@ -26,12 +26,15 @@ import {
   removeAllPortForwarding,
   startStreamingActivity,
 } from '../modules/androidStreaming';
+import { sleep, waitForCondition } from 'asyncbox';
+import { adbStreamingWebSocket } from '../proxy/ws-proxy';
 
 async function streamAndroid(
   adbInstance: any,
   device: { udid: string; state: string },
   systemPort: number,
 ) {
+  adbStreamingWebSocket(systemPort);
   if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
     log.info('Streaming app is not installed. Installing now');
     await installStreamingApp(adbInstance, device.udid);
@@ -253,6 +256,93 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return { adbInstance: this.adb, adbTracker: this.tracker };
   }
 
+  async waitBootEmulator(adbInstance: any, udid: string) {
+    const REQUIRED_SERVICES = ['activity', 'package', 'mount'];
+    const SUBSYSTEM_STATE_OK = 'Subsystem state: true';
+    const NO_READINESS_SERVICE_ERROR = 'Cant find service: reboot_readiness';
+    const apiLevel: any = await this.getApiLevel(adbInstance, udid);
+    if (parseInt(apiLevel) >= 31) {
+      let reason;
+      try {
+        let hasReadinessService = true;
+        await waitForCondition(
+          async () => {
+            try {
+              reason = await adbInstance.adbExec([
+                '-s',
+                udid,
+                'shell',
+                'cmd',
+                'reboot_readiness',
+                'check-subsystems-state',
+                '--list-blocking',
+              ]);
+            } catch (err: any) {
+              // https://github.com/appium/appium/issues/18717
+              reason = err.stdout || err.stderr;
+              if (_.includes(reason, NO_READINESS_SERVICE_ERROR)) {
+                hasReadinessService = false;
+                return true;
+              } else if (!_.includes(reason, SUBSYSTEM_STATE_OK)) {
+                log.debug(`Waiting for emulator startup. Intermediate error: ${err.message}`);
+              }
+            }
+            console.log('reason', reason);
+            return _.includes(reason, SUBSYSTEM_STATE_OK);
+          },
+          {
+            waitMs: 30000,
+            intervalMs: 1000,
+          },
+        );
+        if (hasReadinessService) {
+          return;
+        }
+      } catch (e) {
+        throw new Error(
+          `Emulator is not ready within ${30000}ms${reason ? '. Reason: ' + reason : ''}`,
+        );
+      }
+      log.info(
+        'The device under test does not have reboot_readiness service. ' +
+          'Falling back to the alternative boot detection method.',
+      );
+    }
+
+    /** @type {RegExp[]} */
+    const requiredServicesRe = REQUIRED_SERVICES.map((name) => new RegExp(`\\b${name}:`));
+    let services: any;
+    try {
+      await waitForCondition(
+        async () => {
+          try {
+            services = await adbInstance.shell(['service', 'list']);
+            return requiredServicesRe.every((pattern) => pattern.test(services));
+          } catch (err: any) {
+            log.debug(`Waiting for emulator startup. Intermediate error: ${err.message}`);
+            return false;
+          }
+        },
+        {
+          waitMs: 30000,
+          intervalMs: 3000,
+        },
+      );
+    } catch (e) {
+      if (services) {
+        log.debug(`Recently listed services:\n${services}`);
+      }
+      const missingServices = _.zip(REQUIRED_SERVICES, requiredServicesRe)
+        .filter(([, pattern]) => !/** @type {RegExp} */ pattern?.test(services))
+        .map(([name]) => name);
+      throw new Error(
+        `Emulator is not ready within ${30000}ms ` +
+          `(${missingServices} service${
+            missingServices.length === 1 ? ' is' : 's are'
+          } not running)`,
+      );
+    }
+  }
   async waitBootComplete(originalADB: any, udid: string): Promise<boolean | undefined> {
     return await asyncWait(
       async () => {
@@ -315,8 +405,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       this.initiateAbortControl(newDevice.udid);
       let bootCompleted = false;
       try {
-        await this.waitBootComplete(originalADB, newDevice.udid);
+        await this.waitBootEmulator(originalADB, newDevice.udid);
         bootCompleted = true;
+        await sleep(6000);
       } catch (error) {
         log.info(`Device ${newDevice.udid} boot did not complete. Error: ${error}`);
       }
@@ -366,7 +457,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
           await this.onDeviceRemoved(device, pluginArgs);
         });
         tracker.on('change', async (device: DeviceWithPath) => {
-          if (device.type === 'offline' || device.type === 'unauthorized') {
+          console.log('Device changed:', device.id, device.type);
+          if (device.type === 'offline') {
             await this.onDeviceRemoved(device, pluginArgs);
           } else {
             await this.onDeviceAdded(originalADB, device);
@@ -474,6 +566,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   private async getDeviceVersion(adbInstance: any, udid: string): Promise<string | undefined> {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.release');
+  }
+
+  private async getApiLevel(adbInstance: any, udid: string): Promise<string | undefined> {
+    return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.sdk');
   }
 
   private async getDeviceProperty(

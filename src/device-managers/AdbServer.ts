@@ -1,6 +1,5 @@
-import { spawn } from 'child_process';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { execSync, spawn } from 'child_process';
+
 const adbCommand = spawn('adb', ['-a', 'nodaemon', 'server', 'start']);
 
 adbCommand.stdout.on('data', (data: Buffer) => {
@@ -15,7 +14,6 @@ adbCommand.on('close', (code: number) => {
   console.log(`child process exited with code ${code}`);
 });
 setTimeout(() => {
-  console.log('Script completed with sleep.');
+  execSync('adb kill-server');
+  console.log('ADB Server killed');
 }, 5000);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore

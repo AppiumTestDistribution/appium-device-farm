@@ -3,6 +3,7 @@ export interface IDevice {
   host: string;
   udid: string;
   sdk: string;
+  systemPort: number;
   deviceType: 'simulator' | 'emulator' | 'real';
   offline: boolean;
   userBlocked: boolean;
