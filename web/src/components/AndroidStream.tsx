@@ -5,14 +5,20 @@ const AndroidStream = () => {
 
   useEffect(() => {
     const getWebSocketPort = () => {
-      const queryParams = `${window.location.hash}`;
-      const port = queryParams.split('?')[1].split('=')[1] || '8004'; // Default port is '8002'
-      const host = queryParams.split('?')[2].split('=')[1] || '127.0.0.1';
-      return { port, host };
+      if (window.location.hash.includes('?')) {
+        const params = new URLSearchParams(window.location.hash.split('?')[1]);
+        return {
+          port: params.get('port'),
+          udid: params.get('udid'),
+          host: params.get('host'),
+        };
+      } else {
+        return { port: 8004, host: '127.0.0.1', udid: '' };
+      }
     };
 
-    const { host, port } = getWebSocketPort();
-    const wsUrl = `ws://${host}:${port}`;
+    const { host, udid, port } = getWebSocketPort() as any;
+    const wsUrl = `ws://${host}:${port}/android-stream/${udid}`;
     const ws = new WebSocket(wsUrl);
 
     const handleWebSocketMessage = (event: { data: any }) => {

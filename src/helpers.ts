@@ -241,7 +241,8 @@ export async function loadExternalModules(): Promise<IExternalModuleLoader> {
 export async function registerErrorHandlers() {
   process.on('unhandledRejection', (reason, p) => {
     log.error('******  UnhandledRejection ******');
-    log.error('Reason:  ' + reason);
+    log.error('Reason:  ');
+    console.log(reason);
     log.error((reason as any)?.stack || 'Stacktrace not available');
     log.error('Promise: ', p);
   });

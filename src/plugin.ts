@@ -75,6 +75,7 @@ import http from 'http';
 import * as https from 'https';
 // import { runAndroidAdbServer } from './device-managers/AdbServer';
 import { execSync } from 'child_process';
+import { getStreamingServer } from './streaming-server';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -128,7 +129,9 @@ class DevicePlugin extends BasePlugin {
     cliArgs: ServerArgs,
   ): Promise<void> {
     // Specify the destination path where you want to save the downloaded file
-
+    console.log(httpServer);
+    // log.debug(expressApp)
+    httpServer.addWebSocketHandler('/android-stream/:udid', getStreamingServer());
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();

@@ -27,14 +27,12 @@ import {
   startStreamingActivity,
 } from '../modules/androidStreaming';
 import { sleep, waitForCondition } from 'asyncbox';
-import { adbStreamingWebSocket } from '../proxy/ws-proxy';
 
 async function streamAndroid(
   adbInstance: any,
   device: { udid: string; state: string },
   systemPort: number,
 ) {
-  adbStreamingWebSocket(systemPort);
   if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
     log.info('Streaming app is not installed. Installing now');
     await installStreamingApp(adbInstance, device.udid);

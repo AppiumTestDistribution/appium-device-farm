@@ -64,6 +64,8 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     } = this.props.device;
 
     const deviceState = this.getDeviceState();
+    const appiumHost = new URL(this.props.device.host).hostname;
+    const appiumPort = new URL(this.props.device.host).port;
     let hostName = '';
     try {
       hostName = new URL(host).hostname;
@@ -77,9 +79,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           <button
             className="device-info-card__body_stream-device"
             onClick={() =>
-              (window.location.href = `#/androidStream?port=${
-                this.props.device.systemPort
-              }?host=${this.props.device.host.split(':')[1].replace('//', '')}`)
+              (window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${this.props.device.udid}`)
             }
           >
             Live Stream
