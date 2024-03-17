@@ -54,6 +54,7 @@ export default class Devices {
         host: this.cloud.url,
         busy: false,
         udid: uuidv4(),
+        offline: false,
         userBlocked: false,
         deviceType: 'real',
         capability: d,

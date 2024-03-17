@@ -11,7 +11,7 @@ import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
 import NodeDevices from './NodeDevices';
-import { addNewDevice, removeDevice } from '../data-service/device-service';
+import { addNewDevice, getAllDevices, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
@@ -236,6 +236,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       sessionStartTime: 0,
       chromeDriverPath,
       userBlocked: false,
+      offline: false,
     };
   }
 
@@ -609,7 +610,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     return sdkRoot;
   }
-
   private getDeviceName = async (adbInstance: any, udid: string): Promise<string | undefined> => {
     let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name');
 
