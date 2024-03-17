@@ -41,14 +41,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  nodeUrl,
-  spinWith,
-  stripAppiumPrefixes,
-  isDeviceFarmRunning,
-  hasCloudArgument,
-  loadExternalModules,
-} from './helpers';
+import { nodeUrl, stripAppiumPrefixes, hasCloudArgument, loadExternalModules } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -73,8 +66,8 @@ import Adb from '@devicefarmer/adbkit';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
+import fs from 'fs';
 // import { runAndroidAdbServer } from './device-managers/AdbServer';
-import { execSync } from 'child_process';
 import { getStreamingServer } from './streaming-server';
 
 const commandsQueueGuard = new AsyncLock();
@@ -129,9 +122,9 @@ class DevicePlugin extends BasePlugin {
     cliArgs: ServerArgs,
   ): Promise<void> {
     // Specify the destination path where you want to save the downloaded file
-    console.log(httpServer);
+    const adb = await ADB.createADB({});
     // log.debug(expressApp)
-    httpServer.addWebSocketHandler('/android-stream/:udid', getStreamingServer());
+    httpServer.addWebSocketHandler('/android-stream/:udid', getStreamingServer(adb));
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -205,10 +198,6 @@ class DevicePlugin extends BasePlugin {
 
     await addCLIArgs(cliArgs);
 
-    log.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
-    );
-
     const hubArgument = pluginArgs.hub;
 
     if (hubArgument !== undefined) {
@@ -229,9 +218,13 @@ class DevicePlugin extends BasePlugin {
       //   console.log('Script completed with sleep.');
       // }, 5000);
       const destinationPath = path.join(__dirname, 'stream.apk');
-      const fileUrl =
-        'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
-      await downloadFile(fileUrl, destinationPath);
+      if (!fs.existsSync(destinationPath)) {
+        log.info('Streaming apk not present, so downloading..');
+        const fileUrl =
+          'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
+        await downloadFile(fileUrl, destinationPath);
+        log.info(`Successfully downloaded streaming sdk and saved to ${destinationPath}`);
+      }
       const client = Adb.createClient();
       const apk = destinationPath;
 
@@ -287,6 +280,9 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
+    log.info(
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
+    );
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
