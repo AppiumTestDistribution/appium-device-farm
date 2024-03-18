@@ -56,6 +56,7 @@ function Capabilities({ session }: CapabilitiesProps) {
   return (
     <div className="capabilities">
       {getVideoCompoment()}
+      console.log(session);
       <div className="download">
         <a
           href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${

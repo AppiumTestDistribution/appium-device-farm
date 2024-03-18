@@ -84,7 +84,7 @@ const getColor = (value: string) => {
   } else if (value === 'failed') {
     return 'red';
   } else {
-    return 'yellow';
+    return 'orange';
   }
 };
 export default SessionCard;
