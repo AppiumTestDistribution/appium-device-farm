@@ -2,6 +2,18 @@ import { useEffect, useState } from 'react';
 
 const AndroidStream = () => {
   const [imageSrc, setImageSrc] = useState('');
+  let ws: any;
+  const handleWebSocketMessage = (event: { data: any }) => {
+    const blob = event.data;
+    const url = URL.createObjectURL(blob);
+    setImageSrc(url);
+  };
+
+  const createWebSocketConnection = (wsUrl: string) => {
+    ws = new WebSocket(wsUrl);
+    ws.addEventListener('message', handleWebSocketMessage);
+    ws.addEventListener('close', () => createWebSocketConnection(wsUrl));
+  };
 
   useEffect(() => {
     const getWebSocketPort = () => {
@@ -19,15 +31,8 @@ const AndroidStream = () => {
 
     const { host, udid, port } = getWebSocketPort() as any;
     const wsUrl = `ws://${host}:${port}/android-stream/${udid}`;
-    const ws = new WebSocket(wsUrl);
 
-    const handleWebSocketMessage = (event: { data: any }) => {
-      const blob = event.data;
-      const url = URL.createObjectURL(blob);
-      setImageSrc(url);
-    };
-
-    ws.addEventListener('message', handleWebSocketMessage);
+    createWebSocketConnection(wsUrl);
 
     return () => {
       // Clean up the WebSocket connection when the component is unmounted

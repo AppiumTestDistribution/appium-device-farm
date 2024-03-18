@@ -83,6 +83,8 @@ class DevicePlugin extends BasePlugin {
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
   public static NODE_ID: string;
   public static IS_HUB = false;
+  private static httpServer: any;
+  private static adbInstance: any;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -116,6 +118,14 @@ class DevicePlugin extends BasePlugin {
     );
   }
 
+  private static async registerWebSocketHandlers() {
+    log.info('Registering websocket handler for Streaming');
+    await DevicePlugin.httpServer.addWebSocketHandler(
+      '/android-stream/:udid',
+      getStreamingServer(DevicePlugin.adbInstance),
+    );
+  }
+
   public static async updateServer(
     expressApp: any,
     httpServer: any,
@@ -123,8 +133,9 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     // Specify the destination path where you want to save the downloaded file
     const adb = await ADB.createADB({});
-    // log.debug(expressApp)
-    httpServer.addWebSocketHandler('/android-stream/:udid', getStreamingServer(adb));
+    DevicePlugin.httpServer = httpServer;
+    DevicePlugin.adbInstance = adb;
+    await DevicePlugin.registerWebSocketHandlers();
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -299,6 +310,11 @@ class DevicePlugin extends BasePlugin {
     jwpReqCaps: any,
     caps: ISessionCapability,
   ) {
+    console.log('********** Handlers *****************');
+    const activeHandlers1 = await DevicePlugin.httpServer.getWebSocketHandlers();
+    for (const pathname of _.keys(activeHandlers1)) {
+      console.log(pathname);
+    }
     log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
     log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
     const pendingSessionId = uuidv4();
@@ -572,7 +588,9 @@ class DevicePlugin extends BasePlugin {
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
-    return await next();
+    const res = await next();
+    await DevicePlugin.registerWebSocketHandlers();
+    return res;
   }
 }
 
