@@ -310,11 +310,6 @@ class DevicePlugin extends BasePlugin {
     jwpReqCaps: any,
     caps: ISessionCapability,
   ) {
-    console.log('********** Handlers *****************');
-    const activeHandlers1 = await DevicePlugin.httpServer.getWebSocketHandlers();
-    for (const pathname of _.keys(activeHandlers1)) {
-      console.log(pathname);
-    }
     log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
     log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
     const pendingSessionId = uuidv4();
