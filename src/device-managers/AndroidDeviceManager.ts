@@ -23,7 +23,6 @@ import {
   checkIfStreamingAppIsInstalled,
   forwardPort,
   installStreamingApp,
-  removeAllPortForwarding,
   startStreamingActivity,
 } from '../modules/androidStreaming';
 import { sleep, waitForCondition } from 'asyncbox';
