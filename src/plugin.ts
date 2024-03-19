@@ -69,6 +69,7 @@ import * as https from 'https';
 import fs from 'fs';
 // import { runAndroidAdbServer } from './device-managers/AdbServer';
 import { getStreamingServer } from './streaming-server';
+import { sleep } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -247,6 +248,7 @@ class DevicePlugin extends BasePlugin {
             devices.map(async (device) => {
               try {
                 const selectedDevice = client.getDevice(device.id);
+                await selectedDevice.uninstall('com.device.farm');
                 await selectedDevice.install(apk);
                 console.log(`Installed ${apk} on device ${device.id}`);
               } catch (installError: any) {
