@@ -232,7 +232,7 @@ class DevicePlugin extends BasePlugin {
       if (!fs.existsSync(destinationPath)) {
         log.info('Streaming apk not present, so downloading..');
         const fileUrl =
-          'https://github.com/shamanec/GADS-Android-stream/releases/download/1.1.0/gads-stream.apk';
+          'https://github.com/AppiumTestDistribution/appium-device-farm/raw/dashboard-ui/device-farm.apk';
         await downloadFile(fileUrl, destinationPath);
         log.info(`Successfully downloaded streaming sdk and saved to ${destinationPath}`);
       }
