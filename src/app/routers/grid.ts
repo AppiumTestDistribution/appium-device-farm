@@ -14,6 +14,7 @@ import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
+import { pressHome } from '../../modules/androidStreaming';
 
 const SERVER_UP_TIME = new Date().toISOString();
 

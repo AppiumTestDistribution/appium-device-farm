@@ -68,7 +68,7 @@ import http from 'http';
 import * as https from 'https';
 import fs from 'fs';
 // import { runAndroidAdbServer } from './device-managers/AdbServer';
-import { getStreamingServer } from './streaming-server';
+import { getStreamingServer } from './modules/streaming-server';
 import { sleep, waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
