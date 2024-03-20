@@ -69,7 +69,7 @@ import * as https from 'https';
 import fs from 'fs';
 // import { runAndroidAdbServer } from './device-managers/AdbServer';
 import { getStreamingServer } from './streaming-server';
-import { sleep } from 'asyncbox';
+import { sleep, waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -117,6 +117,13 @@ class DevicePlugin extends BasePlugin {
         deviceFilter,
       )} onUnexpectedShutdown from server`,
     );
+    await waitForCondition(async () => {
+      console.log('Waiting for websocket handlers to be removed..');
+      return !(await DevicePlugin.httpServer.getWebSocketHandlers()).hasOwnProperty(
+        '/android-stream/:udid',
+      );
+    });
+    await DevicePlugin.registerWebSocketHandlers();
   }
 
   private static async registerWebSocketHandlers() {
@@ -249,6 +256,7 @@ class DevicePlugin extends BasePlugin {
               try {
                 const selectedDevice = client.getDevice(device.id);
                 await selectedDevice.uninstall('com.device.farm');
+                await sleep(800);
                 await selectedDevice.install(apk);
                 console.log(`Installed ${apk} on device ${device.id}`);
               } catch (installError: any) {

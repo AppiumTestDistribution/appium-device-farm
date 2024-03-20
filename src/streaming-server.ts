@@ -84,7 +84,7 @@ export function getStreamingServer(adbInstance: ADB) {
         await proxySocket.start();
         log.info(`Successfully created proxy streaming session for device ${udid}`);
         SocketMap.set(streamingKey, proxySocket);
-        proxySocket.addListener(ws);
+        await proxySocket.addListener(ws);
       } catch (err) {
         console.log('Unable to connect to remote streaming socket');
         console.log(err);
