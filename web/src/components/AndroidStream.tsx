@@ -12,7 +12,10 @@ const AndroidStream = () => {
   const createWebSocketConnection = (wsUrl: string) => {
     ws = new WebSocket(wsUrl);
     ws.addEventListener('message', handleWebSocketMessage);
-    ws.addEventListener('close', () => createWebSocketConnection(wsUrl));
+    ws.addEventListener('close', () => {
+      console.log('WebSocket connection closed. Reconnecting...');
+      createWebSocketConnection(wsUrl)
+    });
   };
 
   useEffect(() => {
