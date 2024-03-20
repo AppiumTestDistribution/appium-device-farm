@@ -11,7 +11,7 @@ import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
 import NodeDevices from './NodeDevices';
-import { addNewDevice, getAllDevices, removeDevice } from '../data-service/device-service';
+import { addNewDevice, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
@@ -27,21 +27,6 @@ import {
 } from '../modules/androidStreaming';
 import { sleep, waitForCondition } from 'asyncbox';
 
-async function streamAndroid(
-  adbInstance: any,
-  device: { udid: string; state: string },
-  systemPort: number,
-) {
-  if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
-    log.info('Streaming app is not installed. Installing now');
-    await installStreamingApp(adbInstance, device.udid);
-  }
-  await allowRecordingPermissions(adbInstance, device.udid);
-  await startStreamingActivity(adbInstance, device.udid);
-  await bringStreamingActivityToBack(adbInstance, device.udid);
-  await forwardPort(adbInstance, device.udid, systemPort);
-}
-
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
   private adbAvailable = true;
@@ -53,6 +38,21 @@ export default class AndroidDeviceManager implements IDeviceManager {
     private hostPort: number,
     private nodeId: string,
   ) {}
+
+  async streamAndroid(
+    adbInstance: any,
+    device: { udid: string; state: string },
+    systemPort: number,
+  ) {
+    if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
+      log.info('Streaming app is not installed. Installing now');
+      await installStreamingApp(adbInstance, device.udid);
+    }
+    await allowRecordingPermissions(adbInstance, device.udid);
+    await startStreamingActivity(adbInstance, device.udid);
+    await bringStreamingActivityToBack(adbInstance, device.udid);
+    await forwardPort(adbInstance, device.udid, systemPort);
+  }
 
   private initiateAbortControl(deviceUdid: string) {
     const control = new AbortController();
@@ -182,7 +182,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
     let deviceInfo;
-    await streamAndroid(adbInstance, device, systemPort);
+    await this.streamAndroid(adbInstance, device, systemPort);
 
     try {
       deviceInfo = await Promise.all([

@@ -32,7 +32,7 @@ import {
   setupCronCheckStaleDevices,
   updateDeviceList,
   setupCronCleanPendingSessions,
-  removeStaleDevices,
+  removeStaleDevices, isAndroid
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -231,11 +231,8 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
-    if (pluginArgs.cloud == undefined) {
-      // runAndroidAdbServer();
-      // setTimeout(() => {
-      //   console.log('Script completed with sleep.');
-      // }, 5000);
+
+    if (isAndroid(pluginArgs)) {
       const destinationPath = path.join(__dirname, 'stream.apk');
       if (!fs.existsSync(destinationPath)) {
         log.info('Streaming apk not present, so downloading..');
@@ -272,6 +269,12 @@ class DevicePlugin extends BasePlugin {
       };
       console.log(destinationPath);
       await installStreamingApk();
+    }
+    if (pluginArgs.cloud == undefined) {
+      // runAndroidAdbServer();
+      // setTimeout(() => {
+      //   console.log('Script completed with sleep.');
+      // }, 5000);
       // check for stale nodes
       await setupCronCheckStaleDevices(
         pluginArgs.checkStaleDevicesIntervalMs,

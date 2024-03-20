@@ -68,6 +68,7 @@ describe('Android Device Manager', function () {
     const getConnectedDevicesStub = sandbox
       .stub(androidDevices, 'getConnectedDevices')
       .returns(Promise.resolve(deviceList));
+    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     getDeviceVersion.onFirstCall().returns(Promise.resolve('9'));
     getDeviceVersion.onSecondCall().returns(Promise.resolve('13'));
@@ -108,6 +109,7 @@ describe('Android Device Manager', function () {
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
         userBlocked: false,
+        offline: false,
       },
       {
         busy: false,
@@ -126,6 +128,7 @@ describe('Android Device Manager', function () {
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
         userBlocked: false,
+        offline: false,
       },
     ]);
   });
@@ -143,6 +146,7 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-5555', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -172,6 +176,7 @@ describe('Android Device Manager', function () {
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
         userBlocked: false,
+        offline: false,
       },
     ]);
   });
@@ -189,6 +194,7 @@ describe('Android Device Manager', function () {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -218,6 +224,7 @@ describe('Android Device Manager', function () {
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
         userBlocked: false,
+        offline: false,
       },
     ]);
   });
@@ -237,6 +244,7 @@ describe('Android Device Manager', function () {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -266,6 +274,7 @@ describe('Android Device Manager', function () {
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
         userBlocked: false,
+        offline: false,
       },
     ]);
   });
@@ -293,6 +302,7 @@ describe('Android Device Manager', function () {
     };
 
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     sandbox.stub(adb, <any>'adbExec').callsFake(mockAdbExec);
 
