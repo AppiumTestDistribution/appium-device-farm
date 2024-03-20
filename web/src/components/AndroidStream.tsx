@@ -17,7 +17,7 @@ function AndroidStream() {
     ws.addEventListener('message', handleWebSocketMessage);
     ws.addEventListener('close', () => {
       console.log('WebSocket connection closed. Reconnecting...');
-      createWebSocketConnection(wsUrl)
+      createWebSocketConnection(wsUrl);
     });
     return ws;
   };

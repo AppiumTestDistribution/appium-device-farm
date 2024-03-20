@@ -32,7 +32,8 @@ import {
   setupCronCheckStaleDevices,
   updateDeviceList,
   setupCronCleanPendingSessions,
-  removeStaleDevices, isAndroid
+  removeStaleDevices,
+  isAndroid,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
