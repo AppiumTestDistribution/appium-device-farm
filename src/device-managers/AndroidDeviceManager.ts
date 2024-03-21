@@ -17,14 +17,6 @@ import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
-import {
-  allowRecordingPermissions,
-  bringStreamingActivityToBack,
-  checkIfStreamingAppIsInstalled,
-  forwardPort,
-  installStreamingApp,
-  startStreamingActivity,
-} from '../modules/androidStreaming';
 import { sleep, waitForCondition } from 'asyncbox';
 
 export default class AndroidDeviceManager implements IDeviceManager {
@@ -175,13 +167,15 @@ export default class AndroidDeviceManager implements IDeviceManager {
         this.isRealDevice(adbInstance, device.udid),
         this.getDeviceName(adbInstance, device.udid),
         this.getChromeVersion(adbInstance, device.udid, pluginArgs),
+        this.getDeviceSize(adbInstance, device.udid),
       ]);
     } catch (error) {
       log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
       return undefined;
     }
+    console.log('DeviceInfi', deviceInfo);
 
-    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
+    const [sdk, realDevice, name, chromeDriverPath, deviceSize] = deviceInfo;
 
     // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
     if (!pluginArgs.skipChromeDownload && chromeDriverPath === undefined) {
@@ -221,6 +215,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
       chromeDriverPath,
       userBlocked: false,
       offline: false,
+      width: deviceSize.screenWidth,
+      height: deviceSize.screenHeight,
     };
   }
 
@@ -553,6 +549,36 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
   private async getApiLevel(adbInstance: any, udid: string): Promise<string | undefined> {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.sdk');
+  }
+
+  private async getDeviceSize(adbInstance: any, udid: string) {
+    const device = {
+      screenWidth: 'unknown',
+      screenHeight: 'unknown',
+    };
+    try {
+      const screenSize = await (await adbInstance).adbExec(['-s', udid, 'shell', 'wm', 'size']);
+      const output = screenSize.trim();
+      const lines = output.split('\n');
+      if (lines.length === 1) {
+        const splitOutput = lines[0].split(': ');
+        const screenDimensions = splitOutput[1].split('x');
+
+        device.screenWidth = screenDimensions[0].trim();
+        device.screenHeight = screenDimensions[1].trim();
+      }
+      //Hack for some devices
+      if (lines.length === 3) {
+        const splitOutput = lines[1].split(': ');
+        const screenDimensions = splitOutput[1].split('x');
+
+        device.screenWidth = screenDimensions[0].trim();
+        device.screenHeight = screenDimensions[1].trim();
+      }
+    } catch (error) {
+      log.error(`Error while getting device property size for ${udid}. Error: ${error}`);
+    }
+    return device;
   }
 
   private async getDeviceProperty(
