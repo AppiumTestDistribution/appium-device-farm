@@ -22,7 +22,7 @@ async function main() {
   console.log('Deploying the database migrations');
   executeCmd('prisma migrate deploy');
 
-  console.log('Generating prims client');
+  console.log('Generating prisma client');
   executeCmd('prisma generate');
 }
 

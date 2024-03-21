@@ -88,7 +88,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
         const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
         console.log('Response:', response);
         if (response.status === 200) {
-          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}`;
+          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
         } else {
           alert('Please install the app to stream the device');
         }
@@ -227,8 +227,11 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
         <div className="device-info-card-container__footer_wrapper">
           {blockButton()}
           <div style={{ paddingLeft: '2px' }}>
-            <button className="device-info-card__body_stream-device" onClick={handleLiveStreamClick}
-                    disabled={this.state.isLoading}>
+            <button
+              className="device-info-card__body_stream-device"
+              onClick={handleLiveStreamClick}
+              disabled={this.state.isLoading}
+            >
               {this.state.isLoading ? 'Loading...' : 'Live Stream'}
             </button>
           </div>
