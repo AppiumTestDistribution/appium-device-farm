@@ -1,4 +1,4 @@
-import { Point } from '../../../lib/coordinates';
+import { Point } from '../../../libs/coordinates';
 
 export class ClickControlMessage {
   constructor(

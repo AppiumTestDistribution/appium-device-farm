@@ -1,5 +1,5 @@
 // import { ControlMessage, ControlMessageInterface } from 'appium-grid-common';
-import { Point } from '../../../lib/coordinates';
+import { Point } from '../../../libs/coordinates';
 
 export class SwipeControlMessage {
   constructor(

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@mui/icons-material/Home';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
-import { SimpleInterationHandler } from '../../lib/simple-interation-handler';
+import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
