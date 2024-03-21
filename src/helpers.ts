@@ -27,6 +27,7 @@ import {
   startStreamingActivity,
 } from './modules/androidStreaming';
 import { ADB } from 'appium-adb';
+import { getDevice } from './data-service/device-service';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -280,6 +281,7 @@ export async function installAndroidStreamingApp(request: Request, response: Res
   const udid = request.body.udid;
   const systemPort = request.body.systemPort;
   const destinationPath = path.join(__dirname, 'stream.apk');
+  const device: any = await getDevice({ udid: [udid] });
   if (!fs.existsSync(destinationPath)) {
     log.info('Streaming apk not present, so downloading..');
     const fileUrl =
@@ -294,7 +296,9 @@ export async function installAndroidStreamingApp(request: Request, response: Res
     await installStreamingApp(adbClient, udid);
     console.log(`Installed ${apk} on device ${udid}`);
     await streamAndroid(adbClient, { udid, state: 'device' }, systemPort);
-    return response.status(200).send({ status: 200, message: 'Installed streaming app on device' });
+    return response
+      .status(200)
+      .send({ status: 200, message: 'Installed streaming app on device', device: device });
   } catch (installError: any) {
     console.error(`Failed to install ${apk} on device ${udid}: ${installError}`);
     return response.status(400).send({

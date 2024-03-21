@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import DeviceFarm from '../pages/DeviceFarm';
 import Builds from '../pages/Builds';
 import Session from '../pages/Session';
-import AndroidStream from '../components/AndroidStream';
+import AndroidStream from '../components/streaming/AndroidStream';
 function RootRouter() {
   return (
     <Routes>

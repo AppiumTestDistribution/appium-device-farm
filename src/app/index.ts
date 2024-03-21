@@ -23,6 +23,13 @@ router.use(cors());
 apiRouter.use(cors());
 staticFilesRouter.use(cors());
 
+function getPublicDirectory() {
+  return fs.existsSync(path.join(__dirname, 'public')) &&
+    fs.statSync(path.join(__dirname, 'public')).isDirectory()
+    ? path.join(__dirname, 'public')
+    : path.join(__dirname, '..', '..', 'public');
+}
+
 /**
  * Middleware to check if the appium-dashboard plugin is installed
  * If the plugin is runnig, then we should enable the react app to
@@ -54,21 +61,12 @@ apiRouter.get('/cliArgs', async (req, res) => {
   res.json(await getCLIArgs());
 });
 
-if (
-  fs.existsSync(path.join(__dirname, 'public')) &&
-  fs.statSync(path.join(__dirname, 'public')).isDirectory()
-) {
-  staticFilesRouter.use(express.static(path.join(__dirname, 'public')));
-} else {
-  staticFilesRouter.use(express.static(path.join(__dirname, '..', '..', 'public')));
-}
+const PUBLIC_DICRECTORY = getPublicDirectory();
+staticFilesRouter.use(express.static(PUBLIC_DICRECTORY));
 
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
-router.use(
-  '/ui-assets',
-  express.static(path.join(__dirname, 'public', 'device-farm', 'ui-assets')),
-);
+router.use('/ui-assets', express.static(path.join(PUBLIC_DICRECTORY, 'device-farm', 'ui-assets')));
 router.use(staticFilesRouter);
 
 function createRouter(pluginArgs: IPluginArgs) {
