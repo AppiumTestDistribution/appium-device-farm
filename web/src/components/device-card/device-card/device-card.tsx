@@ -13,8 +13,13 @@ interface IDeviceCardProps {
   device: IDevice;
   reloadDevices: () => void;
 }
-
 export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
+  constructor(props: IDeviceCardProps) {
+    super(props);
+    this.state = {
+      isLoading: false,
+    };
+  }
   getStatusClassName() {
     if (this.props.device.offline) {
       return 'disabled';
@@ -73,20 +78,49 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       hostName = host.split(':')[1].replace('//', '');
     }
 
-    const liveStreaming = () => {
-      return (
-        <div style={{ paddingLeft: '2px' }}>
-          <button
-            className="device-info-card__body_stream-device"
-            onClick={() =>
-              (window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${this.props.device.udid}`)
-            }
-          >
-            Live Stream
-          </button>
-        </div>
-      );
+    const handleLiveStreamClick = async () => {
+      this.setState({ isLoading: true }); // Set loading state to true when the button is clicked
+
+      const { udid, systemPort } = this.props.device;
+
+      try {
+        console.log('Live Stream');
+        const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
+        console.log('Response:', response);
+        if (response.status === 200) {
+          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}`;
+        } else {
+          alert('Please install the app to stream the device');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while trying to stream the device');
+      } finally {
+        this.setState({ isLoading: false }); // Set loading state back to false when the request is complete
+      }
     };
+
+    // const liveStreaming = () => {
+    //   return (
+    //     <div style={{ paddingLeft: '2px' }}>
+    //       <button
+    //         className="device-info-card__body_stream-device"
+    //         onClick={async () => {
+    //           console.log('Live Stream');
+    //           const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
+    //           if(response.status === 200) {
+    //             (window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${this.props.device.udid}`)
+    //           } else {
+    //            alert('Please install the app to stream the device');
+    //         }
+    //         }
+    //         }
+    //       >
+    //         Live Stream
+    //       </button>
+    //     </div>
+    //   );
+    // };
     const blockButton = () => {
       if (busy) {
         return;
@@ -192,7 +226,12 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
         </div>
         <div className="device-info-card-container__footer_wrapper">
           {blockButton()}
-          {liveStreaming()}
+          <div style={{ paddingLeft: '2px' }}>
+            <button className="device-info-card__body_stream-device" onClick={handleLiveStreamClick}
+                    disabled={this.state.isLoading}>
+              {this.state.isLoading ? 'Loading...' : 'Live Stream'}
+            </button>
+          </div>
         </div>
       </div>
     );

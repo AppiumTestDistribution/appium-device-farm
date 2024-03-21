@@ -13,6 +13,20 @@ import asyncWait from 'async-wait-until';
 import axios from 'axios';
 import { FakeModuleLoader } from './fake-module-loader';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
+import fs from 'fs';
+import { downloadFile } from './modules/downloadApk';
+import Adb from '@devicefarmer/adbkit';
+import { sleep } from 'asyncbox';
+import { Request, Response } from 'express';
+import {
+  allowRecordingPermissions,
+  bringStreamingActivityToBack,
+  checkIfStreamingAppIsInstalled,
+  forwardPort,
+  installStreamingApp,
+  startStreamingActivity,
+} from './modules/androidStreaming';
+import { ADB } from 'appium-adb';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -260,4 +274,47 @@ export function getSessionIdFromUrl(url: string) {
     return match[1];
   }
   return null;
+}
+
+export async function installAndroidStreamingApp(request: Request, response: Response) {
+  const udid = request.body.udid;
+  const systemPort = request.body.systemPort;
+  const destinationPath = path.join(__dirname, 'stream.apk');
+  if (!fs.existsSync(destinationPath)) {
+    log.info('Streaming apk not present, so downloading..');
+    const fileUrl =
+      'https://github.com/AppiumTestDistribution/appium-device-farm/raw/dashboard-ui/device-farm.apk';
+    await downloadFile(fileUrl, destinationPath);
+    log.info(`Successfully downloaded streaming sdk and saved to ${destinationPath}`);
+  }
+  const adbClient = await ADB.createADB({ udid });
+  const apk = destinationPath;
+
+  try {
+    await installStreamingApp(adbClient, udid);
+    console.log(`Installed ${apk} on device ${udid}`);
+    await streamAndroid(adbClient, { udid, state: 'device' }, systemPort);
+    return response.status(200).send({ status: 200, message: 'Installed streaming app on device' });
+  } catch (installError: any) {
+    console.error(`Failed to install ${apk} on device ${udid}: ${installError}`);
+    return response.status(400).send({
+      status: 400,
+      message: `Failed to install ${apk} on device ${udid}: ${installError}`,
+    });
+  }
+}
+
+async function streamAndroid(
+  adbInstance: any,
+  device: { udid: string; state: string },
+  systemPort: number,
+) {
+  if (!(await checkIfStreamingAppIsInstalled(adbInstance, device.udid))) {
+    log.info('Streaming app is not installed. Installing now');
+    await installStreamingApp(adbInstance, device.udid);
+  }
+  await allowRecordingPermissions(adbInstance, device.udid);
+  await startStreamingActivity(adbInstance, device.udid);
+  await bringStreamingActivityToBack(adbInstance, device.udid);
+  await forwardPort(adbInstance, device.udid, systemPort);
 }

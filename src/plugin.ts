@@ -32,7 +32,8 @@ import {
   setupCronCheckStaleDevices,
   updateDeviceList,
   setupCronCleanPendingSessions,
-  removeStaleDevices, isAndroid
+  removeStaleDevices,
+  isAndroid,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -60,16 +61,11 @@ import { ADTDatabase } from './data-service/db';
 import EventBus from './notifier/event-bus';
 import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
-import path from 'path';
-import { downloadFile } from './modules/downloadApk';
-import Adb from '@devicefarmer/adbkit';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import fs from 'fs';
-// import { runAndroidAdbServer } from './device-managers/AdbServer';
 import { getStreamingServer } from './modules/streaming-server';
-import { sleep, waitForCondition } from 'asyncbox';
+import { waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -232,44 +228,6 @@ class DevicePlugin extends BasePlugin {
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
-    if (isAndroid(pluginArgs)) {
-      const destinationPath = path.join(__dirname, 'stream.apk');
-      if (!fs.existsSync(destinationPath)) {
-        log.info('Streaming apk not present, so downloading..');
-        const fileUrl =
-          'https://github.com/AppiumTestDistribution/appium-device-farm/raw/dashboard-ui/device-farm.apk';
-        await downloadFile(fileUrl, destinationPath);
-        log.info(`Successfully downloaded streaming sdk and saved to ${destinationPath}`);
-      }
-      const client = Adb.createClient();
-      const apk = destinationPath;
-
-      const installStreamingApk = async () => {
-        try {
-          const devices = await client.listDevices();
-
-          await Promise.all(
-            devices.map(async (device) => {
-              try {
-                const selectedDevice = client.getDevice(device.id);
-                await selectedDevice.uninstall('com.device.farm');
-                await sleep(800);
-                await selectedDevice.install(apk);
-                console.log(`Installed ${apk} on device ${device.id}`);
-              } catch (installError: any) {
-                console.error(`Failed to install ${apk} on device ${device.id}: ${installError}`);
-              }
-            }),
-          );
-
-          console.log(`Installed ${apk} on all connected devices`);
-        } catch (err: any) {
-          console.error('Something went wrong:', err);
-        }
-      };
-      console.log(destinationPath);
-      await installStreamingApk();
-    }
     if (pluginArgs.cloud == undefined) {
       // runAndroidAdbServer();
       // setTimeout(() => {

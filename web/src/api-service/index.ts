@@ -5,6 +5,10 @@ export default class DeviceFarmApiService {
     return apiClient.makeGETRequest('/device', {});
   }
 
+  public static androidStreamingAppInstalled(udid: string, systemPort: number) {
+    return apiClient.makePOSTRequest('/installAndroidStreamingApp', {}, {udid, systemPort});
+  }
+
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
   }
