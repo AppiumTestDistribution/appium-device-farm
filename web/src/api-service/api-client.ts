@@ -20,7 +20,7 @@ class ApiClient {
   }
 
   public formatUrl(url: string) {
-    return `http://localhost:4723/device-farm/api${url}`;
+    return `/device-farm/api${url}`;
   }
 
   private jsonResult(res: any) {
