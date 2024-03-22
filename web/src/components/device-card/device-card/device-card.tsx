@@ -232,7 +232,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
               onClick={handleLiveStreamClick}
               disabled={this.state.isLoading}
             >
-              {this.state.isLoading ? 'Loading...' : 'Live Stream'}
+              {this.state.isLoading ? 'Brewing...' : 'Live Stream'}
             </button>
           </div>
         </div>

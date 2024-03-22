@@ -1,7 +1,7 @@
 import { ClickControlMessage } from '../components/streaming/messages/click-message';
 import { SwipeControlMessage } from '../components/streaming/messages/swipe-message';
 import { Point } from './coordinates';
-// import { ControlMessageSender } from '../control-message-sender';
+//import { ControlMessageSender } from '../control-message-sender';
 // import { ClickControlMessage } from '../messages/ios/click-control-message';
 // import { SwipeControlMessage } from '../messages/ios/swipe-control-message';
 
@@ -11,11 +11,11 @@ export class SimpleInterationHandler {
   private scaleRatio!: number;
   private clickStartTime!: number;
 
-  constructor(
+    constructor(
     private videoElement: HTMLElement,
-    private touchableElement: HTMLCanvasElement,
-    private containerElement: HTMLDivElement,
-    // private controlMessageSender: ControlMessageSender,
+    touchableElement: HTMLCanvasElement,
+    containerElement: HTMLDivElement,
+    private controlMessageSender: any,
     private displayInfo: { width: number; height: number },
   ) {
     const resizeObserver = new ResizeObserver((changes) => {
@@ -59,7 +59,7 @@ export class SimpleInterationHandler {
     ) {
       //swipe action
       const message = new SwipeControlMessage(this.mouseDownPoint as any, this.mouseUpPoint);
-      //this.controlMessageSender.sendMessage(message);
+      this.controlMessageSender.send(JSON.stringify(message.toJSON()));
       console.log(message.toJSON());
       return;
     } else if (Math.ceil((clickEndTime - this.clickStartTime) / 1000) >= 2) {
@@ -68,13 +68,13 @@ export class SimpleInterationHandler {
         this.mouseUpPoint,
         Math.ceil(clickEndTime - this.clickStartTime),
       );
-      //this.controlMessageSender.sendMessage(message);
+      this.controlMessageSender.send(JSON.stringify(message.toJSON()));
       console.log(message.toJSON());
     } else {
       //click action
       console.log(this.mouseUpPoint);
       const message = new ClickControlMessage(this.mouseUpPoint);
-      //this.controlMessageSender.sendMessage(message);
+      this.controlMessageSender.send(JSON.stringify(message.toJSON()));
       console.log(message.toJSON());
     }
 

@@ -78,6 +78,7 @@ function AndroidStream() {
         videoElement.current as any,
         canvasElement.current,
         containerElement.current,
+        ws,
         { width, height },
       );
     }
