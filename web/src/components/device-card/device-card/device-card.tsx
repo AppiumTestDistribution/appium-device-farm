@@ -85,8 +85,14 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
 
       try {
         console.log('Live Stream');
+        const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
         const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
         console.log('Response:', response);
+        if(sessionCreationResponse.status === 200) {
+          console.log('Session created successfully');
+        } else {
+          console.error('Error creating session:', sessionCreationResponse);
+        }
         if (response.status === 200) {
           window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
         } else {

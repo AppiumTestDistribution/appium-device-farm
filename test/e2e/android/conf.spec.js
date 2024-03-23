@@ -30,6 +30,20 @@ describe('Plugin Test', () => {
   it('Vertical swipe test', async () => {
     await driver.executeScript('devicefarm: setSessionName', [{ name: 'SliderTest Example' }]);
     await driver.pause(3000);
+    await driver.performActions([
+      {
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: [
+          { type: 'pointerMove', duration: 0, x: 100, y: 100 },
+          { type: 'pointerDown', button: 0 },
+          { type: 'pause', duration: 500 },
+          { type: 'pointerMove', duration: 1000, origin: 'pointer', x: -50, y: 0 },
+          { type: 'pointerUp', button: 0 },
+        ],
+      },
+    ]);
     await driver.$('~login').click();
     await driver.$('~slider1').click();
   });

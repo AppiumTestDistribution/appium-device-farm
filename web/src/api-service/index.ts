@@ -9,6 +9,10 @@ export default class DeviceFarmApiService {
     return apiClient.makePOSTRequest('/installAndroidStreamingApp', {}, {udid, systemPort});
   }
 
+  public static createSession(udid: string, systemPort: number) {
+    return apiClient.makePOSTRequest('/appiumSession', {}, {udid, systemPort});
+  }
+
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
   }
