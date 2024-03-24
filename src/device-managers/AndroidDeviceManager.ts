@@ -173,7 +173,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
       log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
       return undefined;
     }
-    console.log('DeviceInfi', deviceInfo);
 
     const [sdk, realDevice, name, chromeDriverPath, deviceSize] = deviceInfo;
 
@@ -217,6 +216,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       offline: false,
       width: deviceSize.screenWidth,
       height: deviceSize.screenHeight,
+      liveStreaming: pluginArgs.liveStreaming,
     };
   }
 

@@ -42,7 +42,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { nodeUrl, stripAppiumPrefixes, hasCloudArgument, loadExternalModules } from './helpers';
+import {
+  nodeUrl,
+  stripAppiumPrefixes,
+  hasCloudArgument,
+  loadExternalModules,
+  downloadAndroidStreamAPK, streamAndroid
+} from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -66,6 +72,8 @@ import http from 'http';
 import * as https from 'https';
 import { getStreamingServer } from './modules/streaming-server';
 import { waitForCondition } from 'asyncbox';
+import DeviceFarmApiService from '../web/src/api-service';
+import { installStreamingApp } from './modules/androidStreaming';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -333,6 +341,14 @@ class DevicePlugin extends BasePlugin {
       debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
+      if (this.pluginArgs.liveStreaming && !this.pluginArgs.cloud) {
+        log.info('📱 Live streaming argument is set to true, preparing device for live streaming');
+        const destination = await downloadAndroidStreamAPK();
+        const adbClient = await ADB.createADB({});
+        await installStreamingApp(adbClient, device.udid);
+        log.info(`Installed ${destination} on device ${device.udid}`);
+        await streamAndroid(adbClient, { udid: device.udid, state: 'device' }, device.systemPort);
+      }
       session = await next();
       debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }

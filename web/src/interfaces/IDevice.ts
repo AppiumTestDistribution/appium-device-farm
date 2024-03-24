@@ -14,4 +14,7 @@ export interface IDevice {
   total_session_count?: number;
   totalUtilizationTimeMilliSec?: any;
   session_id?: number;
+  liveStreaming: boolean;
+  width: string;
+  height: string;
 }

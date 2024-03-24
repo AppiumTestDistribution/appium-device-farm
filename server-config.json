@@ -4,7 +4,8 @@
     "plugin": {
       "device-farm": {
         "platform": "android",
-        "skipChromeDownload": true
+        "skipChromeDownload": true,
+        "liveStreaming": true
       }
     }
   }

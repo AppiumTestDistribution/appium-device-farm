@@ -31,4 +31,5 @@ export interface IDevice {
   nodeId?: string;
   width?: string;
   height?: string;
+  liveStreaming?: boolean;
 }

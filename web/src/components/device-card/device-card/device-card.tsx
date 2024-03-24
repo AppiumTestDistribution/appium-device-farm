@@ -40,8 +40,8 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     }
   }
 
-  blockDevice(udid: string, host: string) {
-    DeviceFarmApiService.blockDevice(udid, host);
+   async blockDevice(udid: string, host: string) {
+    await DeviceFarmApiService.blockDevice(udid, host);
 
     this.props.reloadDevices();
   }
@@ -85,18 +85,25 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
 
       try {
         console.log('Live Stream');
-        const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
-        const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
-        console.log('Response:', response);
-        if(sessionCreationResponse.status === 200) {
-          console.log('Session created successfully');
-        } else {
-          console.error('Error creating session:', sessionCreationResponse);
+        if(!this.props.device.session_id) {
+          console.log('Session ID is not available, creating a session');
+          const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
+          if (sessionCreationResponse.status === 200) {
+            await this.blockDevice(udid, host);
+            console.log('Session created successfully');
+          } else {
+            console.error('Error creating session:', sessionCreationResponse);
+          }
         }
-        if (response.status === 200) {
-          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+        if (!this.props.device.liveStreaming) {
+          console.log('Live Streaming property is false, starting a ws session');
+          const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
+          console.log('Response:', response);
+          if (response.status === 200) {
+            window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+          }
         } else {
-          alert('Please install the app to stream the device');
+          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
         }
       } catch (error) {
         console.error('Error:', error);

@@ -34,7 +34,7 @@
     "prettier-check": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --check --verbose",
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' 'test/**/*.ts' --write --single-quote",
     "appium-home": "rm -rf /tmp/some-temp-dir && export APPIUM_HOME=/tmp/some-temp-dir",
-    "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
+    "install-plugin": "npm run buildAndCopyWeb && npm run bundle && appium plugin install --source=local $(pwd)",
     "clear-cache": "rm -rf $HOME/.cache/appium-device-farm",
     "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install uiautomator2",
     "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run appium-home && (appium plugin uninstall device-farm || exit 0) && npm run install-plugin",
@@ -265,6 +265,9 @@
         },
         "remoteConnectionTimeout": {
           "type": "number"
+        },
+        "liveStreaming": {
+          "type": "boolean"
         }
       },
       "title": "Appium device farm plugin",

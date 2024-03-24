@@ -342,11 +342,9 @@ export async function createDriverSession(request: Request, res: Response) {
     }
   }
 }
-export async function installAndroidStreamingApp(request: Request, response: Response) {
-  const udid = request.body.udid;
-  const systemPort = request.body.systemPort;
+
+export async function downloadAndroidStreamAPK() {
   const destinationPath = path.join(__dirname, 'stream.apk');
-  const device: any = await getDevice({ udid: [udid] });
   if (!fs.existsSync(destinationPath)) {
     log.info('Streaming apk not present, so downloading..');
     const fileUrl =
@@ -354,6 +352,14 @@ export async function installAndroidStreamingApp(request: Request, response: Res
     await downloadFile(fileUrl, destinationPath);
     log.info(`Successfully downloaded streaming sdk and saved to ${destinationPath}`);
   }
+  return destinationPath;
+}
+
+export async function installAndroidStreamingApp(request: Request, response: Response) {
+  const udid = request.body.udid;
+  const systemPort = request.body.systemPort;
+  const device: any = await getDevice({ udid: [udid] });
+  const destinationPath = await downloadAndroidStreamAPK();
   const adbClient = await ADB.createADB({ udid });
   const apk = destinationPath;
 
@@ -373,7 +379,7 @@ export async function installAndroidStreamingApp(request: Request, response: Res
   }
 }
 
-async function streamAndroid(
+export async function streamAndroid(
   adbInstance: any,
   device: { udid: string; state: string },
   systemPort: number,
