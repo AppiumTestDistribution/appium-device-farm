@@ -14,8 +14,8 @@ import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
-import { installStreamingApp, pressHome } from '../../modules/androidStreaming';
-import { createDriverSession, installAndroidStreamingApp } from '../../helpers';
+import { installAndroidStreamingApp } from '../../helpers';
+import { createDriverSession, installIOSAppOnRealDevice } from '../../modules/DeviceHelper';
 
 const SERVER_UP_TIME = new Date().toISOString();
 
@@ -245,6 +245,7 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   router.post('/installAndroidStreamingApp', installAndroidStreamingApp);
+  router.post('/installiOSWDA', installIOSAppOnRealDevice);
   router.post('/appiumSession', createDriverSession);
   //router.post('/tap', clickElementFromScreen);
   // node status

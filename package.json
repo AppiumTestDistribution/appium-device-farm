@@ -84,7 +84,8 @@
     "@types/node-persist": "^3.1.5",
     "appium-adb": "^11.0.3",
     "appium-chromedriver": "^5.6.19",
-    "appium-ios-device": "^2.7.6",
+    "appium-ios-device": "^2.7.13",
+    "appium-xcuitest-driver": "^7.6.1",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.12",
     "asyncbox": "^3.0.0",
@@ -103,6 +104,7 @@
     "jsonschema": "1.4.1",
     "lodash": "4.17.21",
     "lokijs": "^1.5.12",
+    "mjpeg-consumer": "^2.0.0",
     "mjpeg-proxy": "^0.3.0",
     "node-abort-controller": "^3.1.1",
     "node-cache": "^5.1.2",
@@ -154,8 +156,7 @@
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
     "@wdio/types": "^8.24.2",
-    "appium-uiautomator2-driver": "^2.42.1",
-    "appium-xcuitest-driver": "^5.14.0",
+    "appium-uiautomator2-driver": "^3.0.4",
     "babel-eslint": "10.1.0",
     "chai": "4.3.10",
     "chai-as-promised": "^7.1.1",
@@ -268,6 +269,9 @@
         },
         "liveStreaming": {
           "type": "boolean"
+        },
+        "wdaBundleId": {
+          "type": "string"
         }
       },
       "title": "Appium device farm plugin",

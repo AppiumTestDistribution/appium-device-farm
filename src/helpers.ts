@@ -15,8 +15,7 @@ import { FakeModuleLoader } from './fake-module-loader';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
 import fs from 'fs';
 import { downloadFile } from './modules/downloadApk';
-import Adb from '@devicefarmer/adbkit';
-import { sleep } from 'asyncbox';
+import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
 import { Request, Response } from 'express';
 import {
   allowRecordingPermissions,
@@ -28,8 +27,6 @@ import {
 } from './modules/androidStreaming';
 import { ADB } from 'appium-adb';
 import { getDevice } from './data-service/device-service';
-import http from 'http';
-import https from 'https';
 import { W3CNewSessionResponse } from './interfaces/ISessionCapability';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
@@ -279,70 +276,6 @@ export function getSessionIdFromUrl(url: string) {
   }
   return null;
 }
-
-export async function createDriverSession(request: Request, res: Response) {
-  const udid = request.body.udid;
-  const systemPort = request.body.systemPort;
-  const capabilitiesToCreateSession = {
-    capabilities: {
-      alwaysMatch: {
-        platformName: 'android',
-        'appium:automationName': 'UIAutomator2',
-        'appium:newCommandTimeout': 120,
-        'appium:waitForIdleTimeout': 10,
-        'appium:udid': udid,
-        'appium:systemPort': systemPort,
-      },
-      firstMatch: [{}],
-    },
-    desiredCapabilities: {
-      platformName: 'android',
-      'appium:automationName': 'UIAutomator2',
-      'appium:newCommandTimeout': 120,
-      'appium:waitForIdleTimeout': 10,
-      'appium:udid': udid,
-      'appium:systemPort': systemPort,
-    },
-  };
-
-  const device: any = await getDevice({ udid: [udid] });
-  const config: any = {
-    method: 'post',
-    url: `${device.host}/wd/hub/session`,
-    timeout: 60000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: capabilitiesToCreateSession,
-  };
-  console.log(config);
-  let sessionDetails: W3CNewSessionResponse | null = null;
-  let errorMessage: string | null = null;
-  try {
-    const response = await axios(config);
-    log.debug('Response from browser create session', JSON.stringify(response.data));
-
-    // Appium endpoint returns session details w3c format: https://github.com/jlipps/simple-wd-spec?tab=readme-ov-file#new-session
-    sessionDetails = response.data as unknown as W3CNewSessionResponse;
-    // check if we have error in response by checking sessionDetails.value type
-    if ('error' in sessionDetails.value) {
-      log.error(`Error while creating session: ${sessionDetails.value.error}`);
-      errorMessage = sessionDetails.value.error as string;
-      return res.status(400).send(errorMessage);
-    }
-    return res.status(200).send({ status: 200, sessionID: sessionDetails.value.sessionId });
-  } catch (error: AxiosError<any> | any) {
-    log.debug(`Received error from remote node: ${JSON.stringify(error)}`);
-    if (error instanceof AxiosError) {
-      errorMessage = JSON.stringify(error.response?.data);
-      return res.status(400).send(errorMessage);
-    } else {
-      errorMessage = error;
-      return res.status(400).send(errorMessage);
-    }
-  }
-}
-
 export async function downloadAndroidStreamAPK() {
   const destinationPath = path.join(__dirname, 'stream.apk');
   if (!fs.existsSync(destinationPath)) {

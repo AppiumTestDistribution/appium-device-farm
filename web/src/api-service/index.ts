@@ -12,7 +12,9 @@ export default class DeviceFarmApiService {
   public static createSession(udid: string, systemPort: number) {
     return apiClient.makePOSTRequest('/appiumSession', {}, {udid, systemPort});
   }
-
+  public static installWDAOnDevice(udid: string) {
+    return apiClient.makePOSTRequest('/installiOSWDA', {}, { udid });
+  }
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
   }

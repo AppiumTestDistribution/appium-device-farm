@@ -216,6 +216,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       deviceType: 'real',
       platform: this.getDevicePlatformName(name),
       host,
+      wdaBundleId: pluginArgs.wdaBundleId,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
       derivedDataPath: this.prepareDerivedDataPath(pluginArgs.derivedDataPath, udid, true),

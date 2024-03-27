@@ -17,4 +17,5 @@ export interface IDevice {
   liveStreaming: boolean;
   width: string;
   height: string;
+  mjpegServerPort: number;
 }

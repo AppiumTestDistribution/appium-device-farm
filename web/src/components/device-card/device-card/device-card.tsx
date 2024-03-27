@@ -81,59 +81,55 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     const handleLiveStreamClick = async () => {
       this.setState({ isLoading: true }); // Set loading state to true when the button is clicked
 
-      const { udid, systemPort } = this.props.device;
-
-      try {
-        console.log('Live Stream');
-        if(!this.props.device.session_id) {
-          console.log('Session ID is not available, creating a session');
-          const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
-          if (sessionCreationResponse.status === 200) {
-            await this.blockDevice(udid, host);
-            console.log('Session created successfully');
+      const { udid, systemPort, platform } = this.props.device;
+      console.log('Platform:', platform);
+      if (platform === 'android') {
+        try {
+          console.log('Live Stream');
+          if(!this.props.device.session_id) {
+            console.log('Session ID is not available, creating a session');
+            const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
+            if (sessionCreationResponse.status === 200) {
+              await this.blockDevice(udid, host);
+              console.log('Session created successfully');
+            } else {
+              console.error('Error creating session:', sessionCreationResponse);
+            }
+          }
+          if (!this.props.device.liveStreaming) {
+            console.log('Live Streaming property is false, starting a ws session');
+            const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
+            console.log('Response:', response);
+            if (response.status === 200) {
+              window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+            }
           } else {
-            console.error('Error creating session:', sessionCreationResponse);
+            window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
           }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while trying to stream the device');
+        } finally {
+          this.setState({ isLoading: false }); // Set loading state back to false when the request is complete
         }
-        if (!this.props.device.liveStreaming) {
-          console.log('Live Streaming property is false, starting a ws session');
-          const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
-          console.log('Response:', response);
-          if (response.status === 200) {
-            window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+      } else {
+        if (!this.props.device.session_id) {
+          const wdaInstallResponse = await DeviceFarmApiService.installWDAOnDevice(udid);
+          if (wdaInstallResponse.status === 200) {
+            const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
+            if (sessionCreationResponse.status === 200) {
+              window.location.href = `#/iOSStream?port=${this.props.device.mjpegServerPort}&host=${appiumHost}`;
+              //window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+            }
+          } else {
+             alert(`Error creating session check logs ${wdaInstallResponse}`);
           }
+          this.setState({ isLoading: false });
         } else {
-          window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
+          window.location.href = `#/iOSStream?port=${this.props.device.mjpegServerPort}&host=${appiumHost}`;
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while trying to stream the device');
-      } finally {
-        this.setState({ isLoading: false }); // Set loading state back to false when the request is complete
       }
     };
-
-    // const liveStreaming = () => {
-    //   return (
-    //     <div style={{ paddingLeft: '2px' }}>
-    //       <button
-    //         className="device-info-card__body_stream-device"
-    //         onClick={async () => {
-    //           console.log('Live Stream');
-    //           const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
-    //           if(response.status === 200) {
-    //             (window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${this.props.device.udid}`)
-    //           } else {
-    //            alert('Please install the app to stream the device');
-    //         }
-    //         }
-    //         }
-    //       >
-    //         Live Stream
-    //       </button>
-    //     </div>
-    //   );
-    // };
     const blockButton = () => {
       if (busy) {
         return;

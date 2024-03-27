@@ -32,4 +32,5 @@ export interface IDevice {
   width?: string;
   height?: string;
   liveStreaming?: boolean;
+  wdaBundleId?: string;
 }
