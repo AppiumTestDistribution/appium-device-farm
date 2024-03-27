@@ -70,6 +70,7 @@ export interface IPluginArgs {
   bindHostOrIp: string;
   enableDashboard: boolean;
   liveStreaming: boolean;
+  wdaBundleId: string;
 
 
   // development purposes
@@ -103,4 +104,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
   remoteConnectionTimeout: 60000,
   liveStreaming: false,
+  wdaBundleId: '',
 };

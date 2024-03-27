@@ -3,6 +3,7 @@ import DeviceFarm from '../pages/DeviceFarm';
 import Builds from '../pages/Builds';
 import Session from '../pages/Session';
 import AndroidStream from '../components/streaming/AndroidStream';
+import IOSStream from '../components/streaming/IOSStream.tsx';
 function RootRouter() {
   return (
     <Routes>
@@ -10,6 +11,7 @@ function RootRouter() {
       <Route path="/builds" element={<Builds />} />
       <Route path="/builds/:buildId/session/:sessionId" element={<Session />} />
       <Route path="/androidStream" element={<AndroidStream />} />
+      <Route path="/iOSStream" element={<IOSStream />} />
     </Routes>
   );
 }

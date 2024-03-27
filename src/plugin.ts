@@ -47,7 +47,8 @@ import {
   stripAppiumPrefixes,
   hasCloudArgument,
   loadExternalModules,
-  downloadAndroidStreamAPK, streamAndroid
+  downloadAndroidStreamAPK,
+  streamAndroid,
 } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -80,6 +81,7 @@ const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
+let wdaBundleId: string;
 let hasEmulators: any;
 let proxy: any;
 let externalModule: any;
@@ -179,6 +181,7 @@ class DevicePlugin extends BasePlugin {
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
+    wdaBundleId = pluginArgs.wdaBundleId;
     if (pluginArgs.proxy !== undefined) {
       log.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
       proxy = pluginArgs.proxy;
@@ -341,7 +344,11 @@ class DevicePlugin extends BasePlugin {
       debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
-      if (this.pluginArgs.liveStreaming && !this.pluginArgs.cloud) {
+      if (
+        this.pluginArgs.platform.toLowerCase() === 'android' &&
+        this.pluginArgs.liveStreaming &&
+        !this.pluginArgs.cloud
+      ) {
         log.info('📱 Live streaming argument is set to true, preparing device for live streaming');
         const destination = await downloadAndroidStreamAPK();
         const adbClient = await ADB.createADB({});
