@@ -12,7 +12,6 @@ const capabilities = {
   'appium:automationName': 'XCUITest',
   'appium:iPhoneOnly': true,
   'appium:app': '/Users/saikrishna/Downloads/git/AppiumTestDistribution/apps/VodQAReactNative.zip',
-  'appium:usePrebuiltWDA': true,
 };
 describe('Plugin1 Test', () => {
   let driver;

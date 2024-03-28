@@ -419,8 +419,8 @@ class DevicePlugin extends BasePlugin {
         const response = await axios(config);
         const { width, height } = response.data.value;
         await updatedAllocatedDevice(device, {
-          width,
-          height,
+          width: String(width / 2),
+          height: String(height / 2),
         });
       }
     } else {
