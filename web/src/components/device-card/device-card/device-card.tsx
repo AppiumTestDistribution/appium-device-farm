@@ -118,15 +118,14 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           if (wdaInstallResponse.status === 200) {
             const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
             if (sessionCreationResponse.status === 200) {
-              window.location.href = `#/iOSStream?port=${this.props.device.mjpegServerPort}&host=${appiumHost}`;
-              //window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+              window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${sessionCreationResponse.device.width}&height=${sessionCreationResponse.device.height}`;
             }
           } else {
              alert(`Error creating session check logs ${wdaInstallResponse}`);
           }
           this.setState({ isLoading: false });
         } else {
-          window.location.href = `#/iOSStream?port=${this.props.device.mjpegServerPort}&host=${appiumHost}`;
+          window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
         }
       }
     };

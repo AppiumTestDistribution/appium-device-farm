@@ -15,7 +15,6 @@ import { FakeModuleLoader } from './fake-module-loader';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
 import fs from 'fs';
 import { downloadFile } from './modules/downloadApk';
-import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
 import { Request, Response } from 'express';
 import {
   allowRecordingPermissions,
@@ -27,7 +26,6 @@ import {
 } from './modules/androidStreaming';
 import { ADB } from 'appium-adb';
 import { getDevice } from './data-service/device-service';
-import { W3CNewSessionResponse } from './interfaces/ISessionCapability';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(

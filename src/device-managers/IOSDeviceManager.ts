@@ -61,7 +61,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       return [];
     }
   }
-
   async getOSVersion(udid: string) {
     return await IOSUtils.getOSVersion(udid);
   }

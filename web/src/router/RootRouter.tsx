@@ -3,7 +3,7 @@ import DeviceFarm from '../pages/DeviceFarm';
 import Builds from '../pages/Builds';
 import Session from '../pages/Session';
 import AndroidStream from '../components/streaming/AndroidStream';
-import IOSStream from '../components/streaming/IOSStream.tsx';
+import IOSStream from '../components/streaming/ios-stream.tsx';
 function RootRouter() {
   return (
     <Routes>
