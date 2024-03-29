@@ -70,10 +70,12 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import { getStreamingServer } from './modules/streaming-server';
-import { waitForCondition } from 'asyncbox';
 import { installStreamingApp } from './modules/androidStreaming';
-import { getIOSStreamingServer } from './modules/ios-streaming-server';
+import {
+  registerAndroidWebSocketHandlers,
+  registerIOSWebSocketHandlers,
+  waitForWebsocketToBeDeregister,
+} from './WebsocketHandler';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -122,29 +124,10 @@ class DevicePlugin extends BasePlugin {
         deviceFilter,
       )} onUnexpectedShutdown from server`,
     );
-    await waitForCondition(async () => {
-      console.log('Waiting for websocket handlers to be removed..');
-      return !(await DevicePlugin.httpServer.getWebSocketHandlers()).hasOwnProperty(
-        '/android-stream/:udid',
-      );
-    });
-    await DevicePlugin.registerAndroidWebSocketHandlers();
-    await DevicePlugin.registerIOSWebSocketHandlers();
-  }
+    await waitForWebsocketToBeDeregister(this.pluginArgs, DevicePlugin.httpServer);
 
-  private static async registerAndroidWebSocketHandlers() {
-    log.info('Registering websocket handler for Android Streaming');
-    await DevicePlugin.httpServer.addWebSocketHandler(
-      '/android-stream/:udid',
-      getStreamingServer(DevicePlugin.adbInstance),
-    );
+    await DevicePlugin.registerWebSocket(this.pluginArgs);
   }
-
-  private static async registerIOSWebSocketHandlers() {
-    log.info('Registering websocket handler for iOS Streaming');
-    await DevicePlugin.httpServer.addWebSocketHandler('/ios-stream/:udid', getIOSStreamingServer());
-  }
-
   public static async updateServer(
     expressApp: any,
     httpServer: any,
@@ -175,13 +158,7 @@ class DevicePlugin extends BasePlugin {
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
     }
-
-    if (pluginArgs.platform.toLowerCase() === 'android') {
-      DevicePlugin.adbInstance = await ADB.createADB({});
-      await DevicePlugin.registerAndroidWebSocketHandlers();
-    } else {
-      await DevicePlugin.registerIOSWebSocketHandlers();
-    }
+    await DevicePlugin.registerWebSocket(pluginArgs);
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
     await initializeStorage();
     (await ADTDatabase.DeviceModel).removeDataOnly();
@@ -283,6 +260,19 @@ class DevicePlugin extends BasePlugin {
     log.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
     );
+  }
+
+  static async registerWebSocket(pluginArgs: IPluginArgs) {
+    if (pluginArgs.platform.toLowerCase() === 'android') {
+      DevicePlugin.adbInstance = await ADB.createADB({});
+      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+    } else if (pluginArgs.platform.toLowerCase() === 'ios') {
+      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
+    } else {
+      DevicePlugin.adbInstance = await ADB.createADB({});
+      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
+    }
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -580,7 +570,7 @@ class DevicePlugin extends BasePlugin {
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     const res = await next();
-    await DevicePlugin.registerAndroidWebSocketHandlers();
+    await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
     return res;
   }
 }

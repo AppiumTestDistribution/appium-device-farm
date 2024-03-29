@@ -18,4 +18,5 @@ export interface IDevice {
   width: string;
   height: string;
   mjpegServerPort: number;
+  productModel?: string;
 }
