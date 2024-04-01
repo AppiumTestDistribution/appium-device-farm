@@ -50,7 +50,7 @@ function IOSStream() {
     }
   };
   useEffect(() => {
-    const { host, udid } = getParamsFromUrl() as any;
+    const { host, port, udid } = getParamsFromUrl() as any;
     const wsUrl = `ws://${host}:${port}/ios-stream/${udid}`;
 
     createWebSocketConnection(wsUrl);
@@ -83,7 +83,7 @@ function IOSStream() {
       );
     }
   }, []);
-  const { host, port, streamPort } = getParamsFromUrl() as any;
+  const { streamPort } = getParamsFromUrl() as any;
   function onToolbarControlClick(controlAction: string) {
     console.log('Sending home button event', ws);
     //const { udid } = getWebSocketPort() as any;
@@ -107,11 +107,11 @@ function IOSStream() {
               maxHeight: 730 + 'px',
               maxWidth: 730 + 'px',
               width: 'auto',
-              position: 'absolute'
+              position: 'absolute',
             }}
-            src={`http://${host}:${streamPort}`}
-          ref={videoElement}
-          id="outputImage"
+            src={`/device-farm/api/dashboard/mjpeg-stream/${streamPort}`}
+            ref={videoElement}
+            id="outputImage"
           />
           <canvas
             ref={canvasElement}
