@@ -286,6 +286,7 @@ export async function userUnblockDevice(udid: string, host: string) {
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = false;
+      device.busy = false;
     });
 }
 
