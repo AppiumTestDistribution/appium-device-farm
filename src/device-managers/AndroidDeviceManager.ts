@@ -295,7 +295,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       await waitForCondition(
         async () => {
           try {
-            services = await adbInstance.shell(['service', 'list']);
+            services = await adbInstance.shell(['-s', udid, 'service', 'list']);
             return requiredServicesRe.every((pattern) => pattern.test(services));
           } catch (err: any) {
             log.debug(`Waiting for emulator startup. Intermediate error: ${err.message}`);

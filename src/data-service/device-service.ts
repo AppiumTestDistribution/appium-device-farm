@@ -340,6 +340,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
             debugLog(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
             device.busy = false;
+            device.userBlocked = false;
             device.lastCmdExecutedAt = undefined;
             device.sessionStartTime = 0;
             device.totalUtilizationTimeMilliSec = totalUtilization;
