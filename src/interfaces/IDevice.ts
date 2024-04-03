@@ -35,4 +35,6 @@ export interface IDevice {
   wdaBundleId?: string;
   productModel?: string;
   deviceTypeIdentifier?: string;
+  proxyUrl?: string;
+  proxySessionId?: string;
 }

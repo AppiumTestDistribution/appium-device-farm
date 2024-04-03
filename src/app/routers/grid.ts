@@ -15,7 +15,7 @@ import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import { installAndroidStreamingApp } from '../../helpers';
-import { createDriverSession, installIOSAppOnRealDevice } from '../../modules/DeviceHelper';
+import { createDriverSession, installIOSAppOnRealDevice } from '../../modules/device-control/DeviceHelper';
 
 const SERVER_UP_TIME = new Date().toISOString();
 

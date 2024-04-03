@@ -1,7 +1,7 @@
 import { waitForCondition } from 'asyncbox';
 import log from './logger';
-import { getStreamingServer } from './modules/streaming-server';
-import { getIOSStreamingServer } from './modules/ios-streaming-server';
+import { getStreamingServer } from './modules/device-control/streaming-server';
+import { getIOSStreamingServer } from './modules/device-control/ios-streaming-server';
 import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ADB } from 'appium-adb';
 export async function waitForWebsocketToBeDeregister(pluginArgs: IPluginArgs, httpServer: any) {

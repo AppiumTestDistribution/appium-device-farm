@@ -70,7 +70,7 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import { installStreamingApp } from './modules/androidStreaming';
+import { installStreamingApp } from './modules/device-control/androidStreaming';
 import {
   registerAndroidWebSocketHandlers,
   registerIOSWebSocketHandlers,
@@ -397,21 +397,15 @@ class DevicePlugin extends BasePlugin {
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
       );
       if (device.platform.toLowerCase() === 'ios') {
-        const config: any = {
-          method: 'post',
-          url: `${device.host}/wd/hub/session/${sessionId}/execute/sync`,
-          timeout: 60000,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: JSON.stringify({ script: 'mobile: viewportRect', args: [] }),
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { server, port, scheme, sessionId } = Object.values(driver.sessions)[0].wda.jwproxy;
+
+        const proxiedInfo = {
+          proxyUrl: `${scheme}://${server}:${port}`,
+          proxySessionId: sessionId,
         };
-        const response = await axios(config);
-        const { width, height } = response.data.value;
-        await updatedAllocatedDevice(device, {
-          width: String(width / 2),
-          height: String(height / 2),
-        });
+        await updatedAllocatedDevice(device, proxiedInfo);
       }
     } else {
       await unblockDevice(device.udid, device.host);

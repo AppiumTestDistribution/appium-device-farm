@@ -5,7 +5,7 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
-import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/DeviceHelper';
+import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {

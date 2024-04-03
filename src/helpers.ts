@@ -14,7 +14,7 @@ import axios, { AxiosError } from 'axios';
 import { FakeModuleLoader } from './fake-module-loader';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
 import fs from 'fs';
-import { downloadFile } from './modules/downloadApk';
+import { downloadFile } from './modules/device-control/downloadApk';
 import { Request, Response } from 'express';
 import {
   allowRecordingPermissions,
@@ -23,7 +23,7 @@ import {
   forwardPort,
   installStreamingApp,
   startStreamingActivity,
-} from './modules/androidStreaming';
+} from './modules/device-control/androidStreaming';
 import { ADB } from 'appium-adb';
 import { getDevice } from './data-service/device-service';
 
