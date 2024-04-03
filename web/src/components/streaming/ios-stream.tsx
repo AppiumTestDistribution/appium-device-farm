@@ -3,6 +3,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
+import { Camera } from '@mui/icons-material';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -17,11 +18,6 @@ function IOSStream() {
 
   // eslint-disable-next-line prefer-const
   let [ws, setWebSocket] = useState<WebSocket | undefined>(undefined);
-  // const handleWebSocketMessage = (event: { data: any }) => {
-  //   const blob = event.data;
-  //   const url = URL.createObjectURL(blob);
-  //   setImageSrc(url);
-  // };
 
   const createWebSocketConnection = (wsUrl: string) => {
     ws = new WebSocket(wsUrl);
@@ -125,7 +121,7 @@ function IOSStream() {
           />
         </div>
         <StreamingToolBar
-          controls={[{ action: 'home', icon: <HomeIcon /> }]}
+          controls={[{ action: 'home', icon: <HomeIcon /> }, {action: 'screenShot', icon: <Camera /> }]}
           onClickCallback={onToolbarControlClick}
         />
       </div>
