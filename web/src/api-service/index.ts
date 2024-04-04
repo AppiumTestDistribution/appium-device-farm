@@ -15,6 +15,10 @@ export default class DeviceFarmApiService {
   public static installWDAOnDevice(udid: string) {
     return apiClient.makePOSTRequest('/installiOSWDA', {}, { udid });
   }
+
+  public static installApk(udid: string, apkPath: string) {
+    return apiClient.makePOSTRequest('/installApk', {}, { udid, apkPath });
+  }
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
   }

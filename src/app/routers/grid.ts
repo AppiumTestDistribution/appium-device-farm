@@ -14,11 +14,30 @@ import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
-import { installAndroidStreamingApp } from '../../helpers';
-import { createDriverSession, installIOSAppOnRealDevice } from '../../modules/device-control/DeviceHelper';
+import { installAndroidStreamingApp, installApk } from '../../helpers';
+import {
+  createDriverSession,
+  installIOSAppOnRealDevice,
+} from '../../modules/device-control/DeviceHelper';
+import { fs } from 'appium/support';
+import path from 'path';
+import formidable from 'formidable';
+import multer from 'multer';
 
 const SERVER_UP_TIME = new Date().toISOString();
+const uploadDir = path.join(__dirname);
 
+const storage = multer.diskStorage({
+  destination: (req: any, file: any, cb: any) => {
+    cb(null, uploadDir);
+  },
+  filename: (req: any, file: any, cb: any) => {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+//will be using this for uplading
+const upload = multer({ storage: storage });
 async function getDevices(request: Request, response: Response) {
   let devices = (await ADTDatabase.DeviceModel).find();
   const { sessionId } = request.query;
@@ -245,8 +264,14 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   router.post('/installAndroidStreamingApp', installAndroidStreamingApp);
+  router.post('/installApk', installApk);
   router.post('/installiOSWDA', installIOSAppOnRealDevice);
   router.post('/appiumSession', createDriverSession);
+  //router.post('/upload', uploadFile);
+  router.post('/upload', upload.single('file'), function (req: any, res) {
+    console.log('storage location is ', req.hostname + '/' + req.file.path);
+    return res.send(req.file);
+  });
   //router.post('/tap', clickElementFromScreen);
   // node status
   router.get(

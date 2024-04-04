@@ -26,6 +26,7 @@ import {
 } from './modules/device-control/androidStreaming';
 import { ADB } from 'appium-adb';
 import { getDevice } from './data-service/device-service';
+import { sleep } from 'asyncbox';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -308,6 +309,26 @@ export async function installAndroidStreamingApp(request: Request, response: Res
       message: `Failed to install ${apk} on device ${udid}: ${installError}`,
     });
   }
+}
+
+export async function installApk(request: Request, response: Response) {
+  const udid = request.body.udid;
+  const apkPath = request.body.apkPath;
+  try {
+    const adbClient = await ADB.createADB({ udid });
+    await adbClient.adbExec(['-s', udid, 'install', apkPath]);
+    await sleep(1000);
+    return response
+      .status(200)
+      .send({ status: 200, message: 'Installed Android apk on device', device: udid });
+  } catch (installError: any) {
+    console.error(`Failed to install APK on device ${udid}: ${installError}`);
+    return response.status(400).send({
+      status: 400,
+      message: `Failed to install APK on device ${udid}: ${installError}`,
+    });
+  }
+  //installApk
 }
 
 export async function streamAndroid(

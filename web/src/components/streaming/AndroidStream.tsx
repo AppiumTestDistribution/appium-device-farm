@@ -3,12 +3,16 @@ import HomeIcon from '@mui/icons-material/Home';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
+import DeviceFarmApiService from '../../api-service';
+import { Camera, UploadFile } from '@mui/icons-material';
+import { Button } from '@mui/material';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
 
 function AndroidStream() {
   const [imageSrc, setImageSrc] = useState('');
+  const [file, setFile] = useState(null);
 
   const containerElement = useRef<HTMLDivElement>(null);
   const videoElement = useRef<HTMLImageElement>(null);
@@ -84,13 +88,57 @@ function AndroidStream() {
     }
   }, []);
 
-  function onToolbarControlClick(controlAction: string) {
-    console.log('Sending home button event', ws);
+  async function onToolbarControlClick(controlAction: string) {
+    console.log('Sending event', ws, JSON.stringify({ action: controlAction }));
     //const { udid } = getWebSocketPort() as any;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     ws.send(JSON.stringify({ action: controlAction }));
   }
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const selectedFile = event.target.files[0];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    setFile(selectedFile);
+  };
+
+  const uploadFile = async () => {
+    if (!file) {
+      console.error('No file selected');
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (!(file.type === 'application/vnd.android.package-archive')) {
+      alert(`File extension not allowed`);
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/device-farm/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        alert('Failed to upload file');
+      }
+
+      const data = await response.json();
+      console.log('File uploaded successfully:', data);
+
+      const { udid } = getParamsFromUrl() as any;
+      await DeviceFarmApiService.installApk(udid, data.path);
+      // Handle success, if needed
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      // Handle error, if needed
+    }
+  };
+
   return (
     <div className="streaming-container">
       <div className="device-container">
@@ -98,7 +146,7 @@ function AndroidStream() {
           style={{
             position: 'relative',
             maxHeight: MAX_HEIGHT + 'px',
-            maxWidth: MAX_WIDTH + 'px',
+            maxWidth: MAX_WIDTH + 'px'
           }}
           ref={containerElement}
         >
@@ -107,7 +155,7 @@ function AndroidStream() {
               maxHeight: MAX_HEIGHT + 'px',
               maxWidth: MAX_WIDTH + 'px',
               width: 'auto',
-              position: 'absolute',
+              position: 'absolute'
             }}
             src={imageSrc}
             ref={videoElement}
@@ -120,20 +168,24 @@ function AndroidStream() {
               width: '100%',
               position: 'absolute',
               cursor: 'pointer',
-              userSelect: 'none',
+              userSelect: 'none'
             }}
           />
         </div>
         <StreamingToolBar
-          controls={[{ action: 'home', icon: <HomeIcon /> }]}
+          controls={[{ action: 'home', icon: <HomeIcon /> },
+            { action: 'screenshot', icon: <Camera /> },
+            { action: 'upload', icon: <UploadFile /> }]}
           onClickCallback={onToolbarControlClick}
         />
-      </div>
-      {/* <Button onClick={homeButtonHandler} startIcon={<HomeIcon />}>
-        Home
-      </Button> */}
+        <Button onClick={uploadFile} startIcon={<UploadFile />}>
+        <input type='file' onChange={handleFileChange} />
+        InstallAPK
+      </Button>
     </div>
-  );
+</div>
+)
+  ;
 }
 
 export default AndroidStream;

@@ -121,7 +121,7 @@ function IOSStream() {
           />
         </div>
         <StreamingToolBar
-          controls={[{ action: 'home', icon: <HomeIcon /> }, {action: 'screenShot', icon: <Camera /> }]}
+          controls={[{ action: 'home', icon: <HomeIcon /> }, {action: 'screenshot', icon: <Camera /> }]}
           onClickCallback={onToolbarControlClick}
         />
       </div>
