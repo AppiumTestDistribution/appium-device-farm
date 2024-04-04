@@ -298,6 +298,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             device.udid,
             false,
           ),
+          preBuildWDAPath: this.pluginArgs.preBuildWDAPath,
         }),
       );
     }

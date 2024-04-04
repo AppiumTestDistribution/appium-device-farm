@@ -66,6 +66,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       userBlocked,
       busy,
       session_id,
+      state
     } = this.props.device;
 
     const deviceState = this.getDeviceState();
@@ -194,6 +195,12 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             <div className="device-info-card-container__body_row_label">Device Location:</div>
             <div className="device-info-card-container__body_row_value" title={hostName}>
               {hostName}
+            </div>
+          </div>
+          <div className="device-info-card-container__body_row">
+            <div className="device-info-card-container__body_row_label">Device state:</div>
+            <div className="device-info-card-container__body_row_value" title={state}>
+              {state}
             </div>
           </div>
           {totalUtilizationTimeMilliSec != null && (

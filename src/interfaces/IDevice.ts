@@ -37,4 +37,5 @@ export interface IDevice {
   deviceTypeIdentifier?: string;
   proxyUrl?: string;
   proxySessionId?: string;
+  prebuiltWDAPath?: string;
 }

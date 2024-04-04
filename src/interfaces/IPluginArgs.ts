@@ -71,7 +71,7 @@ export interface IPluginArgs {
   enableDashboard: boolean;
   liveStreaming: boolean;
   wdaBundleId: string;
-
+  preBuildWDAPath: string;
 
   // development purposes
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
@@ -105,4 +105,5 @@ export const DefaultPluginArgs: IPluginArgs = {
   remoteConnectionTimeout: 60000,
   liveStreaming: false,
   wdaBundleId: '',
+  preBuildWDAPath: '',
 };

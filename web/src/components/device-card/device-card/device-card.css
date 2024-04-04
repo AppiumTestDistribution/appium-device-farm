@@ -1,11 +1,11 @@
 .device-info-card-container {
   background-color: white;
-  height: 260px;
+  height: 276px;
   width: 280px;
   display: flex;
   flex-direction: column;
   margin: auto;
-  padding: 16px;
+  padding: 13px;
   border-radius: 5px;
   cursor: pointer;
   position: relative;
@@ -37,7 +37,7 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 20px 0 15px 0;
+  padding: 6px 0 8px;
 }
 
 .device-info-card-container__title_wrapper {
