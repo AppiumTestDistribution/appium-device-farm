@@ -279,6 +279,9 @@
         },
         "preBuildWDAPath": {
           "type": "string"
+        },
+        "resignedWDA": {
+          "type": "string"
         }
       },
       "title": "Appium device farm plugin",

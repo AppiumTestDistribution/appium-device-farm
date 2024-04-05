@@ -207,7 +207,6 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
-    console.log('*******', ProductType);
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
@@ -224,6 +223,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
       derivedDataPath: this.prepareDerivedDataPath(pluginArgs.derivedDataPath, udid, true),
+      resignedWDAPath: this.pluginArgs.resignedWDA,
     });
   }
 
