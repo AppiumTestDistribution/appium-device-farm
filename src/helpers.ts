@@ -27,6 +27,8 @@ import {
 import { ADB } from 'appium-adb';
 import { getDevice } from './data-service/device-service';
 import { sleep } from 'asyncbox';
+import { DevicePlugin } from './plugin';
+import formdata from 'form-data';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -311,13 +313,57 @@ export async function installAndroidStreamingApp(request: Request, response: Res
   }
 }
 
+export async function uploadFileRemote(filePath: string, device: IDevice) {
+  const form = new formdata();
+  form.append('file', fs.readFileSync(filePath), path.basename(filePath));
+  const response = await axios({
+    url: `${nodeUrl(device)}/device-farm/api/upload`,
+    method: 'post',
+    headers: {
+      ...form.getHeaders(),
+    },
+    data: form,
+  });
+  return response.data.path;
+}
+
+export async function installApkOnRemoteDevice(filePath: string, device: IDevice) {
+  const response = await axios({
+    url: `${nodeUrl(device)}/device-farm/api/installApk`,
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      udid: device.udid,
+      apkPath: filePath,
+    },
+  });
+  return response;
+}
+
 export async function installApk(request: Request, response: Response) {
   const udid = request.body.udid;
   const apkPath = request.body.apkPath;
+  const device: IDevice | undefined = await getDevice({ udid: [udid] });
+  if (!device) {
+    return response.status(400).send({
+      status: 400,
+      message: 'Invalid device id',
+    });
+  }
+
   try {
-    const adbClient = await ADB.createADB({ udid });
-    await adbClient.adbExec(['-s', udid, 'install', apkPath]);
-    await sleep(1000);
+    if (device.nodeId !== DevicePlugin.NODE_ID) {
+      const remoteApkPath = await uploadFileRemote(apkPath, device);
+      const responseFromRemote = await installApkOnRemoteDevice(remoteApkPath, device);
+      return response.status(responseFromRemote.status).send(responseFromRemote.data);
+    } else {
+      const adbClient = await ADB.createADB({ udid });
+      await adbClient.adbExec(['-s', udid, 'install', apkPath]);
+      await sleep(1000);
+    }
+
     return response
       .status(200)
       .send({ status: 200, message: 'Installed Android apk on device', device: udid });
