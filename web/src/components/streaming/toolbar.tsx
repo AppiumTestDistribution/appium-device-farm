@@ -4,6 +4,7 @@ import './streaming.css';
 export interface Control {
   action: string;
   icon: any;
+  name: string;
 }
 export interface IToolBarProps {
   controls: Array<Control>;
@@ -17,6 +18,7 @@ export function StreamingToolBar(props: IToolBarProps) {
       {controls.map((c, i) => (
         <div className="toolbar-control" key={i} onClick={() => onClickCallback(c.action)}>
           {c.icon}
+          <span>{c.name}</span>
         </div>
       ))}
     </div>
