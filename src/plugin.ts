@@ -327,13 +327,7 @@ class DevicePlugin extends BasePlugin {
         }
       },
     );
-    if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
-      log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
-      await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
-        usePortForwarding: true,
-        devicePort: device.mjpegServerPort,
-      });
-    }
+
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
 
@@ -361,6 +355,13 @@ class DevicePlugin extends BasePlugin {
         await streamAndroid(adbClient, { udid: device.udid, state: 'device' }, device.systemPort);
       }
       session = await next();
+      if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
+        log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
+        await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
+          usePortForwarding: true,
+          devicePort: device.mjpegServerPort,
+        });
+      }
       debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
 

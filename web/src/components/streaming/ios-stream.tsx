@@ -79,7 +79,7 @@ function IOSStream() {
       );
     }
   }, []);
-  const { streamPort } = getParamsFromUrl() as any;
+  const { host, port, streamPort } = getParamsFromUrl() as any;
   function onToolbarControlClick(controlAction: string) {
     console.log('Sending home button event', ws);
     //const { udid } = getWebSocketPort() as any;
@@ -105,7 +105,7 @@ function IOSStream() {
               width: 'auto',
               position: 'absolute',
             }}
-            src={`/device-farm/api/dashboard/mjpeg-stream/${streamPort}`}
+            src={`http://${host}:${port}/device-farm/api/dashboard/mjpeg-stream/${streamPort}`}
             ref={videoElement}
             id="outputImage"
           />
