@@ -14,9 +14,10 @@ import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
-import { installAndroidStreamingApp, installApk } from '../../helpers';
 import {
   createDriverSession,
+  installAndroidStreamingApp,
+  installApk,
   installIOSAppOnRealDevice,
 } from '../../modules/device-control/DeviceHelper';
 import { fs } from 'appium/support';
@@ -137,9 +138,7 @@ async function getQueuedSessionRequests(request: Request<void>, response: Respon
 
 async function getNodes(request: Request, response: Response<string[]>) {
   // unfortunately, lokijs does not support field projection
-  const nodes = await (
-    await ADTDatabase.DeviceModel
-  )
+  const nodes = (await ADTDatabase.DeviceModel)
     .chain()
     .find()
     .data()

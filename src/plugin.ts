@@ -41,14 +41,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  downloadAndroidStreamAPK,
-  hasCloudArgument,
-  loadExternalModules,
-  nodeUrl,
-  streamAndroid,
-  stripAppiumPrefixes,
-} from './helpers';
+import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -76,6 +69,8 @@ import {
   registerIOSWebSocketHandlers,
   waitForWebsocketToBeDeregister,
 } from './WebsocketHandler';
+import { downloadAndroidStreamAPK, streamAndroid } from './modules/device-control/DeviceHelper';
+import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -326,7 +321,13 @@ class DevicePlugin extends BasePlugin {
         }
       },
     );
-
+    if (caps.alwaysMatch['df:portForward'] !== undefined) {
+      log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
+      await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
+        usePortForwarding: true,
+        devicePort: device.mjpegServerPort,
+      });
+    }
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;
 
