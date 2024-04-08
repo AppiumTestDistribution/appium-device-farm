@@ -20,9 +20,7 @@ import {
   installApk,
   installIOSAppOnRealDevice,
 } from '../../modules/device-control/DeviceHelper';
-import { fs } from 'appium/support';
 import path from 'path';
-import formidable from 'formidable';
 import multer from 'multer';
 
 const SERVER_UP_TIME = new Date().toISOString();
@@ -101,6 +99,24 @@ async function registerNode(request: Request, response: Response) {
   } else if (type === 'remove') {
     await removeDevice(requestBody);
   }
+  response.status(200).send({
+    success: true,
+  });
+}
+
+async function updateDeviceInfo(request: Request, response: Response) {
+  const requestBody = request.body;
+  const { udid, ...deviceInfo } = requestBody;
+  const devices = (await ADTDatabase.DeviceModel).find({ udid });
+  if (devices.length === 0) {
+    return response.status(404).send(`Device with udid ${udid} not found`);
+  }
+  const device = devices[0];
+  const updatedDevice = {
+    ...device,
+    ...deviceInfo,
+  };
+  await (await ADTDatabase.DeviceModel).update(updatedDevice);
   response.status(200).send({
     success: true,
   });
@@ -250,6 +266,7 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', getDevices);
   router.get('/device/:platform', getDeviceByPlatform);
   router.post('/register', registerNode);
+  router.post('/updateDeviceInfo', updateDeviceInfo);
   router.post('/block', blockDevice);
   router.post('/unblock', unBlockDevice);
 

@@ -41,7 +41,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
+import {
+  hasCloudArgument,
+  hasHubArgument,
+  loadExternalModules,
+  nodeUrl,
+  stripAppiumPrefixes,
+} from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -397,7 +403,7 @@ class DevicePlugin extends BasePlugin {
       log.info(
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
       );
-      if (device.platform.toLowerCase() === 'ios') {
+      if (device.platform.toLowerCase() === 'ios' && !isRemoteOrCloudSession) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const { server, port, scheme, sessionId } = Object.values(driver.sessions)[0].wda.jwproxy;
@@ -407,6 +413,10 @@ class DevicePlugin extends BasePlugin {
           proxySessionId: sessionId,
         };
         await updatedAllocatedDevice(device, proxiedInfo);
+        if (hasHubArgument(this.pluginArgs)) {
+          const node = new NodeDevices(this.pluginArgs.hub);
+          await node.updateDeviceInfoToHub(device.udid, proxiedInfo);
+        }
       }
     } else {
       await unblockDevice(device.udid, device.host);
