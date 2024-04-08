@@ -413,7 +413,7 @@ class DevicePlugin extends BasePlugin {
           proxySessionId: sessionId,
         };
         await updatedAllocatedDevice(device, proxiedInfo);
-        if (hasHubArgument(this.pluginArgs)) {
+        if (this.pluginArgs.hub !== undefined) {
           const node = new NodeDevices(this.pluginArgs.hub);
           await node.updateDeviceInfoToHub(device.udid, proxiedInfo);
         }
