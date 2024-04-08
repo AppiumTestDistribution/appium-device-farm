@@ -321,7 +321,7 @@ class DevicePlugin extends BasePlugin {
         }
       },
     );
-    if (caps.alwaysMatch['df:portForward'] !== undefined) {
+    if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
       log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
       await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
         usePortForwarding: true,
