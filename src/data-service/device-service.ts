@@ -5,6 +5,8 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
+import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
+
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
@@ -13,6 +15,7 @@ export async function removeDevice(devices: { udid: string; host: string }[]) {
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
   }
+  await setDeviceStateWhenUnplugged();
 }
 
 export async function addNewDevice(devices: IDevice[], host?: string): Promise<IDevice[]> {
@@ -62,10 +65,11 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   );
   log.debug(`Added ${result.length} new devices to local database`);
 
-  //log.debug(`Added devices: ${JSON.stringify(result)}`);
-  //log.debug(
-  //  `All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`,
-  //);
+  debugLog(`Added devices: ${JSON.stringify(result)}`);
+  for (const iDevice of result) {
+    await setDeviceState(iDevice);
+  }
+  debugLog(`All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`);
 
   return result;
 }
@@ -282,6 +286,7 @@ export async function userUnblockDevice(udid: string, host: string) {
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
       device.userBlocked = false;
+      device.busy = false;
     });
 }
 
@@ -336,6 +341,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
             debugLog(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
             device.busy = false;
+            device.userBlocked = false;
             device.lastCmdExecutedAt = undefined;
             device.sessionStartTime = 0;
             device.totalUtilizationTimeMilliSec = totalUtilization;

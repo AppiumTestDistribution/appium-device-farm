@@ -1,8 +1,8 @@
 import React from 'react';
 import './device-card.css';
-import { ReactComponent as AndroidIcon } from '../../../assets/android-icon.svg';
-import { ReactComponent as AppleIcon } from '../../../assets/apple-icon.svg';
-import { ReactComponent as LinkIcon } from '../../../assets/link-icon.svg';
+import AndroidIcon from '../../../assets/android-icon.svg';
+import AppleIcon from '../../../assets/apple-icon.svg';
+import LinkIcon from '../../../assets/link-icon.svg';
 import { IDevice } from '../../../interfaces/IDevice';
 import prettyMilliseconds from 'pretty-ms';
 import DeviceFarmApiService from '../../../api-service';
@@ -13,8 +13,13 @@ interface IDeviceCardProps {
   device: IDevice;
   reloadDevices: () => void;
 }
-
 export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
+  constructor(props: IDeviceCardProps) {
+    super(props);
+    this.state = {
+      isLoading: false,
+    };
+  }
   getStatusClassName() {
     if (this.props.device.offline) {
       return 'disabled';
@@ -35,8 +40,8 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
     }
   }
 
-  blockDevice(udid: string, host: string) {
-    DeviceFarmApiService.blockDevice(udid, host);
+   async blockDevice(udid: string, host: string) {
+    await DeviceFarmApiService.blockDevice(udid, host);
 
     this.props.reloadDevices();
   }
@@ -61,9 +66,12 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       userBlocked,
       busy,
       session_id,
+      state
     } = this.props.device;
 
     const deviceState = this.getDeviceState();
+    const appiumHost = new URL(this.props.device.host).hostname;
+    const appiumPort = new URL(this.props.device.host).port;
     let hostName = '';
     try {
       hostName = new URL(host).hostname;
@@ -71,6 +79,61 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
       hostName = host.split(':')[1].replace('//', '');
     }
 
+    const handleLiveStreamClick = async () => {
+      this.setState({ isLoading: true }); // Set loading state to true when the button is clicked
+
+      const { udid, systemPort, platform } = this.props.device;
+      console.log('Platform:', platform);
+      if (platform === 'android') {
+        try {
+          console.log('Live Stream');
+          if(!this.props.device.session_id) {
+            console.log('Session ID is not available, creating a session');
+            const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
+            if (sessionCreationResponse.status === 200) {
+              await this.blockDevice(udid, host);
+              console.log('Session created successfully');
+            } else {
+              console.error('Error creating session:', sessionCreationResponse);
+            }
+          }
+          if (!this.props.device.liveStreaming) {
+            console.log('Live Streaming property is false, starting a ws session');
+            const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
+            console.log('Response:', response);
+            if (response.status === 200) {
+              window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+            }
+          } else {
+            window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while trying to stream the device');
+        } finally {
+          this.setState({ isLoading: false }); // Set loading state back to false when the request is complete
+        }
+      } else {
+        if (!this.props.device.session_id) {
+          const wdaInstallResponse = await DeviceFarmApiService.installWDAOnDevice(udid);
+          if (wdaInstallResponse.status === 200) {
+            const sessionCreationResponse = await DeviceFarmApiService.createSession(udid, systemPort);
+            if (sessionCreationResponse.status === 200) {
+              await this.blockDevice(udid, host);
+              console.log('Session created successfully');
+              window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
+            } else {
+              alert(`Error creating session check logs ${JSON.stringify(sessionCreationResponse.message)}`);
+            }
+          } else {
+             alert(`${JSON.stringify(wdaInstallResponse.message)}`);
+          }
+          this.setState({ isLoading: false });
+        } else {
+          window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
+        }
+      }
+    };
     const blockButton = () => {
       if (busy) {
         return;
@@ -106,9 +169,9 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             {udid}
           </div>
           {['ios', 'tvos'].includes(platform) ? (
-            <AppleIcon className="device-info-card-container__device-icon" />
+            <img src={AppleIcon} className="device-info-card-container__device-icon" />
           ) : (
-            <AndroidIcon className="device-info-card-container__device-icon" />
+            <img src={AndroidIcon} className="device-info-card-container__device-icon" />
           )}
         </div>
         <div className="device-info-card-container__body">
@@ -134,6 +197,12 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             <div className="device-info-card-container__body_row_label">Device Location:</div>
             <div className="device-info-card-container__body_row_value" title={hostName}>
               {hostName}
+            </div>
+          </div>
+          <div className="device-info-card-container__body_row">
+            <div className="device-info-card-container__body_row_label">Device state:</div>
+            <div className="device-info-card-container__body_row_value" title={state}>
+              {state}
             </div>
           </div>
           {totalUtilizationTimeMilliSec != null && (
@@ -166,7 +235,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
                 </div>
               </div>
               <div className="dashboard-link">
-                <LinkIcon className="link-icon" />
+                <img src={LinkIcon} className="link-icon" />
                 <a className="footer-deeplink" href={dashboard_link} target="_blank">
                   Appium Dashboard ({total_session_count})
                 </a>
@@ -174,7 +243,18 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             </div>
           )}
         </div>
-        <div className="device-info-card-container__footer_wrapper">{blockButton()}</div>
+        <div className="device-info-card-container__footer_wrapper">
+          {blockButton()}
+          <div style={{ paddingLeft: '2px' }}>
+            <button
+              className="device-info-card__body_stream-device"
+              onClick={handleLiveStreamClick}
+              disabled={this.state.isLoading}
+            >
+              {this.state.isLoading ? 'Brewing...' : 'Live Stream'}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

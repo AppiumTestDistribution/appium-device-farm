@@ -7,8 +7,27 @@ import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 export default class NodeDevices {
   private host: string;
 
-  constructor(host: string) {
+  constructor(host: any) {
     this.host = host;
+  }
+
+  async updateDeviceInfoToHub(udid: string, deviceInfo: any) {
+    log.info('Updating device with proxySession Information');
+    try {
+      const status = (
+        await axios.post(`${this.host}/device-farm/api/updateDeviceInfo`, {
+          udid,
+          ...deviceInfo,
+        })
+      ).status;
+      if (status === 200) {
+        log.info('Updated device with proxySession Information');
+      } else {
+        log.warn('Something went wrong!!');
+      }
+    } catch (error) {
+      log.error(`Unable to update device with proxySession Information. Reason: ${error}`);
+    }
   }
 
   async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: string) {

@@ -1,0 +1,48 @@
+.session-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  overflow-x: scroll;
+  background-color: white;
+  border-bottom: 2px solid lightgray;
+}
+
+.session-info-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-info-item {
+  display: flex;
+  gap: 8px;
+}
+
+.session-info-item p {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 6px 0;
+}
+
+.session-info-item_value {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.session-info-item_value {
+  display: flex;
+  align-items: center;
+}
+
+.session-info-item_value img {
+  height: 16px;
+  width: 16px;
+  margin-right: 4px;
+}
+
+.session-info-item_title {
+  color: gray;
+  width: 120px;
+}

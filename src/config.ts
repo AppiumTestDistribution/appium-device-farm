@@ -5,7 +5,7 @@ const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
 
 export const config: Config = {
   cacheDir: basePath,
-  databasePath: `${basePath}/device-farm.db`,
+  databasePath: `${basePath}/device-farm.db?connection_limit=1`,
   sessionAssetsPath: path.join(basePath, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
 };

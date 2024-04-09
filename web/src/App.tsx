@@ -1,16 +1,18 @@
-import React from 'react';
-import './App.css';
-import DeviceExplorer from './components/device-explorer/device-explorer';
-import Header from './components/header/header';
+import RootRouter from './router/RootRouter';
+import { HashRouter } from 'react-router-dom';
+import Sidebar from './components/sidebar';
+import './app.css';
 
 function App() {
   return (
-    <div className="app-container">
-      <Header />
-      <div className="app-body-container">
-        <DeviceExplorer />
+    <HashRouter>
+      <div className="app-container">
+        <Sidebar />
+        <div className="app-body-container">
+          <RootRouter />
+        </div>
       </div>
-    </div>
+    </HashRouter>
   );
 }
 

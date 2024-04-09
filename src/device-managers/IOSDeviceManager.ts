@@ -15,6 +15,8 @@ import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';
 import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
+import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
+import { IOSDeviceInfoMap } from './IOSDeviceType';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
@@ -61,7 +63,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       return [];
     }
   }
-
   async getOSVersion(udid: string) {
     return await IOSUtils.getOSVersion(udid);
   }
@@ -205,6 +206,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const mjpegServerPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
+    const { ProductType } = await getDeviceInfo(udid);
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
@@ -216,9 +218,12 @@ export default class IOSDeviceManager implements IDeviceManager {
       deviceType: 'real',
       platform: this.getDevicePlatformName(name),
       host,
+      wdaBundleId: pluginArgs.wdaBundleId,
+      productModel: ProductType,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
       derivedDataPath: this.prepareDerivedDataPath(pluginArgs.derivedDataPath, udid, true),
+      resignedWDAPath: this.pluginArgs.resignedWDA,
     });
   }
 
@@ -244,7 +249,8 @@ export default class IOSDeviceManager implements IDeviceManager {
   public async fetchLocalSimulators() {
     log.debug('Fetching local simulators');
     const returnedSimulators: IDevice[] = [];
-    const flattenValued = await this.getLocalSims();
+    const { simctl, list } = await this.createSimctlInstance();
+    const flattenValued = await this.getLocalSims(simctl, list);
     let filteredSimulators: Array<IDevice> = [];
     const localPluginArgs = this.pluginArgs;
     if (this.pluginArgs.simulators !== undefined) {
@@ -263,11 +269,15 @@ export default class IOSDeviceManager implements IDeviceManager {
 
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
-
+    const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
+      const productModel = deviceTypes.filter(
+        (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
+      )[0].modelIdentifier;
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
+      const modelInfo = this.findKeyByValue(productModel);
       returnedSimulators.push(
         Object.assign({
           ...device,
@@ -280,23 +290,31 @@ export default class IOSDeviceManager implements IDeviceManager {
           host: `http://${this.pluginArgs.bindHostOrIp}:${this.hostPort}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
           sessionStartTime: 0,
+          productModel,
+          width: modelInfo.Width,
+          height: modelInfo.Height,
           derivedDataPath: this.prepareDerivedDataPath(
             this.pluginArgs.derivedDataPath,
             device.udid,
             false,
           ),
+          preBuildWDAPath: this.pluginArgs.preBuildWDAPath,
         }),
       );
     }
 
     return returnedSimulators;
   }
+  findKeyByValue(model: string): any {
+    for (const [key, value] of Object.entries(IOSDeviceInfoMap)) {
+      if (model === key) {
+        return value;
+      }
+    }
+  }
 
-  private async getLocalSims(): Promise<Array<IDevice>> {
+  private async getLocalSims(simctl: any, list: any): Promise<Array<IDevice>> {
     try {
-      const simctl = new Simctl();
-      // list runtimes and log availability errors
-      const list = await simctl.list();
       const runtimes = list.runtimes;
       const unAavailableRuntimes = runtimes
         .filter((runtime: any) => !runtime.isAvailable)
@@ -315,7 +333,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       let tvosSimulators: any = [];
       if (iOSSimulators) {
         iosSimulators = flatten(
-          Object.values((await simctl.getDevicesByParsing('iOS')) as Array<IDevice>),
+          Object.values((await simctl.getDevices(null, 'iOS')) as Array<IDevice>),
         );
       } else {
         log.info('No iOS simulators found!');
@@ -333,5 +351,12 @@ export default class IOSDeviceManager implements IDeviceManager {
       log.error(error);
       return [];
     }
+  }
+
+  private async createSimctlInstance() {
+    const simctl = new Simctl();
+    // list runtimes and log availability errors
+    const list = await simctl.list();
+    return { simctl, list };
   }
 }

@@ -69,11 +69,15 @@ export interface IPluginArgs {
   cloud?: CloudConfig;
   bindHostOrIp: string;
   enableDashboard: boolean;
+  liveStreaming: boolean;
+  wdaBundleId: string;
+  preBuildWDAPath: string;
 
   // development purposes
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
   bootedSimulators?: boolean;
   remoteConnectionTimeout?: number;
+  resignedWDA?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -100,4 +104,8 @@ export const DefaultPluginArgs: IPluginArgs = {
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
   remoteConnectionTimeout: 60000,
+  liveStreaming: false,
+  wdaBundleId: '',
+  preBuildWDAPath: '',
+  resignedWDA: ''
 };

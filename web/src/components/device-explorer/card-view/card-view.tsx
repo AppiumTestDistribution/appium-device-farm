@@ -13,7 +13,7 @@ export default class CardView extends React.Component<IProps, any> {
     return (
       <div className="device-explorer-card-container">
         {React.Children.toArray(
-          this.props.devices.map((device, i) => (
+          this.props.devices.map((device) => (
             <DeviceCard device={device} reloadDevices={this.props.reloadDevices} />
           )),
         )}

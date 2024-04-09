@@ -1,11 +1,11 @@
 .device-info-card-container {
   background-color: white;
-  height: 260px;
+  height: 276px;
   width: 280px;
   display: flex;
   flex-direction: column;
   margin: auto;
-  padding: 16px;
+  padding: 13px;
   border-radius: 5px;
   cursor: pointer;
   position: relative;
@@ -37,7 +37,7 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 20px 0 15px 0;
+  padding: 6px 0 8px;
 }
 
 .device-info-card-container__title_wrapper {
@@ -142,13 +142,27 @@
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 3px;
-  width: 280px;
-  position: absolute;
+  width: 140px;
   bottom: 15px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
+}
+
+.device-info-card__body_stream-device {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  width: 140px;
+  bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: #e6f8f3;
+  border: 1px solid #0bb785;
+  color: #0bb785;
 }
 
 .device-info-card__body_block-device-icon {

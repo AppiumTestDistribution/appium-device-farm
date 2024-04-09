@@ -15,9 +15,29 @@ import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
+import {
+  createDriverSession,
+  installAndroidStreamingApp,
+  installApk,
+  installIOSAppOnRealDevice,
+} from '../../modules/device-control/DeviceHelper';
+import path from 'path';
+import multer from 'multer';
 
 const SERVER_UP_TIME = new Date().toISOString();
+const uploadDir = path.join(__dirname);
 
+const storage = multer.diskStorage({
+  destination: (req: any, file: any, cb: any) => {
+    cb(null, uploadDir);
+  },
+  filename: (req: any, file: any, cb: any) => {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+//will be using this for uplading
+const upload = multer({ storage: storage });
 async function getDevices(request: Request, response: Response) {
   let devices = (await ADTDatabase.DeviceModel).find();
   const { sessionId } = request.query;
@@ -40,7 +60,7 @@ async function getDevices(request: Request, response: Response) {
       deviceSessionMap[session.udid].push(session);
     });
     devices = devices.map((d) => {
-      d.dashboard_link = `${dashboardPluginUrl}?device_udid=${d.udid}&start_time=${SERVER_UP_TIME}`;
+      d.dashboard_link = `${dashboardPluginUrl}?deviceUDID=${d.udid}&start_time=${SERVER_UP_TIME}`;
       d.total_session_count = deviceSessionMap[d.udid]?.length || 0;
       return d;
     });
@@ -85,6 +105,24 @@ async function registerNode(request: Request, response: Response) {
   });
 }
 
+async function updateDeviceInfo(request: Request, response: Response) {
+  const requestBody = request.body;
+  const { udid, ...deviceInfo } = requestBody;
+  const devices = (await ADTDatabase.DeviceModel).find({ udid });
+  if (devices.length === 0) {
+    return response.status(404).send(`Device with udid ${udid} not found`);
+  }
+  const device = devices[0];
+  const updatedDevice = {
+    ...device,
+    ...deviceInfo,
+  };
+  await (await ADTDatabase.DeviceModel).update(updatedDevice);
+  response.status(200).send({
+    success: true,
+  });
+}
+
 async function blockDevice(request: Request, response: Response) {
   const requestBody = request.body;
   const device = await getDevice(requestBody);
@@ -117,9 +155,7 @@ async function getQueuedSessionRequests(request: Request<void>, response: Respon
 
 async function getNodes(request: Request, response: Response<string[]>) {
   // unfortunately, lokijs does not support field projection
-  const nodes = await (
-    await ADTDatabase.DeviceModel
-  )
+  const nodes = (await ADTDatabase.DeviceModel)
     .chain()
     .find()
     .data()
@@ -244,6 +280,7 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', getDevices);
   router.get('/device/:platform', getDeviceByPlatform);
   router.post('/register', registerNode);
+  router.post('/updateDeviceInfo', updateDeviceInfo);
   router.post('/block', blockDevice);
   router.post('/unblock', unBlockDevice);
 
@@ -256,6 +293,16 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/status', nodeAdbStatusOnThisHost);
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
+  router.post('/installAndroidStreamingApp', installAndroidStreamingApp);
+  router.post('/installApk', installApk);
+  router.post('/installiOSWDA', installIOSAppOnRealDevice);
+  router.post('/appiumSession', createDriverSession);
+  //router.post('/upload', uploadFile);
+  router.post('/upload', upload.single('file'), function (req: any, res) {
+    console.log('storage location is ', req.hostname + '/' + req.file.path);
+    return res.send(req.file);
+  });
+  //router.post('/tap', clickElementFromScreen);
   // node status
   router.get(
     '/status',

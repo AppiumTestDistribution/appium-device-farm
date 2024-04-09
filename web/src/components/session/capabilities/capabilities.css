@@ -1,0 +1,64 @@
+.capabilities {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  margin: 16px;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tab-header {
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  padding: 8px 16px;
+  border-bottom: 1px solid gray;
+}
+
+.tab-header.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+}
+
+.tab-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.key-value-pair {
+  display: flex;
+  font-size: 12px;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.key {
+  font-weight: bold;
+  margin: 0;
+  width: 200px;
+  margin-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.value {
+  color: gray;
+  margin: 0;
+  width: 50%;
+}
+
+.download {
+  width: 50%;
+  color: rgb(255, 255, 255);
+  background: rgb(111, 199, 107);
+  padding: 5px;
+  margin-right: 10px;
+  margin-left: 100px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+}

@@ -3,6 +3,7 @@ export interface IDevice {
   host: string;
   udid: string;
   sdk: string;
+  systemPort: number;
   deviceType: 'simulator' | 'emulator' | 'real';
   offline: boolean;
   userBlocked: boolean;
@@ -13,4 +14,10 @@ export interface IDevice {
   total_session_count?: number;
   totalUtilizationTimeMilliSec?: any;
   session_id?: number;
+  liveStreaming: boolean;
+  width: string;
+  height: string;
+  mjpegServerPort: number;
+  productModel?: string;
+  state?: string;
 }

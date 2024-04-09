@@ -1,0 +1,41 @@
+
+.session-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.session-header {
+  background-color: rgb(219, 219, 219);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-bottom: 2px solid lightgray;
+}
+
+.session-header > img {
+  height: 20px;
+  width: 20px;
+}
+
+.session-header button {
+  font-size: 18px;
+  font-weight: 800;
+  color: #3a6879;
+  background-color: transparent;
+  text-decoration: underline;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.session-header > h3 {
+  font-size: 18px;
+}
+
+.session-body {
+  display: flex;
+}

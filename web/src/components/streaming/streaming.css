@@ -1,0 +1,28 @@
+.streaming-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.device-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+.toolbar-container {
+  height: fit-content;
+  width: 350px;
+  border: 1px solid gray;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+}
+
+.toolbar-control {
+  cursor: pointer;
+}

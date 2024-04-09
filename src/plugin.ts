@@ -23,16 +23,16 @@ import {
 } from './data-service/pending-sessions-service';
 import {
   allocateDeviceForSession,
-  setupCronReleaseBlockedDevices,
-  setupCronUpdateDeviceList,
   deviceType,
   initializeStorage,
   isIOS,
   refreshSimulatorState,
-  setupCronCheckStaleDevices,
-  updateDeviceList,
-  setupCronCleanPendingSessions,
   removeStaleDevices,
+  setupCronCheckStaleDevices,
+  setupCronCleanPendingSessions,
+  setupCronReleaseBlockedDevices,
+  setupCronUpdateDeviceList,
+  updateDeviceList,
 } from './device-utils';
 import { DeviceFarmManager } from './device-managers';
 import { Container } from 'typedi';
@@ -42,12 +42,11 @@ import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import {
-  nodeUrl,
-  spinWith,
-  stripAppiumPrefixes,
-  isDeviceFarmRunning,
   hasCloudArgument,
+  hasHubArgument,
   loadExternalModules,
+  nodeUrl,
+  stripAppiumPrefixes,
 } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
@@ -70,12 +69,21 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
+import { installStreamingApp } from './modules/device-control/androidStreaming';
+import {
+  registerAndroidWebSocketHandlers,
+  registerIOSWebSocketHandlers,
+  waitForWebsocketToBeDeregister,
+} from './WebsocketHandler';
+import { downloadAndroidStreamAPK, streamAndroid } from './modules/device-control/DeviceHelper';
+import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
+let wdaBundleId: string;
 let hasEmulators: any;
 let proxy: any;
 let externalModule: any;
@@ -84,6 +92,8 @@ class DevicePlugin extends BasePlugin {
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
   public static NODE_ID: string;
   public static IS_HUB = false;
+  private static httpServer: any;
+  private static adbInstance: any;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -115,13 +125,16 @@ class DevicePlugin extends BasePlugin {
         deviceFilter,
       )} onUnexpectedShutdown from server`,
     );
-  }
+    await waitForWebsocketToBeDeregister(this.pluginArgs, DevicePlugin.httpServer);
 
+    await DevicePlugin.registerWebSocket(this.pluginArgs);
+  }
   public static async updateServer(
     expressApp: any,
     httpServer: any,
     cliArgs: ServerArgs,
   ): Promise<void> {
+    DevicePlugin.httpServer = httpServer;
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -146,13 +159,14 @@ class DevicePlugin extends BasePlugin {
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
     }
-
+    await DevicePlugin.registerWebSocket(pluginArgs);
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
     await initializeStorage();
     (await ADTDatabase.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
+    wdaBundleId = pluginArgs.wdaBundleId;
     if (pluginArgs.proxy !== undefined) {
       log.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
       proxy = pluginArgs.proxy;
@@ -168,7 +182,6 @@ class DevicePlugin extends BasePlugin {
       throw new Error(
         '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
       );
-
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});
@@ -195,10 +208,6 @@ class DevicePlugin extends BasePlugin {
 
     await addCLIArgs(cliArgs);
 
-    log.info(
-      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
-    );
-
     const hubArgument = pluginArgs.hub;
 
     if (hubArgument !== undefined) {
@@ -213,7 +222,12 @@ class DevicePlugin extends BasePlugin {
       DevicePlugin.IS_HUB = true;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
+
     if (pluginArgs.cloud == undefined) {
+      // runAndroidAdbServer();
+      // setTimeout(() => {
+      //   console.log('Script completed with sleep.');
+      // }, 5000);
       // check for stale nodes
       await setupCronCheckStaleDevices(
         pluginArgs.checkStaleDevicesIntervalMs,
@@ -243,6 +257,22 @@ class DevicePlugin extends BasePlugin {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
+    log.info(
+      `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
+    );
+  }
+
+  static async registerWebSocket(pluginArgs: IPluginArgs) {
+    if (pluginArgs.platform.toLowerCase() === 'android') {
+      DevicePlugin.adbInstance = await ADB.createADB({});
+      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+    } else if (pluginArgs.platform.toLowerCase() === 'ios') {
+      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
+    } else {
+      DevicePlugin.adbInstance = await ADB.createADB({});
+      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
+    }
   }
 
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
@@ -252,19 +282,6 @@ class DevicePlugin extends BasePlugin {
     }
     return deviceTypes;
   }
-
-  static async waitForRemoteDeviceFarmToBeRunning(host: string) {
-    await spinWith(
-      `Waiting for device farm server ${host} to be up and running\n`,
-      async () => {
-        return await isDeviceFarmRunning(host);
-      },
-      (msg: any) => {
-        throw new Error(`Failed: ${msg}`);
-      },
-    );
-  }
-
   async createSession(
     next: () => any,
     driver: any,
@@ -324,7 +341,26 @@ class DevicePlugin extends BasePlugin {
       debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
+      if (
+        this.pluginArgs.platform.toLowerCase() === 'android' &&
+        this.pluginArgs.liveStreaming &&
+        !this.pluginArgs.cloud
+      ) {
+        log.info('📱 Live streaming argument is set to true, preparing device for live streaming');
+        const destination = await downloadAndroidStreamAPK();
+        const adbClient = await ADB.createADB({});
+        await installStreamingApp(adbClient, device.udid);
+        log.info(`Installed ${destination} on device ${device.udid}`);
+        await streamAndroid(adbClient, { udid: device.udid, state: 'device' }, device.systemPort);
+      }
       session = await next();
+      if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
+        log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
+        await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
+          usePortForwarding: true,
+          devicePort: device.mjpegServerPort,
+        });
+      }
       debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
 
@@ -367,29 +403,22 @@ class DevicePlugin extends BasePlugin {
       log.info(
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
       );
+      if (device.platform.toLowerCase() === 'ios' && !isRemoteOrCloudSession) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { server, port, scheme, sessionId } = Object.values(driver.sessions)[0].wda.jwproxy;
+
+        const proxiedInfo = {
+          proxyUrl: `${scheme}://${server}:${port}`,
+          proxySessionId: sessionId,
+        };
+        await updatedAllocatedDevice(device, proxiedInfo);
+        if (this.pluginArgs.hub !== undefined) {
+          const node = new NodeDevices(this.pluginArgs.hub);
+          await node.updateDeviceInfoToHub(device.udid, proxiedInfo);
+        }
+      }
     } else {
-      // Case: Success in creating session on the node but for some reason the hub gets an error from node
-      // in this case the device in node is busy and hub unblocks the device.
-      // if (isRemoteOrCloudSession) {
-      //   try {
-      //     debugLog('Blocking device on the node');
-      //     const timeoutMs = 30000;
-      //     const result = await axios({
-      //       method: 'post',
-      //       url: `${device.host}/device-farm/api/block`,
-      //       timeout: timeoutMs,
-      //       data: { udid: device.udid, host: device.host },
-      //       headers: {
-      //         'Content-Type': 'application/json',
-      //       },
-      //     });
-      //
-      //     return result.status == 200;
-      //   } catch (error: any) {
-      //     log.info(`Device Farm is not running at ${device.host}. Error: ${error}`);
-      //     return false;
-      //   }
-      // }
       await unblockDevice(device.udid, device.host);
       log.info(
         `${pendingSessionId} 📱 Device UDID ${device.udid} unblocked. Reason: Failed to create session`,
@@ -545,7 +574,9 @@ class DevicePlugin extends BasePlugin {
   async deleteSession(next: () => any, driver: any, sessionId: any) {
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
-    return await next();
+    const res = await next();
+    await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+    return res;
   }
 }
 

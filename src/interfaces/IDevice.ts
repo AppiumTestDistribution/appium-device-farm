@@ -29,4 +29,13 @@ export interface IDevice {
   adbRemoteHost: string;
   adbPort: number;
   nodeId?: string;
+  width: string;
+  height: string;
+  liveStreaming?: boolean;
+  wdaBundleId?: string;
+  productModel?: string;
+  deviceTypeIdentifier?: string;
+  proxyUrl?: string;
+  proxySessionId?: string;
+  prebuiltWDAPath?: string;
 }

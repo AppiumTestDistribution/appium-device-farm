@@ -13,9 +13,10 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'df:build': 'DeviceFarm BuildName 66',
   'df:options': {
-    record_video: false,
+    recordVideo: true,
+    screenshotOnFailure: true,
+    build: new Date().toISOString(),
   },
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
@@ -27,9 +28,24 @@ describe('Plugin Test', () => {
   });
 
   it('Vertical swipe test', async () => {
-    await driver.executeScript('devicefarm: setSessionName', [{ name: 'DeviceFarm SliderTest' }]);
-    console.log(await driver.capabilities.deviceUDID);
+    await driver.executeScript('devicefarm: setSessionName', [{ name: 'SliderTest Example' }]);
+    await driver.pause(3000);
+    await driver.performActions([
+      {
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: [
+          { type: 'pointerMove', duration: 0, x: 100, y: 100 },
+          { type: 'pointerDown', button: 0 },
+          { type: 'pause', duration: 500 },
+          { type: 'pointerMove', duration: 1000, origin: 'pointer', x: -50, y: 0 },
+          { type: 'pointerUp', button: 0 },
+        ],
+      },
+    ]);
     await driver.$('~login').click();
+    await driver.$('~slider1').click();
   });
 
   afterEach(async function () {

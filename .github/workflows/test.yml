@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - dashboard-module
+      - dashboard-ui
 
 jobs:
   buildWithSubmodule:
@@ -24,6 +24,10 @@ jobs:
         # Add your script commands here
         npm ci
         npm run bundle
+    - name: Run Unit Test
+      run: |
+        # Add your script commands here
+        npm test
 
   buildWithOutSubmodule:
     name: Build with Out Submodule

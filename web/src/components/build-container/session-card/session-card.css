@@ -1,0 +1,76 @@
+.build-session {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 3px rgba(33, 33, 33, 0.2);
+  border: 2px solid rgb(255, 255, 255);
+}
+
+.build-session:hover {
+  box-shadow: unset;
+  border-color: #15252b;
+}
+
+.build-session-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 50%;
+}
+
+.build-session_name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #212121;
+}
+
+.build-session-device {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.build-session-device img {
+  width: 16px;
+  height: 16px;
+}
+
+.build-session-device div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.build-session-device p {
+  font-size: 11px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.build-session-device_last_updated {
+  color: #9e9e9e;
+}
+
+.build-session_status {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: 20%;
+  min-width: 140px;
+  color: #9e9e9e;
+}
+
+.build-session_time {
+  font-size: 14px;
+  font-weight: 600;
+  width: 20%;
+  min-width: 140px;
+  color: #9e9e9e;
+}

@@ -8,6 +8,9 @@
         "skipChromeDownload": true,
         "androidDeviceType": "real",
         "iosDeviceType": "simulated",
+        "wdaBundleId": "atd.pro",
+        "resignedWDA": "/Something/WebDriverAgentRunner-Runner.ipa",
+        "preBuildWDAPath": "/Users/saikrishna/Library/Developer/Xcode/DerivedData/WebDriverAgent-egfeypzyldpeeqdwikoxqbnopkla/Build/Products/Debug-iphonesimulator/WebDriverAgentRunner-Runner.app",
         "adbRemote": [
           "192.168.0.1:5037",
           "192.168.0.2:5037"

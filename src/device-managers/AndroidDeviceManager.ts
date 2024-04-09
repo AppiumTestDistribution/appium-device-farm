@@ -17,6 +17,7 @@ import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
+import { sleep, waitForCondition } from 'asyncbox';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -88,6 +89,11 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const connectedDevices = await this.getConnectedDevices(pluginArgs);
     //log.debug(`fetchAndroidDevices: ${JSON.stringify(connectedDevices)}`);
 
+    // for (const [adbInstance, devices] of connectedDevices) {
+    //   for await (const device of devices) {
+    //     await removeAllPortForwarding(adbInstance, device.udid);
+    //   }
+    // }
     for (const [adbInstance, devices] of connectedDevices) {
       log.debug(
         `fetchAndroidDevices from host: ${adbInstance.adbHost}. Found ${devices.length} android devices`,
@@ -153,6 +159,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     const systemPort = await getFreePort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
     let deviceInfo;
+    //await this.streamAndroid(adbInstance, device, systemPort);
 
     try {
       deviceInfo = await Promise.all([
@@ -160,13 +167,14 @@ export default class AndroidDeviceManager implements IDeviceManager {
         this.isRealDevice(adbInstance, device.udid),
         this.getDeviceName(adbInstance, device.udid),
         this.getChromeVersion(adbInstance, device.udid, pluginArgs),
+        this.getDeviceSize(adbInstance, device.udid),
       ]);
     } catch (error) {
       log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
       return undefined;
     }
 
-    const [sdk, realDevice, name, chromeDriverPath] = deviceInfo;
+    const [sdk, realDevice, name, chromeDriverPath, deviceSize] = deviceInfo;
 
     // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
     if (!pluginArgs.skipChromeDownload && chromeDriverPath === undefined) {
@@ -205,6 +213,10 @@ export default class AndroidDeviceManager implements IDeviceManager {
       sessionStartTime: 0,
       chromeDriverPath,
       userBlocked: false,
+      offline: false,
+      width: deviceSize.screenWidth,
+      height: deviceSize.screenHeight,
+      liveStreaming: pluginArgs.liveStreaming,
     };
   }
 
@@ -223,6 +235,93 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return { adbInstance: this.adb, adbTracker: this.tracker };
   }
 
+  async waitBootEmulator(adbInstance: any, udid: string) {
+    const REQUIRED_SERVICES = ['activity', 'package', 'mount'];
+    const SUBSYSTEM_STATE_OK = 'Subsystem state: true';
+    const NO_READINESS_SERVICE_ERROR = 'Cant find service: reboot_readiness';
+    const apiLevel: any = await this.getApiLevel(adbInstance, udid);
+    if (parseInt(apiLevel) >= 31) {
+      let reason;
+      try {
+        let hasReadinessService = true;
+        await waitForCondition(
+          async () => {
+            try {
+              reason = await adbInstance.adbExec([
+                '-s',
+                udid,
+                'shell',
+                'cmd',
+                'reboot_readiness',
+                'check-subsystems-state',
+                '--list-blocking',
+              ]);
+            } catch (err: any) {
+              // https://github.com/appium/appium/issues/18717
+              reason = err.stdout || err.stderr;
+              if (_.includes(reason, NO_READINESS_SERVICE_ERROR)) {
+                hasReadinessService = false;
+                return true;
+              } else if (!_.includes(reason, SUBSYSTEM_STATE_OK)) {
+                log.debug(`Waiting for emulator startup. Intermediate error: ${err.message}`);
+              }
+            }
+            console.log('reason', reason);
+            return _.includes(reason, SUBSYSTEM_STATE_OK);
+          },
+          {
+            waitMs: 30000,
+            intervalMs: 1000,
+          },
+        );
+        if (hasReadinessService) {
+          return;
+        }
+      } catch (e) {
+        throw new Error(
+          `Emulator is not ready within ${30000}ms${reason ? '. Reason: ' + reason : ''}`,
+        );
+      }
+      log.info(
+        'The device under test does not have reboot_readiness service. ' +
+          'Falling back to the alternative boot detection method.',
+      );
+    }
+
+    /** @type {RegExp[]} */
+    const requiredServicesRe = REQUIRED_SERVICES.map((name) => new RegExp(`\\b${name}:`));
+    let services: any;
+    try {
+      await waitForCondition(
+        async () => {
+          try {
+            services = await adbInstance.shell(['-s', udid, 'service', 'list']);
+            return requiredServicesRe.every((pattern) => pattern.test(services));
+          } catch (err: any) {
+            log.debug(`Waiting for emulator startup. Intermediate error: ${err.message}`);
+            return false;
+          }
+        },
+        {
+          waitMs: 30000,
+          intervalMs: 3000,
+        },
+      );
+    } catch (e) {
+      if (services) {
+        log.debug(`Recently listed services:\n${services}`);
+      }
+      const missingServices = _.zip(REQUIRED_SERVICES, requiredServicesRe)
+        .filter(([, pattern]) => !/** @type {RegExp} */ pattern?.test(services))
+        .map(([name]) => name);
+      throw new Error(
+        `Emulator is not ready within ${30000}ms ` +
+          `(${missingServices} service${
+            missingServices.length === 1 ? ' is' : 's are'
+          } not running)`,
+      );
+    }
+  }
   async waitBootComplete(originalADB: any, udid: string): Promise<boolean | undefined> {
     return await asyncWait(
       async () => {
@@ -285,8 +384,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       this.initiateAbortControl(newDevice.udid);
       let bootCompleted = false;
       try {
-        await this.waitBootComplete(originalADB, newDevice.udid);
+        await this.waitBootEmulator(originalADB, newDevice.udid);
         bootCompleted = true;
+        await sleep(6000);
       } catch (error) {
         log.info(`Device ${newDevice.udid} boot did not complete. Error: ${error}`);
       }
@@ -336,7 +436,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
           await this.onDeviceRemoved(device, pluginArgs);
         });
         tracker.on('change', async (device: DeviceWithPath) => {
-          if (device.type === 'offline' || device.type === 'unauthorized') {
+          console.log('Device changed:', device.id, device.type);
+          if (device.type === 'offline') {
             await this.onDeviceRemoved(device, pluginArgs);
           } else {
             await this.onDeviceAdded(originalADB, device);
@@ -446,6 +547,40 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.release');
   }
 
+  private async getApiLevel(adbInstance: any, udid: string): Promise<string | undefined> {
+    return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.sdk');
+  }
+
+  private async getDeviceSize(adbInstance: any, udid: string) {
+    const device = {
+      screenWidth: 'unknown',
+      screenHeight: 'unknown',
+    };
+    try {
+      const screenSize = await (await adbInstance).adbExec(['-s', udid, 'shell', 'wm', 'size']);
+      const output = screenSize.trim();
+      const lines = output.split('\n');
+      if (lines.length === 1) {
+        const splitOutput = lines[0].split(': ');
+        const screenDimensions = splitOutput[1].split('x');
+
+        device.screenWidth = screenDimensions[0].trim();
+        device.screenHeight = screenDimensions[1].trim();
+      }
+      //Hack for some devices
+      if (lines.length === 3) {
+        const splitOutput = lines[1].split(': ');
+        const screenDimensions = splitOutput[1].split('x');
+
+        device.screenWidth = screenDimensions[0].trim();
+        device.screenHeight = screenDimensions[1].trim();
+      }
+    } catch (error) {
+      log.error(`Error while getting device property size for ${udid}. Error: ${error}`);
+    }
+    return device;
+  }
+
   private async getDeviceProperty(
     adbInstance: any,
     udid: string,
@@ -485,7 +620,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     return sdkRoot;
   }
-
   private getDeviceName = async (adbInstance: any, udid: string): Promise<string | undefined> => {
     let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name');
 

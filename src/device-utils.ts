@@ -56,8 +56,8 @@ export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefi
   return app.endsWith('.app') || app.endsWith('.zip') ? 'simulator' : 'real';
 };
 
-export function isAndroid(cliArgs: ServerCLI): boolean {
-  return cliArgs.Platform.toLowerCase() === DevicePlatform.ANDROID;
+export function isAndroid(pluginArgs: IPluginArgs): boolean {
+  return pluginArgs.platform.toLowerCase() === DevicePlatform.ANDROID;
 }
 
 export function deviceType(pluginArgs: IPluginArgs, device: string): boolean {
