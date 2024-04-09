@@ -70,8 +70,6 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import { saveTestExecutionMetaData } from './wdio-service/wdio-service';
-import { Request, Response } from 'express';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -244,20 +242,6 @@ class DevicePlugin extends BasePlugin {
     if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
       await setSimulatorState(devicesUpdates);
       await refreshSimulatorState(pluginArgs, cliArgs.port);
-    }
-    expressApp.post('/wdio/handleTestExecutionMetaData', await DevicePlugin.handleTestExecutionMetaData);
-  }
-
-  static async handleTestExecutionMetaData(req: Request, res: Response) {
-    try {
-      await saveTestExecutionMetaData(req); 
-      log.info("Saved Test Execution Meta Data.")
-      res.status(200).send('{"message": "Saved Test Execution Meta Data"}');
-    } catch(e) {
-      const response = {message: `Failed to save Test Execution Meta Data. Error: ${e}`}
-      log.error(`Error while handling TestExecutionMetaData.`);      
-      log.error(`Sending response - ${response}.`)
-      res.status(500).json(response);
     }
   }
 
