@@ -46,4 +46,8 @@ export default class DeviceFarmApiService {
   public static getSessionLogs(sessionId: string) {
     return apiClient.makeGETRequest(`/dashboard/session/${sessionId}/session_log`, {});
   }
+
+  public static closeSession(udid: string) {
+    return apiClient.makePOSTRequest('/closeSession', {}, {udid, origin: window.location.origin});
+  }
 }

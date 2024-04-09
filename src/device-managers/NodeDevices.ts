@@ -1,8 +1,8 @@
 import axios from 'axios';
 import log from '../logger';
-import { DeviceWithPath } from '@devicefarmer/adbkit';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
+import { IDevice } from '../interfaces/IDevice';
 
 export default class NodeDevices {
   private host: string;
@@ -30,7 +30,7 @@ export default class NodeDevices {
     }
   }
 
-  async postDevicesToHub(devices: DeviceWithPath[] | DeviceUpdate[], arg: string) {
+  async postDevicesToHub(devices: IDevice[] | DeviceUpdate[], arg: string) {
     // DeviceWithPath -> new device
     // DeviceUpdate -> removed device
     log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
@@ -44,9 +44,13 @@ export default class NodeDevices {
       ).status;
       if (status === 200) {
         if (arg === 'add') {
-          log.info(`Pushed devices to hub ${JSON.stringify(devices)}`);
+          devices.forEach((device: any) => {
+            log.info(`Pushed devices to hub ${device.udid}`);
+          });
         } else {
-          log.info(`Removed device and pushed information to hub ${JSON.stringify(devices)}`);
+          devices.forEach((device: any) => {
+            log.info(`Removed device and pushed information to hub ${device.udid}`);
+          });
         }
       } else {
         log.warn('Something went wrong!!');

@@ -58,7 +58,7 @@ export class SimpleInterationHandler {
       this.mouseDownPoint?.y != this.mouseUpPoint?.y
     ) {
       //swipe action
-      const message = new SwipeControlMessage(this.mouseDownPoint as any, this.mouseUpPoint);
+      const message = new SwipeControlMessage(this.mouseDownPoint as any, this.mouseUpPoint, Math.ceil(clickEndTime - this.clickStartTime));
       this.controlMessageSender.send(JSON.stringify(message.toJSON()));
       console.log(message.toJSON());
       return;

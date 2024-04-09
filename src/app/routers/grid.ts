@@ -15,10 +15,11 @@ import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import {
+  closeSession,
   createDriverSession,
   installAndroidStreamingApp,
   installApk,
-  installIOSAppOnRealDevice,
+  installIOSAppOnRealDevice
 } from '../../modules/device-control/DeviceHelper';
 import path from 'path';
 import multer from 'multer';
@@ -283,6 +284,7 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.post('/installApk', installApk);
   router.post('/installiOSWDA', installIOSAppOnRealDevice);
   router.post('/appiumSession', createDriverSession);
+  router.post('/closeSession', closeSession);
   //router.post('/upload', uploadFile);
   router.post('/upload', upload.single('file'), function (req: any, res) {
     console.log('storage location is ', req.hostname + '/' + req.file.path);

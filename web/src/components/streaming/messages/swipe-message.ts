@@ -4,7 +4,8 @@ import { Point } from '../../../libs/coordinates';
 export class SwipeControlMessage {
   constructor(
     readonly startPoint: Point,
-    readonly endPoint: Point
+    readonly endPoint: Point,
+    readonly duration: number = 0,
   ) {
   }
 
@@ -25,7 +26,7 @@ export class SwipeControlMessage {
                 y: this.startPoint.y
               },
               { type: 'pointerDown', button: 0 },
-              { type: 'pause', duration: 500 },
+              { type: 'pause', duration: this.duration },
               {
                 type: 'pointerMove',
                 duration: 200,
