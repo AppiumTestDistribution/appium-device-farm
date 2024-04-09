@@ -57,3 +57,19 @@ model SessionLog {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model TestEventJournal {
+  id                  String   @id @default(uuid())
+  session_id          String
+  event_uuid          String   @unique
+  event_type          String
+  event_sub_type      String
+  name                String
+  scopes              String
+  result              String?
+  started_at          DateTime?
+  finished_at         DateTime?
+  start_event_doc     String?
+  finished_event_doc  String?
+  file                String
+}
