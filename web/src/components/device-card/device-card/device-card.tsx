@@ -102,10 +102,10 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             const response = await DeviceFarmApiService.androidStreamingAppInstalled(udid, systemPort);
             console.log('Response:', response);
             if (response.status === 200) {
-              window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
+              window.location.href = `#/androidStream?port=${appiumPort}&platform=android&host=${appiumHost}&udid=${udid}&width=${response.device.width}&height=${response.device.height}`;
             }
           } else {
-            window.location.href = `#/androidStream?port=${appiumPort}&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
+            window.location.href = `#/androidStream?port=${appiumPort}&platform=android&host=${appiumHost}&udid=${udid}&width=${this.props.device.width}&height=${this.props.device.height}`;
           }
         } catch (error) {
           console.error('Error:', error);
@@ -121,7 +121,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
             if (sessionCreationResponse.status === 200) {
               await this.blockDevice(udid, host);
               console.log('Session created successfully');
-              window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
+              window.location.href = `#/iOSStream?port=${appiumPort}&platform=ios&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
             } else {
               alert(`Error creating session check logs ${JSON.stringify(sessionCreationResponse.message)}`);
             }
@@ -130,7 +130,7 @@ export default class DeviceCard extends React.Component<IDeviceCardProps, any> {
           }
           this.setState({ isLoading: false });
         } else {
-          window.location.href = `#/iOSStream?port=${appiumPort}&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
+          window.location.href = `#/iOSStream?port=${appiumPort}&platform=ios&udid=${udid}&host=${appiumHost}&streamPort=${this.props.device.mjpegServerPort}&width=${this.props.device.width}&height=${this.props.device.height}`;
         }
       }
     };

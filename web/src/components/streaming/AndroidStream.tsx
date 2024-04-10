@@ -5,6 +5,7 @@ import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
 import DeviceFarmApiService from '../../api-service';
 import HomeIcon from '@mui/icons-material/Home';
 import { Camera, Upload, Close } from '@mui/icons-material';
+import { toolBarControl } from './util.ts';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -88,20 +89,7 @@ function AndroidStream() {
   }, []);
 
   async function onToolbarControlClick(controlAction: string) {
-    console.log('Sending event', ws, JSON.stringify({ action: controlAction }));
-    if(controlAction === 'close') {
-      console.log('Closing session');
-      const { udid } = getParamsFromUrl() as any;
-      const response = await DeviceFarmApiService.closeSession(udid);
-      if(response.status === 200) {
-        window.location.href = '/device-farm/#';
-      }
-    } else {
-      //const { udid } = getWebSocketPort() as any;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ws.send(JSON.stringify({ action: controlAction }));
-    }
+    await toolBarControl(ws, controlAction, getParamsFromUrl);
   }
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

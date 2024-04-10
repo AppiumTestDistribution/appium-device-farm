@@ -4,8 +4,7 @@ import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
 import { Camera, Close, Upload } from '@mui/icons-material';
-import { uploadFile } from './upload.ts';
-import DeviceFarmApiService from '../../api-service';
+import { toolBarControl, uploadFile } from './util.ts';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -67,9 +66,6 @@ function IOSStream() {
 
     createWebSocketConnection(wsUrl);
     return () => {
-      // Clean up the WebSocket connection when the component is unmounted
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //ws.removeEventListener('message', handleWebSocketMessage);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       ws.close();
@@ -97,20 +93,7 @@ function IOSStream() {
   }, []);
   const { host, port, streamPort } = getParamsFromUrl() as any;
   async function onToolbarControlClick(controlAction: string) {
-    console.log('Sending event', ws, JSON.stringify({ action: controlAction }));
-    if(controlAction === 'close') {
-      console.log('Closing session');
-      const { udid } = getParamsFromUrl() as any;
-      const response = await DeviceFarmApiService.closeSession(udid);
-      if(response.status === 200) {
-        window.location.href = '/device-farm/#';
-      }
-    } else {
-      //const { udid } = getWebSocketPort() as any;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ws.send(JSON.stringify({ action: controlAction }));
-    }
+    await toolBarControl(ws, controlAction, getParamsFromUrl);
   }
   return (
     <div className="streaming-container">
@@ -153,7 +136,7 @@ function IOSStream() {
               action: 'upload',
               icon: (
                 <div>
-                  <label htmlFor="input-file">Upload IPA</label>
+                  <label htmlFor="input-file">Upload IPA/App</label>
                   <Upload
                     onClick={uploadAUT}
                   />
@@ -161,7 +144,7 @@ function IOSStream() {
                     type="file"
                     onChange={handleFileChange}
                     name="fileUpload"
-                    accept="ipa, app, zip"
+                    accept="ipa, app"
                   />
                 </div>
               ),
