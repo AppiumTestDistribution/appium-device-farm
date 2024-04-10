@@ -3,7 +3,9 @@ import HomeIcon from '@mui/icons-material/Home';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
-import { Camera } from '@mui/icons-material';
+import { Camera, Close, Upload } from '@mui/icons-material';
+import { uploadFile } from './upload.ts';
+import DeviceFarmApiService from '../../api-service';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -14,6 +16,7 @@ function IOSStream() {
   const containerElement = useRef<HTMLDivElement>(null);
   const videoElement = useRef<HTMLImageElement>(null);
   const canvasElement = useRef<HTMLCanvasElement>(null);
+  const [file, setFile] = useState(null);
   let interactionHandler: SimpleInterationHandler | null;
 
   // eslint-disable-next-line prefer-const
@@ -28,6 +31,19 @@ function IOSStream() {
     });
     setWebSocket(ws);
     return ws;
+  };
+
+  const uploadAUT = async () => {
+    await uploadFile(file, getParamsFromUrl)
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const selectedFile = event.target.files[0];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    setFile(selectedFile);
   };
 
   const getParamsFromUrl = () => {
@@ -80,12 +96,21 @@ function IOSStream() {
     }
   }, []);
   const { host, port, streamPort } = getParamsFromUrl() as any;
-  function onToolbarControlClick(controlAction: string) {
-    console.log('Sending home button event', ws);
-    //const { udid } = getWebSocketPort() as any;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ws.send(JSON.stringify({ action: controlAction }));
+  async function onToolbarControlClick(controlAction: string) {
+    console.log('Sending event', ws, JSON.stringify({ action: controlAction }));
+    if(controlAction === 'close') {
+      console.log('Closing session');
+      const { udid } = getParamsFromUrl() as any;
+      const response = await DeviceFarmApiService.closeSession(udid);
+      if(response.status === 200) {
+        window.location.href = '/device-farm/#';
+      }
+    } else {
+      //const { udid } = getWebSocketPort() as any;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      ws.send(JSON.stringify({ action: controlAction }));
+    }
   }
   return (
     <div className="streaming-container">
@@ -124,6 +149,29 @@ function IOSStream() {
           controls={[
             { action: 'home', icon: <HomeIcon />, name: 'Home' },
             { action: 'screenshot', icon: <Camera />, name: 'screenshot' },
+            {
+              action: 'upload',
+              icon: (
+                <div>
+                  <label htmlFor="input-file">Upload IPA</label>
+                  <Upload
+                    onClick={uploadAUT}
+                  />
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    name="fileUpload"
+                    accept="ipa, app, zip"
+                  />
+                </div>
+              ),
+              name: ''
+            },
+            {
+              action: 'close',
+              icon: <Close />,
+              name: 'Close Session',
+            },
           ]}
           onClickCallback={onToolbarControlClick}
         />
