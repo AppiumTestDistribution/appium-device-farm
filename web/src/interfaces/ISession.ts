@@ -19,4 +19,5 @@ export interface ISession {
   createdAt: string;
   updatedAt: string;
   live?: string;
+  appProfiling?: string;
 }

@@ -398,6 +398,7 @@ class DevicePlugin extends BasePlugin {
           deviceFarmCapabilities,
           pluginNodeId: DevicePlugin.NODE_ID,
           driver: driver,
+          adb: DevicePlugin.adbInstance,
         }),
       );
 

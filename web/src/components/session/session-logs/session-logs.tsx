@@ -7,6 +7,8 @@ import DeviceLogs from './device-logs/device-log';
 import { IDeviceLogs } from '../../../interfaces/IDeviceLogs';
 import { useParams } from 'react-router-dom';
 import { ISession } from '../../../interfaces/ISession';
+import { IAppProfilingLogs } from '../../../interfaces/IAppProfilingLogs';
+import AppProfiling from './app-profiling/app-profiling';
 
 enum ActiveTab {
   TextLogs = 'textLogs',
@@ -21,8 +23,7 @@ function SessionLogs(props: { session: ISession }) {
   const { sessionId } = useParams();
   const [sessionLogs, setSessionLogs] = useState<ISessionLogs[]>([]);
   const [deviceLogs, setDeviceLogs] = useState<IDeviceLogs[]>([]);
-  const [showImages, setShowImages] = useState(false);
-  const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+  const [appProfilingLogs, setAppProfilingLogs] = useState<IAppProfilingLogs | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.TextLogs);
 
   useEffect(() => {
@@ -35,6 +36,10 @@ function SessionLogs(props: { session: ISession }) {
           setDeviceLogs(deviceLogs);
         } else {
           setDeviceLogs([]);
+        }
+        if (session.appProfiling) {
+          const appProfiling = await DeviceFarmApiService.getAppProfiling(sessionId as string);
+          setAppProfilingLogs(appProfiling);
         }
         const baseURL = window.location.protocol + '//' + window.location.host;
         setBaseUrl(baseURL);
@@ -59,55 +64,35 @@ function SessionLogs(props: { session: ISession }) {
         >
           Text Logs
         </div>
-        <div
-          className={`tab-header ${activeTab === ActiveTab.DeviceLogs ? 'active' : ''}`}
-          onClick={() => handleTabClick(ActiveTab.DeviceLogs)}
-        >
-          Device Logs
-        </div>
-        <div
+        {session.deviceLogs && (
+          <div
+            className={`tab-header ${activeTab === ActiveTab.DeviceLogs ? 'active' : ''}`}
+            onClick={() => handleTabClick(ActiveTab.DeviceLogs)}
+          >
+            Device Logs
+          </div>
+        )}
+        {/* <div
           className={`tab-header ${activeTab === ActiveTab.DebugLogs ? 'active' : ''}`}
           onClick={() => handleTabClick(ActiveTab.DebugLogs)}
         >
           Debug Logs
-        </div>
-        <div
-          className={`tab-header ${activeTab === ActiveTab.AppProfiling ? 'active' : ''}`}
-          onClick={() => handleTabClick(ActiveTab.AppProfiling)}
-        >
-          App Profiling
-        </div>
-      </div>
-      <div className="tab-filter">
-        <div className="checkbox-container">
-          <input
-            type="checkbox"
-            id="show-images"
-            checked={showImages}
-            onChange={() => setShowImages(!showImages)}
-          />
-          <label htmlFor="show-images">Show Images</label>
-        </div>
-        <div className="checkbox-container">
-          <input
-            type="checkbox"
-            id="show-errors"
-            checked={showErrorsOnly}
-            onChange={() => setShowErrorsOnly(!showErrorsOnly)}
-          />
-          <label htmlFor="show-errors">Show Errors Only</label>
-        </div>
+        </div> */}
+        {session.appProfiling && (
+          <div
+            className={`tab-header ${activeTab === ActiveTab.AppProfiling ? 'active' : ''}`}
+            onClick={() => handleTabClick(ActiveTab.AppProfiling)}
+          >
+            App Profiling
+          </div>
+        )}
       </div>
       <div className="tab-content">
-        {activeTab === ActiveTab.TextLogs && (
-          <TextLogs
-            sessionLogs={sessionLogs}
-            showImages={showImages}
-            showErrorsOnly={showErrorsOnly}
-            baseUrl={url}
-          />
-        )}
+        {activeTab === ActiveTab.TextLogs && <TextLogs sessionLogs={sessionLogs} baseUrl={url} />}
         {activeTab === ActiveTab.DeviceLogs && <DeviceLogs deviceLogs={deviceLogs} />}
+        {activeTab === ActiveTab.AppProfiling && (
+          <AppProfiling appProfilingLogs={appProfilingLogs as any} session={session} />
+        )}
       </div>
     </div>
   );

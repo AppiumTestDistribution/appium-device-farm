@@ -1,3 +1,4 @@
+import ADB from 'appium-adb';
 import { IDevice } from './IDevice';
 
 export type IDeviceFarmSessionOptions = {
@@ -7,4 +8,5 @@ export type IDeviceFarmSessionOptions = {
   sessionResponse: Record<string, any>;
   pluginNodeId: string;
   driver: any;
+  adb: ADB;
 };

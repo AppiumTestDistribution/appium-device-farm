@@ -62,4 +62,8 @@ export default class DeviceFarmApiService {
     );
     return response?.logs || [];
   }
+
+  public static async getAppProfiling(sessionId: string) {
+    return apiClient.makeGETRequest(`/dashboard/session/${sessionId}/app_profiling`, {});
+  }
 }

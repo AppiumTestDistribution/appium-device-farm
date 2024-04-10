@@ -27,6 +27,7 @@ model Session {
   hasLiveVideo        Boolean      @map("has_live_video")
   videoRecording      String?      @map("video_recording")
   deviceLogs          String?      @map("device_logs")
+  appProfiling        String?      @map("app_profiling")
   startTime           DateTime     @default(now()) @map("start_time")
   endTime             DateTime?    @map("end_time")
   failureReason       String?      @map("failure_reason")
