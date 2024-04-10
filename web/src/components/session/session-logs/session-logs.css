@@ -16,9 +16,9 @@
   cursor: pointer;
   font-weight: bold;
   text-align: center;
-  width: 100%;
+  max-width: 150px;
   padding: 16px;
-  border-bottom: 1px solid gray;
+  font-size: 13px;
 }
 
 .session-logs .tab-header.active {
@@ -45,4 +45,5 @@
 
 .session-logs .tab-content {
   overflow-y: auto;
+  border-top: 1px solid gray;
 }

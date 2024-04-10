@@ -13,7 +13,7 @@ interface TextLogsProps {
 
 function TextLogs({ sessionLogs, baseUrl }: TextLogsProps) {
   const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(null);
-  const [showImages, setShowImages] = useState(false);
+  const [showImages, setShowImages] = useState(true);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
 
   return (
@@ -41,7 +41,7 @@ function TextLogs({ sessionLogs, baseUrl }: TextLogsProps) {
       <div className="text-logs">
         {sessionLogs
           .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-          .filter((sessionLog) => (showErrorsOnly ? !sessionLog.isSuccess : sessionLog.isSuccess))
+          .filter((sessionLog) => (showErrorsOnly ? !sessionLog.isSuccess : true))
           .map((sessionLog, index, array) => {
             const currentTime = new Date(sessionLog.createdAt);
             const nextTime = index < array.length - 1 ? new Date(array[index + 1].createdAt) : null;
@@ -55,7 +55,10 @@ function TextLogs({ sessionLogs, baseUrl }: TextLogsProps) {
             const formattedBody = JSON.stringify(body, null, 2);
 
             return (
-              <div key={sessionLog.id} className="text-log">
+              <div
+                key={sessionLog.id}
+                className={`text-log ${sessionLog.isSuccess ? '' : 'failed'}`}
+              >
                 <div className="text-log-header">
                   <div className="title">{sessionLog.title}</div>
                   <div className="accessibility">

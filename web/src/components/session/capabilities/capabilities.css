@@ -13,10 +13,12 @@
 
 .tab-header {
   cursor: pointer;
-  font-weight: bold;
   width: 100%;
   padding: 8px 16px;
+  margin: 12px 0 0 0;
   border-bottom: 1px solid gray;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .tab-header.active {

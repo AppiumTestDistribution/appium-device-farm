@@ -64,7 +64,7 @@
   justify-content: space-between;
   align-items: center;
   color: #999;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .details-item_icon {
@@ -107,7 +107,7 @@
   gap: 4px;
   align-items: center;
   color: #999;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .build-item_session_details_item > img {

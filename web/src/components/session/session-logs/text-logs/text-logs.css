@@ -58,13 +58,13 @@
 }
 
 .session-logs .text-log-response span {
-  font-size: 14px;
+  font-size: 11px;
   margin: 0;
   color: rgb(203, 75, 22);
 }
 
 .session-logs .text-log-response p {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #808080;
   margin: 0 0 8px 0;
@@ -72,6 +72,10 @@
 
 .text-log-screenshot {
   margin: 8px;
-  width: 50%;
+  width: 220px;
   height: auto;
+}
+
+.session-logs .failed {
+  background-color: #f5eab5;
 }

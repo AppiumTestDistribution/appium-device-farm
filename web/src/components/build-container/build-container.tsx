@@ -50,12 +50,11 @@ function BuildContainer({
       </div>
       <div className="build-list">
         {builds.map((build) => (
-          <>
+          <div key={`build-container-${build.id}`}>
             <div
               className={`build-item ${
                 selectedBuild?.id === build.id && !sessionId && 'build-item_selected'
               } `}
-              key={build.id}
               onClick={() => handleBuildClick(build.id)}
             >
               <p className="build-item_name">{build.name}</p>
@@ -78,7 +77,7 @@ function BuildContainer({
                   .filter((session) => session.buildId === build.id)
                   .map((session) => (
                     <div
-                      key={session.buildId}
+                      key={`build-${session.buildId}-session${session.id}`}
                       className={`build-item_session ${
                         sessionId === session.id && 'build-item_session_selected'
                       }`}
@@ -95,12 +94,15 @@ function BuildContainer({
                           />
                           <span>{session.deviceName}</span>
                         </div>
+                        <div className="build-item_session_details_item">
+                          <span>{session.status}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
               </div>
             )}
-          </>
+          </div>
         ))}
       </div>
     </div>

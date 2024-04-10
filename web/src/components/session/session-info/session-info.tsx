@@ -19,64 +19,69 @@ function SessionInfo({ session }: { session: ISession }) {
 
   function getAppName(capabilities: string) {
     const capabilitiesObject = JSON.parse(capabilities);
-    return capabilitiesObject.app.split('/').pop();
+    return capabilitiesObject.appPackage || '-';
   }
 
   return (
-    <div className="session-info">
-      <div className="session-info-column">
-        <div className="session-info-item">
-          <p className="session-info-item_title">Session Id:</p>
-          <p className="session-info-item_value">{session.id}</p>
+    <div className="session-info-container">
+      <div className="session-info">
+        <div className="session-info-column">
+          <div className="session-info-item">
+            <p className="session-info-item_title">Session Id:</p>
+            <p className="session-info-item_value">{session.id}</p>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">Start Time:</p>
+            <p className="session-info-item_value">{session.startTime}</p>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">Device Name:</p>
+            <div className="session-info-item_value">
+              <img src={MobileIcon} alt="device icon" />
+              <p>{session.deviceName}</p>
+            </div>
+          </div>
         </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">Start Time:</p>
-          <p className="session-info-item_value">{session.startTime}</p>
+        <div className="session-info-column">
+          <div className="session-info-item">
+            <p className="session-info-item_title">OS:</p>
+            <div className="session-info-item_value">
+              <img
+                src={session.devicePlatform === 'android' ? AndroidIcon : AppleIcon}
+                alt="device platform"
+              />
+              <p>{session.devicePlatform}</p>
+            </div>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">End Time:</p>
+            <p className="session-info-item_value">{session.endTime || session.status}</p>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">UDID:</p>
+            <p className="session-info-item_value">{session.deviceUDID}</p>
+          </div>
         </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">Device Name:</p>
-          <div className="session-info-item_value">
-            <img src={MobileIcon} alt="device icon" />
-            <p>{session.deviceName}</p>
+        <div className="session-info-column">
+          <div className="session-info-item">
+            <p className="session-info-item_title">OS Version:</p>
+            <p className="session-info-item_value">{session.deviceVersion}</p>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">Duration:</p>
+            <p className="session-info-item_value">
+              {runningTime(session.startTime, session.endTime)}
+            </p>
+          </div>
+          <div className="session-info-item">
+            <p className="session-info-item_title">App:</p>
+            <p className="session-info-item_value">{getAppName(session.sessionCapabilities)}</p>
           </div>
         </div>
       </div>
-      <div className="session-info-column">
-        <div className="session-info-item">
-          <p className="session-info-item_title">OS:</p>
-          <div className="session-info-item_value">
-            <img
-              src={session.devicePlatform === 'android' ? AndroidIcon : AppleIcon}
-              alt="device platform"
-            />
-            <p>{session.devicePlatform}</p>
-          </div>
-        </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">End Time:</p>
-          <p className="session-info-item_value">{session.endTime || session.status}</p>
-        </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">UDID:</p>
-          <p className="session-info-item_value">{session.deviceUDID}</p>
-        </div>
-      </div>
-      <div className="session-info-column">
-        <div className="session-info-item">
-          <p className="session-info-item_title">OS Version:</p>
-          <p className="session-info-item_value">{session.deviceVersion}</p>
-        </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">Duration:</p>
-          <p className="session-info-item_value">
-            {runningTime(session.startTime, session.endTime)}
-          </p>
-        </div>
-        <div className="session-info-item">
-          <p className="session-info-item_title">App:</p>
-          <p className="session-info-item_value">{getAppName(session.desiredCapabilities)}</p>
-        </div>
-      </div>
+      {session.status?.toLowerCase() == 'running' && (
+        <div className="session-running-indicator"></div>
+      )}
     </div>
   );
 }
