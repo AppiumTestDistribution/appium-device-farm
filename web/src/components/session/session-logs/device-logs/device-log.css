@@ -1,0 +1,16 @@
+.device-logs {
+    background-color: #010409;
+    color: #e6edf4;
+    padding: 16px;
+}
+
+.log-line {
+    word-wrap: break-word;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+.log-line-number {
+    color: #848d97;
+    margin-right: 10px;
+}

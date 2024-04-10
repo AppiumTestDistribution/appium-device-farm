@@ -9,6 +9,7 @@ export interface ISession {
   hasLiveVideo: boolean;
   videoRecording: string | null;
   startTime: string;
+  deviceLogs: string;
   endTime: string | null;
   failureReason: string | null;
   deviceUDID: string;

@@ -38,4 +38,5 @@
 
 .session-body {
   display: flex;
+  max-height: calc(100% - 200px);
 }

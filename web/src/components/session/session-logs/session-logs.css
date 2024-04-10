@@ -2,9 +2,10 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 70%;
   margin: 16px;
   border: 1px solid #808080;
+  height: calc(100% - 30px);
 }
 
 .session-logs .tabs {
@@ -43,6 +44,5 @@
 }
 
 .session-logs .tab-content {
-  max-height: 400px;
   overflow-y: auto;
 }

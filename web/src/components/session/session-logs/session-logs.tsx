@@ -3,6 +3,10 @@ import './session-logs.css';
 import { ISessionLogs } from '../../../interfaces/ISessionLogs';
 import TextLogs from './text-logs/text-logs';
 import DeviceFarmApiService from '../../../api-service';
+import DeviceLogs from './device-logs/device-log';
+import { IDeviceLogs } from '../../../interfaces/IDeviceLogs';
+import { useParams } from 'react-router-dom';
+import { ISession } from '../../../interfaces/ISession';
 
 enum ActiveTab {
   TextLogs = 'textLogs',
@@ -11,9 +15,12 @@ enum ActiveTab {
   AppProfiling = 'appProfiling',
 }
 
-function SessionLogs({ sessionId }: any) {
+function SessionLogs(props: { session: ISession }) {
+  const { session } = props;
   const [url, setBaseUrl] = useState<string>();
+  const { sessionId } = useParams();
   const [sessionLogs, setSessionLogs] = useState<ISessionLogs[]>([]);
+  const [deviceLogs, setDeviceLogs] = useState<IDeviceLogs[]>([]);
   const [showImages, setShowImages] = useState(false);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.TextLogs);
@@ -21,8 +28,14 @@ function SessionLogs({ sessionId }: any) {
   useEffect(() => {
     async function init() {
       try {
-        const sessionLogs = await DeviceFarmApiService.getSessionLogs(sessionId);
+        const sessionLogs = await DeviceFarmApiService.getSessionLogs(sessionId as string);
         setSessionLogs(sessionLogs);
+        if (session.deviceLogs) {
+          const deviceLogs = await DeviceFarmApiService.getDeviceLogs(sessionId as string);
+          setDeviceLogs(deviceLogs);
+        } else {
+          setDeviceLogs([]);
+        }
         const baseURL = window.location.protocol + '//' + window.location.host;
         setBaseUrl(baseURL);
         console.log('Base URL:', url);
@@ -31,7 +44,7 @@ function SessionLogs({ sessionId }: any) {
       }
     }
     init();
-  }, []);
+  }, [sessionId, url]);
 
   const handleTabClick = (tab: ActiveTab) => {
     setActiveTab(tab);
@@ -94,6 +107,7 @@ function SessionLogs({ sessionId }: any) {
             baseUrl={url}
           />
         )}
+        {activeTab === ActiveTab.DeviceLogs && <DeviceLogs deviceLogs={deviceLogs} />}
       </div>
     </div>
   );

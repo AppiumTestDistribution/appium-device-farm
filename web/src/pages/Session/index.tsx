@@ -66,7 +66,7 @@ function Session() {
             <SessionInfo session={selectedSession} />
             <div className="session-body">
               <Capabilities session={selectedSession} />
-              <SessionLogs sessionId={selectedSession.id} />
+              <SessionLogs session={selectedSession} />
             </div>
           </div>
         )}

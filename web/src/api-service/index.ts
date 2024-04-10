@@ -6,11 +6,15 @@ export default class DeviceFarmApiService {
   }
 
   public static androidStreamingAppInstalled(udid: string, systemPort: number) {
-    return apiClient.makePOSTRequest('/installAndroidStreamingApp', {}, {udid, systemPort});
+    return apiClient.makePOSTRequest('/installAndroidStreamingApp', {}, { udid, systemPort });
   }
 
   public static createSession(udid: string, systemPort: number) {
-    return apiClient.makePOSTRequest('/appiumSession', {}, {udid, systemPort, origin: window.location.origin});
+    return apiClient.makePOSTRequest(
+      '/appiumSession',
+      {},
+      { udid, systemPort, origin: window.location.origin },
+    );
   }
   public static installWDAOnDevice(udid: string) {
     return apiClient.makePOSTRequest('/installiOSWDA', {}, { udid });
@@ -48,6 +52,14 @@ export default class DeviceFarmApiService {
   }
 
   public static closeSession(udid: string) {
-    return apiClient.makePOSTRequest('/closeSession', {}, {udid, origin: window.location.origin});
+    return apiClient.makePOSTRequest('/closeSession', {}, { udid, origin: window.location.origin });
+  }
+
+  public static async getDeviceLogs(sessionId: string) {
+    const response = await apiClient.makeGETRequest(
+      `/dashboard/session/${sessionId}/device_logs`,
+      {},
+    );
+    return response?.logs || [];
   }
 }

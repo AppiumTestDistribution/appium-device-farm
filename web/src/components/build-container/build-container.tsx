@@ -5,7 +5,7 @@ import AndroidIcon from '../../assets/android-new-icon.svg';
 import AppleIcon from '../../assets/apple-new-icon.svg';
 import { IBuild } from '../../interfaces/IBuild';
 import { ISession } from '../../interfaces/ISession';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function BuildContainer({
   selectedBuild,
@@ -18,8 +18,8 @@ function BuildContainer({
   builds: IBuild[];
   sessions: ISession[];
 }) {
-  const path = window.location.pathname;
   const navigate = useNavigate();
+  const { sessionId } = useParams();
 
   function timeAgo(createdAt: string | number | Date) {
     const currentDate = new Date();
@@ -41,10 +41,6 @@ function BuildContainer({
       return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
     }
   }
-
-  const buildId = path.match(/builds\/(.+?)\//)?.[1];
-  const sessionId = path.match(/session\/(.+?)$/)?.[1];
-  console.log({ buildId, sessionId });
 
   return (
     <div className="build-container">

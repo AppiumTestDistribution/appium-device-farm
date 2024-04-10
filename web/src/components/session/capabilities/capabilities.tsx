@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ISession } from '../../../interfaces/ISession';
 import './capabilities.css';
 
@@ -13,6 +13,10 @@ enum ActiveTab {
 
 function Capabilities({ session }: CapabilitiesProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.DesiredCapabilities);
+
+  useEffect(() => {
+    setActiveTab(ActiveTab.DesiredCapabilities);
+  }, [session]);
 
   const renderKeyValuePairs = (data: string) => {
     const parsedData = JSON.parse(data);
@@ -37,11 +41,13 @@ function Capabilities({ session }: CapabilitiesProps) {
         <img
           src={source}
           style={{
-            maxHeight: '40%',
+            width: '250px',
+            height: 'auto',
+            margin: 'auto',
           }}
         />
       );
-    } else {
+    } else if (session.videoRecording) {
       return (
         <video
           controls
@@ -50,14 +56,27 @@ function Capabilities({ session }: CapabilitiesProps) {
           }`}
         />
       );
+    } else {
+      return (
+        <div
+          style={{
+            width: '100%',
+            height: '300px',
+            paddingTop: '25%',
+            textAlign: 'center',
+            fontSize: '18px',
+          }}
+        >
+          <b>Video recording not available</b>
+        </div>
+      );
     }
   }
 
   return (
     <div className="capabilities">
       {getVideoCompoment()}
-      console.log(session);
-      <div className="download">
+      {/* <div className="download">
         <a
           href={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
             session.videoRecording
@@ -66,7 +85,7 @@ function Capabilities({ session }: CapabilitiesProps) {
         >
           Download
         </a>
-      </div>
+      </div> */}
       <div className="tabs">
         <div
           className={`tab-header ${activeTab === ActiveTab.DesiredCapabilities ? 'active' : ''}`}

@@ -19,6 +19,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   MIN_SDK = 'minSDK',
   MAX_SDK = 'maxSDK',
   FILTER_BY_HOST = 'filterByHost',
+  SAVE_DEVICE_LOGS = 'saveDeviceLogs',
 }
 
 function isCapabilityAlreadyPresent(caps: ISessionCapability, capabilityName: string) {
