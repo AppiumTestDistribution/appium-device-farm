@@ -408,7 +408,7 @@ class DevicePlugin extends BasePlugin {
       if (device.platform.toLowerCase() === 'ios' && !isRemoteOrCloudSession) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const { server, port, scheme, sessionId } = Object.values(driver.sessions)[0].wda.jwproxy;
+        const { server, port, scheme } = driver.sessions[sessionId].wda.jwproxy;
 
         const proxiedInfo = {
           proxyUrl: `${scheme}://${server}:${port}`,
@@ -577,7 +577,12 @@ class DevicePlugin extends BasePlugin {
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     const res = await next();
-    await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
+    try {
+      await waitForWebsocketToBeDeregister(this.pluginArgs, DevicePlugin.httpServer);
+      await DevicePlugin.registerWebSocket(this.pluginArgs);
+    } catch (err) {
+      log.info('Socket server not removed within 5000ms. So not registering again');
+    }
     return res;
   }
 }

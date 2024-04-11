@@ -20,7 +20,8 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-json-view": "^1.21.3",
-    "react-router-dom": "^6.21.1"
+    "react-router-dom": "^6.21.1",
+    "react-use-websocket": "^3.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

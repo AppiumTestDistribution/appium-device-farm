@@ -9,7 +9,7 @@
 .device-container {
   display: flex;
   flex-direction: row;
-  gap: 0;
+  gap: 10px;
 }
 
 .toolbar-container {

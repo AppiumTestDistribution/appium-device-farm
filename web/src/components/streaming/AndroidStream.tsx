@@ -6,12 +6,14 @@ import DeviceFarmApiService from '../../api-service';
 import HomeIcon from '@mui/icons-material/Home';
 import { Camera, Upload, Close } from '@mui/icons-material';
 import { toolBarControl } from './util.ts';
+import DeviceLoading from '../../assets/device-loading.gif';
+import useWebSocket from 'react-use-websocket';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
 
 function AndroidStream() {
-  const [imageSrc, setImageSrc] = useState('');
+  const [imageSrc, setImageSrc] = useState(DeviceLoading);
   const [file, setFile] = useState(null);
 
   const containerElement = useRef<HTMLDivElement>(null);
@@ -19,22 +21,10 @@ function AndroidStream() {
   const canvasElement = useRef<HTMLCanvasElement>(null);
   let interactionHandler: SimpleInterationHandler | null;
 
-  // eslint-disable-next-line prefer-const
-  let [ws, setWebSocket] = useState<WebSocket | undefined>(undefined);
   const handleWebSocketMessage = (event: { data: any }) => {
     const blob = event.data;
     const url = URL.createObjectURL(blob);
     setImageSrc(url);
-  };
-
-  const createWebSocketConnection = (wsUrl: string) => {
-    ws = new WebSocket(wsUrl);
-    ws.addEventListener('message', handleWebSocketMessage);
-    ws.addEventListener('close', () => {
-      console.log('WebSocket connection closed. Reconnecting...');
-      createWebSocketConnection(wsUrl);
-    });
-    return ws;
   };
 
   const getParamsFromUrl = () => {
@@ -51,22 +41,15 @@ function AndroidStream() {
       return { port: 8004, host: '127.0.0.1', udid: '' };
     }
   };
-  useEffect(() => {
-    const { host, udid, port } = getParamsFromUrl() as any;
-    const wsUrl = `ws://${host}:${port}/android-stream/${udid}`;
-
-    createWebSocketConnection(wsUrl);
-    setWebSocket(ws);
-    return () => {
-      // Clean up the WebSocket connection when the component is unmounted
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ws.removeEventListener('message', handleWebSocketMessage);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      ws.close();
-    };
-  }, []);
+  const { host, udid, port } = getParamsFromUrl() as any;
+  const wsUrl = `ws://${host}:${port}/android-stream/${udid}`;
+  const { sendMessage } = useWebSocket(wsUrl, {
+    share: false,
+    shouldReconnect: () => true,
+    onMessage: handleWebSocketMessage,
+    reconnectInterval: 1500,
+    reconnectAttempts: 15,
+  });
 
   useEffect(() => {
     const { width, height } = getParamsFromUrl() as any;
@@ -82,14 +65,14 @@ function AndroidStream() {
         videoElement.current as any,
         canvasElement.current,
         containerElement.current,
-        ws,
+        { send: sendMessage },
         { width, height },
       );
     }
   }, []);
 
   async function onToolbarControlClick(controlAction: string) {
-    await toolBarControl(ws, controlAction, getParamsFromUrl);
+    await toolBarControl({ send: sendMessage } as any, controlAction, getParamsFromUrl);
   }
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -185,9 +168,7 @@ function AndroidStream() {
               icon: (
                 <div>
                   <label htmlFor="input-file">Upload APK</label>
-                  <Upload
-                    onClick={uploadFile}
-                  />
+                  <Upload onClick={uploadFile} />
                   <input
                     type="file"
                     onChange={handleFileChange}
@@ -196,7 +177,7 @@ function AndroidStream() {
                   />
                 </div>
               ),
-              name: ''
+              name: '',
             },
             {
               action: 'close',
