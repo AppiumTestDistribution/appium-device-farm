@@ -17,6 +17,7 @@ const capabilities = {
     recordVideo: true,
     screenshotOnFailure: true,
     build: new Date().toISOString(),
+    saveDeviceLogs: true,
   },
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
