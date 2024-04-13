@@ -6,22 +6,26 @@ export default class DeviceFarmApiService {
   }
 
   public static androidStreamingAppInstalled(udid: string, systemPort: number) {
-    return apiClient.makePOSTRequest('/installAndroidStreamingApp', {}, { udid, systemPort });
+    return apiClient.makePOSTRequest(
+      '/dashboard/installAndroidStreamingApp',
+      {},
+      { udid, systemPort },
+    );
   }
 
   public static createSession(udid: string, systemPort: number) {
     return apiClient.makePOSTRequest(
-      '/appiumSession',
+      '/dashboard/appiumSession',
       {},
       { udid, systemPort, origin: window.location.origin },
     );
   }
   public static installWDAOnDevice(udid: string) {
-    return apiClient.makePOSTRequest('/installiOSWDA', {}, { udid });
+    return apiClient.makePOSTRequest('/dashboard/installiOSWDA', {}, { udid });
   }
 
   public static installApk(udid: string, apkPath: string) {
-    return apiClient.makePOSTRequest('/installApk', {}, { udid, apkPath });
+    return apiClient.makePOSTRequest('/dashboard/installApk', {}, { udid, apkPath });
   }
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
@@ -52,7 +56,11 @@ export default class DeviceFarmApiService {
   }
 
   public static closeSession(udid: string) {
-    return apiClient.makePOSTRequest('/closeSession', {}, { udid, origin: window.location.origin });
+    return apiClient.makePOSTRequest(
+      '/dashboard/closeSession',
+      {},
+      { udid, origin: window.location.origin },
+    );
   }
 
   public static async getDeviceLogs(sessionId: string) {

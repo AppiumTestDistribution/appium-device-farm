@@ -69,14 +69,11 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import { installStreamingApp } from './modules/device-control/androidStreaming';
-import {
-  registerAndroidWebSocketHandlers,
-  registerIOSWebSocketHandlers,
-  waitForWebsocketToBeDeregister,
-} from './WebsocketHandler';
-import { downloadAndroidStreamAPK, streamAndroid } from './modules/device-control/DeviceHelper';
 import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
+import { BeforeSessionCreatedEvent } from './events/before-session-create-event';
+import SessionType from './enums/SessionType';
+import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
+import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -125,9 +122,7 @@ class DevicePlugin extends BasePlugin {
         deviceFilter,
       )} onUnexpectedShutdown from server`,
     );
-    await waitForWebsocketToBeDeregister(this.pluginArgs, DevicePlugin.httpServer);
-
-    await DevicePlugin.registerWebSocket(this.pluginArgs);
+    await EventBus.fire(new UnexpectedServerShutdownEvent());
   }
   public static async updateServer(
     expressApp: any,
@@ -135,6 +130,7 @@ class DevicePlugin extends BasePlugin {
     cliArgs: ServerArgs,
   ): Promise<void> {
     DevicePlugin.httpServer = httpServer;
+
     // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
@@ -149,7 +145,17 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
-    externalModule.onPluginLoaded(cliArgs, pluginArgs, pluginConfig, EventBus);
+    if (pluginArgs.platform.toLowerCase() === 'android') {
+      DevicePlugin.adbInstance = ADB.createADB({});
+    }
+    externalModule.onPluginLoaded(
+      cliArgs,
+      pluginArgs,
+      httpServer,
+      pluginConfig,
+      EventBus,
+      DevicePlugin.adbInstance,
+    );
     DevicePlugin.NODE_ID = uuidv4();
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
@@ -159,7 +165,6 @@ class DevicePlugin extends BasePlugin {
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
     }
-    await DevicePlugin.registerWebSocket(pluginArgs);
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
     await initializeStorage();
     (await ADTDatabase.DeviceModel).removeDataOnly();
@@ -263,19 +268,6 @@ class DevicePlugin extends BasePlugin {
     );
   }
 
-  static async registerWebSocket(pluginArgs: IPluginArgs) {
-    if (pluginArgs.platform.toLowerCase() === 'android') {
-      DevicePlugin.adbInstance = await ADB.createADB({});
-      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
-    } else if (pluginArgs.platform.toLowerCase() === 'ios') {
-      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
-    } else {
-      DevicePlugin.adbInstance = await ADB.createADB({});
-      await registerAndroidWebSocketHandlers(DevicePlugin.httpServer, DevicePlugin.adbInstance);
-      await registerIOSWebSocketHandlers(DevicePlugin.httpServer);
-    }
-  }
-
   private static setIncludeSimulatorState(pluginArgs: IPluginArgs, deviceTypes: string) {
     if (hasCloudArgument(pluginArgs)) {
       deviceTypes = 'real';
@@ -342,18 +334,14 @@ class DevicePlugin extends BasePlugin {
       debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
-      if (
-        this.pluginArgs.platform.toLowerCase() === 'android' &&
-        this.pluginArgs.liveStreaming &&
-        !this.pluginArgs.cloud
-      ) {
-        log.info('📱 Live streaming argument is set to true, preparing device for live streaming');
-        const destination = await downloadAndroidStreamAPK();
-        const adbClient = await ADB.createADB({});
-        await installStreamingApp(adbClient, device.udid);
-        log.info(`Installed ${destination} on device ${device.udid}`);
-        await streamAndroid(adbClient, { udid: device.udid, state: 'device' }, device.systemPort);
-      }
+      const sessionType = device.cloud
+        ? SessionType.CLOUD
+        : device.nodeId !== DevicePlugin.NODE_ID
+          ? SessionType.REMOTE
+          : SessionType.LOCAL;
+
+      await EventBus.fire(new BeforeSessionCreatedEvent({ device, sessionType: sessionType }));
+
       session = await next();
       if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
@@ -577,12 +565,7 @@ class DevicePlugin extends BasePlugin {
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     const res = await next();
-    try {
-      await waitForWebsocketToBeDeregister(this.pluginArgs, DevicePlugin.httpServer);
-      await DevicePlugin.registerWebSocket(this.pluginArgs);
-    } catch (err) {
-      log.info('Socket server not removed within 5000ms. So not registering again');
-    }
+    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId }));
     return res;
   }
 }

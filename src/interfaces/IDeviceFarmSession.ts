@@ -1,5 +1,6 @@
 import ADB from 'appium-adb';
 import { IDevice } from './IDevice';
+import SessionType from '../enums/SessionType';
 
 export type IDeviceFarmSessionOptions = {
   sessionId: string;
@@ -9,4 +10,13 @@ export type IDeviceFarmSessionOptions = {
   pluginNodeId: string;
   driver: any;
   adb: ADB;
+};
+
+export type IBeforeSessionCreateEventOptions = {
+  device: IDevice;
+  sessionType: SessionType;
+};
+
+export type IAfterSessionDeletedEventOptions = {
+  sessionId: string;
 };

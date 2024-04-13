@@ -5,7 +5,7 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
-import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
+// import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
@@ -15,7 +15,7 @@ export async function removeDevice(devices: { udid: string; host: string }[]) {
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
   }
-  await setDeviceStateWhenUnplugged();
+  //await setDeviceStateWhenUnplugged();
 }
 
 export async function addNewDevice(devices: IDevice[], host?: string): Promise<IDevice[]> {
@@ -66,9 +66,9 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   log.debug(`Added ${result.length} new devices to local database`);
 
   debugLog(`Added devices: ${JSON.stringify(result)}`);
-  for (const iDevice of result) {
-    await setDeviceState(iDevice);
-  }
+  // for (const iDevice of result) {
+  //   await setDeviceState(iDevice);
+  // }
   debugLog(`All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`);
 
   return result;
