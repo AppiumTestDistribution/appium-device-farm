@@ -124,6 +124,7 @@ class DevicePlugin extends BasePlugin {
     );
     await EventBus.fire(new UnexpectedServerShutdownEvent());
   }
+
   public static async updateServer(
     expressApp: any,
     httpServer: any,
@@ -145,8 +146,11 @@ class DevicePlugin extends BasePlugin {
     } else {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
-    if (pluginArgs.platform.toLowerCase() === 'android') {
-      DevicePlugin.adbInstance = ADB.createADB({});
+    if (
+      pluginArgs.platform.toLowerCase() === 'android' ||
+      pluginArgs.platform.toLowerCase() == 'both'
+    ) {
+      DevicePlugin.adbInstance = await ADB.createADB({});
     }
     externalModule.onPluginLoaded(
       cliArgs,
