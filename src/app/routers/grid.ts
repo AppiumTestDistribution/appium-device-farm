@@ -16,6 +16,7 @@ import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import path from 'path';
 import multer from 'multer';
+import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 
 const SERVER_UP_TIME = new Date().toISOString();
 const uploadDir = path.join(__dirname);
@@ -256,6 +257,19 @@ async function getDevicesFromDeviceManager() {
   return devices;
 }
 
+async function handleTestExecutionMetaData(req: Request, res: Response) {
+  try {
+    await saveTestExecutionMetaData(req);
+    log.info("Saved Test Execution Meta Data.")
+    res.status(200).send('{"message": "Saved Test Execution Meta Data"}');
+  } catch(e) {
+    const response = {message: `Failed to save Test Execution Meta Data. Error: ${e}`}
+    log.error(`Error while handling TestExecutionMetaData.`);
+    log.error(`Sending response - ${response}.`)
+    res.status(500).json(response);
+  }
+}
+
 function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', getDevices);
   router.get('/device/:platform', getDeviceByPlatform);
@@ -289,6 +303,8 @@ function register(router: Router, pluginArgs: IPluginArgs) {
       });
     },
   );
+  // test execution meta data
+  router.post('/handleTestExecutionMetaData', handleTestExecutionMetaData);
 }
 
 export default {
