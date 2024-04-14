@@ -7,6 +7,7 @@ import { Camera, Close, Upload } from '@mui/icons-material';
 import { toolBarControl, uploadFile } from './util.ts';
 import DeviceLoading from '../../assets/device-loading.gif';
 import useWebSocket from 'react-use-websocket';
+import { StreamActionNotifier } from './StreamActionNotifier.tsx';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -31,11 +32,11 @@ function IOSStream() {
   // const [imageSrc, setImageSrc] = useState('');
   const { host, port, udid, width, height, streamPort } = getParamsFromUrl() as any;
   const wsUrl = `ws://${host}:${port}/ios-stream/${udid}`;
-  const { sendMessage } = useWebSocket(wsUrl, {
+  const { sendMessage, getWebSocket } = useWebSocket(wsUrl, {
     share: false,
-    shouldReconnect: () => true,
+    shouldReconnect: (event: CloseEvent) => event.code !== 1000,
     reconnectInterval: 1500,
-    reconnectAttempts: 15,
+    reconnectAttempts: 5,
   });
 
   const containerElement = useRef<HTMLDivElement>(null);
@@ -88,6 +89,7 @@ function IOSStream() {
   }
   return (
     <div className="streaming-container">
+      <StreamActionNotifier ws={getWebSocket() as any} />
       <div className="device-container">
         <div
           style={{

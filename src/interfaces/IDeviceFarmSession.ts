@@ -19,4 +19,5 @@ export type IBeforeSessionCreateEventOptions = {
 
 export type IAfterSessionDeletedEventOptions = {
   sessionId: string;
+  device?: IDevice;
 };

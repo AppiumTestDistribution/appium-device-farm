@@ -21,6 +21,7 @@
     "react-dom": "^18.2.0",
     "react-json-view": "^1.21.3",
     "react-router-dom": "^6.21.1",
+    "react-toastify": "^10.0.5",
     "react-use-websocket": "^3.0.0"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@ import {
 } from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
 import {
+  getDevice,
   setSimulatorState,
   unblockDevice,
   unblockDeviceMatchingFilter,
@@ -122,7 +123,7 @@ class DevicePlugin extends BasePlugin {
         deviceFilter,
       )} onUnexpectedShutdown from server`,
     );
-    await EventBus.fire(new UnexpectedServerShutdownEvent());
+    await EventBus.fire(new UnexpectedServerShutdownEvent({ driver }));
   }
 
   public static async updateServer(
@@ -566,10 +567,13 @@ class DevicePlugin extends BasePlugin {
   }
 
   async deleteSession(next: () => any, driver: any, sessionId: any) {
+    const device = await getDevice({
+      session_id: sessionId,
+    });
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     const res = await next();
-    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId }));
+    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
     return res;
   }
 }

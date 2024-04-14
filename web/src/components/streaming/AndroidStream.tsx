@@ -10,6 +10,7 @@ import { toolBarControl } from './util.ts';
 import DeviceLoading from '../../assets/device-loading.gif';
 import useWebSocket from 'react-use-websocket';
 import { CircularProgress } from '@mui/material';
+import { StreamActionNotifier } from './StreamActionNotifier.tsx';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
@@ -25,6 +26,7 @@ function AndroidStream() {
   const videoElement = useRef<HTMLImageElement>(null);
   const canvasElement = useRef<HTMLCanvasElement>(null);
   let interactionHandler: SimpleInterationHandler | null;
+
   const handleWebSocketMessage = (event: { data: any }) => {
     const blob = event.data;
     const url = URL.createObjectURL(blob);
@@ -47,12 +49,14 @@ function AndroidStream() {
   };
   const { host, udid, port } = getParamsFromUrl() as any;
   const wsUrl = `ws://${host}:${port}/android-stream/${udid}`;
-  const { sendMessage } = useWebSocket(wsUrl, {
+  const { sendMessage, getWebSocket } = useWebSocket(wsUrl, {
     share: false,
-    shouldReconnect: () => true,
+    shouldReconnect: (event: CloseEvent) => {
+      return event.code !== 1000;
+    },
     onMessage: handleWebSocketMessage,
     reconnectInterval: 1500,
-    reconnectAttempts: 15,
+    reconnectAttempts: 5,
   });
 
   useEffect(() => {
@@ -116,19 +120,19 @@ function AndroidStream() {
 
       const { udid } = getParamsFromUrl() as any;
       const res = await DeviceFarmApiService.installApk(udid, data.path);
-      if(res.status === 200) {
+      if (res.status === 200) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-          setAlertType('success');
-          setAlertMessage(res.message);
-        } else {
+        setAlertType('success');
+        setAlertMessage(res.message);
+      } else {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         setAlertType('error');
         setAlertMessage(res.message);
-        }
-        setLoading(false);
-        setShowAlert(true);
+      }
+      setLoading(false);
+      setShowAlert(true);
       // Handle success, if needed
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -137,81 +141,85 @@ function AndroidStream() {
   };
 
   return (
-      <div className="streaming-container">
-        <div className="device-container">
-          <div
+    <div className="streaming-container">
+      <StreamActionNotifier ws={getWebSocket() as any} />
+      <div className="device-container">
+        <div
+          style={{
+            position: 'relative',
+            maxHeight: MAX_HEIGHT + 'px',
+            maxWidth: MAX_WIDTH + 'px',
+          }}
+          ref={containerElement}
+        >
+          <img
             style={{
-              position: 'relative',
               maxHeight: MAX_HEIGHT + 'px',
-              maxWidth: MAX_WIDTH + 'px'
+              maxWidth: MAX_WIDTH + 'px',
+              width: 'auto',
+              position: 'absolute',
             }}
-            ref={containerElement}
-          >
-            <img
-              style={{
-                maxHeight: MAX_HEIGHT + 'px',
-                maxWidth: MAX_WIDTH + 'px',
-                width: 'auto',
-                position: 'absolute'
-              }}
-              src={imageSrc}
-              ref={videoElement}
-              id="outputImage" />
-            <canvas
-              ref={canvasElement}
-              style={{
-                height: '100%',
-                width: '100%',
-                position: 'absolute',
-                cursor: 'pointer',
-                userSelect: 'none'
-              }} />
-          </div>
-          <StreamingToolBar
-            controls={[
-              {
-                action: 'home',
-                icon: <HomeIcon />,
-                name: 'Show Home Screen' //onClick={() => onToolbarControlClick('home')}
-              },
-              {
-                action: 'screenshot',
-                icon: <Camera />,
-                name: 'Capture Screenshot'
-              },
-              {
-                action: 'upload',
-                icon: (
-                  <div>
-                    <label htmlFor="input-file">Upload APK</label>
-                    <Upload onClick={uploadFile} />
-                    <input
-                      type="file"
-                      onChange={handleFileChange}
-                      name="fileUpload"
-
-                      accept="apk, aab" />
-                    {loading && <CircularProgress />}
-                    {showAlert && (
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-expect-error
-                      <Alert severity={alertType} onClose={() => setShowAlert(false)}>
-                        {alertMessage}
-                      </Alert>
-                    )}
-                  </div>
-                ),
-                name: ''
-              },
-              {
-                action: 'close',
-                icon: <Close />,
-                name: 'Close Session'
-              }
-            ]}
-            onClickCallback={onToolbarControlClick} />
+            src={imageSrc}
+            ref={videoElement}
+            id="outputImage"
+          />
+          <canvas
+            ref={canvasElement}
+            style={{
+              height: '100%',
+              width: '100%',
+              position: 'absolute',
+              cursor: 'pointer',
+              userSelect: 'none',
+            }}
+          />
         </div>
+        <StreamingToolBar
+          controls={[
+            {
+              action: 'home',
+              icon: <HomeIcon />,
+              name: 'Show Home Screen', //onClick={() => onToolbarControlClick('home')}
+            },
+            {
+              action: 'screenshot',
+              icon: <Camera />,
+              name: 'Capture Screenshot',
+            },
+            {
+              action: 'upload',
+              icon: (
+                <div>
+                  <label htmlFor="input-file">Upload APK</label>
+                  <Upload onClick={uploadFile} />
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    name="fileUpload"
+                    accept="apk, aab"
+                  />
+                  {loading && <CircularProgress />}
+                  {showAlert && (
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    <Alert severity={alertType} onClose={() => setShowAlert(false)}>
+                      {alertMessage}
+                    </Alert>
+                  )}
+                </div>
+              ),
+              name: '',
+            },
+            {
+              action: 'close',
+              icon: <Close />,
+              name: 'Close Session',
+            },
+          ]}
+          onClickCallback={onToolbarControlClick}
+        />
       </div>
+    </div>
   );
 }
 

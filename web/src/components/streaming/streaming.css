@@ -26,3 +26,8 @@
 .toolbar-control {
   cursor: pointer;
 }
+
+.Toastify__toast-container {
+  width: 100%!important;
+  max-width: 700px;
+}
