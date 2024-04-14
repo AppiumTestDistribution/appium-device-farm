@@ -11,7 +11,7 @@ export class SimpleInterationHandler {
   private scaleRatio!: number;
   private clickStartTime!: number;
 
-    constructor(
+  constructor(
     private videoElement: HTMLElement,
     touchableElement: HTMLCanvasElement,
     containerElement: HTMLDivElement,
@@ -58,7 +58,11 @@ export class SimpleInterationHandler {
       this.mouseDownPoint?.y != this.mouseUpPoint?.y
     ) {
       //swipe action
-      const message = new SwipeControlMessage(this.mouseDownPoint as any, this.mouseUpPoint, Math.ceil(clickEndTime - this.clickStartTime));
+      const message = new SwipeControlMessage(
+        this.mouseDownPoint as any,
+        this.mouseUpPoint,
+        Math.ceil(clickEndTime - this.clickStartTime),
+      );
       this.controlMessageSender.send(JSON.stringify(message.toJSON()));
       console.log(message.toJSON());
       return;

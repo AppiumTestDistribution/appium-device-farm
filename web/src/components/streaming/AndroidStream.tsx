@@ -68,7 +68,7 @@ function AndroidStream() {
       containerElement.current &&
       videoElement.current
     ) {
-      videoElement.current.style.height = height + 'px';
+      //videoElement.current.style.width = width + 'px';
       interactionHandler = new SimpleInterationHandler(
         videoElement.current as any,
         canvasElement.current,
@@ -156,7 +156,7 @@ function AndroidStream() {
             style={{
               maxHeight: MAX_HEIGHT + 'px',
               maxWidth: MAX_WIDTH + 'px',
-              width: 'auto',
+              height: 'auto!important',
               position: 'absolute',
             }}
             src={imageSrc}

@@ -9,8 +9,8 @@ import DeviceLoading from '../../assets/device-loading.gif';
 import useWebSocket from 'react-use-websocket';
 import { StreamActionNotifier } from './StreamActionNotifier.tsx';
 
-const MAX_HEIGHT = 720;
-const MAX_WIDTH = 720;
+const MAX_HEIGHT = 820;
+const MAX_WIDTH = 820;
 
 function IOSStream() {
   const getParamsFromUrl = () => {
@@ -67,7 +67,7 @@ function IOSStream() {
       containerElement.current &&
       videoElement.current
     ) {
-      videoElement.current.style.height = height + 'px';
+      //videoElement.current.style.width = width + 'px';
       interactionHandler = new SimpleInterationHandler(
         videoElement.current as any,
         canvasElement.current,
@@ -103,7 +103,7 @@ function IOSStream() {
             style={{
               maxHeight: MAX_HEIGHT + 'px',
               maxWidth: MAX_WIDTH + 'px',
-              width: 'auto',
+              height: 'auto!important',
               position: 'absolute',
               backgroundImage: `url(${DeviceLoading})`,
               backgroundRepeat: 'no-repeat',
