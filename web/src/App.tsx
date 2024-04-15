@@ -4,6 +4,9 @@ import Sidebar from './components/sidebar';
 import { ToastContainer } from 'react-toastify';
 import './app.css';
 import 'react-toastify/dist/ReactToastify.css';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 function App() {
   return (

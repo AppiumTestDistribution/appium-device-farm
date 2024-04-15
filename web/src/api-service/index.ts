@@ -27,6 +27,7 @@ export default class DeviceFarmApiService {
   public static installApk(udid: string, apkPath: string) {
     return apiClient.makePOSTRequest('/dashboard/installApk', {}, { udid, apkPath });
   }
+
   public static getPendingSessionsCount() {
     return apiClient.makeGETRequest('/queue/length', {});
   }

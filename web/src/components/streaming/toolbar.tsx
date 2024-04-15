@@ -1,10 +1,13 @@
 import 'react';
 import './streaming.css';
+import Tooltip from '@mui/material/Tooltip';
+import { IconButton } from '@mui/material';
 
 export interface Control {
   action: string;
   icon: any;
   name: string;
+  onClick?: (action: string) => void;
 }
 export interface IToolBarProps {
   controls: Array<Control>;
@@ -13,13 +16,18 @@ export interface IToolBarProps {
 
 export function StreamingToolBar(props: IToolBarProps) {
   const { controls, onClickCallback } = props;
+
   return (
     <div className="toolbar-container">
       {controls.map((c, i) => (
-        <div className="toolbar-control" key={i} onClick={() => onClickCallback(c.action)}>
-          {c.icon}
-          <span>{c.name}</span>
-        </div>
+        <Tooltip title={c.name} placement="right-start" key={`tooltip-${i}`}>
+          <IconButton
+            key={i}
+            onClick={() => (c.onClick ? c.onClick(c.action) : onClickCallback(c.action))}
+          >
+            {c.icon}
+          </IconButton>
+        </Tooltip>
       ))}
     </div>
   );

@@ -2,7 +2,15 @@ import { useEffect } from 'react';
 import { toast, ToastOptions, ToastContent } from 'react-toastify';
 import { Timer } from './timer';
 
-export function StreamActionNotifier({ ws }: { ws: WebSocket }) {
+export function StreamActionNotifier({
+  ws,
+  onStreamImage,
+  onScreenshotImage,
+}: {
+  ws: WebSocket;
+  onStreamImage?: (frame: Blob) => void;
+  onScreenshotImage?: (base64Frame: string) => void;
+}) {
   const refreshSession = () => {
     ws.send(JSON.stringify({ action: 'refreshSession' }));
     clearToast();
@@ -21,7 +29,6 @@ export function StreamActionNotifier({ ws }: { ws: WebSocket }) {
   };
 
   const parseIncommingMessage = ({ action, data }: { action: string; data: any }) => {
-    console.log(action, data);
     if (action == 'session_timeout') {
       showToast(
         <div>
@@ -47,6 +54,10 @@ export function StreamActionNotifier({ ws }: { ws: WebSocket }) {
         type: 'success',
         autoClose: 1000,
       });
+    } else if (action == 'screenshot_image') {
+      if (onScreenshotImage) {
+        onScreenshotImage(data);
+      }
     }
   };
 
@@ -61,7 +72,9 @@ export function StreamActionNotifier({ ws }: { ws: WebSocket }) {
           parseIncommingMessage(parsedMesage);
         }
       } catch (err) {
-        //ignore
+        if (onStreamImage) {
+          onStreamImage(message.data);
+        }
       }
     });
   }, [ws]);

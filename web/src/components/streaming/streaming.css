@@ -10,11 +10,13 @@
   display: flex;
   flex-direction: row;
   gap: 10px;
+  flex: 0 0 80%;
+  justify-content: center;
 }
 
 .toolbar-container {
   height: fit-content;
-  width: 350px;
+  padding: 10px;
   border: 1px solid gray;
   display: flex;
   flex-direction: column;
@@ -30,4 +32,49 @@
 .Toastify__toast-container {
   width: 100%!important;
   max-width: 700px;
+}
+
+.app-upload-status {
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+}
+
+.screenshot-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  height: 90vh;
+  gap:20px;
+  float: right;
+  padding: 15px;
+  overflow-y: scroll;
+}
+
+.screenshot-gallery-thumbnail {
+  cursor: pointer;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.screenshot-gallery-thumbnail img {
+  transition: border .3s ease-out;
+  height: auto;
+  width: 100px;
+}
+
+.screenshot-gallery-thumbnail:hover img {
+  border: 4px solid #337ab7;
+}
+
+.action-menus {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.screenshot-gallery-thumbnail:hover .action-menus{
+  display: flex;
 }

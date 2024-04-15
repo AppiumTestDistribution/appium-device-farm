@@ -1,35 +1,42 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
-import DeviceFarmApiService from '../../api-service';
 import HomeIcon from '@mui/icons-material/Home';
-import { Camera, Upload, Close } from '@mui/icons-material';
-import Alert from '@mui/material/Alert';
+import {
+  Camera,
+  Upload,
+  StopCircle,
+  ArrowBackIosNewOutlined,
+  VolumeUpOutlined,
+  VolumeDownOutlined,
+  CropSquareOutlined,
+} from '@mui/icons-material';
 import { toolBarControl } from './util.ts';
 import DeviceLoading from '../../assets/device-loading.gif';
 import useWebSocket from 'react-use-websocket';
-import { CircularProgress } from '@mui/material';
 import { StreamActionNotifier } from './StreamActionNotifier.tsx';
+import { AppInstaller } from './AppInstaller.tsx';
+import { ScreenshotGallery } from './screenshot-gallery.tsx';
 
 const MAX_HEIGHT = 720;
 const MAX_WIDTH = 720;
 
 function AndroidStream() {
   const [imageSrc, setImageSrc] = useState(DeviceLoading);
-  const [file, setFile] = useState(null);
-  const [alertType, setAlertType] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const uploadApp = useCallback(() => {
+    setShowFileUpload((preVal) => !preVal);
+  }, []);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+
   const containerElement = useRef<HTMLDivElement>(null);
   const videoElement = useRef<HTMLImageElement>(null);
   const canvasElement = useRef<HTMLCanvasElement>(null);
   let interactionHandler: SimpleInterationHandler | null;
 
-  const handleWebSocketMessage = (event: { data: any }) => {
-    const blob = event.data;
-    const url = URL.createObjectURL(blob);
+  const onStreamImage = (frame: Blob) => {
+    const url = URL.createObjectURL(frame);
     setImageSrc(url);
   };
 
@@ -54,7 +61,6 @@ function AndroidStream() {
     shouldReconnect: (event: CloseEvent) => {
       return event.code !== 1000;
     },
-    onMessage: handleWebSocketMessage,
     reconnectInterval: 1500,
     reconnectAttempts: 5,
   });
@@ -79,70 +85,27 @@ function AndroidStream() {
     }
   }, []);
 
+  const onNewScreenShot = (screenshot: string) => {
+    setScreenshots((existingScreenshots) => [...existingScreenshots, screenshot]);
+  };
+
+  const onDeleteScreenshot = (index: number) => {
+    const newScreenshots = [...screenshots];
+    newScreenshots.splice(index, 1);
+    setScreenshots(newScreenshots);
+  };
+
   async function onToolbarControlClick(controlAction: string) {
     await toolBarControl({ send: sendMessage } as any, controlAction, getParamsFromUrl);
   }
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const selectedFile = event.target.files[0];
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    setFile(selectedFile);
-  };
-
-  const uploadFile = async () => {
-    setLoading(true);
-    if (!file) {
-      console.error('No file selected');
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    if (!(file.type === 'application/vnd.android.package-archive')) {
-      alert(`File extension not allowed`);
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/device-farm/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        alert('Failed to upload file');
-      }
-
-      const data = await response.json();
-      console.log('File uploaded successfully:', data);
-
-      const { udid } = getParamsFromUrl() as any;
-      const res = await DeviceFarmApiService.installApk(udid, data.path);
-      if (res.status === 200) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        setAlertType('success');
-        setAlertMessage(res.message);
-      } else {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        setAlertType('error');
-        setAlertMessage(res.message);
-      }
-      setLoading(false);
-      setShowAlert(true);
-      // Handle success, if needed
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      // Handle error, if needed
-    }
-  };
 
   return (
     <div className="streaming-container">
-      <StreamActionNotifier ws={getWebSocket() as any} />
+      <StreamActionNotifier
+        ws={getWebSocket() as any}
+        onStreamImage={onStreamImage}
+        onScreenshotImage={onNewScreenShot}
+      />
       <div className="device-container">
         <div
           style={{
@@ -182,43 +145,52 @@ function AndroidStream() {
               name: 'Show Home Screen', //onClick={() => onToolbarControlClick('home')}
             },
             {
-              action: 'screenshot',
+              action: 'back',
+              icon: <ArrowBackIosNewOutlined />,
+              name: 'Back',
+            },
+            {
+              action: 'backgroundApps',
+              icon: <CropSquareOutlined />,
+              name: 'Open background apps',
+            },
+            {
+              action: 'volumeUp',
+              icon: <VolumeUpOutlined />,
+              name: 'Volume Up',
+            },
+            {
+              action: 'volumeDown',
+              icon: <VolumeDownOutlined />,
+              name: 'Volume Down',
+            },
+            {
+              action: 'takeScreenshot',
               icon: <Camera />,
               name: 'Capture Screenshot',
             },
             {
-              action: 'upload',
-              icon: (
-                <div>
-                  <label htmlFor="input-file">Upload APK</label>
-                  <Upload onClick={uploadFile} />
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    name="fileUpload"
-                    accept="apk, aab"
-                  />
-                  {loading && <CircularProgress />}
-                  {showAlert && (
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-expect-error
-                    <Alert severity={alertType} onClose={() => setShowAlert(false)}>
-                      {alertMessage}
-                    </Alert>
-                  )}
-                </div>
-              ),
-              name: '',
+              name: 'Upload app',
+              icon: <Upload />,
+              onClick: uploadApp,
+              action: 'uploadFile',
             },
             {
               action: 'close',
-              icon: <Close />,
+              icon: <StopCircle color="error" />,
               name: 'Close Session',
             },
           ]}
           onClickCallback={onToolbarControlClick}
         />
       </div>
+      <AppInstaller
+        platform="android"
+        open={showFileUpload}
+        onClose={() => setShowFileUpload(false)}
+        deviceUdid={udid}
+      />
+      <ScreenshotGallery screenshots={screenshots} onDeleteScreenshot={onDeleteScreenshot} />
     </div>
   );
 }

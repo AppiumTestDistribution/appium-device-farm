@@ -1,13 +1,22 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import HomeIcon from '@mui/icons-material/Home';
 import './streaming.css';
 import { StreamingToolBar } from './toolbar';
 import { SimpleInterationHandler } from '../../libs/simple-interation-handler';
-import { Camera, Close, Upload } from '@mui/icons-material';
-import { toolBarControl, uploadFile } from './util.ts';
+import {
+  Camera,
+  StopCircle,
+  Upload,
+  PowerSettingsNew,
+  VolumeDownOutlined,
+  VolumeUpOutlined,
+} from '@mui/icons-material';
+import { toolBarControl } from './util.ts';
 import DeviceLoading from '../../assets/device-loading.gif';
 import useWebSocket from 'react-use-websocket';
 import { StreamActionNotifier } from './StreamActionNotifier.tsx';
+import { AppInstaller } from './AppInstaller.tsx';
+import { ScreenshotGallery } from './screenshot-gallery.tsx';
 
 const MAX_HEIGHT = 820;
 const MAX_WIDTH = 820;
@@ -42,23 +51,24 @@ function IOSStream() {
   const containerElement = useRef<HTMLDivElement>(null);
   const videoElement = useRef<HTMLImageElement>(null);
   const canvasElement = useRef<HTMLCanvasElement>(null);
-  const [file, setFile] = useState(null);
+  const [screenshots, setScreenshots] = useState<string[]>([]);
   let interactionHandler: SimpleInterationHandler | null;
 
-  // eslint-disable-next-line prefer-const
+  const uploadApp = useCallback(() => {
+    setShowFileUpload((preVal) => !preVal);
+  }, []);
 
-  const uploadAUT = async () => {
-    await uploadFile(file, getParamsFromUrl);
+  const onNewScreenShot = (screenshot: string) => {
+    setScreenshots((existingScreenshots) => [...existingScreenshots, screenshot]);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    const selectedFile = event.target.files[0];
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    setFile(selectedFile);
+  const onDeleteScreenshot = (index: number) => {
+    const newScreenshots = [...screenshots];
+    newScreenshots.splice(index, 1);
+    setScreenshots(newScreenshots);
   };
+
+  const [showFileUpload, setShowFileUpload] = useState(false);
 
   useEffect(() => {
     if (
@@ -89,7 +99,7 @@ function IOSStream() {
   }
   return (
     <div className="streaming-container">
-      <StreamActionNotifier ws={getWebSocket() as any} />
+      <StreamActionNotifier ws={getWebSocket() as any} onScreenshotImage={onNewScreenShot} />
       <div className="device-container">
         <div
           style={{
@@ -128,35 +138,40 @@ function IOSStream() {
         <StreamingToolBar
           controls={[
             { action: 'home', icon: <HomeIcon />, name: 'Home' },
-            { action: 'screenshot', icon: <Camera />, name: 'screenshot' },
             {
-              action: 'upload',
-              icon: (
-                <div>
-                  <label htmlFor="input-file">Upload IPA/App</label>
-                  <Upload onClick={uploadAUT} />
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    name="fileUpload"
-                    accept="ipa, app"
-                  />
-                </div>
-              ),
-              name: '',
+              action: 'volumeUp',
+              icon: <VolumeUpOutlined />,
+              name: 'Volume Up',
+            },
+            {
+              action: 'volumeDown',
+              icon: <VolumeDownOutlined />,
+              name: 'Volume Down',
+            },
+            { action: 'power', icon: <PowerSettingsNew />, name: 'Power' },
+            { action: 'takeScreenshot', icon: <Camera />, name: 'screenshot' },
+            {
+              name: 'Upload app',
+              icon: <Upload />,
+              onClick: uploadApp,
+              action: 'uploadFile',
             },
             {
               action: 'close',
-              icon: <Close />,
+              icon: <StopCircle color="error" />,
               name: 'Close Session',
             },
           ]}
           onClickCallback={onToolbarControlClick}
         />
       </div>
-      {/* <Button onClick={homeButtonHandler} startIcon={<HomeIcon />}>
-        Home
-      </Button> */}
+      <AppInstaller
+        platform="ios"
+        open={showFileUpload}
+        onClose={() => setShowFileUpload(false)}
+        deviceUdid={udid}
+      />
+      <ScreenshotGallery screenshots={screenshots} onDeleteScreenshot={onDeleteScreenshot} />
     </div>
   );
 }
