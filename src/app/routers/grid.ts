@@ -260,12 +260,12 @@ async function getDevicesFromDeviceManager() {
 async function handleTestExecutionMetaData(req: Request, res: Response) {
   try {
     await saveTestExecutionMetaData(req);
-    log.info("Saved Test Execution Meta Data.")
+    log.info('Saved Test Execution Meta Data.');
     res.status(200).send('{"message": "Saved Test Execution Meta Data"}');
-  } catch(e) {
-    const response = {message: `Failed to save Test Execution Meta Data. Error: ${e}`}
-    log.error(`Error while handling TestExecutionMetaData.`);
-    log.error(`Sending response - ${response}.`)
+  } catch (e) {
+    const response = { message: `Failed to save Test Execution Meta Data. Error: ${e}` };
+    log.error('Error while handling TestExecutionMetaData.');
+    log.error(`Sending response - ${response}.`);
     res.status(500).json(response);
   }
 }
