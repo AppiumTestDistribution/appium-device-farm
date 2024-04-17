@@ -24,8 +24,8 @@ export default class DeviceFarmApiService {
     return apiClient.makePOSTRequest('/dashboard/installiOSWDA', {}, { udid });
   }
 
-  public static installApk(udid: string, apkPath: string) {
-    return apiClient.makePOSTRequest('/dashboard/installApk', {}, { udid, apkPath });
+  public static installApp(udid: string, apkPath: string) {
+    return apiClient.makePOSTRequest('/dashboard/installApp', {}, { udid, apkPath });
   }
 
   public static getPendingSessionsCount() {

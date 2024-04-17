@@ -22,17 +22,9 @@ export const uploadFile = async (file: any, getParamsFromUrl: any) => {
     const data = await response.json();
     console.log('File uploaded successfully:', data);
 
-    const { udid, platform } = getParamsFromUrl() as any;
+    const { udid } = getParamsFromUrl() as any;
     console.log(udid);
-    if (platform === 'android') {
-      // application/vnd.android.package-archive mimetype
-      await DeviceFarmApiService.installApk(udid, data.path);
-    } else {
-      // check if user has provided ipa for real device or app for simulator
-      console.log('Install iOS App for real and simulator');
-      //application/octet-stream real device
-      // application/zip simulator
-    }
+    await DeviceFarmApiService.installApp(udid, data.path);
   } catch (error) {
     console.error('Error uploading file:', error);
     // Handle error, if needed

@@ -38,7 +38,6 @@ export function AppInstaller({
       'application/vnd.android.package-archive': ['.apk'],
     },
     ios: {
-      'application/octet-stream': ['.ipa', '.oob'],
     },
   };
 
@@ -104,13 +103,7 @@ export function AppInstaller({
     const data = await response.json();
     setStatus(FILE_UPLOAD_STATE.INSTALLING);
 
-    if (platform == 'android') {
-      response = await DeviceFarmApiService.installApk(deviceUdid, data.path);
-    } else {
-      //TODO : Replace the api with ipa file
-      response = await DeviceFarmApiService.installApk(deviceUdid, data.path);
-    }
-
+    response = await DeviceFarmApiService.installApp(deviceUdid, data.path);
     if (response.status === 200) {
       setStatus(FILE_UPLOAD_STATE.INSTALLATION_SUCCESS);
     } else {

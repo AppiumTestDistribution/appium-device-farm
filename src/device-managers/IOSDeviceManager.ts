@@ -154,7 +154,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
     });
     // might as well track devices
-    this.trackIOSDevices(pluginArgs);
+    await this.trackIOSDevices(pluginArgs);
 
     return deviceState;
   }
