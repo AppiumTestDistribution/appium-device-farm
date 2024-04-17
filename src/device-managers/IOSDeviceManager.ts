@@ -3,8 +3,7 @@ import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { getFreePort } from '../helpers';
-import { asyncForEach } from '../helpers';
+import { asyncForEach, getFreePort } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
@@ -207,6 +206,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
+    const modelInfo = this.findKeyByValue(ProductType);
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
@@ -224,6 +224,8 @@ export default class IOSDeviceManager implements IDeviceManager {
       sessionStartTime: 0,
       derivedDataPath: this.prepareDerivedDataPath(pluginArgs.derivedDataPath, udid, true),
       resignedWDAPath: this.pluginArgs.resignedWDA,
+      width: modelInfo.Width,
+      height: modelInfo.Height,
     });
   }
 
@@ -271,9 +273,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
     const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
-      const productModel = deviceTypes.filter(
-        (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
-      )[0].modelIdentifier;
+      const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
@@ -305,6 +305,13 @@ export default class IOSDeviceManager implements IDeviceManager {
 
     return returnedSimulators;
   }
+
+  private static getProductModel(deviceTypes: any, device: IDevice) {
+    return deviceTypes.filter(
+      (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
+    )[0].modelIdentifier;
+  }
+
   findKeyByValue(model: string): any {
     for (const [key, value] of Object.entries(IOSDeviceInfoMap)) {
       if (model === key) {
