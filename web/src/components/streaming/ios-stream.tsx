@@ -18,8 +18,8 @@ import { StreamActionNotifier } from './StreamActionNotifier.tsx';
 import { AppInstaller } from './AppInstaller.tsx';
 import { ScreenshotGallery } from './screenshot-gallery.tsx';
 
-const MAX_HEIGHT = 820;
-const MAX_WIDTH = 820;
+const MAX_HEIGHT = 720;
+const MAX_WIDTH = 720;
 
 function IOSStream() {
   const getParamsFromUrl = () => {
