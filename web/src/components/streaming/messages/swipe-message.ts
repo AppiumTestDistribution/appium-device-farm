@@ -29,7 +29,7 @@ export class SwipeControlMessage {
               { type: 'pause', duration: this.duration },
               {
                 type: 'pointerMove',
-                duration: 200,
+                duration: 100,
                 origin: 'viewport',
                 x: this.endPoint.x,
                 y: this.endPoint.y
