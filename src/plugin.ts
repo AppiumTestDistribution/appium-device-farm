@@ -383,18 +383,20 @@ class DevicePlugin extends BasePlugin {
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
-      await EventBus.fire(
-        new SessionCreatedEvent({
-          sessionId,
-          device,
-          sessionResponse,
-          deviceFarmCapabilities,
-          pluginNodeId: DevicePlugin.NODE_ID,
-          driver: driver,
-          adb: DevicePlugin.adbInstance,
-        }),
-      );
-
+      if (!caps.alwaysMatch['df:skipReport']) {
+        log.info('Skipping dashboard report');
+        await EventBus.fire(
+          new SessionCreatedEvent({
+            sessionId,
+            device,
+            sessionResponse,
+            deviceFarmCapabilities,
+            pluginNodeId: DevicePlugin.NODE_ID,
+            driver: driver,
+            adb: DevicePlugin.adbInstance,
+          }),
+        );
+      }
       log.info(
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
       );
