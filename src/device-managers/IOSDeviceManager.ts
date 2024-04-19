@@ -222,7 +222,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       productModel: ProductType,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
-      derivedDataPath: this.prepareDerivedDataPath(pluginArgs.derivedDataPath, udid, true),
       resignedWDAPath: this.pluginArgs.resignedWDA,
       width: modelInfo.Width,
       height: modelInfo.Height,

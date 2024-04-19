@@ -348,7 +348,7 @@ class DevicePlugin extends BasePlugin {
       await EventBus.fire(new BeforeSessionCreatedEvent({ device, sessionType: sessionType }));
 
       session = await next();
-      if (caps.alwaysMatch['df:portForward'] !== undefined && device.realDevice) {
+      if (device.platform === 'ios' && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
         await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
           usePortForwarding: true,

@@ -58,6 +58,7 @@ export async function iOSCapabilities(
     mjpegServerPort?: number;
     wdaLocalPort?: number;
     derivedDataPath?: string;
+    wdaBundleId?: string;
   },
 ) {
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
@@ -65,7 +66,11 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
-  caps.firstMatch[0]['appium:derivedDataPath'] = freeDevice.derivedDataPath;
+  if (freeDevice.realDevice && !caps.alwaysMatch['df:skipReport']) {
+    caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
+    caps.firstMatch[0]['appium:updatedWDABundleId'] = freeDevice.wdaBundleId;
+    caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
+  }
   const deleteMatch = [
     'appium:derivedDataPath',
     'appium:platformVersion',
