@@ -50,6 +50,11 @@ function Capabilities({ session }: CapabilitiesProps) {
     } else if (session.videoRecording) {
       return (
         <video
+          style={{
+            maxHeight: '400px',
+            height: 'auto',
+            width: '100%',
+          }}
           controls
           src={`${window.location.protocol + '//' + window.location.host}/device-farm/assets/${
             session.videoRecording
