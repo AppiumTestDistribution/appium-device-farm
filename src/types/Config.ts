@@ -3,4 +3,5 @@ export type Config = {
   databasePath: string;
   sessionAssetsPath: string;
   takeScreenshotsFor: Array<string>;
+  appsPath: string;
 };

@@ -2,6 +2,7 @@ import getPort from 'get-port';
 import { ISessionCapability } from './interfaces/ISessionCapability';
 import _ from 'lodash';
 import { IDevice } from './interfaces/IDevice';
+import { prisma } from './prisma';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -30,7 +31,18 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
   if (_.has(caps.alwaysMatch, capabilityName)) delete caps.alwaysMatch[capabilityName];
 }
 
+async function findAppPath(fileName: string) {
+  if (fileName.startsWith('file')) {
+    const appInfo: any = await prisma.appInformation.findFirst({
+      where: { uploadedFileName: fileName as string },
+    });
+    return appInfo?.path;
+  } else {
+    return fileName;
+  }
+}
 export async function androidCapabilities(caps: ISessionCapability, freeDevice: IDevice) {
+  caps.firstMatch[0]['appium:app'] = await findAppPath(caps.alwaysMatch['appium:app']);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
@@ -46,6 +58,7 @@ export async function androidCapabilities(caps: ISessionCapability, freeDevice: 
   deleteAlwaysMatch(caps, 'appium:chromeDriverPort');
   deleteAlwaysMatch(caps, 'appium:adbRemoteHost');
   deleteAlwaysMatch(caps, 'appium:adbPort');
+  deleteAlwaysMatch(caps, 'appium:app');
 }
 
 export async function iOSCapabilities(

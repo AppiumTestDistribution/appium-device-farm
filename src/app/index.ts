@@ -66,6 +66,7 @@ staticFilesRouter.use(express.static(PUBLIC_DICRECTORY));
 
 router.use('/api', apiRouter);
 router.use('/assets', express.static(config.sessionAssetsPath));
+router.use('/apps', express.static(config.appsPath));
 router.use('/ui-assets', express.static(path.join(PUBLIC_DICRECTORY, 'device-farm', 'ui-assets')));
 router.use(staticFilesRouter);
 

@@ -24,7 +24,7 @@ export const uploadFile = async (file: any, getParamsFromUrl: any) => {
 
     const { udid } = getParamsFromUrl() as any;
     console.log(udid);
-    await DeviceFarmApiService.installApp(udid, data.path);
+    await DeviceFarmApiService.installApp(udid, data.file.path);
   } catch (error) {
     console.error('Error uploading file:', error);
     // Handle error, if needed

@@ -73,3 +73,11 @@ model TestEventJournal {
   finished_event_doc  String?
   file                String
 }
+
+model AppInformation {
+  id                  String   @id @default(uuid())
+  fileName            String
+  uploadedFileName    String
+  path                String
+  platform            String
+}

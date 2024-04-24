@@ -103,7 +103,7 @@ export function AppInstaller({
     const data = await response.json();
     setStatus(FILE_UPLOAD_STATE.INSTALLING);
 
-    response = await DeviceFarmApiService.installApp(deviceUdid, data.path);
+    response = await DeviceFarmApiService.installApp(deviceUdid, data.file.path);
     if (response.status === 200) {
       setStatus(FILE_UPLOAD_STATE.INSTALLATION_SUCCESS);
     } else {

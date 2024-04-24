@@ -17,9 +17,10 @@ import { IDevice } from '../../interfaces/IDevice';
 import path from 'path';
 import multer from 'multer';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
+import os from 'os';
 
 const SERVER_UP_TIME = new Date().toISOString();
-const uploadDir = path.join(__dirname);
+const uploadDir = path.join(os.homedir(), '.cache', 'appium-device-farm', 'assets');
 
 const storage = multer.diskStorage({
   destination: (req: any, file: any, cb: any) => {
@@ -290,7 +291,14 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   //router.post('/upload', uploadFile);
   router.post('/upload', upload.single('file'), function (req: any, res) {
     console.log('storage location is ', req.hostname + '/' + req.file.path);
-    return res.send(req.file);
+    if (req.file) {
+      console.log('storage location is ', req.hostname + '/' + req.file.path);
+      res
+        .status(200)
+        .json({ success: true, message: 'File uploaded successfully', file: req.file });
+    } else {
+      res.status(400).json({ success: false, message: 'File upload failed' });
+    }
   });
   //router.post('/tap', clickElementFromScreen);
   // node status

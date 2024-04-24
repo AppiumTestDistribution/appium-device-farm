@@ -8,4 +8,5 @@ export const config: Config = {
   databasePath: `${basePath}/device-farm-latest.db?connection_limit=1`,
   sessionAssetsPath: path.join(basePath, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
+  appsPath: path.join(basePath, 'assets'),
 };
