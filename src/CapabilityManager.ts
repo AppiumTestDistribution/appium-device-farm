@@ -3,6 +3,7 @@ import { ISessionCapability } from './interfaces/ISessionCapability';
 import _ from 'lodash';
 import { IDevice } from './interfaces/IDevice';
 import { prisma } from './prisma';
+import { DevicePlugin } from './plugin';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -36,7 +37,7 @@ async function findAppPath(fileName: string) {
     const appInfo: any = await prisma.appInformation.findFirst({
       where: { uploadedFileName: fileName as string },
     });
-    return appInfo?.path;
+    return `${DevicePlugin.serverUrl}${appInfo?.path}`;
   } else {
     return fileName;
   }
@@ -74,6 +75,7 @@ export async function iOSCapabilities(
     wdaBundleId?: string;
   },
 ) {
+  caps.firstMatch[0]['appium:app'] = await findAppPath(caps.alwaysMatch['appium:app']);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
@@ -91,6 +93,7 @@ export async function iOSCapabilities(
     'appium:mjpegServerPort',
     'appium:udid',
     'appium:deviceName',
+    'appium:app',
   ];
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
 }

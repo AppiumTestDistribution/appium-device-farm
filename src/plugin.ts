@@ -92,13 +92,14 @@ class DevicePlugin extends BasePlugin {
   public static IS_HUB = false;
   private static httpServer: any;
   private static adbInstance: any;
+  public static serverUrl: string;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
     // here, CLI Args are already pluginArgs. Different case for updateServer
     log.debug(`📱 Plugin Args: ${JSON.stringify(cliArgs)}`);
     // plugin args will assign undefined value as well for bindHostOrIp
-    this.pluginArgs = Object.assign({}, DefaultPluginArgs, this.cliArgs as unknown as IPluginArgs);
+    this.pluginArgs = Object.assign({}, DefaultPluginArgs, cliArgs as unknown as IPluginArgs);
     // not pretty but will do for now
     if (this.pluginArgs.bindHostOrIp === undefined) {
       this.pluginArgs.bindHostOrIp = ip.address();
@@ -231,6 +232,7 @@ class DevicePlugin extends BasePlugin {
       );
     } else {
       DevicePlugin.IS_HUB = true;
+      DevicePlugin.serverUrl = `http://${pluginArgs.bindHostOrIp}:${cliArgs.port}`;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
