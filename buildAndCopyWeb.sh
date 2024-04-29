@@ -1,4 +1,4 @@
-if [ -d "dashboard-web" ]; then
+if [ -d "dashboard-frontend" ]; then
   # shellcheck disable=SC2164
   cd dashboard-frontend
   npm install --force
@@ -10,5 +10,5 @@ if [ -d "dashboard-web" ]; then
   cp -R ./dashboard-frontend/dist/* src/public/
   echo "Build date - `date` by `whoami`" > src/public/version.txt
 else
-  echo "Directory dashboard-web does not exist."
+  echo "Directory dashboard-frontend does not exist."
 fi

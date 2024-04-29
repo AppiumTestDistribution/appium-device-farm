@@ -14,31 +14,9 @@ import { DeviceFarmManager } from '../../device-managers';
 import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
-import path from 'path';
-import multer from 'multer';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
-import os from 'os';
-import { DevicePlugin } from '../../plugin';
-import { uploadFileRemote } from '../../modules/device-control/DeviceHelper';
 
 const SERVER_UP_TIME = new Date().toISOString();
-const uploadDir = path.join(os.homedir(), '.cache', 'appium-device-farm', 'assets');
-
-const storage = multer.diskStorage({
-  destination: (req: any, file: any, cb: any) => {
-    cb(null, uploadDir);
-  },
-  filename: (req: any, file: any, cb: any) => {
-    if (file.originalname === 'wda-resign.ipa') {
-      cb(null, file.originalname);
-    } else {
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-  },
-});
-
-//will be using this for uplading
-const upload = multer({ storage: storage });
 async function getDevices(request: Request, response: Response) {
   let devices = (await ADTDatabase.DeviceModel).find();
   const { sessionId } = request.query;
@@ -295,33 +273,6 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   //router.post('/upload', uploadFile);
-  router.post('/upload', upload.single('file'), async function (req: any, res) {
-    console.log('storage location is ', req.hostname + '/' + req.file.path);
-    const devices = (await ADTDatabase.DeviceModel).chain().find().data();
-    const uniqByHost = _.uniqBy(devices, 'host');
-    const appPath = path.join(
-      os.homedir(),
-      '.cache',
-      'appium-device-farm',
-      'assets',
-      'wda-resign.ipa',
-    );
-    const asyncCall = async (device: IDevice) => {
-      if (device.nodeId !== DevicePlugin.NODE_ID) {
-        console.log('Uploading WDA to remote machines');
-        await uploadFileRemote(appPath, device);
-      }
-    };
-    await Promise.all(uniqByHost.map((device: IDevice) => asyncCall(device)));
-    if (req.file) {
-      console.log('storage location is ', req.hostname + '/' + req.file.path);
-      res
-        .status(200)
-        .json({ success: true, message: 'File uploaded successfully', file: req.file });
-    } else {
-      res.status(400).json({ success: false, message: 'File upload failed' });
-    }
-  });
   //router.post('/tap', clickElementFromScreen);
   // node status
   router.get(
