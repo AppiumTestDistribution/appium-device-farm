@@ -32,7 +32,9 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
   if (_.has(caps.alwaysMatch, capabilityName)) delete caps.alwaysMatch[capabilityName];
 }
 
-async function findAppPath(fileName: string) {
+async function findAppPath(caps: any) {
+  if (caps.alwaysMatch['df:skipReport']) return;
+  const fileName = caps.alwaysMatch['appium:app'] || caps.firstMatch[0]['appium:app'];
   if (fileName.startsWith('file')) {
     const appInfo: any = await prisma.appInformation.findFirst({
       where: { uploadedFileName: fileName as string },
@@ -43,7 +45,7 @@ async function findAppPath(fileName: string) {
   }
 }
 export async function androidCapabilities(caps: ISessionCapability, freeDevice: IDevice) {
-  caps.firstMatch[0]['appium:app'] = await findAppPath(caps.alwaysMatch['appium:app']);
+  caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
@@ -75,7 +77,7 @@ export async function iOSCapabilities(
     wdaBundleId?: string;
   },
 ) {
-  caps.firstMatch[0]['appium:app'] = await findAppPath(caps.alwaysMatch['appium:app']);
+  caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;

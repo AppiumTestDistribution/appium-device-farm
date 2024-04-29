@@ -3,12 +3,10 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "ios",
-        "hub": "http://10.211.55.3:31337",
+        "platform": "both",
         "skipChromeDownload": true,
         "liveStreaming": true,
-        "iosDeviceType": "simulated",
-        "wdaBundleId": "atd.pro"
+        "wdaBundleId": "con.device.farm"
       }
     }
   }

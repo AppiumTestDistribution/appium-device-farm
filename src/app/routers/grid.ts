@@ -18,6 +18,8 @@ import path from 'path';
 import multer from 'multer';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 import os from 'os';
+import { DevicePlugin } from '../../plugin';
+import { uploadFileRemote } from '../../modules/device-control/DeviceHelper';
 
 const SERVER_UP_TIME = new Date().toISOString();
 const uploadDir = path.join(os.homedir(), '.cache', 'appium-device-farm', 'assets');
@@ -27,7 +29,11 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req: any, file: any, cb: any) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    if (file.originalname === 'wda-resign.ipa') {
+      cb(null, file.originalname);
+    } else {
+      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
   },
 });
 
@@ -289,8 +295,24 @@ function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/node/:host/status', _.curry(nodeAdbStatusOnOtherHost)(pluginArgs.bindHostOrIp));
 
   //router.post('/upload', uploadFile);
-  router.post('/upload', upload.single('file'), function (req: any, res) {
+  router.post('/upload', upload.single('file'), async function (req: any, res) {
     console.log('storage location is ', req.hostname + '/' + req.file.path);
+    const devices = (await ADTDatabase.DeviceModel).chain().find().data();
+    const uniqByHost = _.uniqBy(devices, 'host');
+    const appPath = path.join(
+      os.homedir(),
+      '.cache',
+      'appium-device-farm',
+      'assets',
+      'wda-resign.ipa',
+    );
+    const asyncCall = async (device: IDevice) => {
+      if (device.nodeId !== DevicePlugin.NODE_ID) {
+        console.log('Uploading WDA to remote machines');
+        await uploadFileRemote(appPath, device);
+      }
+    };
+    await Promise.all(uniqByHost.map((device: IDevice) => asyncCall(device)));
     if (req.file) {
       console.log('storage location is ', req.hostname + '/' + req.file.path);
       res

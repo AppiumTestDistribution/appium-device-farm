@@ -8,6 +8,8 @@ import path from 'path';
 import { deviceMock } from './fixtures/devices';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { v4 as uuidv4 } from 'uuid';
+import * as IOSUtils from 'appium-ios-device/build/lib/utilities';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -30,13 +32,14 @@ describe('IOS Device Manager', () => {
     sandbox.restore();
   });
   it('IOS Device List to have added state', async () => {
-    const iosDevices = new IOSDeviceManager(pluginArgs, 4723);
+    const iosDevices = new IOSDeviceManager(pluginArgs, 4723, uuidv4());
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(Helper, 'isMac').returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getSimulators').returns([
       {
         name: 'iPad Air (3rd generation)',
@@ -68,11 +71,11 @@ describe('IOS Device Manager', () => {
         wdaLocalPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
+        width: '375',
+        productModel: 'iPhone12,8',
+        wdaBundleId: '',
+        height: '667',
         host: `http://${ip.address()}:4723`,
-        derivedDataPath: path.join(
-          os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
-        ),
         mjpegServerPort: 54093,
       },
       {
@@ -115,11 +118,13 @@ describe('IOS Device Manager', () => {
         DefaultPluginArgs,
       ),
       4723,
+      uuidv4(),
     );
     sandbox.stub(iosDeviceManager, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDeviceManager, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDeviceManager, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
@@ -153,8 +158,11 @@ describe('IOS Device Manager', () => {
         DefaultPluginArgs,
       ),
       4723,
+      uuidv4(),
     );
     sandbox.stub(Helper, 'getFreePort').returns(54093);
+    sandbox.stub(IOSDeviceManager, 'getProductModel').returns('iPhone12,8');
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
       .returns(deviceMock.filter((device) => device.platform === 'iOS'));
@@ -167,8 +175,9 @@ describe('IOS Device Manager', () => {
   });
 
   it('IOS Device List to have added state - Include simulators with real devices', async () => {
-    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723, uuidv4());
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
@@ -192,13 +201,13 @@ describe('IOS Device Manager', () => {
         busy: false,
         realDevice: true,
         deviceType: 'real',
+        width: '375',
+        productModel: 'iPhone12,8',
+        wdaBundleId: '',
+        height: '667',
         platform: 'ios',
         wdaLocalPort: 54093,
         host: `http://${ip.address()}:4723`,
-        derivedDataPath: path.join(
-          os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
-        ),
         mjpegServerPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -215,9 +224,10 @@ describe('IOS Device Manager', () => {
   });
 
   it('IOS Device List to have added state - Only simulators', async () => {
-    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723, uuidv4());
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
@@ -245,8 +255,9 @@ describe('IOS Device Manager', () => {
   });
 
   it('IOS Device List to have added state - Only real devices', async () => {
-    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723);
+    const iosDevices = new IOSDeviceManager(DefaultPluginArgs, 4723, uuidv4());
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
+    sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
@@ -278,10 +289,10 @@ describe('IOS Device Manager', () => {
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         host: `http://${ip.address()}:4723`,
-        derivedDataPath: path.join(
-          os.homedir(),
-          'Library/Developer/Xcode/DerivedData/WebDriverAgent-00001111-00115D822222002E',
-        ),
+        width: '375',
+        productModel: 'iPhone12,8',
+        wdaBundleId: '',
+        height: '667',
         mjpegServerPort: 54093,
       },
     ]);

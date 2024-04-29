@@ -551,7 +551,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     return await this.getDeviceProperty(adbInstance, udid, 'ro.build.version.sdk');
   }
 
-  private async getDeviceSize(adbInstance: any, udid: string) {
+  async getDeviceSize(adbInstance: any, udid: string) {
     const device = {
       screenWidth: 'unknown',
       screenHeight: 'unknown',

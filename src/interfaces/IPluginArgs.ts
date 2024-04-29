@@ -77,7 +77,6 @@ export interface IPluginArgs {
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
   bootedSimulators?: boolean;
   remoteConnectionTimeout?: number;
-  resignedWDA?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -107,5 +106,4 @@ export const DefaultPluginArgs: IPluginArgs = {
   liveStreaming: false,
   wdaBundleId: '',
   preBuildWDAPath: '',
-  resignedWDA: ''
 };

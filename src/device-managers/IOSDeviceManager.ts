@@ -222,7 +222,6 @@ export default class IOSDeviceManager implements IDeviceManager {
       productModel: ProductType,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,
-      resignedWDAPath: this.pluginArgs.resignedWDA,
       width: modelInfo.Width,
       height: modelInfo.Height,
     });
@@ -305,7 +304,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     return returnedSimulators;
   }
 
-  private static getProductModel(deviceTypes: any, device: IDevice) {
+  static getProductModel(deviceTypes: any, device: IDevice) {
     return deviceTypes.filter(
       (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
     )[0].modelIdentifier;

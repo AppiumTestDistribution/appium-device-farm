@@ -38,5 +38,4 @@ export interface IDevice {
   proxyUrl?: string;
   proxySessionId?: string;
   prebuiltWDAPath?: string;
-  resignedWDAPath?: string;
 }

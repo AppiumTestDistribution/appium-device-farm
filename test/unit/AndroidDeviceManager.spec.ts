@@ -68,7 +68,12 @@ describe('Android Device Manager', function () {
     const getConnectedDevicesStub = sandbox
       .stub(androidDevices, 'getConnectedDevices')
       .returns(Promise.resolve(deviceList));
-    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
+    sandbox.stub(androidDevices, 'getDeviceSize').returns(
+      Promise.resolve({
+        screenWidth: '350',
+        screenHeight: '600',
+      }),
+    );
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     getDeviceVersion.onFirstCall().returns(Promise.resolve('9'));
     getDeviceVersion.onSecondCall().returns(Promise.resolve('13'));
@@ -104,6 +109,9 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
+        width: '350',
+        height: '600',
+        liveStreaming: false,
         host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -115,6 +123,9 @@ describe('Android Device Manager', function () {
         busy: false,
         adbRemoteHost: '192.168.0.104',
         adbPort: 5037,
+        width: '350',
+        height: '600',
+        liveStreaming: false,
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'real',
@@ -146,7 +157,12 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-5555', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
-    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
+    sandbox.stub(androidDevices, 'getDeviceSize').returns(
+      Promise.resolve({
+        screenWidth: '350',
+        screenHeight: '600',
+      }),
+    );
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -171,6 +187,9 @@ describe('Android Device Manager', function () {
         udid: 'emulator-5554',
         platform: 'android',
         systemPort: 54321,
+        width: '350',
+        height: '600',
+        liveStreaming: false,
         host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -194,7 +213,12 @@ describe('Android Device Manager', function () {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
-    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
+    sandbox.stub(androidDevices, 'getDeviceSize').returns(
+      Promise.resolve({
+        screenWidth: '350',
+        screenHeight: '600',
+      }),
+    );
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -217,6 +241,9 @@ describe('Android Device Manager', function () {
         sdk: '13',
         realDevice: true,
         udid: 'YOGAA1BBB4124',
+        width: '350',
+        height: '600',
+        liveStreaming: false,
         platform: 'android',
         systemPort: 54322,
         host: `http://${ip.address()}:4723`,
@@ -244,7 +271,12 @@ describe('Android Device Manager', function () {
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
-    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
+    sandbox.stub(androidDevices, 'getDeviceSize').returns(
+      Promise.resolve({
+        screenWidth: '350',
+        screenHeight: '600',
+      }),
+    );
     const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
@@ -269,6 +301,9 @@ describe('Android Device Manager', function () {
         udid: 'YOGAA1BBB4124',
         platform: 'android',
         systemPort: 54322,
+        width: '350',
+        height: '600',
+        liveStreaming: false,
         host: 'http://10.1.1.1:3333',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -302,7 +337,6 @@ describe('Android Device Manager', function () {
     };
 
     sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
-    sandbox.stub(androidDevices, <any>'streamAndroid').returns('');
     sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
     sandbox.stub(adb, <any>'adbExec').callsFake(mockAdbExec);
 
