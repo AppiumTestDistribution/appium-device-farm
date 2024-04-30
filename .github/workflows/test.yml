@@ -50,4 +50,5 @@ jobs:
       - name: Run script
         run: |
           npm ci
+          npm run bundle
     
