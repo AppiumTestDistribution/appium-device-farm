@@ -45,9 +45,9 @@ jobs:
         node: [20]
 
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository with out submodule
         uses: actions/checkout@v3
       - name: Run script
         run: |
-          npm ci
+          npm install
     
