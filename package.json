@@ -29,7 +29,7 @@
     "build-web-and-plugin": "npx tsc -b && npm run buildAndCopyWeb && npm run copy-files",
     "copy-files": "cp -R src/public lib",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
-    "prepublish": "npx tsc && npm run buildAndCopyWeb && npm run copy-files && npm run bundle",
+    "prepublishOnly": "npx tsc && npm run buildAndCopyWeb && npm run copy-files && npm run bundle",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier-check": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' --check --verbose",
     "prettier": "prettier 'src/**/*.ts' 'web/**/*.ts' 'web/**/*.tsx' 'test/**/*.ts' --write --single-quote",
