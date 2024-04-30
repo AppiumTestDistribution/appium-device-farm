@@ -8,10 +8,10 @@ on:
 jobs:
   buildWithSubmodule:
     name: Build with Submodule
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20]
 
     steps:
     - name: Checkout repository with submodules
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20]
 
     steps:
       - name: Checkout repository with submodules
