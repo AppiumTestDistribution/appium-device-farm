@@ -210,6 +210,15 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // if (filterOptions.deviceType === 'simulator') {
   //   filter.state = 'Booted'; // Needs a fix
   // }
+  if (filter.udid) {
+    const askedDevice: Array<any> = deviceModel.chain().find({ udid: filter.udid }).data();
+    if (askedDevice[0].userBlocked) {
+      delete filter.busy;
+      delete filter.userBlocked;
+    }
+  }
+
+  log.info(`Updated devices with filter: ${JSON.stringify(filter)}`);
   const matchingDevices = results.find(filter).data();
   // use the following debugging tools to debug this function
   debugLog(`basic filter: ${JSON.stringify(basicFilter)}`);
