@@ -72,7 +72,7 @@
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
     "@appium/base-plugin": "^2.2.22",
-    "@appium/types": "^0.14.1",
+    "@appium/types": "^0.17.0",
     "@devicefarmer/adbkit": "^3.2.6",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@prisma/client": "^5.4.1",
