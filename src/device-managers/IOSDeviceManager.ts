@@ -32,24 +32,30 @@ export default class IOSDeviceManager implements IDeviceManager {
     deviceTypes: { iosDeviceType: DeviceTypeToInclude },
     existingDeviceDetails: Array<IDevice>,
   ): Promise<IDevice[]> {
-    if (deviceTypes.iosDeviceType === 'real') {
-      return flatten(
-        await Promise.all([
-          this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
-        ]),
-      );
-    } else if (deviceTypes.iosDeviceType === 'simulated') {
-      const simulators = flatten(await Promise.all([this.getSimulators()]));
-      log.debug(`Simulators: ${JSON.stringify(simulators)}`);
-      return simulators;
+    if (this.pluginArgs.cloud != undefined) {
+      const devices: IDevice[] = [];
+      const cloud = new Devices(this.pluginArgs.cloud, devices, 'ios');
+      return await cloud.getDevices();
     } else {
-      // return both real and simulated devices
-      return flatten(
-        await Promise.all([
-          this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
-          this.getSimulators(),
-        ]),
-      );
+      if (deviceTypes.iosDeviceType === 'real') {
+        return flatten(
+          await Promise.all([
+            this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
+          ]),
+        );
+      } else if (deviceTypes.iosDeviceType === 'simulated') {
+        const simulators = flatten(await Promise.all([this.getSimulators()]));
+        log.debug(`Simulators: ${JSON.stringify(simulators)}`);
+        return simulators;
+      } else {
+        // return both real and simulated devices
+        return flatten(
+          await Promise.all([
+            this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
+            this.getSimulators(),
+          ]),
+        );
+      }
     }
   }
 
