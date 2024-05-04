@@ -80,4 +80,6 @@ model AppInformation {
   uploadedFileName    String
   path                String
   platform            String
+  fileSize            String  @default("0")
+  createdAt DateTime  @default(now()) @map("created_at")
 }
