@@ -230,6 +230,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       sessionStartTime: 0,
       width: modelInfo.Width,
       height: modelInfo.Height,
+      tags: [],
     });
   }
 
@@ -303,6 +304,7 @@ export default class IOSDeviceManager implements IDeviceManager {
             false,
           ),
           preBuildWDAPath: this.pluginArgs.preBuildWDAPath,
+          tags: [],
         }),
       );
     }
