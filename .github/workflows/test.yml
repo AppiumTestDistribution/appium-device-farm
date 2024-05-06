@@ -60,6 +60,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
          npm ci
@@ -79,4 +82,24 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           script: npm run integration-android
+  IOSIntegrationTest:
+    name: Build with Submodule
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node: [ 20 ]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Build
+        run: |
+          npm ci
+          npm run bundle
+      - name: Run iOS Integration Test
+        run: |
+          npm run integration-ios
 
