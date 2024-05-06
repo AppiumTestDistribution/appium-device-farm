@@ -7,7 +7,7 @@ on:
 
 jobs:
   buildWithSubmodule:
-    name: Build with Submodule
+    name: Run Unit Test
     runs-on: macos-latest
     strategy:
       matrix:
@@ -52,6 +52,7 @@ jobs:
           npm ci
           npm run bundle
   AndroidIntegrationTest:
+    name: Run Android Integration Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -83,7 +84,7 @@ jobs:
           profile: Nexus 6
           script: npm run integration-android
   IOSIntegrationTest:
-    name: Build with Submodule
+    name: Run iOS Integration Test
     runs-on: macos-latest
     strategy:
       matrix:

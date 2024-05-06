@@ -278,6 +278,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
     const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
+      console.log('DeviceTypes', deviceTypes);
+      console.log('Device', device);
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
