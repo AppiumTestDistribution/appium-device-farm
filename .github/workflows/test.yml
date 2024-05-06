@@ -152,9 +152,7 @@ jobs:
           npm run bundle
       - name: Run BrowserStack Test
         run: |
-          echo ${{ env.BS_USERNAME }}
-          echo ${{ secrets.BS_USERNAME }}
-#          export CLOUD_USERNAME=${{ env.BS_USERNAME }}
-#          export CLOUD_KEY=${{ env.BS_PASSWORD }}
-#          export BS_ANDROID_CLOUD_APP= ${{ env.BS_ANDROID_CLOUD_APP }}
-#          npm run test-parallel-bs
+          export CLOUD_USERNAME=${{ secrets.BS_USERNAME }}
+          export CLOUD_KEY=${{ secrets.BS_PASSWORD }}
+          export BS_ANDROID_CLOUD_APP= ${{ secrets.BS_ANDROID_CLOUD_APP }}
+          npm run test-parallel-bs
