@@ -1,5 +1,5 @@
 trigger:
-- dashboard-ui
+- dashboard-module
 
 jobs:
  - job: E2EPluginTest

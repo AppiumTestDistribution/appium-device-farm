@@ -103,4 +103,56 @@ jobs:
       - name: Run iOS Integration Test
         run: |
           npm run integration-ios
+  
 
+
+
+  E2EPluginTest:
+    name: Run Plugin Test
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node: [ 20 ]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Build
+        run: |
+          npm ci
+          npm run bundle
+      - name: Run e2e plugin Test
+        run: |
+          npm run test-e2e
+      - name: Run E2E BrowserStack Test
+        run: |
+          npm run test-e2e-browserstack
+      - name: Run E2E PCloudy Test
+        run: |
+          npm run test-e2e-pcloudy
+
+  BrowserStackTest:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node: [ 20 ]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Build
+        run: |
+          npm ci
+          npm run bundle
+      - name: Run BrowserStack Test
+        run: |
+          export CLOUD_USERNAME=$BS_USERNAME
+          export CLOUD_KEY=$BS_PASSWORD
+          export BS_ANDROID_CLOUD_APP=$BS_ANDROID_CLOUD_APP
+          npm run test-parallel-bs

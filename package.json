@@ -130,7 +130,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "appium": "^2.2.1"
+    "appium": "^2.5.4"
   },
   "devDependencies": {
     "@appium/docutils": "^0.4.11",
