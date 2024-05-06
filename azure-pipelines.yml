@@ -1,62 +1,7 @@
 trigger:
-- dashboard-module
+- dashboard-ui
 
 jobs:
- - job: UnitTest  
-   pool:
-     vmImage: 'macOS-latest'
-   steps:
-    - task: NodeTool@0.200.0
-      inputs:
-       versionSpec: '20.x'
-    - template: templates/pipeline.yml
-    - script: |
-        npm test
-      displayName: 'npm test'
-    - script: |
-        npm run prettier-check
-      displayName: 'Prettier check'
-
- - job: ANDROID
-   pool:
-     vmImage: 'macOS-latest'
-
-   steps:
-    - task: NodeTool@0.200.0
-      inputs:
-       versionSpec: '20.x'
-    - template: templates/pipeline.yml
-    - bash: |
-        echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
-      displayName: "install Android image"
-    - script: |
-        $ANDROID_HOME/emulator/emulator -list-avds
-        echo '---'
-        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
-        echo '---'
-        echo '---'
-        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator1 -k 'system-images;android-27;google_apis;x86' --force
-        echo '---'
-        $ANDROID_HOME/emulator/emulator -list-avds
-      displayName: "create AVD"
-    - script: |
-        $ANDROID_HOME/platform-tools/adb devices
-        echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -verbose -no-boot-anim -no-audio -no-window -gpu swiftshader_indirect > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-        echo '---'
-        echo '---'
-        nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator1 -verbose -no-boot-anim -no-audio -no-window -gpu swiftshader_indirect > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-        echo '---'
-        $ANDROID_HOME/platform-tools/adb devices
-        $ANDROID_HOME/platform-tools/adb kill-server
-        echo '----devices after kill server----'
-        $ANDROID_HOME/platform-tools/adb devices
-      displayName: "start Android emulator"
-    - script: |
-        npm run build --if-present
-        npm run integration-android
-      displayName: "Android Integration Test"
-
  - job: E2EPluginTest
    pool:
      vmImage: 'macOS-latest'
