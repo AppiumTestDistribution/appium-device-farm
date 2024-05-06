@@ -152,6 +152,7 @@ jobs:
           npm run bundle
       - name: Run BrowserStack Test
         run: |
+          echo "${{ env.BS_USERNAME }}"
           export CLOUD_USERNAME=${{ env.BS_USERNAME }}
           export CLOUD_KEY=${{ env.BS_PASSWORD }}
           export BS_ANDROID_CLOUD_APP= ${{ env.BS_ANDROID_CLOUD_APP }}
