@@ -57,7 +57,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
         log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`);
       }
     } else {
-      log.debug(`Device "${device.udid}" already exists in database`);
+      debugLog(`Device "${device.udid}" already exists in database`);
     }
   });
 
@@ -377,7 +377,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
           },
         );
 
-        log.debug(`Unblocked device ${device.udid} from host ${device.host}`);
+        debugLog(`Unblocked device ${device.udid} from host ${device.host}`);
       }),
     ).catch((error) => {
       log.error(`Unable to unblock device. Reason: ${error}`);
