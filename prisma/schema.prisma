@@ -59,27 +59,35 @@ model SessionLog {
 }
 
 model TestEventJournal {
-  id                  String   @id @default(uuid())
-  session_id          String
-  event_uuid          String   @unique
-  event_type          String
-  event_sub_type      String
-  name                String
-  scopes              String
-  result              String?
-  started_at          DateTime?
-  finished_at         DateTime?
-  start_event_doc     String?
-  finished_event_doc  String?
-  file                String
+  id                 String    @id @default(uuid())
+  session_id         String
+  event_uuid         String    @unique
+  event_type         String
+  event_sub_type     String
+  name               String
+  scopes             String
+  result             String?
+  started_at         DateTime?
+  finished_at        DateTime?
+  start_event_doc    String?
+  finished_event_doc String?
+  file               String
 }
 
 model AppInformation {
-  id                  String   @id @default(uuid())
-  fileName            String
-  uploadedFileName    String
-  path                String
-  platform            String
-  fileSize            String  @default("0")
-  createdAt DateTime  @default(now()) @map("created_at")
+  id               String   @id @default(uuid())
+  fileName         String
+  uploadedFileName String
+  path             String
+  platform         String
+  fileSize         String   @default("0")
+  createdAt        DateTime @default(now()) @map("created_at")
+}
+
+model DeviceTags {
+  host String
+  udid String
+  tags String?
+
+  @@unique([host, udid])
 }

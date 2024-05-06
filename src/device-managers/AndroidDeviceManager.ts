@@ -217,6 +217,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       width: deviceSize.screenWidth,
       height: deviceSize.screenHeight,
       liveStreaming: pluginArgs.liveStreaming,
+      tags: [],
     };
   }
 

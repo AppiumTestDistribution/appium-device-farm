@@ -5,6 +5,8 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
+import { DeviceTags } from '@prisma/client';
+import { prisma } from '../prisma';
 // import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
@@ -71,6 +73,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   // }
   debugLog(`All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`);
 
+  await updateDeviceTags();
   return result;
 }
 
@@ -94,6 +97,21 @@ export async function setSimulatorState(devices: Array<IDevice>) {
           });
       }
     }
+  }
+}
+
+export async function updateDeviceTags() {
+  /**
+   * Update the Latest Simulator state in DB
+   */
+  const deviceTagList: Array<DeviceTags> = await prisma.deviceTags.findMany();
+  for await (const tagData of deviceTagList) {
+    (await ADTDatabase.DeviceModel)
+      .chain()
+      .find({ udid: tagData.udid, host: tagData.host })
+      .update(function (d: IDevice) {
+        d.tags = tagData.tags?.split(',').filter(Boolean) || [];
+      });
   }
 }
 
