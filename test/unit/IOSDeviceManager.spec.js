@@ -3,8 +3,6 @@ import { expect } from 'chai';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
 import * as DeviceUtils from '../../src/device-utils';
-import os from 'os';
-import path from 'path';
 import { deviceMock } from './fixtures/devices';
 import ip from 'ip';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
@@ -68,6 +66,7 @@ describe('IOS Device Manager', () => {
         realDevice: true,
         deviceType: 'real',
         platform: 'ios',
+        tags: [],
         wdaLocalPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -205,6 +204,7 @@ describe('IOS Device Manager', () => {
         productModel: 'iPhone12,8',
         wdaBundleId: '',
         height: '667',
+        tags: [],
         platform: 'ios',
         wdaLocalPort: 54093,
         host: `http://${ip.address()}:4723`,
@@ -283,6 +283,7 @@ describe('IOS Device Manager', () => {
         name: 'Sai’s iPhone',
         busy: false,
         realDevice: true,
+        tags: [],
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
