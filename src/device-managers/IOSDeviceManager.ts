@@ -315,15 +315,21 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   static getProductModel(deviceTypes: any, device: IDevice) {
-    return deviceTypes.filter(
-      (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
-    )[0].modelIdentifier;
+    if (device.platform === 'tvos') {
+      return undefined;
+    } else {
+      return deviceTypes.filter(
+        (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
+      )[0].modelIdentifier;
+    }
   }
 
   findKeyByValue(model: string): any {
-    for (const [key, value] of Object.entries(IOSDeviceInfoMap)) {
-      if (model === key) {
-        return value;
+    if (model !== undefined) {
+      for (const [key, value] of Object.entries(IOSDeviceInfoMap)) {
+        if (model === key) {
+          return value;
+        }
       }
     }
   }
