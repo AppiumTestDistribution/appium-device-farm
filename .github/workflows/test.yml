@@ -60,6 +60,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: Build
+        run: |
+         npm ci
+         npm run bundle
 
       - name: Enable KVM
         run: |
@@ -74,5 +78,5 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
-          script: adb devices
+          script: npm run integration-android
 
