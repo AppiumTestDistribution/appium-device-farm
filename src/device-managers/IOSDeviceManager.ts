@@ -277,14 +277,12 @@ export default class IOSDeviceManager implements IDeviceManager {
     const buildSimulators = !isEmpty(filteredSimulators) ? filteredSimulators : flattenValued;
     //log.debug(`Build Simulators: ${JSON.stringify(buildSimulators)}`);
     const deviceTypes = await list.devicetypes;
-    console.log('DeviceTypes', deviceTypes);
     for await (const device of buildSimulators) {
-      console.log('Device', device);
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
-      const modelInfo = this.findKeyByValue(productModel);
+      const modelInfo = this.findKeyByValue(productModel) || { Width: '', Height: '' };
       returnedSimulators.push(
         Object.assign({
           ...device,
