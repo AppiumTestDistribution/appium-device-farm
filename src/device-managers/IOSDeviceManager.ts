@@ -315,7 +315,9 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   static getProductModel(deviceTypes: any, device: IDevice) {
-    if (device.platform === 'tvos') {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (device.platform === 'tvOS') {
       return undefined;
     } else {
       return deviceTypes.filter(
