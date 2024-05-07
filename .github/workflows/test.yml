@@ -36,6 +36,28 @@ jobs:
       run: |
         # Add your script commands here
         npm test
+  HubWithNoPlatform:
+    name: Run E2E Plugin Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+      - name: Build
+        run: |
+          # Add your script commands here
+          npm ci
+          npm run bundle
+      - name: Run E2E Plugin Test without Platform
+        run: |
+          # Add your script commands here
+          npm run test-e2e
 
   buildWithOutSubmodule:
     name: Build with Out Submodule

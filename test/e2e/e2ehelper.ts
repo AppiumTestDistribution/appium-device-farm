@@ -82,7 +82,7 @@ export function ensureAppiumHome(suffix = '', deleteExisting = true) {
 }
 
 export function ensureHubConfig(
-  platform: 'android' | 'ios' | 'both' = 'android',
+  platform: 'android' | 'ios' | 'both' | 'none' = 'android',
   iosDeviceType: 'real' | 'simulated' | 'both' = 'both',
   androidDeviceType: 'real' | 'simulated' | 'both' = 'both',
   moreConfig: Partial<IPluginArgs> = {},

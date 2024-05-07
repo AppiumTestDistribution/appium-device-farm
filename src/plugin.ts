@@ -190,10 +190,10 @@ class DevicePlugin extends BasePlugin {
     registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
     externalModule.updateServer(expressApp, httpServer);
 
-    if (!platform)
-      throw new Error(
-        '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
-      );
+    // if (!platform)
+    //   throw new Error(
+    //     '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
+    //   );
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});

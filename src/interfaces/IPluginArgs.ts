@@ -31,7 +31,7 @@ export interface IDerivedDataPath {
 export type DeviceTypeToInclude = 'both' | 'real' | 'simulated';
 
 export interface IPluginArgs {
-  platform: 'ios' | 'android' | 'both';
+  platform: 'ios' | 'android' | 'both' | 'none';
   iosDeviceType: DeviceTypeToInclude;
   androidDeviceType: DeviceTypeToInclude;
   skipChromeDownload: boolean;
@@ -80,7 +80,7 @@ export interface IPluginArgs {
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
-  platform: 'both',
+  platform: 'none',
   iosDeviceType: 'both',
   androidDeviceType: 'both',
   skipChromeDownload: true,

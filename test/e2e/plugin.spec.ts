@@ -22,8 +22,7 @@ import { ADTDatabase } from '../../src/data-service/db';
 
 describe('Basic Plugin Test', () => {
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig();
-
+  const hub_config_file = ensureHubConfig('none');
   // dump node config into a file
   const node_config_file = ensureNodeConfig();
 
