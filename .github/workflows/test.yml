@@ -197,4 +197,4 @@ jobs:
         npm run bundle
      - name: Run LT Test
        run: |
-          CLOUD_USERNAME=${{ secrets.LT_CLOUD_APP }} CLOUD_KEY=${{ secrets.LT_PASSWORD }} LT_CLOUD_APP=${{ secrets.LT_CLOUD_APP }} npm run test-parallel-lt
+          CLOUD_USERNAME=${{ secrets.USERNAME }} CLOUD_KEY=${{ secrets.LT_PASSWORD }} LT_CLOUD_APP=${{ secrets.LT_CLOUD_APP }} npm run test-parallel-lt
