@@ -151,7 +151,7 @@ describe('Device Utils', () => {
     );
   });
 
-  it.only('Allocate devices for session with tag filter', async () => {
+  it('Allocate devices for session with tag filter', async () => {
     (await ADTDatabase.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
       'android',
