@@ -29,6 +29,7 @@ describe('Device Utils', () => {
     busy: false,
     state: 'device',
     udid: 'emulator-5555',
+    tags: ['team1', 'team33'],
     platform: 'android',
     deviceType: 'real',
     host: 'http://192.168.0.225:4723',
@@ -42,6 +43,7 @@ describe('Device Utils', () => {
     sdk: '10',
     realDevice: true,
     name: 'emulator-5555',
+    tags: ['team22', 'teamAutomation'],
     busy: false,
     state: 'device',
     udid: 'emulator-5555',
@@ -145,6 +147,70 @@ describe('Device Utils', () => {
         .with.property(
           'message',
           'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"http://192.168.0.226:4723"}',
+        ),
+    );
+  });
+
+  it.only('Allocate devices for session with tag filter', async () => {
+    (await ADTDatabase.DeviceModel).removeDataOnly();
+    const deviceManager = new DeviceFarmManager(
+      'android',
+      { androidDeviceType: 'both', iosDeviceType: 'both' },
+      4723,
+      Object.assign(pluginArgs, { maxSessions: 3 }),
+      NODE_ID,
+    );
+    Container.set(DeviceFarmManager, deviceManager);
+    await addNewDevice(devices);
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'android',
+        'appium:app': '/Downloads/VodQA.apk',
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+        'df:options': {
+          tags: ['team1', 'teamAutomation'],
+        },
+      },
+      firstMatch: [{}],
+    };
+    const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+      capabilities,
+      1000,
+      1000,
+      pluginArgs,
+    );
+
+    async function getFilteredDevice(udid: string, host: string) {
+      return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
+    }
+
+    const foundDevice = (
+      await getFilteredDevice(
+        allocatedDeviceForFirstSession.udid,
+        allocatedDeviceForFirstSession.host,
+      )
+    )[0];
+    expect(foundDevice.tags).to.be.deep.eq(['team1', 'team33']);
+    const allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(
+      capabilities,
+      1000,
+      1000,
+      pluginArgs,
+    );
+    const foundSecondDevice = (
+      await getFilteredDevice(
+        allocatedDeviceForSecondSession.udid,
+        allocatedDeviceForSecondSession.host,
+      )
+    )[0];
+    expect(foundSecondDevice.tags).to.be.deep.eq(['team22', 'teamAutomation']);
+    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
+      expect(error)
+        .to.be.an('error')
+        .with.property(
+          'message',
+          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","tags":["team1","teamAutomation"]}',
         ),
     );
   });

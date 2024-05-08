@@ -18,6 +18,7 @@ const capabilities = {
     screenshotOnFailure: true,
     build: new Date().toISOString(),
     saveDeviceLogs: true,
+    tags: ['team1', 'team22'],
   },
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',

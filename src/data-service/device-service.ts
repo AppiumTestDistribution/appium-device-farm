@@ -217,6 +217,9 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
             });
           }
           break;
+        case 'tags':
+          filter.tags = { $containsAny: filterOptions.tags };
+          break;
         default:
           // do not remove this line as it will help us to know if we have missed any filter options
           // eslint-disable-next-line no-case-declarations

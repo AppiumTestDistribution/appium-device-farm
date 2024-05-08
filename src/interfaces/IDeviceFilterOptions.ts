@@ -14,4 +14,5 @@ export interface IDeviceFilterOptions {
   maxSDK?: string;
   session_id?: string;
   filterByHost?: string;
+  tags?: string[];
 }

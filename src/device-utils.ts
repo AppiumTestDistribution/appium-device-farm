@@ -300,6 +300,9 @@ export function getDeviceFiltersFromCapability(
     maxSDK: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MAX_SDK]
       ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.MAX_SDK]
       : undefined,
+    tags: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.TAGS]
+      ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.TAGS]
+      : undefined,
   };
 
   if (name !== undefined) {
