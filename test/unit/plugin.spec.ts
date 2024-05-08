@@ -39,6 +39,7 @@ describe('Device filter tests', () => {
       minSDK: undefined,
       maxSDK: undefined,
       filterByHost: undefined,
+      tags: undefined,
       busy: false,
       userBlocked: false,
     });
@@ -72,6 +73,7 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: undefined,
       maxSDK: undefined,
+      tags: undefined,
       busy: false,
       userBlocked: false,
     });
@@ -101,6 +103,7 @@ describe('Device filter tests', () => {
       udid: undefined,
       minSDK: '10.2.0',
       maxSDK: undefined,
+      tags: undefined,
       busy: false,
       userBlocked: false,
     });
