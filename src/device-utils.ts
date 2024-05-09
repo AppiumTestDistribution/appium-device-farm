@@ -325,32 +325,41 @@ export async function getBusyDevicesCount() {
   }).length;
 }
 
-export async function updateDeviceList(host: string, hubArgument?: string): Promise<IDevice[]> {
-  const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
-  if (devices.length === 0) {
-    log.warn('No devices found');
-    return [];
-  }
-
-  // log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
-
-  // first thing first. Update device list in local list
-  await addNewDevice(devices, host);
-
+export async function updateDeviceList(host: string, hubArgument?: string): Promise<any> {
   if (hubArgument) {
     if (await isDeviceFarmRunning(hubArgument)) {
+      const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
+      if (devices.length === 0) {
+        log.warn('No devices found');
+        return [];
+      }
+
+      // log.debug(`Updating device list with ${JSON.stringify(devices)} devices`);
+
+      // first thing first. Update device list in local list
+      await addNewDevice(devices, host);
       const nodeDevices = new NodeDevices(hubArgument);
       try {
         await nodeDevices.postDevicesToHub(devices, 'add');
       } catch (error) {
         log.error(`Cannot send device list update. Reason: ${error}`);
       }
+      return devices;
     } else {
-      log.warn(`Not sending device update since hub ${hubArgument} is not running`);
+      log.warn(
+        `Not sending device update since hub ${hubArgument} is not running. Removing all devices from node`,
+      );
+      (await ADTDatabase.DeviceModel).removeDataOnly();
     }
+  } else {
+    const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
+    if (devices.length === 0) {
+      log.warn('No devices found');
+      return [];
+    }
+    await addNewDevice(devices, host);
+    return devices;
   }
-
-  return devices;
 }
 
 export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: number) {

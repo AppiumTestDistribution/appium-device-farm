@@ -3,6 +3,7 @@ import log from '../logger';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import { IDevice } from '../interfaces/IDevice';
+import { ADTDatabase } from '../data-service/db';
 
 export default class NodeDevices {
   private host: string;
@@ -45,7 +46,7 @@ export default class NodeDevices {
       if (status === 200) {
         if (arg === 'add') {
           devices.forEach((device: any) => {
-            log.info(`Pushed devices to hub ${device.udid}`);
+            log.info(`Pushed devices to hub ${device.udid} ${device.mjpegServerPort}`);
           });
         } else {
           devices.forEach((device: any) => {
