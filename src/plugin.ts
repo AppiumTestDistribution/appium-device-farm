@@ -81,7 +81,6 @@ const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
 let iosDeviceType: any;
-let wdaBundleId: string;
 let hasEmulators: any;
 let proxy: any;
 let externalModule: any;
@@ -177,7 +176,6 @@ class DevicePlugin extends BasePlugin {
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
-    wdaBundleId = pluginArgs.wdaBundleId;
     if (pluginArgs.proxy !== undefined) {
       log.info(`Adding proxy for axios: ${JSON.stringify(pluginArgs.proxy)}`);
       proxy = pluginArgs.proxy;

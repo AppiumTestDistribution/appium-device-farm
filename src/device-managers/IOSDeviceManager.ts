@@ -224,7 +224,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       deviceType: 'real',
       platform: this.getDevicePlatformName(name),
       host,
-      wdaBundleId: pluginArgs.wdaBundleId,
+      wdaBundleId: '',
       productModel: ProductType,
       totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
       sessionStartTime: 0,

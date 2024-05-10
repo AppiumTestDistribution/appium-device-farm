@@ -81,6 +81,7 @@ model AppInformation {
   path             String
   platform         String
   fileSize         String   @default("0")
+  appBundleId      String   @default("")
   createdAt        DateTime @default(now()) @map("created_at")
 }
 

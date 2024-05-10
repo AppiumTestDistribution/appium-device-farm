@@ -5,7 +5,9 @@ hide:
 ---
 ## Prerequisite
 
-Appium version 2.0.X
+Appium version 2.4.X
+
+Make sure to install go-ios for real device testing. Refer [go-ios](https://github.com/danielpaulus/go-ios)
 
 ## Installation - Server
 
@@ -13,7 +15,6 @@ Install the plugin using Appium's plugin CLI, either as a named plugin or via NP
 
 ```
 appium plugin install --source=npm appium-device-farm
-appium plugin install --source=npm appium-dashboard
 ```
 
 ## Installation - Client
@@ -43,6 +44,13 @@ User can block/unblock devices from Dashboard manually. These devices will not b
 
 Once automation picks the device user cannot manually unblock, it's responsible for the automation script.
 
+## Manual Control of Devices for iOS real device
+Resign the WDA provided here: [WDA](). Upload the resigned WDA to the server from the UI. Make sure the WDA uploaded should be named as `wda-resign.ipa`.
+
+Follow the instructions [here](https://github.com/DanTheMan827/ios-app-signer) to resign the WDA.
+
+Verify: Install the resigned WDA on the device and check if the WDA is working fine. Use the command 
+`ios install --path=/pathto/wda-resign.ipa`
 ## Dashboard
 
 To reflect the test status on dashboard. 
