@@ -227,7 +227,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
         this.adb = await ADB.createADB({});
         const client = Adb.createClient();
         this.tracker = await client.trackDevices();
-        const originalADBTracking = this.createLocalAdbTracker(this.tracker, this.adb);
+        const originalADBTracking = this.createLocalAdbTracker(client, this.tracker, this.adb);
         await originalADBTracking();
       }
     } catch (e) {
@@ -426,7 +426,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
   }
 
-  public createLocalAdbTracker(tracker: Tracker, originalADB: any) {
+  public createLocalAdbTracker(client: Client, tracker: Tracker, originalADB: any) {
     const pluginArgs = this.pluginArgs;
     const adbTracker = async () => {
       try {
@@ -444,8 +444,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
             await this.onDeviceAdded(originalADB, device);
           }
         });
-        tracker.on('end', () => {
+        tracker.on('end', async () => {
           log.info('Tracking stopped');
+          this.tracker = await client.trackDevices();
+          await this.createLocalAdbTracker(client, tracker, originalADB)();
+        });
+        tracker.on('error', () => {
+          log.info('Error from android tracker');
         });
       } catch (err: any) {
         log.error('Something went wrong:', err.stack);
