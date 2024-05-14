@@ -1,0 +1,54 @@
+site_name: Appium Device Farm
+repo_url: https://github.com/AppiumTestDistribution/appium-device-farm
+repo_name: AppiumTestDistribution/appium-device-farm
+site_url: https://appium-device-farm-eight.vercel.app/
+edit_uri: edit/master/docs
+site_description: Documentation for the Appium Device Farm plugin
+docs_dir: docs
+site_dir: site
+theme:
+  name: material
+  logo: assets/images/appium-logo-white.png
+  favicon: assets/images/appium-logo.png
+  custom_dir: docs/overrides
+  features:
+    - navigation.tabs
+  font:
+    code: Roboto Mono
+markdown_extensions:
+  - meta
+  - attr_list
+  - admonition
+  - md_in_html
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: ""
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - docs/overrides/.icons/
+extra_css:
+  - assets/stylesheets/extra.css
+nav:
+  - index.md
+  - setup.md
+  - troubleshooting.md
+  - cloud.md
+  - remote-execution.md
+  - architecture.md
+  - Reference:
+      - server-args.md
+      - capabilities.md
+      - reference/commands/sample.md
+      - reference/commands/a.md
