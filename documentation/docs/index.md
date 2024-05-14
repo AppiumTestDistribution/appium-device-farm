@@ -2,11 +2,12 @@
 title: Overview
 hide:
   - navigation
+  - toc
 ---
 
 
 <div style="text-align: center">
-  <img src="assets/images/DeviceFarm-Logo.jpg" class="center" />
+  <img src="assets/images/DeviceFarm-Logo.jpg" class="center" width="200"/>
 </div>
 
 This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
