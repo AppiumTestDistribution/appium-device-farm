@@ -234,7 +234,10 @@ export async function loadExternalModules(): Promise<IExternalModuleLoader> {
       console.log(externalModule);
       return new (externalModule as any).default();
     })
-    .catch((err) => new FakeModuleLoader());
+    .catch((err) => {
+      console.error('Error Loading External Module', err);
+      return new FakeModuleLoader();
+    });
   //return new FakeModuleLoader();
 }
 
