@@ -26,7 +26,7 @@ No special action is needed to make things work on the client side.
 The plugin will not be active unless turned on when invoking the Appium server. See "Argument options" below
 
 ```
-appium server -ka 800 --use-plugins=device-farm,appium-dashboard  -pa /wd/hub --plugin-device-farm-platform=android
+appium server -ka 800 --use-plugins=device-farm  -pa /wd/hub --plugin-device-farm-platform=android
 ```
 
 You can also pass all the arguments in a config file. Refer [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/server-config.json)

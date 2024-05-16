@@ -35,8 +35,6 @@ This is an Appium plugin designed to manage and create driver session on connect
 	During test execution, our solution updates the device pool with newly available devices, ensuring that your tests run on the latest resources.
 
 
-	[:octicons-arrow-right-24: Customization](#)
-
 -   :status-settings:{ .device } __Parallel Testing Enhancement__
 
 	---

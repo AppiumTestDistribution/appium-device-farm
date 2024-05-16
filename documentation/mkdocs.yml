@@ -8,7 +8,7 @@ docs_dir: docs
 site_dir: site
 theme:
   name: material
-  logo: assets/images/appium-logo-white.png
+  logo: assets/images/appium-logo.png
   favicon: assets/images/appium-logo.png
   custom_dir: docs/overrides
   features:
@@ -51,4 +51,3 @@ nav:
       - server-args.md
       - capabilities.md
       - reference/commands/sample.md
-      - reference/commands/a.md

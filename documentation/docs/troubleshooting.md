@@ -9,12 +9,15 @@ hide:
 1. How do I improve the iOS session startup for real device?
     - Resign the WDA provided here: [WDA]()
     - Use the following capabilities:
-        ```json
+   
+      ```json
       {
-       'appium:usePreinstalledWDA': true,
-        'appium:updatedWDABundleId': wdaBundleID,
-        'appium:updatedWDABundleIdSuffix': '',
+       "appium:usePreinstalledWDA": true,
+       "appium:updatedWDABundleId": wdaBundleID,
+       "appium:updatedWDABundleIdSuffix": "",
       }
+      ```
+      
     - Make sure the iPhone real device is unblocked and enabled developer mode.
 2. How do I improve the iOS session startup for Simulators?
     - Provide server argument during the appium server start. `preBuildWDAPath` with the path to the WDA build for Simulators.
