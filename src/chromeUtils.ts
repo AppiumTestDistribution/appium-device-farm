@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import _ from 'lodash';
 import { system, fs, node } from '@appium/support';
-import { BaseDriver } from 'appium/driver';
+import { BaseDriver } from '@appium/base-driver';
 import path from 'path';
 import axios from 'axios';
 import { exec } from 'teen_process';
@@ -110,6 +110,7 @@ const getOsInfo = _.memoize(async function getOsInfo() {
   };
 });
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 // error TS2345: Argument of type '{}' is not assignable to parameter of type 'DriverOpts<Readonly<Record<string, Constraint>>>'
 // Type '{}' is missing the following properties from type 'ServerArgs': address, allowCors, allowInsecure, basePath, and 26 more.
