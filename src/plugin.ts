@@ -70,7 +70,7 @@ import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
 import * as https from 'https';
-import { DEVICE_CONNECTIONS_FACTORY } from 'appium-xcuitest-driver/build/lib/device-connections-factory';
+import { DEVICE_CONNECTIONS_FACTORY } from './iProxy';
 import { BeforeSessionCreatedEvent } from './events/before-session-create-event';
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
