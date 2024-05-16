@@ -34,7 +34,7 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
 }
 
 async function findAppPath(caps: any) {
-  if (caps.alwaysMatch['df:skipReport']) return;
+  if (caps.firstMatch[0]['df:skipReport']) return;
   const fileName = caps.alwaysMatch['appium:app'] || caps.firstMatch[0]['appium:app'];
   if (fileName?.startsWith('file')) {
     const appInfo: any = await prisma.appInformation.findFirst({
@@ -84,7 +84,7 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
-  if (freeDevice.realDevice && !caps.alwaysMatch['df:skipReport']) {
+  if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const { appBundleId } = (await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
     })) as any;
