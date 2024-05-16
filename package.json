@@ -130,6 +130,7 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
+    "ws": "^8.17.0",
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
