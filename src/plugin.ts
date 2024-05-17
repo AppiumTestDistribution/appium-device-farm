@@ -133,7 +133,6 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     DevicePlugin.httpServer = httpServer;
 
-    // cliArgs are here is not pluginArgs yet as it contains the whole CLI argument for Appium! Different case for our plugin constructor
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
@@ -164,7 +163,6 @@ class DevicePlugin extends BasePlugin {
     DevicePlugin.NODE_ID = uuidv4();
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
-    // I'm transferring the CLI Args to pluginArgs here.
     DevicePlugin.nodeBasePath = cliArgs.basePath;
 
     if (pluginArgs.bindHostOrIp === undefined) {
@@ -187,11 +185,6 @@ class DevicePlugin extends BasePlugin {
 
     registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
     externalModule.updateServer(expressApp, httpServer);
-
-    // if (!platform)
-    //   throw new Error(
-    //     '🔴 🔴 🔴 Specify --plugin-device-farm-platform from CLI as android,iOS or both or use appium server config. Please refer 🔗 https://github.com/appium/appium/blob/master/packages/appium/docs/en/guides/config.md 🔴 🔴 🔴',
-    //   );
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
       const adb = await ADB.createADB({});
