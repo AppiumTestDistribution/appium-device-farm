@@ -18,9 +18,6 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
-      - name: Post bumpr status comment
-        uses: haya14busa/action-bumpr@v1
-
       # Get tag name.
       - id: tag
         uses: haya14busa/action-cond@v1
