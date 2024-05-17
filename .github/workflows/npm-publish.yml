@@ -1,4 +1,4 @@
-name: release
+name: Release Device Farm to NPM
 on:
   push:
     branches:
