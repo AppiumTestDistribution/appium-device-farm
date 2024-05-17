@@ -290,6 +290,7 @@ class DevicePlugin extends BasePlugin {
     } = caps;
     stripAppiumPrefixes(requiredCaps);
     stripAppiumPrefixes(allFirstMatchCaps);
+    const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
@@ -376,7 +377,7 @@ class DevicePlugin extends BasePlugin {
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
-      if (!caps.alwaysMatch['df:skipReport']) {
+      if (!mergedCapabilites['df:skipReport']) {
         log.info('Skipping dashboard report');
         await EventBus.fire(
           new SessionCreatedEvent({

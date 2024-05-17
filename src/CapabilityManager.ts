@@ -34,8 +34,9 @@ function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
 }
 
 async function findAppPath(caps: any) {
-  if (caps.firstMatch[0]['df:skipReport']) return;
-  const fileName = _.has(caps, 'alwaysMatch') ? caps.alwaysMatch['appium:app'] : caps.firstMatch[0]['appium:app'];
+  const mergedCaps = Object.assign({}, caps.firstMatch ? caps.firstMatch[0] : {}, caps.alwaysMatch);
+  if (mergedCaps['df:skipReport']) return;
+  const fileName = mergedCaps['appium:app'];
   if (fileName?.startsWith('file')) {
     const appInfo: any = await prisma.appInformation.findFirst({
       where: { uploadedFileName: fileName as string },
