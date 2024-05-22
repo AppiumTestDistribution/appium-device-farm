@@ -18,7 +18,7 @@ import {
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import ip from 'ip';
 import { IDevice } from '../../src/interfaces/IDevice';
-import { ADTDatabase } from '../../src/data-service/db';
+import { ATDRepository } from '../../src/data-service/db';
 
 describe('Basic Plugin Test', () => {
   // dump hub config into a file
@@ -58,7 +58,7 @@ describe('Basic Plugin Test', () => {
   });
 
   it('Add Android devices from node to hub', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     const nodeAndroidDevice = [
       {
         adbRemoteHost: null,

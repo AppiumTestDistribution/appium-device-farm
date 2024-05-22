@@ -1,4 +1,4 @@
-import { ADTDatabase } from './db';
+import { ATDRepository } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
@@ -12,7 +12,7 @@ import { prisma } from '../prisma';
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
-    (await ADTDatabase.DeviceModel)
+    (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid, host: { $contains: device.host } })
       .remove();
@@ -41,7 +41,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       device,
     );
 
-    const isDeviceAlreadyPresent = (await ADTDatabase.DeviceModel)
+    const isDeviceAlreadyPresent = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid, host: device.host })
       .data();
@@ -49,7 +49,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       delete device['$loki'];
       delete device['meta'];
       try {
-        (await ADTDatabase.DeviceModel).insert({
+        (await ATDRepository.DeviceModel).insert({
           ...device,
         });
         return device;
@@ -71,7 +71,9 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   // for (const iDevice of result) {
   //   await setDeviceState(iDevice);
   // }
-  debugLog(`All devices: ${JSON.stringify((await ADTDatabase.DeviceModel).chain().find().data())}`);
+  debugLog(
+    `All devices: ${JSON.stringify((await ATDRepository.DeviceModel).chain().find().data())}`,
+  );
 
   await updateDeviceTags();
   return result;
@@ -82,14 +84,14 @@ export async function setSimulatorState(devices: Array<IDevice>) {
    * Update the Latest Simulator state in DB
    */
   for await (const device of devices) {
-    const allDevices = (await ADTDatabase.DeviceModel).chain().find().data();
+    const allDevices = (await ATDRepository.DeviceModel).chain().find().data();
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
       const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
       if (state !== device.state) {
         log.info(
           `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
         );
-        (await ADTDatabase.DeviceModel)
+        (await ATDRepository.DeviceModel)
           .chain()
           .find({ udid: device.udid })
           .update(function (d: IDevice) {
@@ -106,7 +108,7 @@ export async function updateDeviceTags() {
    */
   const deviceTagList: Array<DeviceTags> = await prisma.deviceTags.findMany();
   for await (const tagData of deviceTagList) {
-    (await ADTDatabase.DeviceModel)
+    (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: tagData.udid, host: tagData.host })
       .update(function (d: IDevice) {
@@ -116,7 +118,7 @@ export async function updateDeviceTags() {
 }
 
 export async function getAllDevices(): Promise<IDevice[]> {
-  return (await ADTDatabase.DeviceModel).chain().find().data();
+  return (await ATDRepository.DeviceModel).chain().find().data();
 }
 
 /**
@@ -127,7 +129,7 @@ export async function getAllDevices(): Promise<IDevice[]> {
 export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<IDevice[]> {
   // host, userBlocked must not be undefined
   const basicFilter = { host: { $ne: undefined }, userBlocked: { $ne: undefined } };
-  const deviceModel = await ADTDatabase.DeviceModel;
+  const deviceModel = await ATDRepository.DeviceModel;
   let results = deviceModel.chain().find(basicFilter);
   const filter = {} as any;
 
@@ -270,7 +272,7 @@ export async function getDevice(filterOptions: IDeviceFilterOptions): Promise<ID
 
 export async function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
   log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
-  (await ADTDatabase.DeviceModel)
+  (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: device.udid, host: device.host })
     .update(function (device: IDevice) {
@@ -278,7 +280,7 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
         ...updateData,
       });
     });
-  const updatedDevicestatus = (await ADTDatabase.DeviceModel)
+  const updatedDevicestatus = (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: device.udid, host: device.host })
     .data();
@@ -286,7 +288,7 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
 }
 
 export async function updateCmdExecutedTime(sessionId: string) {
-  (await ADTDatabase.DeviceModel)
+  (await ATDRepository.DeviceModel)
     .chain()
     .find({ session_id: sessionId })
     .update(function (device: IDevice) {
@@ -302,7 +304,7 @@ export async function updateCmdExecutedTime(sessionId: string) {
  */
 export async function userBlockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel)
+  (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
@@ -312,7 +314,7 @@ export async function userBlockDevice(udid: string, host: string) {
 
 export async function userUnblockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel)
+  (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
@@ -328,7 +330,7 @@ export async function userUnblockDevice(udid: string, host: string) {
  */
 export async function blockDevice(udid: string, host: string) {
   // we are requiring host as emulator/simulator name may be the same for different hosts
-  (await ADTDatabase.DeviceModel)
+  (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: udid, host: host })
     .update(function (device: IDevice) {
@@ -342,7 +344,7 @@ export async function unblockDevice(udid: string, host: string) {
 }
 
 export async function unblockDeviceMatchingFilter(filter: object) {
-  const deviceModel = await ADTDatabase.DeviceModel;
+  const deviceModel = await ATDRepository.DeviceModel;
   let devices;
   if (Object.keys(filter).length === 0) {
     devices = deviceModel.chain().find().data();

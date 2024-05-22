@@ -8,7 +8,7 @@ import {
   initializeStorage,
   cleanPendingSessions,
 } from '../../../src/device-utils';
-import { ADTDatabase } from '../../../src/data-service/db';
+import { ATDRepository } from '../../../src/data-service/db';
 
 import Simctl from 'node-simctl';
 import { addCLIArgs } from '../../../src/data-service/pluginArgs';
@@ -29,7 +29,7 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
 });
 
 async function markSimulatorsAsBooted() {
-  const deviceModel = await ADTDatabase.DeviceModel;
+  const deviceModel = await ATDRepository.DeviceModel;
   // mark simulators as booted
   deviceModel.findAndUpdate({ platform: 'ios', deviceType: 'simulator' }, (device) => {
     device.state = 'Booted';
@@ -66,7 +66,7 @@ async function initDeviceFarm(iosDeviceType: string) {
 
 describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     await addCLIArgs(serverCliArgs);
   });
 
@@ -87,7 +87,10 @@ describe('Max sessions CLI argument test', () => {
     };
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find({ udid: device.udid }).data();
+    const allDeviceIds = (await ATDRepository.DeviceModel)
+      .chain()
+      .find({ udid: device.udid })
+      .data();
     expect(allDeviceIds[0].busy).to.be.true;
   });
 
@@ -129,7 +132,7 @@ describe('Max sessions CLI argument test', () => {
     // set all devices to busy
     const allDevices = await deviceManager.getDevices();
     for await (const device of allDevices) {
-      (await ADTDatabase.DeviceModel)
+      (await ATDRepository.DeviceModel)
         .chain()
         .find({ platform: 'ios' })
         .update((device) => {
@@ -191,7 +194,7 @@ describe('IOS Simulator Test', () => {
     };
     // console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-    const allocatedSimulator = (await ADTDatabase.DeviceModel)
+    const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid })
       .data();
@@ -230,7 +233,7 @@ describe('IOS Simulator Test', () => {
     // console.log('devices: ', await deviceManager.getDevices())
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-    const allocatedSimulator = (await ADTDatabase.DeviceModel)
+    const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid })
       .data();
@@ -267,7 +270,7 @@ describe('IOS Simulator Test', () => {
       };
       const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
 
-      const allocatedSimulator = (await ADTDatabase.DeviceModel)
+      const allocatedSimulator = (await ATDRepository.DeviceModel)
         .chain()
         .find({ udid: device.udid })
         .data();
@@ -326,7 +329,7 @@ describe('Boot simulator test', async () => {
     };
     const devices = await deviceManager.getDevices();
     const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
-    const allocatedSimulator = (await ADTDatabase.DeviceModel)
+    const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid })
       .data();
