@@ -2,7 +2,7 @@ import { cleanPendingSessions, getDeviceFiltersFromCapability } from '../../src/
 import { expect } from 'chai';
 import { addCLIArgs } from '../../src/data-service/pluginArgs';
 import { serverCliArgs } from '../integration/cliArgs';
-import { ADTDatabase } from '../../src/data-service/db';
+import { ATDRepository } from '../../src/data-service/db';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { getDeviceFarmCapabilities } from '../../src/CapabilityManager';
 
@@ -11,7 +11,7 @@ const pluginArgs = DefaultPluginArgs;
 describe('Device filter tests', () => {
   it('Get Device filters for real device', async () => {
     await addCLIArgs(serverCliArgs);
-    (await ADTDatabase.CLIArgs)
+    (await ATDRepository.CLIArgs)
       .chain()
       .find()
       .update(function (d) {
@@ -46,7 +46,7 @@ describe('Device filter tests', () => {
   });
 
   it('Get Device from filter properties for simulator', async () => {
-    (await ADTDatabase.CLIArgs)
+    (await ATDRepository.CLIArgs)
       .chain()
       .find()
       .update(function (d) {
@@ -113,11 +113,11 @@ describe('Device filter tests', () => {
 describe('Pending sessions', async () => {
   it('clean pending sessions', async () => {
     // insert pending sessions
-    (await ADTDatabase.PendingSessionsModel).insert({
+    (await ATDRepository.PendingSessionsModel).insert({
       capability_id: '1',
       createdAt: new Date().getTime(),
     });
-    (await ADTDatabase.PendingSessionsModel).insert({
+    (await ATDRepository.PendingSessionsModel).insert({
       capability_id: '2',
       createdAt: new Date().getTime() - 10000,
     });
@@ -126,7 +126,7 @@ describe('Pending sessions', async () => {
     await cleanPendingSessions(5000);
 
     // check pending sessions
-    const pendingSessions = (await ADTDatabase.PendingSessionsModel).chain().data();
+    const pendingSessions = (await ATDRepository.PendingSessionsModel).chain().data();
     expect(pendingSessions.length).to.equal(1);
   });
 });

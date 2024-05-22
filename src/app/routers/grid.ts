@@ -1,5 +1,5 @@
 import { Response, Request, Router } from 'express';
-import { ADTDatabase } from '../../data-service/db';
+import { ATDRepository } from '../../data-service/db';
 import axios from 'axios';
 import _ from 'lodash';
 import {
@@ -18,7 +18,7 @@ import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 
 const SERVER_UP_TIME = new Date().toISOString();
 async function getDevices(request: Request, response: Response) {
-  let devices = (await ADTDatabase.DeviceModel).find();
+  let devices = (await ATDRepository.DeviceModel).find();
   const { sessionId } = request.query;
   if (sessionId) {
     return response.json(devices.find((value) => value.session_id === sessionId));
@@ -53,7 +53,7 @@ async function getDeviceByPlatform(request: Request, response: Response) {
   if (!platform || ['ios', 'android'].indexOf(platform.toLowerCase()) < 0) {
     return response.status(200).send([]);
   }
-  let devices = (await ADTDatabase.DeviceModel).find({
+  let devices = (await ATDRepository.DeviceModel).find({
     platform: platform.toLowerCase(),
   });
 
@@ -87,7 +87,7 @@ async function registerNode(request: Request, response: Response) {
 async function updateDeviceInfo(request: Request, response: Response) {
   const requestBody = request.body;
   const { udid, ...deviceInfo } = requestBody;
-  const devices = (await ADTDatabase.DeviceModel).find({ udid });
+  const devices = (await ATDRepository.DeviceModel).find({ udid });
   if (devices.length === 0) {
     return response.status(404).send(`Device with udid ${udid} not found`);
   }
@@ -96,7 +96,7 @@ async function updateDeviceInfo(request: Request, response: Response) {
     ...device,
     ...deviceInfo,
   };
-  await (await ADTDatabase.DeviceModel).update(updatedDevice);
+  await (await ATDRepository.DeviceModel).update(updatedDevice);
   response.status(200).send({
     success: true,
   });
@@ -125,16 +125,16 @@ async function unBlockDevice(request: Request, response: Response) {
 }
 
 async function getQueuedSessionLength(request: Request<void>, response: Response<number>) {
-  response.json((await ADTDatabase.PendingSessionsModel).chain().find().count());
+  response.json((await ATDRepository.PendingSessionsModel).chain().find().count());
 }
 
 async function getQueuedSessionRequests(request: Request<void>, response: Response<unknown[]>) {
-  response.json((await ADTDatabase.PendingSessionsModel).chain().find().data());
+  response.json((await ATDRepository.PendingSessionsModel).chain().find().data());
 }
 
 async function getNodes(request: Request, response: Response<string[]>) {
   // unfortunately, lokijs does not support field projection
-  const nodes = (await ADTDatabase.DeviceModel)
+  const nodes = (await ATDRepository.DeviceModel)
     .chain()
     .find()
     .data()
@@ -171,7 +171,7 @@ async function nodeAdbStatusOnOtherHost(
   } else {
     // find node url from database of devices
     const devices = (await (
-      await ADTDatabase.DeviceModel
+      await ATDRepository.DeviceModel
     )
       .chain()
       .find({ host: { $contains: host } })

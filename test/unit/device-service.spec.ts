@@ -1,5 +1,5 @@
 import { getDevice } from '../../src/data-service/device-service';
-import { ADTDatabase } from '../../src/data-service/db';
+import { ATDRepository } from '../../src/data-service/db';
 import { expect } from 'chai';
 import { IDeviceFilterOptions } from '../../src/interfaces/IDeviceFilterOptions';
 import semver from 'semver';
@@ -106,9 +106,9 @@ describe('Get device', () => {
       },
     ];
 
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     for await (const device of devices) {
-      (await ADTDatabase.DeviceModel).insert({
+      (await ATDRepository.DeviceModel).insert({
         ...device,
       });
     }

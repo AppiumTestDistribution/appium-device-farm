@@ -3,7 +3,7 @@ import * as DeviceUtils from '../../src/device-utils';
 import * as DeviceService from '../../src/data-service/device-service';
 import chai from 'chai';
 import sinonChai from 'sinon-chai';
-import { ADTDatabase } from '../../src/data-service/db';
+import { ATDRepository } from '../../src/data-service/db';
 import ip from 'ip';
 import { addNewDevice } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
@@ -102,7 +102,7 @@ describe('Device Utils', () => {
   });
 
   it('Allocate devices for session with host filter', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
       'android',
       { androidDeviceType: 'both', iosDeviceType: 'both' },
@@ -130,7 +130,7 @@ describe('Device Utils', () => {
     );
 
     async function getFilteredDevice(udid: string, host: string) {
-      return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
+      return (await ATDRepository.DeviceModel).chain().find({ udid, host }).data();
     }
 
     const foundDevice = (
@@ -152,7 +152,7 @@ describe('Device Utils', () => {
   });
 
   it('Allocate devices for session with tag filter', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
       'android',
       { androidDeviceType: 'both', iosDeviceType: 'both' },
@@ -182,7 +182,7 @@ describe('Device Utils', () => {
     );
 
     async function getFilteredDevice(udid: string, host: string) {
-      return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
+      return (await ATDRepository.DeviceModel).chain().find({ udid, host }).data();
     }
 
     const foundDevice = (
@@ -215,7 +215,7 @@ describe('Device Utils', () => {
     );
   });
   it('Allocating device should set device to be busy', async function () {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
       'android',
       { androidDeviceType: 'both', iosDeviceType: 'both' },
@@ -242,7 +242,7 @@ describe('Device Utils', () => {
     );
 
     async function getFilteredDevice(udid: string, host: string) {
-      return (await ADTDatabase.DeviceModel).chain().find({ udid, host }).data();
+      return (await ATDRepository.DeviceModel).chain().find({ udid, host }).data();
     }
 
     const foundDevice = (
@@ -254,7 +254,7 @@ describe('Device Utils', () => {
 
     expect(foundDevice.busy).to.be.true;
 
-    let filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel)
+    let filterDeviceWithSameUDID = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: allocatedDeviceForFirstSession.udid })
       .data();
@@ -272,7 +272,7 @@ describe('Device Utils', () => {
     // allocatedDeviceForSecondSession should not be the same as allocatedDeviceForFirstSession
     expect(allocatedDeviceForFirstSession).to.not.be.equal(allocatedDeviceForSecondSession);
 
-    const foundSecondDevice = (await ADTDatabase.DeviceModel)
+    const foundSecondDevice = (await ATDRepository.DeviceModel)
       .chain()
       .find({
         udid: allocatedDeviceForSecondSession.udid,
@@ -281,7 +281,7 @@ describe('Device Utils', () => {
       .data()[0];
 
     // check that the device is busy
-    filterDeviceWithSameUDID = (await ADTDatabase.DeviceModel)
+    filterDeviceWithSameUDID = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: allocatedDeviceForFirstSession.udid })
       .data();
@@ -371,7 +371,7 @@ describe('Device Utils', () => {
   });
 
   it('Block and unblock device', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     // mock setUtilizationTime
     sandbox.stub(DeviceUtils, <any>'setUtilizationTime').callsFake(sinon.fake());
 
@@ -388,14 +388,14 @@ describe('Device Utils', () => {
 
     // assert device is busy
     expect(
-      (await ADTDatabase.DeviceModel)
+      (await ATDRepository.DeviceModel)
         .chain()
         .find({ udid: targetDevice.udid, host: targetDevice.host })
         .data()[0],
     ).to.have.property('busy', true);
 
     // set lastCommandTimestamp, otherwise it won't be picked up as device to unblock
-    (await ADTDatabase.DeviceModel)
+    (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: targetDevice.udid, host: targetDevice.host })
       .update(function (device: IDevice) {
@@ -417,7 +417,7 @@ describe('Device Utils', () => {
 
     // assert: device should not have lastCommandTimestamp or it should be undefined
 
-    const device = (await ADTDatabase.DeviceModel)
+    const device = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: targetDevice.udid, host: targetDevice.host })
       .data()[0];
@@ -426,7 +426,7 @@ describe('Device Utils', () => {
   });
 
   it('should remove stale devices', async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     const deviceManager = new DeviceFarmManager(
       'android',
       { androidDeviceType: 'both', iosDeviceType: 'both' },
@@ -441,7 +441,7 @@ describe('Device Utils', () => {
 
     // assert emulator-9999 is removed
     expect(
-      (await ADTDatabase.DeviceModel).chain().find({ udid: 'emulator-9999' }).data().length,
+      (await ATDRepository.DeviceModel).chain().find({ udid: 'emulator-9999' }).data().length,
     ).to.be.equal(0);
   });
 });

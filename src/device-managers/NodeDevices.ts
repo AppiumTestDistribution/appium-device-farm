@@ -3,7 +3,7 @@ import log from '../logger';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import { IDevice } from '../interfaces/IDevice';
-import { ADTDatabase } from '../data-service/db';
+import { ATDRepository } from '../data-service/db';
 
 export default class NodeDevices {
   private host: string;

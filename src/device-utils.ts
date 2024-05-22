@@ -39,7 +39,7 @@ import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
 import { IPluginArgs } from './interfaces/IPluginArgs';
-import { ADTDatabase } from './data-service/db';
+import { ATDRepository } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
 
@@ -349,7 +349,7 @@ export async function updateDeviceList(host: string, hubArgument?: string): Prom
       log.warn(
         `Not sending device update since hub ${hubArgument} is not running. Removing all devices from node`,
       );
-      (await ADTDatabase.DeviceModel).removeDataOnly();
+      (await ATDRepository.DeviceModel).removeDataOnly();
     }
   } else {
     const devices: IDevice[] = await getDeviceManager().getDevices(await getAllDevices());
@@ -506,7 +506,7 @@ export async function setupCronUpdateDeviceList(
 }
 
 export async function cleanPendingSessions(timeoutMs: number) {
-  const pendingSessions = (await ADTDatabase.PendingSessionsModel).chain().find().data();
+  const pendingSessions = (await ATDRepository.PendingSessionsModel).chain().find().data();
   const currentEpoch = new Date().getTime();
   const timedOutSessions = pendingSessions.filter((session) => {
     const timeSinceSessionCreated = currentEpoch - session.createdAt;
@@ -522,7 +522,7 @@ export async function cleanPendingSessions(timeoutMs: number) {
   }
   for await (const session of timedOutSessions) {
     log.debug(`Removing pending session ${session.capability_id} because it has timed out`);
-    (await ADTDatabase.PendingSessionsModel).remove(session);
+    (await ATDRepository.PendingSessionsModel).remove(session);
   }
 }
 

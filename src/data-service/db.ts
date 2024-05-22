@@ -2,30 +2,30 @@ import log from '../logger';
 import loki from 'lokijs';
 
 // database class singleton
-export class ADTDatabase {
-  private static _instance: ADTDatabase;
+export class ATDRepository {
+  private static _instance: ATDRepository;
   private _dbList: { dbname: string; db: loki }[] = [];
 
   static get DeviceModel() {
-    return ADTDatabase.getDeviceModel();
+    return ATDRepository.getDeviceModel();
   }
   static get PendingSessionsModel() {
-    return ADTDatabase.getPendingSessionsModel();
+    return ATDRepository.getPendingSessionsModel();
   }
   static get CLIArgs() {
-    return ADTDatabase.getCLIArgs();
+    return ATDRepository.getCLIArgs();
   }
   static get db() {
-    return ADTDatabase.getDB();
+    return ATDRepository.getDB();
   }
 
   private constructor() {
     log.info('Initializing database');
-    ADTDatabase._instance = this;
+    ATDRepository._instance = this;
   }
 
   public static instance() {
-    return ADTDatabase._instance || new ADTDatabase();
+    return ATDRepository._instance || new ATDRepository();
   }
 
   private static dbname() {
@@ -35,15 +35,15 @@ export class ADTDatabase {
   }
 
   private static async getDeviceModel() {
-    return (await ADTDatabase.getDB()).addCollection('devices');
+    return (await ATDRepository.getDB()).addCollection('devices');
   }
 
   private static async getPendingSessionsModel() {
-    return (await ADTDatabase.getDB()).addCollection('pending-sessions');
+    return (await ATDRepository.getDB()).addCollection('pending-sessions');
   }
 
   private static async getCLIArgs() {
-    return (await ADTDatabase.getDB()).addCollection('cliArgs');
+    return (await ATDRepository.getDB()).addCollection('cliArgs');
   }
 
   private static initCollections(db: loki) {
@@ -53,16 +53,16 @@ export class ADTDatabase {
   }
 
   private static async getDB() {
-    const existingDb = ADTDatabase.instance()._dbList.find(
-      (db) => db.dbname === ADTDatabase.dbname(),
+    const existingDb = ATDRepository.instance()._dbList.find(
+      (db) => db.dbname === ATDRepository.dbname(),
     );
 
     if (existingDb) return existingDb.db;
 
-    log.debug(`Creating new database: ${ADTDatabase.dbname()}`);
+    log.debug(`Creating new database: ${ATDRepository.dbname()}`);
 
     const db = await new Promise<loki>((resolve, reject) => {
-      const db = new loki(ADTDatabase.dbname(), {
+      const db = new loki(ATDRepository.dbname(), {
         autoload: true,
       });
 
@@ -77,7 +77,7 @@ export class ADTDatabase {
 
       db.on('loaded', () => {
         log.info('Database loaded');
-        ADTDatabase.initCollections(db);
+        ATDRepository.initCollections(db);
         resolve(db);
       });
 
@@ -90,7 +90,7 @@ export class ADTDatabase {
       });
     });
 
-    ADTDatabase.instance()._dbList.push({ dbname: ADTDatabase.dbname(), db });
+    ATDRepository.instance()._dbList.push({ dbname: ATDRepository.dbname(), db });
 
     return db;
   }

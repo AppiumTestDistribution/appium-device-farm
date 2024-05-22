@@ -8,7 +8,7 @@ import {
   allocateDeviceForSession,
   initializeStorage,
 } from '../../../src/device-utils';
-import { ADTDatabase } from '../../../src/data-service/db';
+import { ATDRepository } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,7 +27,7 @@ describe('IOS Test', () => {
 
   it('Throw error when no device is found for given capabilities', async () => {
     await initializeStorage();
-    (await ADTDatabase.CLIArgs)
+    (await ATDRepository.CLIArgs)
       .chain()
       .find()
       .update(function (d) {

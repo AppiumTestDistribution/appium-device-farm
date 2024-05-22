@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import { DeviceFarmManager } from '../../src/device-managers';
 import { Container } from 'typedi';
-import { ADTDatabase } from '../../src/data-service/db';
+import { ATDRepository } from '../../src/data-service/db';
 import {
   updateDeviceList,
   allocateDeviceForSession,
@@ -35,7 +35,7 @@ describe('Android Test', () => {
   );
 
   before(async () => {
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     // adb devices should return devices
     expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
       0,
@@ -62,7 +62,7 @@ describe('Android Test', () => {
       firstMatch: [{}],
     };
     const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = (await ADTDatabase.DeviceModel)
+    const allDeviceIds = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: devices.udid })
       .data();
@@ -100,7 +100,7 @@ describe('Android Test', () => {
     });
 
     await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
-    const allDeviceIds = (await ADTDatabase.DeviceModel).chain().find().data();
+    const allDeviceIds = (await ATDRepository.DeviceModel).chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
 

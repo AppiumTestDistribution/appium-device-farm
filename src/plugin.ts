@@ -63,7 +63,7 @@ import { PluginConfig, ServerArgs } from '@appium/types';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import ip from 'ip';
 import _ from 'lodash';
-import { ADTDatabase } from './data-service/db';
+import { ATDRepository } from './data-service/db';
 import EventBus from './notifier/event-bus';
 import { config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
@@ -170,7 +170,7 @@ class DevicePlugin extends BasePlugin {
     }
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
     await initializeStorage();
-    (await ADTDatabase.DeviceModel).removeDataOnly();
+    (await ATDRepository.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
     androidDeviceType = pluginArgs.androidDeviceType;
     iosDeviceType = pluginArgs.iosDeviceType;
