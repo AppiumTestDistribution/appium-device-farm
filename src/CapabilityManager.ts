@@ -86,12 +86,14 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
-    const { appBundleId } = (await prisma.appInformation.findFirst({
+    const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
-    })) as any;
-    caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
-    caps.firstMatch[0]['appium:updatedWDABundleId'] = appBundleId;
-    caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
+    });
+    if (wdaInfo) {
+      caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
+      caps.firstMatch[0]['appium:updatedWDABundleId'] = wdaInfo.appBundleId;
+      caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
+    }
   }
   const deleteMatch = [
     'appium:derivedDataPath',
