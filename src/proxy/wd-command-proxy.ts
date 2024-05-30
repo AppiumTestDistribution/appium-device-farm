@@ -137,7 +137,12 @@ export function wrapRequestWithMiddleware(options: {
   for (const middlware of middlewares) {
     next = ((_next) => async () => {
       if (_.isFunction(middlware)) {
-        return await middlware(request, response, _next);
+        try {
+          return middlware(request, response, _next);
+        } catch (e) {
+          log.error('Error executing middleware:');
+          log.error(e);
+        }
       }
     })(next);
   }
