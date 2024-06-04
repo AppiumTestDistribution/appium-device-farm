@@ -11,6 +11,10 @@ export default class CapabilityManager {
 
   getCapability() {
     const entries = Object.entries(this.freeDevice.capability);
+    if (!this.capabilities.alwaysMatch) {
+      this.capabilities.alwaysMatch = {};
+    }
+
     entries.map(([key, val]) => {
       this.capabilities.alwaysMatch[`appium:${key}`] = val;
     });
