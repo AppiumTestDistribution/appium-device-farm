@@ -150,7 +150,7 @@ class DevicePlugin extends BasePlugin {
       pluginArgs.platform.toLowerCase() === 'android' ||
       pluginArgs.platform.toLowerCase() == 'both'
     ) {
-      DevicePlugin.adbInstance = await ADB.createADB({});
+      DevicePlugin.adbInstance = await ADB.createADB({ adbExecTimeout: 60000 });
     }
     externalModule.onPluginLoaded(
       cliArgs,
@@ -187,7 +187,7 @@ class DevicePlugin extends BasePlugin {
     externalModule.updateServer(expressApp, httpServer);
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
-      const adb = await ADB.createADB({});
+      const adb = await ADB.createADB({ adbExecTimeout: 60000 });
       const array = pluginArgs.emulators || [];
       const promiseArray = array.map(async (arr: any) => {
         await Promise.all([await adb.launchAVD(arr.avdName, arr)]);

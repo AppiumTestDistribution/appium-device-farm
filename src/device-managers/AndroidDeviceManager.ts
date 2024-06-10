@@ -224,7 +224,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async getAdb(): Promise<any> {
     try {
       if (!this.adb) {
-        this.adb = await ADB.createADB({});
+        this.adb = await ADB.createADB({ adbExecTimeout: 60000 });
         const client = Adb.createClient();
         this.tracker = await client.trackDevices();
         const originalADBTracking = this.createLocalAdbTracker(client, this.tracker, this.adb);
