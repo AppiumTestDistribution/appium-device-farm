@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "8.4.7-rc.37",
+  "version": "8.4.7-rc.38",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -79,7 +79,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.14",
-    "@prisma/client": "^5.4.1",
+    "@prisma/client": "^5.15.0",
     "@types/appium-adb": "^9.10.4",
     "@types/node-persist": "^3.1.5",
     "appium-adb": "^11.0.3",
@@ -122,7 +122,7 @@
     "path-exists-cli": "^2.0.0",
     "plist": "^3.1.0",
     "portscanner": "^2.2.0",
-    "prisma": "^5.4.1",
+    "prisma": "^5.15.0",
     "q": "^1.5.1",
     "ramda": "^0.28.0",
     "reflect-metadata": "^0.1.13",
