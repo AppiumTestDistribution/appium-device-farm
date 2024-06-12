@@ -71,8 +71,8 @@
   },
   "homepage": "https://github.com/AppiumTestDistribution/appium-device-farm#readme",
   "dependencies": {
-    "@appium/base-plugin": "^2.2.31",
-    "@appium/types": "^0.14.1",
+    "@appium/base-plugin": "^2.2.39",
+    "@appium/types": "^0.20.3",
     "@devicefarmer/adbkit": "^3.2.6",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
@@ -82,10 +82,10 @@
     "@prisma/client": "^5.15.0",
     "@types/appium-adb": "^9.10.4",
     "@types/node-persist": "^3.1.5",
-    "appium-adb": "^11.0.3",
-    "appium-chromedriver": "^5.6.19",
-    "appium-ios-device": "^2.7.13",
-    "appium-xcuitest-driver": "^7.9.1",
+    "appium-adb": "^12.4.2",
+    "appium-chromedriver": "^5.6.57",
+    "appium-ios-device": "^2.7.17",
+    "appium-xcuitest-driver": "^7.17.4",
     "async-lock": "^1.2.8",
     "async-wait-until": "^2.0.12",
     "asyncbox": "^3.0.0",
@@ -134,7 +134,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "appium": "^2.5.4"
+    "appium": "^2.10.3"
   },
   "devDependencies": {
     "@appium/docutils": "^0.4.11",

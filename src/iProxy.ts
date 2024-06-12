@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import net from 'net';
 import B from 'bluebird';
-import { logger, util, timing } from '@appium/support';
+import { util, timing } from '@appium/support';
 import { utilities } from 'appium-ios-device';
 import { checkPortStatus } from 'portscanner';
 import { waitForCondition } from 'asyncbox';
-import { AppiumLogger } from '@appium/types';
+import log from './logger';
 
 const LOCALHOST = '127.0.0.1';
 
@@ -14,14 +14,12 @@ class iProxy {
   private deviceport: number;
   private udid: any;
   private localServer: any;
-  private log: AppiumLogger;
   private onBeforeProcessExit: any;
   constructor(udid: any, localport: any, deviceport: any) {
     this.localport = parseInt(localport, 10);
     this.deviceport = parseInt(deviceport, 10);
     this.udid = udid;
     this.localServer = null;
-    this.log = logger.getLogger(`iProxy@${udid.substring(0, 8)}:${this.localport}`);
   }
 
   async start() {
@@ -35,7 +33,7 @@ class iProxy {
         // We can only connect to the remote socket after the local socket connection succeeds
         remoteSocket = await utilities.connectPort(this.udid, this.deviceport);
       } catch (e: any) {
-        this.log.debug(e.message);
+        log.debug(e.message);
         localSocket.destroy();
         return;
       }
@@ -49,13 +47,13 @@ class iProxy {
         localSocket.destroy();
       });
       // not all remote socket errors are critical for the user
-      remoteSocket.on('error', (e: any) => this.log.debug(e));
+      remoteSocket.on('error', (e: any) => log.debug(e));
       localSocket.once('end', destroyCommChannel);
       localSocket.once('close', () => {
         destroyCommChannel();
         remoteSocket.destroy();
       });
-      localSocket.on('error', (e) => this.log.warn(e.message));
+      localSocket.on('error', (e) => log.warn(e.message));
       localSocket.pipe(remoteSocket);
       remoteSocket.pipe(localSocket);
     });
@@ -70,12 +68,12 @@ class iProxy {
       this.localServer = null;
       throw e;
     }
-    this.localServer.on('error', (e: any) => this.log.warn(e.message));
+    this.localServer.on('error', (e: any) => log.warn(e.message));
     this.localServer.once('close', (e: any) => {
       if (e) {
-        this.log.info(`The connection has been closed with error ${e.message}`);
+        log.info(`The connection has been closed with error ${e.message}`);
       } else {
-        this.log.info('The connection has been closed');
+        log.info('The connection has been closed');
       }
       this.localServer = null;
     });
@@ -90,7 +88,7 @@ class iProxy {
       return;
     }
 
-    this.log.debug('Closing the connection');
+    log.debug('Closing the connection');
     this.localServer.close();
     this.localServer = null;
   }
@@ -105,7 +103,6 @@ class iProxy {
   }
 }
 
-const log = logger.getLogger('DevCon Factory Device Farm');
 const PORT_CLOSE_TIMEOUT = 15 * 1000; // 15 seconds
 const SPLITTER = ':';
 
