@@ -477,8 +477,15 @@ class DevicePlugin extends BasePlugin {
       method: 'post',
       url: remoteUrl,
       timeout: this.pluginArgs.remoteConnectionTimeout,
-      httpAgent: new http.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
-      httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 60000 }),
+      httpAgent: new http.Agent({
+        keepAlive: true,
+        keepAliveMsecs: 60000,
+      }),
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
+        keepAlive: true,
+        keepAliveMsecs: 60000,
+      }),
       headers: {
         'Content-Type': 'application/json',
       },
