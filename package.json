@@ -288,6 +288,10 @@
       },
       "title": "Appium device farm plugin",
       "type": "object"
+    },
+    "scripts": {
+      "setup": "lib/src/scripts/setup-db.js",
+      "reset": "lib/src/scripts/clear-assets.js"
     }
   },
   "engines": {
