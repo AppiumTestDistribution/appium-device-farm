@@ -4,7 +4,7 @@ hide:
   - navigation
 ---
 
-### IOS
+### Device Farm
 
 1. Facing errors related to prisma installation?
 
@@ -17,7 +17,9 @@ hide:
    - run `appium plugin run device-farm reset`
    - The above command will delete all the existing data from database and resets the device farm to the original state
 
-3. How do I improve the iOS session startup for real device?
+### IOS
+
+1. How do I improve the iOS session startup for real device?
    - Resign the WDA provided here: [WDA]()
    - Use the following capabilities:
      ```json
@@ -28,7 +30,7 @@ hide:
      }
      ```
    - Make sure the iPhone real device is unblocked and enabled developer mode.
-4. How do I improve the iOS session startup for Simulators?
+2. How do I improve the iOS session startup for Simulators?
    - Provide server argument during the appium server start. `preBuildWDAPath` with the path to the WDA build for Simulators.
 
 ### Notes
