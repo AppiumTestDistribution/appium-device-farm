@@ -6,7 +6,7 @@ const env = {
   DATABASE_URL: `file:${config.databasePath}`,
 };
 
-function executeCmd(cmd: string) {
+export function executeCmd(cmd: string) {
   try {
     execSync(cmd, {
       env,
@@ -26,4 +26,8 @@ async function main() {
   executeCmd('prisma generate');
 }
 
-(async () => await main())();
+if (require.main === module) {
+  (async () => await main())();
+}
+
+export default main;
