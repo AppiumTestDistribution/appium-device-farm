@@ -103,6 +103,7 @@ export async function allocateDeviceForSession(
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
   const intervalBetweenAttempts =
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_QUERY_INTERVAL] || deviceQueryIntervalMs;
+  const liveVideo = deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO] || true;
 
   try {
     await waitUntil(
@@ -148,7 +149,7 @@ export async function allocateDeviceForSession(
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
 
     // FIXME: convert this into a return value
-    await updateCapabilityForDevice(capability, device);
+    await updateCapabilityForDevice(capability, device, { liveVideo });
 
     // update newCommandTimeout for the device.
     // This is required so it won't get unblocked by prematurely.
@@ -170,12 +171,16 @@ export async function allocateDeviceForSession(
  * @param device
  * @returns
  */
-export async function updateCapabilityForDevice(capability: any, device: IDevice) {
+export async function updateCapabilityForDevice(
+  capability: any,
+  device: IDevice,
+  options: { liveVideo: boolean },
+) {
   if (!device.hasOwnProperty('cloud')) {
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
-      await androidCapabilities(capability, device);
+      await androidCapabilities(capability, device, options);
     } else {
-      await iOSCapabilities(capability, device);
+      await iOSCapabilities(capability, device, options);
     }
   } else {
     log.info('Updating cloud capability for Device');
