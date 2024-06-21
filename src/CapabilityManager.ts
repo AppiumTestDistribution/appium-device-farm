@@ -47,7 +47,11 @@ async function findAppPath(caps: any) {
     return fileName;
   }
 }
-export async function androidCapabilities(caps: ISessionCapability, freeDevice: IDevice) {
+export async function androidCapabilities(
+  caps: ISessionCapability,
+  freeDevice: IDevice,
+  options: { liveVideo: boolean },
+) {
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
@@ -56,7 +60,7 @@ export async function androidCapabilities(caps: ISessionCapability, freeDevice: 
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
-  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
+  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort') && !!options.liveVideo) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
   }
   deleteAlwaysMatch(caps, 'appium:udid');
@@ -79,13 +83,16 @@ export async function iOSCapabilities(
     derivedDataPath?: string;
     wdaBundleId?: string;
   },
+  options: { liveVideo: boolean },
 ) {
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
+  caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
+    ? freeDevice.mjpegServerPort
+    : undefined;
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
