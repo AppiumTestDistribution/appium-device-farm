@@ -103,7 +103,9 @@ export async function allocateDeviceForSession(
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
   const intervalBetweenAttempts =
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_QUERY_INTERVAL] || deviceQueryIntervalMs;
-  const liveVideo = deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO] || true;
+  const liveVideo = _.isNil(deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO])
+    ? true
+    : JSON.parse(deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO]);
 
   try {
     await waitUntil(

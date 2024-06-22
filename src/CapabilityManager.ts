@@ -60,8 +60,13 @@ export async function androidCapabilities(
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
-  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort') && !!options.liveVideo) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = await getPort();
+  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
+    caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
+      ? await getPort()
+      : undefined;
+  }
+  if (!options.liveVideo) {
+    deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
   }
   deleteAlwaysMatch(caps, 'appium:udid');
   deleteAlwaysMatch(caps, 'appium:systemPort');
@@ -90,9 +95,11 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
-    ? freeDevice.mjpegServerPort
-    : undefined;
+  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
+    caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
+      ? await getPort()
+      : undefined;
+  }
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
@@ -103,6 +110,7 @@ export async function iOSCapabilities(
       caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
     }
   }
+
   const deleteMatch = [
     'appium:derivedDataPath',
     'appium:platformVersion',
@@ -112,6 +120,10 @@ export async function iOSCapabilities(
     'appium:deviceName',
     'appium:app',
   ];
+
+  if (!options.liveVideo) {
+    deleteMatch.push('appium:mjpegServerPort');
+  }
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
 }
 
