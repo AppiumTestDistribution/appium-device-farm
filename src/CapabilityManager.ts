@@ -95,11 +95,9 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
-      ? await getPort()
-      : undefined;
-  }
+  caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
+    ? freeDevice.mjpegServerPort
+    : undefined;
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
