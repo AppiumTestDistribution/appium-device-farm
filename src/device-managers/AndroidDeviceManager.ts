@@ -564,22 +564,17 @@ export default class AndroidDeviceManager implements IDeviceManager {
     };
     try {
       const screenSize = await (await adbInstance).adbExec(['-s', udid, 'shell', 'wm', 'size']);
-      const output = screenSize.trim();
-      const lines = output.split('\n');
-      if (lines.length === 1) {
-        const splitOutput = lines[0].split(': ');
-        const screenDimensions = splitOutput[1].split('x');
+      const lines = screenSize.trim().split('\n');
+      log.info(`Screen dimension for device ${udid} : ${screenSize}`);
+      const pysicalSizeLine = lines.find((line: string) =>
+        line.toLowerCase().startsWith('physical size'),
+      );
+      if (pysicalSizeLine) {
+        const [_, dimension] = pysicalSizeLine.split(': ');
+        const [width, height] = dimension.split('x');
 
-        device.screenWidth = screenDimensions[0].trim();
-        device.screenHeight = screenDimensions[1].trim();
-      }
-      //Hack for some devices
-      if (lines.length === 3) {
-        const splitOutput = lines[1].split(': ');
-        const screenDimensions = splitOutput[1].split('x');
-
-        device.screenWidth = screenDimensions[0].trim();
-        device.screenHeight = screenDimensions[1].trim();
+        device.screenWidth = width.trim();
+        device.screenHeight = height.trim();
       }
     } catch (error) {
       log.error(`Error while getting device property size for ${udid}. Error: ${error}`);
