@@ -564,13 +564,13 @@ export default class AndroidDeviceManager implements IDeviceManager {
     };
     try {
       const screenSize = await (await adbInstance).adbExec(['-s', udid, 'shell', 'wm', 'size']);
-      const lines = screenSize.trim().split('\n');
       log.info(`Screen dimension for device ${udid} : ${screenSize}`);
-      const pysicalSizeLine = lines.find((line: string) =>
-        line.toLowerCase().startsWith('physical size'),
-      );
-      if (pysicalSizeLine) {
-        const [_, dimension] = pysicalSizeLine.split(': ');
+      const overrideMatch = screenSize.match(/Override size:\s*(\d+x\d+)/);
+      const physicalMatch = screenSize.match(/Physical size:\s*(\d+x\d+)/);
+      const dimension = overrideMatch ? overrideMatch[1] : physicalMatch ? physicalMatch[1] : null;
+
+      if (dimension) {
+        log.info(`Parsed screen dimension for device ${udid} : ${dimension}`);
         const [width, height] = dimension.split('x');
 
         device.screenWidth = width.trim();
