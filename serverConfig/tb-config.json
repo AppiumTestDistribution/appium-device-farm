@@ -1,0 +1,21 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "device-farm": {
+        "platform": "android",
+        "cloud": {
+          "cloudName": "testingbot",
+          "url": "https://hub.testingbot.com/wd/hub",
+          "devices": [
+            {
+              "platformVersion": "14",
+              "deviceName": "Pixel 8",
+              "platform": "android"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

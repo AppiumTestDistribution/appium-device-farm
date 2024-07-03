@@ -40,3 +40,11 @@ Refer on LambdaTest config [here](https://github.com/AppiumTestDistribution/appi
 appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/hs-config.json
 ```
 Refer on HeadSpin config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/hs-config.json).
+
+
+### TestingBot
+
+```
+CLOUD_KEY="apiKey" CLOUD_USERNAME="useremail" appium server -ka 800 --use-plugins=device-farm --config ./serverConfig/tb-config.json -pa /wd/hub
+```
+Refer on TestingBot config [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/serverConfig/tb-config.json)
