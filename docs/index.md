@@ -4,13 +4,11 @@ hide:
   - navigation
 ---
 
-
 <div style="text-align: center">
   <img src="assets/images/DeviceFarm-Logo.jpg" class="center" />
 </div>
 
-
-This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
+This is an Appium plugin designed to manage and create driver session on connected android, iOS real devices, emulators and Simulators.
 
 **Why Appium Device Farm?**
 
