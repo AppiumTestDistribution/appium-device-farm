@@ -340,8 +340,6 @@ class DevicePlugin extends BasePlugin {
           : SessionType.LOCAL;
 
       await EventBus.fire(new BeforeSessionCreatedEvent({ device, sessionType: sessionType }));
-
-      session = await next();
       if (device.platform === 'ios' && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
         await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
@@ -349,6 +347,8 @@ class DevicePlugin extends BasePlugin {
           devicePort: device.mjpegServerPort,
         });
       }
+      session = await next();
+
       debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
 
@@ -576,6 +576,9 @@ class DevicePlugin extends BasePlugin {
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
     const res = await next();
     await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
+    if (device?.platform === 'ios' && device.realDevice) {
+      await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+    }
     return res;
   }
 }
