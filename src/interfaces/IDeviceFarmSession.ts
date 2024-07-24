@@ -15,6 +15,7 @@ export type IDeviceFarmSessionOptions = {
 export type IBeforeSessionCreateEventOptions = {
   device: IDevice;
   sessionType: SessionType;
+  caps: any;
 };
 
 export type IAfterSessionDeletedEventOptions = {

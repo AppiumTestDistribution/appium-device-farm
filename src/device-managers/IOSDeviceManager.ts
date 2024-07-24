@@ -16,6 +16,7 @@ import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
+import { exec } from 'child_process';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
@@ -213,6 +214,18 @@ export default class IOSDeviceManager implements IDeviceManager {
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType);
+    if (process.env.PI) {
+      log.info('Running go-ios agent');
+      const startTunnel = `ios tunnel start --userspace --udid=${udid}`;
+      exec(startTunnel, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
+      });
+    }
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
@@ -231,6 +244,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       width: modelInfo.Width,
       height: modelInfo.Height,
       tags: [],
+      webDriverAgentUrl: `http://${pluginArgs.bindHostOrIp}:${wdaLocalPort}`,
     });
   }
 
