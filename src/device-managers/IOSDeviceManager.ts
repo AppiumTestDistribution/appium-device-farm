@@ -215,8 +215,9 @@ export default class IOSDeviceManager implements IDeviceManager {
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType);
     if (process.env.PI) {
+      const goIOS = process.env.GO_IOS || 'ios';
       log.info('Running go-ios agent');
-      const startTunnel = `ios tunnel start --userspace --udid=${udid}`;
+      const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
       exec(startTunnel, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
