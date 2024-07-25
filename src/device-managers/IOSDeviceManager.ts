@@ -220,10 +220,6 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.info('Running go-ios agent');
         const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
         exec(startTunnel, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-          }
           console.log(`stdout: ${stdout}`);
           console.error(`stderr: ${stderr}`);
         });
