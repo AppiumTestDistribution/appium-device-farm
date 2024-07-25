@@ -215,17 +215,21 @@ export default class IOSDeviceManager implements IDeviceManager {
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType);
     if (process.env.PI) {
-      const goIOS = process.env.GO_IOS || 'ios';
-      log.info('Running go-ios agent');
-      const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
-      exec(startTunnel, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
-      });
+      try {
+        const goIOS = process.env.GO_IOS || 'ios';
+        log.info('Running go-ios agent');
+        const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
+        exec(startTunnel, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+          console.error(`stderr: ${stderr}`);
+        });
+      } catch (err) {
+        log.error(err);
+      }
     }
     return Object.assign({
       wdaLocalPort,
