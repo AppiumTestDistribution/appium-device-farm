@@ -156,6 +156,19 @@ export default class IOSDeviceManager implements IDeviceManager {
           userBlocked: false,
         });
       } else {
+        if (process.env.PI) {
+          try {
+            const goIOS = process.env.GO_IOS || 'ios';
+            log.info('Running go-ios agent');
+            const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
+            exec(startTunnel, (error, stdout, stderr) => {
+              console.log(`stdout: ${stdout}`);
+              console.error(`stderr: ${stderr}`);
+            });
+          } catch (err) {
+            log.error(err);
+          }
+        }
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
         deviceState.push(deviceInfo);
       }
@@ -167,19 +180,6 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
-    if (process.env.PI) {
-      try {
-        const goIOS = process.env.GO_IOS || 'ios';
-        log.info('Running go-ios agent');
-        const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
-        exec(startTunnel, (error, stdout, stderr) => {
-          console.log(`stdout: ${stdout}`);
-          console.error(`stderr: ${stderr}`);
-        });
-      } catch (err) {
-        log.error(err);
-      }
-    }
     const iosTracker = IosTracker.getInstance();
     iosTracker.on('attached', async (udid: string) => {
       const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
