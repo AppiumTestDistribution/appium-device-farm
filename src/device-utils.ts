@@ -6,7 +6,6 @@ import {
   isDeviceFarmRunning,
   isMac,
 } from './helpers';
-import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import {
   androidCapabilities,
