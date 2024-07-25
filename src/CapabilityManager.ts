@@ -79,6 +79,7 @@ export async function androidCapabilities(
 export async function iOSCapabilities(
   caps: ISessionCapability,
   freeDevice: {
+    webDriverAgentUrl?: any;
     udid: any;
     name: string;
     realDevice: boolean;
@@ -106,6 +107,8 @@ export async function iOSCapabilities(
       caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
       caps.firstMatch[0]['appium:updatedWDABundleId'] = wdaInfo.appBundleId;
       caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
+    } else if (process.env.GO_IOS) {
+      caps.firstMatch[0]['appium:webDriverAgentUrl'] = freeDevice.webDriverAgentUrl;
     }
   }
 

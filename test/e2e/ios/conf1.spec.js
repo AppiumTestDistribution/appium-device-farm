@@ -11,7 +11,7 @@ const capabilities = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
   'appium:iPhoneOnly': true,
-  'appium:app': '/Users/saikrishna/Downloads/git/AppiumTestDistribution/apps/VodQAReactNative.zip',
+  'appium:bundleId': 'com.device.farm.wdioapp',
 };
 describe('Plugin1 Test', () => {
   let driver;

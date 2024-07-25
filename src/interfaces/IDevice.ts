@@ -39,4 +39,5 @@ export interface IDevice {
   proxySessionId?: string;
   prebuiltWDAPath?: string;
   tags: Array<string>;
+  webDriverAgentUrl?: string;
 }

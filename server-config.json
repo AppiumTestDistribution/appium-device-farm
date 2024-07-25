@@ -5,7 +5,8 @@
       "device-farm": {
         "platform": "both",
         "skipChromeDownload": true,
-        "wdaBundleId": "con.device.farm"
+        "iosDeviceType": "real",
+        "liveStreaming": true
       }
     }
   }
