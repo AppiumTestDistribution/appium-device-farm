@@ -259,6 +259,7 @@ function createListener(): net.Socket {
     }
 
     // subsequent responses report on connected device status:
+    console.log(msg);
     if (msg.MessageType === 'Attached') {
       devices[msg.Properties.SerialNumber] = msg.Properties;
       conn.emit('attached', msg.Properties.SerialNumber);
