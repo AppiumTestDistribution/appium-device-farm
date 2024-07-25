@@ -167,6 +167,19 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   async trackIOSDevices(pluginArgs: IPluginArgs) {
+    if (process.env.PI) {
+      try {
+        const goIOS = process.env.GO_IOS || 'ios';
+        log.info('Running go-ios agent');
+        const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
+        exec(startTunnel, (error, stdout, stderr) => {
+          console.log(`stdout: ${stdout}`);
+          console.error(`stderr: ${stderr}`);
+        });
+      } catch (err) {
+        log.error(err);
+      }
+    }
     const iosTracker = IosTracker.getInstance();
     iosTracker.on('attached', async (udid: string) => {
       const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
@@ -214,19 +227,6 @@ export default class IOSDeviceManager implements IDeviceManager {
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType);
-    if (process.env.PI) {
-      try {
-        const goIOS = process.env.GO_IOS || 'ios';
-        log.info('Running go-ios agent');
-        const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
-        exec(startTunnel, (error, stdout, stderr) => {
-          console.log(`stdout: ${stdout}`);
-          console.error(`stderr: ${stderr}`);
-        });
-      } catch (err) {
-        log.error(err);
-      }
-    }
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
