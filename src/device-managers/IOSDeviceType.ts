@@ -577,8 +577,8 @@ export const IOSDeviceInfoMap: any = {
   },
   // iPad mini 6
   'iPad14,1': {
-    Width: '',
-    Height: '',
+    Width: '744',
+    Height: '1133',
     Model: 'iPad mini 6',
   },
   // iPad mini 6
