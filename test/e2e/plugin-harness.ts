@@ -98,7 +98,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
       }
 
       // find go_ios from npm
-      if (!!enableGoIos) env.GO_IOS = await goIosPath();
+      if (enableGoIos) env.GO_IOS = await goIosPath();
 
       return env;
     };
