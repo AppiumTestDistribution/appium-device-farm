@@ -190,35 +190,7 @@ class DeviceConnectionsFactory {
           for (const key of this._releaseProxiedConnections(connectionsOnPort)) {
             delete this._connectionsMapping[key];
           }
-          const timer = new timing.Timer().start();
-          try {
-            await waitForCondition(
-              async () => {
-                try {
-                  if ((await checkPortStatus(port, LOCALHOST)) !== 'open') {
-                    log.info(
-                      `Port #${port} has been successfully released after ` +
-                        `${timer.getDuration().asMilliSeconds.toFixed(0)}ms`,
-                    );
-                    isPortBusy = false;
-                    return true;
-                  }
-                } catch (ign) {
-                  /* empty */
-                }
-                return false;
-              },
-              {
-                waitMs: PORT_CLOSE_TIMEOUT,
-                intervalMs: 300,
-              },
-            );
-          } catch (ign) {
-            log.warn(
-              `Did not know how to release port #${port} in ` +
-                `${timer.getDuration().asMilliSeconds.toFixed(0)}ms`,
-            );
-          }
+          isPortBusy = await this.waitForPortTobeReleased(port, isPortBusy);
         }
       }
 
@@ -249,7 +221,41 @@ class DeviceConnectionsFactory {
     log.info(`Successfully requested the connection for ${currentKey}`);
   }
 
-  releaseConnection(udid = null, port = null) {
+  private async waitForPortTobeReleased(port: any, isPortBusy: boolean) {
+    const timer = new timing.Timer().start();
+    try {
+      await waitForCondition(
+        async () => {
+          try {
+            if ((await checkPortStatus(port, LOCALHOST)) !== 'open') {
+              log.info(
+                `Port #${port} has been successfully released after ` +
+                  `${timer.getDuration().asMilliSeconds.toFixed(0)}ms`,
+              );
+              isPortBusy = false;
+              return true;
+            }
+          } catch (ign) {
+            /* empty */
+          }
+          return false;
+        },
+        {
+          waitMs: PORT_CLOSE_TIMEOUT,
+          intervalMs: 300,
+        },
+      );
+    } catch (ign) {
+      log.warn(
+        `Did not know how to release port #${port} in ` +
+          `${timer.getDuration().asMilliSeconds.toFixed(0)}ms`,
+      );
+    }
+    return isPortBusy;
+  }
+
+  async releaseConnection(udid: any, port: any) {
+    const isPortBusy = (await checkPortStatus(port, LOCALHOST)) === 'open';
     if (!udid && !port) {
       log.warn(
         'Neither device UDID nor local port is set. ' +
@@ -269,6 +275,7 @@ class DeviceConnectionsFactory {
     for (const key of keys) {
       delete this._connectionsMapping[key];
     }
+    await this.waitForPortTobeReleased(port, isPortBusy);
     log.debug(`Cached connections count: ${_.size(this._connectionsMapping)}`);
   }
 }
