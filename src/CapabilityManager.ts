@@ -61,9 +61,7 @@ export async function androidCapabilities(
   if (freeDevice.chromeDriverPath)
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
-      ? await getPort()
-      : undefined;
+    caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo ? await getPort() : undefined;
   }
   if (!options.liveVideo) {
     deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
@@ -79,6 +77,7 @@ export async function androidCapabilities(
 export async function iOSCapabilities(
   caps: ISessionCapability,
   freeDevice: {
+    webDriverAgentUrl?: any;
     udid: any;
     name: string;
     realDevice: boolean;
@@ -94,18 +93,20 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = !!options.liveVideo
+  caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
     ? freeDevice.mjpegServerPort
     : undefined;
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
     });
-    if (wdaInfo) {
+    if (wdaInfo && !process.env.GO_IOS) {
+      caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
       caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
       caps.firstMatch[0]['appium:updatedWDABundleId'] = wdaInfo.appBundleId;
       caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
+    } else if (wdaInfo && process.env.GO_IOS) {
+      caps.firstMatch[0]['appium:webDriverAgentUrl'] = freeDevice.webDriverAgentUrl;
     }
   }
 

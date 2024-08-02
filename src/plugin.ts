@@ -75,6 +75,7 @@ import { BeforeSessionCreatedEvent } from './events/before-session-create-event'
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
+import { waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -338,8 +339,9 @@ class DevicePlugin extends BasePlugin {
         : device.nodeId !== DevicePlugin.NODE_ID
           ? SessionType.REMOTE
           : SessionType.LOCAL;
-
-      await EventBus.fire(new BeforeSessionCreatedEvent({ device, sessionType: sessionType }));
+      await EventBus.fire(
+        new BeforeSessionCreatedEvent({ device, sessionType: sessionType, caps }),
+      );
       if (device.platform === 'ios' && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
         await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {

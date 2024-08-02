@@ -16,6 +16,8 @@ import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
+import { exec } from 'child_process';
+import semver from 'semver';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
@@ -156,6 +158,20 @@ export default class IOSDeviceManager implements IDeviceManager {
         });
       } else {
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
+        const goIOS = process.env.GO_IOS;
+        if (goIOS && semver.satisfies(deviceInfo.sdk, '>=17.0.0')) {
+          //Check for version above 17+ and presence for Go IOS
+          try {
+            log.info('Running go-ios agent');
+            const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
+            exec(startTunnel, (error, stdout, stderr) => {
+              console.log(`stdout: ${stdout}`);
+              console.error(`stderr: ${stderr}`);
+            });
+          } catch (err) {
+            log.error(err);
+          }
+        }
         deviceState.push(deviceInfo);
       }
     });
@@ -231,6 +247,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       width: modelInfo.Width,
       height: modelInfo.Height,
       tags: [],
+      webDriverAgentUrl: `http://${pluginArgs.bindHostOrIp}:${wdaLocalPort}`,
     });
   }
 
