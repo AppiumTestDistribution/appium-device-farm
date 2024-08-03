@@ -52,17 +52,23 @@ Enter a Project Name and a valid `Organization Identifier`. It can be any value,
 
 Once the project is created, click on the `Project Name` in the left pane and select the `Signing & Capabilities` tab. You should see `Xcode Managed Profile` listed under Provisioning Profile.
 
-![xcode signing](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step9-post-project-creation.png)
+![Ios resign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step10-ios-resign-1.png)
 
 You can also check if the provisioning profile is created in the `~/Library/MobileDevice/Provisioning Profiles directory`. Once the provisioning profile is present, you have successfully created it and can now use it to sign the WDA file.
 
+## Resigning WDA .ipa
+
 To re-sign the IPA, open the `iOS Resigner app` that you previously downloaded. Select the WDA IPA file that you downloaded as the input file. Choose your Apple account from the `Signing Certificate` dropdown. In the `Provisioning Profile` dropdown, select the provisioning profile you created earlier.
 
-    ![Ios resign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step10-ios-resign-1.png)
+![Ios resign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step10-ios-resign-1.png)
 
-After entering all the details, click "Start" and select a folder to save the resigned IPA file. Ensure you save it with the name `wda-resign.ipa` and click "Save." This will create a new file in the output directory.
+After entering all the details, click "Start" and select a folder to save the resigned IPA file. Ensure you save it with the name `wda-resign.ipa` and click "Save."
 
-    ![ios wda sign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step11-ios-resign-save.png)
+![ios wda sign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step11-ios-resign-save.png)
+
+This will create a new file in the output directory.
+
+![ios wda sign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step14-wda-resign-completed.png)
 
 ## Uploading signed WDA in device farm
 
