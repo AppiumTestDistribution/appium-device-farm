@@ -98,7 +98,7 @@
     "http-proxy-agent": "7.0.0",
     "http-proxy-middleware": "^3.0.0-beta.1",
     "https-proxy-agent": "7.0.2",
-    "ip": "^1.1.8",
+    "ip": "^2.0.1",
     "jsonschema": "1.4.1",
     "lodash": "4.17.21",
     "lokijs": "^1.5.12",
