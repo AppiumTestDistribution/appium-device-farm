@@ -128,6 +128,12 @@
     "appium": "^2.5.4"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
     "@appium/docutils": "^0.4.11",
     "@appium/fake-driver": "^5.2.10",
     "@appium/plugin-test-support": "^0.3.23",
