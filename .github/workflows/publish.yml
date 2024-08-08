@@ -19,7 +19,7 @@ jobs:
               check-latest: true
          - run: npm install --no-package-lock
            name: Install dependencies
-         - run: npm run build
+         - run: npm run bundle
            name: Build
          - run: npx semantic-release
            env:
