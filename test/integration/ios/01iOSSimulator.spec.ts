@@ -336,6 +336,6 @@ describe('Boot simulator test', async () => {
     expect(allocatedSimulator[0].state).to.be.equal('Booted');
   });
   after('Delete simulator', async () => {
-    if (simctl.udid) await simctl.deleteDevice(simctl.udid);
+    //if (simctl.udid) await simctl.deleteDevice(simctl.udid);
   });
 });
