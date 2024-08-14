@@ -647,5 +647,45 @@ export const IOSDeviceInfoMap: any = {
     Height: '1180',
     Model: 'iPad (10th Gen)',
   },
+  'iPad16,6': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad Pro 13-inch (M4) Wi-Fi + Cellular',
+  },
+'iPad16,5': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad Pro 13-inch (M4) Wi-Fi',
+  },
+'iPad16,4': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Pro 11-inch (M4) Wi-Fi + Cellular',
+  },
+'iPad16,3': {
+   Width: '834',
+    Height: '1194',
+    Model: 'iPad Pro 11-inch (M4)',
+  },
+'iPad14,11': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad Air 13-inch (M2) Wi-Fi + Cellular',
+  },
+'iPad14,10': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad Air 13-inch (M2) Wi-Fi',
+  },
+'iPad14,9': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Air 11-inch (M2) Wi-Fi + Cellular',
+  },
+'iPad14,8': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Air 11-inch (M2) Wi-Fi',
+  },
   // Add the rest of the entries here...
 };
