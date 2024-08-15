@@ -63,15 +63,13 @@ async function deleteFilesInDirectory(directoryPath: string) {
       const filePath = path.join(directoryPath, file);
       const fileStat = await statAsync(filePath);
       if (fileStat.isFile()) {
-        console.log(`🗑️ Deleting file: ${filePath}`);
         await unlinkAsync(filePath);
       } else if (fileStat.isDirectory()) {
-        console.log(`🗂️ Deleting directory: ${filePath}`);
         await deleteFilesInDirectory(filePath);
         await rmdirAsync(filePath);
       }
     }
-    console.log('✅ All files and folders inside the directory have been deleted.');
+    console.log('✅ All files and folders inside the directory Framework have been deleted.');
   } catch (error) {
     console.error('❌ Error deleting files:', error);
     process.exit(1);
