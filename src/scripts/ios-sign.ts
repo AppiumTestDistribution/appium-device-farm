@@ -69,11 +69,11 @@ async function deleteFilesInDirectory(directoryPath: string) {
         await rmdirAsync(filePath);
       }
     }
-    console.log('✅ All files and folders inside the directory Framework have been deleted.');
   } catch (error) {
     console.error('❌ Error deleting files:', error);
     process.exit(1);
   }
+  console.log('✅ All files and folders inside the directory Framework have been deleted.');
 }
 
 async function createPayloadDirectory(path: string) {
@@ -124,37 +124,32 @@ async function zipPayloadDirectory(outputZipPath: any, folderPath: any) {
 }
 
 async function main() {
-  try {
-    const projectDir = await findWebDriverAgentPath();
-    console.log('📁 WebDriverAgent project directory:', projectDir);
-    await buildWebDriverAgent(projectDir);
-    const iPhoneosPath = await findiPhoneosPath();
-    console.log('📂 iPhoneos path found:', iPhoneosPath);
-    await deleteFilesInDirectory(`${iPhoneosPath}/Frameworks`);
-    await createPayloadDirectory(`${projectDir}${wdaBuildPath}`);
-    await moveAppFile(iPhoneosPath, `${projectDir}${wdaBuildPath}`);
-
-    await zipPayloadDirectory(
-      `${projectDir}${wdaBuildPath}/wda-resign.zip`,
-      `${projectDir}${wdaBuildPath}/Payload`,
+  if (!process.env.MOBILE_PROVISION_PATH) {
+    throw new Error(
+      '❌ Mobile provision file path not provided, Please set MOBILE_PROVISION_PATH in environment variables',
     );
-    const ipaToResign = `${projectDir}${wdaBuildPath}/wda-resign.zip`;
-    if (process.env.MOBILE_PROVISION_PATH) {
-      console.log('✅ Mobile provision file path provided');
-      const as = new Applesign({
-        mobileprovision: process.env.MOBILE_PROVISION_PATH,
-        outfile: `${projectDir}${wdaBuildPath}/wda-resigned.ipa`,
-      });
-      await as.signIPA(ipaToResign);
-      console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resigned.ipa`);
-    } else {
-      console.error(
-        '❌ Mobile provision file path not provided, Please set MOBILE_PROVISION_PATH in environment variables',
-      );
-    }
-  } catch (error) {
-    console.error('❌ An error occurred:', error);
   }
+  const projectDir = await findWebDriverAgentPath();
+  console.log('📁 WebDriverAgent project directory:', projectDir);
+  await buildWebDriverAgent(projectDir);
+  const iPhoneosPath = await findiPhoneosPath();
+  console.log('📂 iPhoneos path found:', iPhoneosPath);
+  await deleteFilesInDirectory(`${iPhoneosPath}/Frameworks`);
+  await createPayloadDirectory(`${projectDir}${wdaBuildPath}`);
+  await moveAppFile(iPhoneosPath, `${projectDir}${wdaBuildPath}`);
+
+  await zipPayloadDirectory(
+    `${projectDir}${wdaBuildPath}/wda-resign.zip`,
+    `${projectDir}${wdaBuildPath}/Payload`,
+  );
+  const ipaToResign = `${projectDir}${wdaBuildPath}/wda-resign.zip`;
+  console.log('✅ Mobile provision file path provided');
+  const as = new Applesign({
+    mobileprovision: process.env.MOBILE_PROVISION_PATH,
+    outfile: `${projectDir}${wdaBuildPath}/wda-resigned.ipa`,
+  });
+  await as.signIPA(ipaToResign);
+  console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resigned.ipa`);
 }
 
 main();
