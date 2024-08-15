@@ -73,7 +73,6 @@ async function deleteFilesInDirectory(directoryPath: string) {
     console.error('❌ Error deleting files:', error);
     process.exit(1);
   }
-  console.log('✅ All files and folders inside the directory Framework have been deleted.');
 }
 
 async function createPayloadDirectory(path: string) {
@@ -125,6 +124,10 @@ async function zipPayloadDirectory(outputZipPath: any, folderPath: any) {
 
 async function main() {
   if (!process.env.MOBILE_PROVISION_PATH) {
+    console.error('❌ Mobile provision file path not provided, available paths:');
+    const { stdout } = await execAsync('find ~/Library/MobileDevice', { encoding: 'utf8' });
+    // Output the result to the CLI
+    console.log(stdout);
     throw new Error(
       '❌ Mobile provision file path not provided, Please set MOBILE_PROVISION_PATH in environment variables',
     );
@@ -134,6 +137,7 @@ async function main() {
   await buildWebDriverAgent(projectDir);
   const iPhoneosPath = await findiPhoneosPath();
   console.log('📂 iPhoneos path found:', iPhoneosPath);
+  console.log(`🗑️ Deleting files in directory: ${iPhoneosPath}/Frameworks`);
   await deleteFilesInDirectory(`${iPhoneosPath}/Frameworks`);
   await createPayloadDirectory(`${projectDir}${wdaBuildPath}`);
   await moveAppFile(iPhoneosPath, `${projectDir}${wdaBuildPath}`);
@@ -149,7 +153,9 @@ async function main() {
     outfile: `${projectDir}${wdaBuildPath}/wda-resigned.ipa`,
   });
   await as.signIPA(ipaToResign);
+  console.info('*******************************************');
   console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resigned.ipa`);
+  console.info('*******************************************');
 }
 
 main();
