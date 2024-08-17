@@ -258,8 +258,8 @@ export function getDeviceFiltersFromCapability(
   pluginArgs: IPluginArgs,
 ): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
-  const udids = capability[DEVICE_FARM_CAPABILITIES.UDIDS]
-    ? capability[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
+  const udids = deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.UDIDS]
+    ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
     : process.env.UDIDS?.split(',').map(_.trim);
   /* Based on the app file extension, we will decide whether to run the
    * test on real device or simulator.
