@@ -17,11 +17,16 @@ const execAsync = util.promisify(exec);
 const wdaBuildPath = '/appium_wda_ios/Build/Products/Debug-iphoneos';
 async function findWebDriverAgentPath() {
   try {
-    console.log('🔍 Searching for WebDriverAgent.xcodeproj...');
-    const { stdout } = await execAsync('find $HOME/.appium -name WebDriverAgent.xcodeproj');
-    const projectPath = stdout.trim();
-    console.log('✅ Found WebDriverAgent.xcodeproj at:', projectPath);
-    return path.dirname(projectPath);
+    if (process.env.WDA_PROJECT_PATH) {
+      console.log('✅ WebDriverAgent project path provided');
+      return process.env.WDA_PROJECT_PATH;
+    } else {
+      console.log('🔍 Searching for WebDriverAgent.xcodeproj...');
+      const { stdout } = await execAsync('find $HOME/.appium -name WebDriverAgent.xcodeproj');
+      const projectPath = stdout.trim();
+      console.log('✅ Found WebDriverAgent.xcodeproj at:', projectPath);
+      return path.dirname(projectPath);
+    }
   } catch (error) {
     console.error('❌ Error finding WebDriverAgent.xcodeproj:', error);
     process.exit(1);
@@ -150,11 +155,11 @@ async function main() {
   console.log('✅ Mobile provision file path provided');
   const as = new Applesign({
     mobileprovision: process.env.MOBILE_PROVISION_PATH,
-    outfile: `${projectDir}${wdaBuildPath}/wda-resigned.ipa`,
+    outfile: `${projectDir}${wdaBuildPath}/wda-resign.ipa`,
   });
   await as.signIPA(ipaToResign);
   console.info('*******************************************');
-  console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resigned.ipa`);
+  console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resign.ipa`);
   console.info('*******************************************');
 }
 
