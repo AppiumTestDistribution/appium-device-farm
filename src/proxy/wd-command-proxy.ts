@@ -32,7 +32,7 @@ export function addProxyHandler(sessionId: string, remoteHost: string) {
         // log.debug(`proxyRes host: ${req.headers.host} method: ${req.method}  path: ${req.url}`);
       },
       error: (err: any, req: any, res: any) => {
-        log.error('proxy handler error: ', err.message, ' data: ', err.response.data);
+        log.error('proxy handler error: ', err.message, ' data: ', err?.response?.data);
       },
     },
   };
