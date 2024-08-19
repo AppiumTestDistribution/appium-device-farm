@@ -1,0 +1,46 @@
+APPIUM DEVICE FARM PLUGIN PROPRIETARY LICENSE
+
+1. License Grant
+   Subject to the terms and conditions of this License, the core maintainers of the Appium Device Farm Plugin project ("Licensors") hereby grant to you ("Licensee") a non-exclusive, non-transferable, limited license to use the proprietary components of the Appium Device Farm Plugin ("Proprietary Software") solely for your internal business purposes.
+
+2. Proprietary Components
+   This License applies exclusively to the following components of the Appium Device Farm Plugin:
+   - src/modules/dashboard
+   - src/modules/device-control
+   - dashboard-frontend
+
+3. Restrictions
+   Licensee shall not, and shall not permit others to:
+   a) Copy, modify, translate, adapt, alter, decompile, disassemble, or reverse engineer the Proprietary Software;
+   b) Create derivative works based on the Proprietary Software;
+   c) Distribute, sublicense, lease, rent, loan, or otherwise transfer the Proprietary Software to any third party;
+   d) Remove, alter, or obscure any proprietary notices on the Proprietary Software;
+   e) Use the Proprietary Software for any purpose other than as expressly permitted in this License.
+
+4. Ownership
+   Licensors retain all right, title, and interest in and to the Proprietary Software, including all intellectual property rights therein. This License does not grant Licensee any rights to patents, copyrights, trade secrets, trade names, trademarks, or any other rights in respect to the Proprietary Software.
+
+5. Confidentiality
+   Licensee acknowledges that the Proprietary Software contains valuable trade secrets of Licensor. Licensee agrees to maintain the confidentiality of the Proprietary Software and to use at least the same degree of care to prevent its unauthorized use or disclosure as Licensee uses with respect to its own confidential information.
+
+6. No Warranty
+   THE PROPRIETARY SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. LICENSOR DISCLAIMS ALL WARRANTIES, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+7. Limitation of Liability
+   IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR DAMAGES FOR LOSS OF PROFITS, REVENUE, DATA, OR USE, INCURRED BY LICENSEE OR ANY THIRD PARTY, WHETHER IN AN ACTION IN CONTRACT OR TORT, EVEN IF SUCH PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+8. Termination
+   This License is effective until terminated. Licensor may terminate this License at any time if Licensee breaches any of its terms. Upon termination, Licensee shall immediately cease all use of the Proprietary Software and destroy all copies thereof.
+
+9. Export Compliance
+   Licensee shall comply with all applicable export laws and regulations in its use of the Proprietary Software.
+
+10. Governing Law and Jurisdiction
+    This License shall be governed by and construed in accordance with the laws of the jurisdiction where the majority of core maintainers reside, without giving effect to any choice of law rule. Any legal action or proceeding relating to this License shall be instituted in a court of competent jurisdiction in that same jurisdiction.
+
+By using the Proprietary Software, you acknowledge that you have read this License, understand it, and agree to be bound by its terms and conditions.
+
+Appium Device Farm Plugin Project
+https://github.com/AppiumTestDistribution/appium-device-farm
+
+Last Updated: 20/AUG/2024
