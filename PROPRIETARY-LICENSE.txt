@@ -5,8 +5,7 @@ APPIUM DEVICE FARM PLUGIN PROPRIETARY LICENSE
 
 2. Proprietary Components
    This License applies exclusively to the following components of the Appium Device Farm Plugin:
-   - src/modules/dashboard
-   - src/modules/device-control
+   - src/modules/
    - dashboard-frontend
 
 3. Restrictions
