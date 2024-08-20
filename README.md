@@ -54,8 +54,7 @@ The Appium Device Farm Plugin uses a hybrid licensing model to balance open-sour
 2. **Proprietary Components**:
    The following components, while included in the distribution, are proprietary and provided in an obfuscated form:
 
-   - src/modules/dashboard
-   - src/modules/device-control
+   - src/modules/
    - dashboard-frontend
 
    These components are integral parts of the plugin but their source code is not open for modification or redistribution.
