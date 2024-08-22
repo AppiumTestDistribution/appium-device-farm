@@ -3,7 +3,6 @@ import path from 'path';
 import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 import ip from 'ip';
-import { Options } from '@wdio/types';
 
 const APPIUM_HOST = ip.address();
 const APPIUM_PORT = 4723;
@@ -49,7 +48,7 @@ describe('Plugin Test', () => {
   });
 
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
   });
 
   it('Vertical swipe test', async () => {

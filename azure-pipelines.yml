@@ -9,7 +9,7 @@ jobs:
    steps:
     - task: NodeTool@0.200.0
       inputs:
-       versionSpec: '16.x'
+       versionSpec: '20.x'
     - template: templates/pipeline.yml
     - script: |
         npm run test-e2e

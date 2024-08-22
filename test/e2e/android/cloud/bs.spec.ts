@@ -56,7 +56,7 @@ describe('BrowserStack: Plugin Test', () => {
   });
 
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
   });
 
   it('Vertical swipe test', async () => {
@@ -130,7 +130,7 @@ describe('Browser Stack: Quirks', () => {
     console.log(`initialBusyDevices: ${JSON.stringify(initialBusyDevices)}`);
 
     try {
-      await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+      await remote({ ...WDIO_PARAMS, capabilities } as any);
     } catch (e) {
       console.log(e);
     }

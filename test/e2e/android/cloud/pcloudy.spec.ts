@@ -55,7 +55,7 @@ describe('Plugin Test', () => {
   });
 
   beforeEach(async () => {
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
   });
 
   it('Vertical swipe test', async () => {
