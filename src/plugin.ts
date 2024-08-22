@@ -148,8 +148,9 @@ class DevicePlugin extends BasePlugin {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
     if (
-      pluginArgs.platform.toLowerCase() === 'android' ||
-      pluginArgs.platform.toLowerCase() == 'both'
+      (pluginArgs.platform.toLowerCase() === 'android' ||
+        pluginArgs.platform.toLowerCase() == 'both') &&
+      !pluginArgs.cloud
     ) {
       DevicePlugin.adbInstance = await ADB.createADB({ adbExecTimeout: 60000 });
     }

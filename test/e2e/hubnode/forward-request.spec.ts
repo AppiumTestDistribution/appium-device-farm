@@ -23,7 +23,7 @@ const WDIO_PARAMS = {
   connectionRetryCount: 0,
   hostname: hub_config.bindHostOrIp,
   port: HUB_APPIUM_PORT,
-  logLevel: 'info',
+  logLevel: 'debug',
   path: '/',
 };
 

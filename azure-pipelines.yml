@@ -42,6 +42,7 @@ jobs:
         $ANDROID_HOME/platform-tools/adb devices
       displayName: "start Android emulator"
     - script: |
+        adb devices
         npm run test-e2e-hubnode
       displayName: 'E2E Hub and Node Test'
 
