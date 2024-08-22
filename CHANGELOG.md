@@ -1,3 +1,9 @@
+## [9.2.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.6...v9.2.7) (2024-08-22)
+
+### Miscellaneous Chores
+
+* **deps:** update dependency chai-exclude to v2.1.1 ([#1203](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1203)) ([740a604](https://github.com/AppiumTestDistribution/appium-device-farm/commit/740a604dd93e1d2eb48f3698490f0b833a9aa8af))
+
 ## [9.2.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.5...v9.2.6) (2024-08-22)
 
 ### Miscellaneous Chores
