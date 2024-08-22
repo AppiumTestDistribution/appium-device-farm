@@ -1,3 +1,9 @@
+## [9.2.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.5...v9.2.6) (2024-08-22)
+
+### Miscellaneous Chores
+
+* **deps:** update dependency chai-as-promised to v7.1.2 ([faf9016](https://github.com/AppiumTestDistribution/appium-device-farm/commit/faf9016b3e23fb2515bb268be81e916aeff852e2))
+
 ## [9.2.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.4...v9.2.5) (2024-08-22)
 
 ### Miscellaneous Chores
