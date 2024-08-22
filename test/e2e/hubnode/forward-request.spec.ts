@@ -23,7 +23,7 @@ const WDIO_PARAMS = {
   connectionRetryCount: 0,
   hostname: hub_config.bindHostOrIp,
   port: HUB_APPIUM_PORT,
-  logLevel: 'info',
+  logLevel: 'debug',
   path: '/',
 };
 
@@ -111,7 +111,7 @@ describe('E2E Forward Request', () => {
     });
     console.log(`Node wdio params: ${JSON.stringify(node_wdio_params)}`);
     console.log(`node config: ${JSON.stringify(node_config)}`);
-    driver = await remote({ ...node_wdio_params, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...node_wdio_params, capabilities } as any);
     expect(driver).to.be.not.undefined;
   });
 
@@ -149,7 +149,7 @@ describe('E2E Forward Request', () => {
 
     console.log(`Node device: ${JSON.stringify(nodeDevice)}`);
 
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
 
     // busy device should be on the node
     const newAllDevices = (
@@ -168,7 +168,7 @@ describe('E2E Forward Request', () => {
       it.skip('node and hub should not be using the same host');
     }
 
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
     const allDevices = (
       await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;
@@ -207,7 +207,7 @@ describe('E2E Forward Request', () => {
       it.skip('node and hub should not be using the same host');
     }
 
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
     const allDevices = (
       await axios.get(`http://${hub_config.bindHostOrIp}:${HUB_APPIUM_PORT}/device-farm/api/device`)
     ).data;

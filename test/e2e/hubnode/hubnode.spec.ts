@@ -123,7 +123,7 @@ describe('E2E Hub and Node', () => {
   it('Vertical swipe test', async () => {
     await waitForHubAndNode();
 
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
 
     console.log(`Device UDID: ${await driver.capabilities.deviceUDID}`);
     await driver.performActions([
@@ -146,7 +146,7 @@ describe('E2E Hub and Node', () => {
   it('serve device-farm endpoint when test is still running', async () => {
     await waitForHubAndNode();
 
-    driver = await remote({ ...WDIO_PARAMS, capabilities } as Options.WebdriverIO);
+    driver = await remote({ ...WDIO_PARAMS, capabilities } as any);
 
     // check device-farm endpoint using axios
     const res = await axios.get(`http://${APPIUM_HOST}:${HUB_APPIUM_PORT}/device-farm`);
@@ -167,7 +167,7 @@ describe('E2E Hub and Node', () => {
     } as unknown as WebdriverIO.Capabilities;
 
     await expect(
-      remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
+      remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as any),
     ).to.eventually.be.rejected;
 
     // check device-farm endpoint using axios: /api/queue/length
@@ -192,7 +192,7 @@ describe('E2E Hub and Node', () => {
     } as unknown as WebdriverIO.Capabilities;
 
     await expect(
-      remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as Options.WebdriverIO),
+      remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as any),
     ).to.eventually.be.rejectedWith(
       "An unknown server-side error occurred while processing the command. Original error: Error: Either provide 'app' option to install 'com.nonexistent' or consider setting 'noReset' to 'true' if 'com.nonexistent' is supposed to be preinstalled.",
     );

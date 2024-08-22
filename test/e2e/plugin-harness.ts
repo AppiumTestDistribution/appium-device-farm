@@ -219,6 +219,8 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
       if (configFile) {
         serverArgs.push(`--config=${configFile}`);
       }
+      const logFile = `${configFile.split('.json')[0]}.log`;
+      serverArgs.push(`--log=${logFile}`);
       console.log(`APPIUM_HOME=${env.APPIUM_HOME} GO_IOS=${env.GO_IOS}`);
       console.log(`${info} Running: ${process.execPath} ${serverArgs.join(' ')}`);
 
