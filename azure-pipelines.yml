@@ -44,6 +44,10 @@ jobs:
     - script: |
         adb devices
         npm run test-e2e-hubnode
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: $(System.DefaultWorkingDirectory)/temp-appium
+        artifactName: logs
       displayName: 'E2E Hub and Node Test'
 
  - job: E2EPluginBrowserStackTest
