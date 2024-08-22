@@ -1,3 +1,9 @@
+## [9.2.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.4...v9.2.5) (2024-08-22)
+
+### Miscellaneous Chores
+
+* **deps:** update dependency @appium/plugin-test-support to v0.3.41 ([8ea1918](https://github.com/AppiumTestDistribution/appium-device-farm/commit/8ea1918114db978bbdbf4111a86bb2d0c4796e99))
+
 ## [9.2.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.3...v9.2.4) (2024-08-22)
 
 ### Bug Fixes
