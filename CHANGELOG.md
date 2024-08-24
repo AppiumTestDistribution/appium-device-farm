@@ -1,3 +1,9 @@
+## [9.2.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.7...v9.2.8) (2024-08-24)
+
+### Bug Fixes
+
+* error handling and ios signing script ([#1306](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1306)) ([0d9f206](https://github.com/AppiumTestDistribution/appium-device-farm/commit/0d9f20661844c6f92d35d4203ebc4ea01d59b540))
+
 ## [9.2.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.6...v9.2.7) (2024-08-22)
 
 ### Miscellaneous Chores
