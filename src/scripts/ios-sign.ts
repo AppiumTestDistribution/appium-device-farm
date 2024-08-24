@@ -6,114 +6,112 @@ import fs from 'fs';
 // @ts-ignore
 import Applesign from 'applesign';
 import archiver from 'archiver';
-
-const readdirAsync = util.promisify(fs.readdir);
-const unlinkAsync = util.promisify(fs.unlink);
-const statAsync = util.promisify(fs.stat);
-const rmdirAsync = util.promisify(fs.rmdir);
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
+import Listr, { ListrContext } from 'listr';
+import { provision } from 'ios-mobileprovision-finder';
+import os from 'os';
+import { Observable, Subscriber } from 'rxjs';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { select } from '@inquirer/prompts';
 
 const execAsync = util.promisify(exec);
+const WDA_BUILD_PATH = '/appium_wda_ios/Build/Products/Debug-iphoneos';
+const PROVISION_FILE_PATH_PREFIX = path.join(
+  os.homedir(),
+  'Library/MobileDevice/Provisioning Profiles',
+);
 
-const wdaBuildPath = '/appium_wda_ios/Build/Products/Debug-iphoneos';
-async function findWebDriverAgentPath() {
-  try {
-    if (process.env.WDA_PROJECT_PATH) {
-      console.log('✅ WebDriverAgent project path provided');
-      return process.env.WDA_PROJECT_PATH;
-    } else {
-      console.log('🔍 Searching for WebDriverAgent.xcodeproj...');
-      const { stdout } = await execAsync('find $HOME/.appium -name WebDriverAgent.xcodeproj');
-      const projectPath = stdout.trim();
-      console.log('✅ Found WebDriverAgent.xcodeproj at:', projectPath);
-      return path.dirname(projectPath);
-    }
-  } catch (error) {
-    console.error('❌ Error finding WebDriverAgent.xcodeproj:', error);
-    process.exit(1);
-  }
+type Context = ListrContext & CliOptions;
+
+interface CliOptions {
+  mobileProvisioningFile?: string;
+  wdaProjectPath?: string;
 }
 
-// 2. Run xcodebuild clean build-for-testing
-async function buildWebDriverAgent(projectDir: string) {
+const getOptions = async () => {
+  const argv: CliOptions = await yargs(hideBin(process.argv)).options({
+    'mobile-provisioning-file': {
+      desc: 'Path to the mobile provisioning file which is used to sign the webdriver agent',
+      type: 'string',
+    },
+    'wda-project-path': {
+      desc: 'Path to webdriver agent xcode project',
+      type: 'string',
+    },
+  }).argv;
+
+  return {
+    mobileProvisioningFile: argv.mobileProvisioningFile,
+    wdaProjectPath: argv.wdaProjectPath,
+  };
+};
+
+const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
+  if (mobileProvisioningFile) {
+    if (!fs.existsSync(mobileProvisioningFile) || !fs.statSync(mobileProvisioningFile).isFile()) {
+      throw new Error(`Mobile provisioning file ${mobileProvisioningFile} does not exists`);
+    }
+    return mobileProvisioningFile;
+  } else {
+    const provisioningFiles = provision.read();
+    if (!provisioningFiles || !provisioningFiles.length) {
+      throw new Error('No mobileprovision file found on the machine');
+    }
+    const prompt = await select({
+      message: 'Select the mobileprovision to use for signing',
+      choices: provisioningFiles.map((file) => ({
+        value: file.UUID,
+        name: `${file.Name.split(':')[1] || file.Name} (Team: ${file.TeamName}) (${file.UUID})`,
+      })),
+    });
+
+    return path.join(PROVISION_FILE_PATH_PREFIX, `${prompt}.mobileprovision`);
+  }
+};
+
+const getWdaProject = async (wdaProjectPath?: string) => {
+  if (wdaProjectPath) {
+    if (!fs.existsSync(wdaProjectPath) || !fs.statSync(wdaProjectPath).isDirectory()) {
+      throw new Error(`Unable to find webdriver agent project in path ${wdaProjectPath}`);
+    }
+    return wdaProjectPath;
+  }
+
   try {
-    console.log('🏗️ Building WebDriverAgent...');
+    const { stdout } = await execAsync('find $HOME/.appium -name WebDriverAgent.xcodeproj');
+    return path.dirname(stdout.trim());
+  } catch (err) {
+    throw new Error('Unable to find WebDriverAgent project');
+  }
+};
+
+/* Task definintions */
+async function buildWebDriverAgent(projectDir: string, logger: any) {
+  try {
     const buildCommand =
       'xcodebuild clean build-for-testing -project WebDriverAgent.xcodeproj -derivedDataPath appium_wda_ios -scheme WebDriverAgentRunner -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO';
+    logger(buildCommand);
     await execAsync(buildCommand, { cwd: projectDir, maxBuffer: undefined });
-    console.log('🎉 Successfully built WebDriverAgent!');
+    return `${projectDir}/${WDA_BUILD_PATH}/WebDriverAgentRunner-Runner.app`;
   } catch (error) {
-    console.error('❌ Error building WebDriverAgent:', error);
-    process.exit(1);
+    throw new Error(`❌ Error building WebDriverAgent: ${(error as any)?.message}`);
   }
 }
 
-// 3. Search for iPhoneos path inside "appium_wda_ios/Build/Products/"
-async function findiPhoneosPath() {
-  try {
-    console.log('🔍 Searching for iPhoneos path...');
-    const wdaPath = await findWebDriverAgentPath();
-    const wdaApp = `${wdaPath}/${wdaBuildPath}/WebDriverAgentRunner-Runner.app`;
-    console.log('✅ Found iPhoneos path:', wdaApp);
-    return wdaApp;
-  } catch (error) {
-    console.error('❌ Error finding iPhoneos path:', error);
-    process.exit(1);
-  }
-}
-
-async function deleteFilesInDirectory(directoryPath: string) {
-  try {
-    const files = await readdirAsync(directoryPath);
-    for (const file of files) {
-      const filePath = path.join(directoryPath, file);
-      const fileStat = await statAsync(filePath);
-      if (fileStat.isFile()) {
-        await unlinkAsync(filePath);
-      } else if (fileStat.isDirectory()) {
-        await deleteFilesInDirectory(filePath);
-        await rmdirAsync(filePath);
-      }
-    }
-  } catch (error) {
-    console.error('❌ Error deleting files:', error);
-    process.exit(1);
-  }
-}
-
-async function createPayloadDirectory(path: string) {
-  try {
-    console.log('📁 Creating Payload directory...');
-    console.log(`mkdir -p ${path}/Payload`);
-    await execAsync(`mkdir -p ${path}/Payload`);
-    console.log('✅ Payload directory created successfully.');
-  } catch (error) {
-    console.error('❌ Error creating Payload directory:', error);
-    process.exit(1);
-  }
-}
-
-// 2. Move the .app file into the Payload directory
-async function moveAppFile(appFilePath: string, payloadPath: string) {
-  try {
-    console.log('🚚 Moving .app file to Payload directory...');
-    const appFileName = path.basename(appFilePath);
-    await execAsync(`mv ${appFilePath} ${payloadPath}/Payload`);
-    console.log(`✅ Moved ${appFileName} to Payload directory.`);
-  } catch (error) {
-    console.error('❌ Error moving .app file:', error);
-    process.exit(1);
-  }
-}
-
-// 3. Zip the Payload directory
-async function zipPayloadDirectory(outputZipPath: any, folderPath: any) {
+async function zipPayloadDirectory(
+  outputZipPath: any,
+  folderPath: any,
+  observer: Subscriber<string>,
+) {
   return new Promise<void>((resolve, reject) => {
     const output = fs.createWriteStream(outputZipPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     output.on('close', () => {
-      console.log(`Zipped ${archive.pointer()} total bytes`);
-      console.log(`Archive has been written to ${outputZipPath}`);
+      observer.next(`Zipped ${archive.pointer()} total bytes`);
+      observer.next(`Archive has been written to ${outputZipPath}`);
       resolve();
     });
 
@@ -127,40 +125,80 @@ async function zipPayloadDirectory(outputZipPath: any, folderPath: any) {
   });
 }
 
-async function main() {
-  if (!process.env.MOBILE_PROVISION_PATH) {
-    console.error('❌ Mobile provision file path not provided, available paths:');
-    const { stdout } = await execAsync('find ~/Library/MobileDevice', { encoding: 'utf8' });
-    // Output the result to the CLI
-    console.log(stdout);
-    throw new Error(
-      '❌ Mobile provision file path not provided, Please set MOBILE_PROVISION_PATH in environment variables',
-    );
-  }
-  const projectDir = await findWebDriverAgentPath();
-  console.log('📁 WebDriverAgent project directory:', projectDir);
-  await buildWebDriverAgent(projectDir);
-  const iPhoneosPath = await findiPhoneosPath();
-  console.log('📂 iPhoneos path found:', iPhoneosPath);
-  console.log(`🗑️ Deleting files in directory: ${iPhoneosPath}/Frameworks`);
-  await deleteFilesInDirectory(`${iPhoneosPath}/Frameworks`);
-  await createPayloadDirectory(`${projectDir}${wdaBuildPath}`);
-  await moveAppFile(iPhoneosPath, `${projectDir}${wdaBuildPath}`);
+(async () => {
+  const cliOptions = await getOptions();
+  const mobileProvisioningFile = await getMobileProvisioningFile(cliOptions.mobileProvisioningFile);
 
-  await zipPayloadDirectory(
-    `${projectDir}${wdaBuildPath}/wda-resign.zip`,
-    `${projectDir}${wdaBuildPath}/Payload`,
+  const tasks = new Listr(
+    [
+      {
+        title: '🔍 Searching for WebDriverAgent.xcodeproj',
+        task: async (context: Context, task) => {
+          context.wdaProjectPath = await getWdaProject(cliOptions.wdaProjectPath);
+          task.title = `Found WebDriverAgent.xcodeproj at: ${context.wdaProjectPath}`;
+        },
+      },
+      {
+        title: '🏗️ Building WebDriverAgent',
+        task: (context: Context, task) => {
+          return new Observable((observer) => {
+            buildWebDriverAgent(context.wdaProjectPath, observer.next.bind(observer)).then(
+              (wdaAppPath) => {
+                context.wdaAppPath = wdaAppPath;
+                task.title = 'Successfully built WebDriverAgent';
+                observer.complete();
+              },
+            );
+          });
+        },
+      },
+      {
+        title: 'Preparing webdrivergaent ipa',
+        task: (context) => {
+          return new Observable((observer) => {
+            const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
+            const payloadDirectory = path.join(wdaBuildPath, 'Payload');
+            observer.next('Removing framework directory');
+            fs.readdirSync(`${context.wdaAppPath}/Frameworks`).forEach((f) =>
+              fs.rmSync(`${context.wdaAppPath}/Frameworks/${f}`, { recursive: true }),
+            );
+
+            observer.next('Creating Payload directory');
+            execAsync(`mkdir -p ${payloadDirectory}`)
+              .then(() => {
+                observer.next('Payload directory created successfully');
+              })
+              .then(() => {
+                observer.next('🚚 Moving .app file to Payload directory...');
+                return execAsync(`mv ${context.wdaAppPath} ${payloadDirectory}`);
+              })
+              .then(() => {
+                observer.next('Packing Payload directory...');
+                return zipPayloadDirectory(
+                  `${wdaBuildPath}/wda-resign.zip`,
+                  payloadDirectory,
+                  observer,
+                );
+              })
+              .then(() => observer.complete());
+          });
+        },
+      },
+      {
+        title: 'Signing WebDriverAgent ipa',
+        task: async (context, task) => {
+          const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
+          const ipaPath = `${wdaBuildPath}/wda-resign.ipa`;
+          const as = new Applesign({
+            mobileprovision: mobileProvisioningFile,
+            outfile: ipaPath,
+          });
+          await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
+          task.title = `Successfully signed WebDriverAgent file  ${ipaPath}`;
+        },
+      },
+    ],
+    { exitOnError: true },
   );
-  const ipaToResign = `${projectDir}${wdaBuildPath}/wda-resign.zip`;
-  console.log('✅ Mobile provision file path provided');
-  const as = new Applesign({
-    mobileprovision: process.env.MOBILE_PROVISION_PATH,
-    outfile: `${projectDir}${wdaBuildPath}/wda-resign.ipa`,
-  });
-  await as.signIPA(ipaToResign);
-  console.info('*******************************************');
-  console.info(`✅ Successfully signed ${projectDir}${wdaBuildPath}/wda-resign.ipa`);
-  console.info('*******************************************');
-}
-
-main();
+  await tasks.run();
+})();
