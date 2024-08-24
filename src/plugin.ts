@@ -293,6 +293,7 @@ class DevicePlugin extends BasePlugin {
     stripAppiumPrefixes(requiredCaps);
     stripAppiumPrefixes(allFirstMatchCaps);
     const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
+    log.info(`Merged Capabilities: ${JSON.stringify(mergedCapabilites, null, 2)}`);
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
@@ -381,7 +382,6 @@ class DevicePlugin extends BasePlugin {
         addProxyHandler(sessionId, device.host);
       }
       if (!mergedCapabilites['df:skipReport']) {
-        log.info('Skipping dashboard report');
         await EventBus.fire(
           new SessionCreatedEvent({
             sessionId,
@@ -393,6 +393,8 @@ class DevicePlugin extends BasePlugin {
             adb: DevicePlugin.adbInstance,
           }),
         );
+      } else {
+        log.info('Skipping dashboard report');
       }
       log.info(
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
