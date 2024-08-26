@@ -190,7 +190,7 @@
     "sinon": "17.0.1",
     "sinon-chai": "^3.7.0",
     "ts-node": "10.9.2",
-    "typescript": "5.2.2",
+    "typescript": "5.5.4",
     "wait-on": "^7.2.0",
     "webdriverio": "^8.20.4",
     "webpack-cli": "^5.1.4",
