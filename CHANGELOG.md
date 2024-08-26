@@ -1,3 +1,9 @@
+## [9.2.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.8...v9.2.9) (2024-08-26)
+
+### Bug Fixes
+
+* WDA IPA file and update submodule ([#1328](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1328)) ([2295434](https://github.com/AppiumTestDistribution/appium-device-farm/commit/229543456f1edc744d29d317f3d27e5126f416d6))
+
 ## [9.2.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.7...v9.2.8) (2024-08-24)
 
 ### Bug Fixes
