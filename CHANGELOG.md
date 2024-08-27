@@ -1,3 +1,9 @@
+## [9.2.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.9...v9.2.10) (2024-08-27)
+
+### Bug Fixes
+
+* add wdalocalport when running parallel sessions ([#1342](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1342)) ([1f7144b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1f7144bd77c938b01fec1b32a75080a4ad432c26))
+
 ## [9.2.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.8...v9.2.9) (2024-08-26)
 
 ### Bug Fixes
