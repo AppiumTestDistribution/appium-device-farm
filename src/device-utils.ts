@@ -41,6 +41,7 @@ import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ATDRepository } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
+import getPort from 'get-port';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -177,7 +178,16 @@ export async function updateCapabilityForDevice(
   device: IDevice,
   options: { liveVideo: boolean },
 ) {
+  const mergedCapabilites = Object.assign(
+    {},
+    capability.alwaysMatch,
+    capability.firstMatch[0] || {},
+  );
   if (!device.hasOwnProperty('cloud')) {
+    if (mergedCapabilites['appium:automationName']?.toLowerCase() === 'flutterintegration') {
+      capability.firstMatch[0]['appium:flutterSystemPort'] = await getPort();
+    }
+
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
       await androidCapabilities(capability, device, options);
     } else {

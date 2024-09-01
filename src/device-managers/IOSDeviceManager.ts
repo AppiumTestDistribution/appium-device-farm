@@ -361,8 +361,8 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.error(`The following runtimes are not available: ${unAavailableRuntimes.join(', ')}`);
       }
 
-      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
-      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 1;
+      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 0;
+      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 0;
 
       log.debug(`iOS Simulators: ${iOSSimulators}`);
       log.debug(`tvOS Simulators: ${tvSimulators}`);
