@@ -402,7 +402,8 @@ class DevicePlugin extends BasePlugin {
       if (device.platform.toLowerCase() === 'ios' && !isRemoteOrCloudSession) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const wda = driver.sessions[sessionId].wda.jwproxy;
+        const sessionDriver = driver.sessions[sessionId].proxydriver || driver.sessions[sessionId];
+        const wda = sessionDriver.wda.jwproxy;
         const proxiedInfo = {
           proxyUrl: `${wda.scheme}://${wda.server}:${wda.port}`,
           proxySessionId: wda.sessionId,
