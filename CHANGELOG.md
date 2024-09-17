@@ -1,3 +1,9 @@
+## [9.2.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.10...v9.2.11) (2024-09-02)
+
+### Bug Fixes
+
+* add support to flutter integration driver ([#1355](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1355)) ([683c61c](https://github.com/AppiumTestDistribution/appium-device-farm/commit/683c61c1ee5400cf12ab2f40de3450803fa01f05))
+
 ## [9.2.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.9...v9.2.10) (2024-08-27)
 
 ### Bug Fixes
