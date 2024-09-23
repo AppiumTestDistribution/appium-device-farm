@@ -3,7 +3,7 @@ import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort } from '../helpers';
+import { asyncForEach } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
@@ -18,6 +18,42 @@ import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
 import { exec } from 'child_process';
 import semver from 'semver';
+import net from 'net';
+
+// Function to find a free port and check it
+async function getFreePortWithCheck(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    const server = net.createServer();
+    server.unref(); // Avoid holding the program open
+    server.on('error', reject);
+    server.listen(0, () => {
+      const port = (server.address() as net.AddressInfo).port;
+      server.close(() => resolve(port));
+    });
+  });
+}
+
+// Function to get a valid unused port
+async function getUnusedPort(): Promise<number> {
+  let port: number = 0; // Initialize port with a default value
+  let isPortAvailable = false;
+
+  while (!isPortAvailable) {
+    port = await getFreePortWithCheck();
+    isPortAvailable = await checkIfPortIsAvailable(port);
+  }
+  return port;
+}
+
+// Function to check if a given port is available
+async function checkIfPortIsAvailable(port: number): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => resolve(false)) // If there's an error, port is in use
+      .once('listening', () => tester.once('close', () => resolve(true)).close()) // If it starts listening, the port is free
+      .listen(port);
+  });
+}
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
@@ -223,8 +259,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     } else {
       host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
-    const wdaLocalPort = await getFreePort();
-    const mjpegServerPort = await getFreePort();
+    const wdaLocalPort = await getUnusedPort();
+    const mjpegServerPort = await getUnusedPort();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
@@ -296,8 +332,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
-      const wdaLocalPort = await getFreePort();
-      const mjpegServerPort = await getFreePort();
+      const wdaLocalPort = await getUnusedPort();
+      const mjpegServerPort = await getUnusedPort();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
       const modelInfo = this.findKeyByValue(productModel) || { Width: '', Height: '' };
       returnedSimulators.push(
