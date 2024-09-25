@@ -28,8 +28,7 @@ async function getFreePortWithCheck(): Promise<number> {
   });
 }
 
-// Function to get a valid unused port
-async function getUnusedPort(): Promise<number> {
+export async function getUnusedPort(): Promise<number> {
   let port: number = 0; // Initialize port with a default value
   let isPortAvailable = false;
 
