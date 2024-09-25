@@ -28,17 +28,6 @@ async function getFreePortWithCheck(): Promise<number> {
   });
 }
 
-export async function getUnusedPort(): Promise<number> {
-  let port: number = 0; // Initialize port with a default value
-  let isPortAvailable = false;
-
-  while (!isPortAvailable) {
-    port = await getFreePortWithCheck();
-    isPortAvailable = await checkIfPortIsAvailable(port);
-  }
-  return port;
-}
-
 // Function to check if a given port is available
 async function checkIfPortIsAvailable(port: number): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
@@ -47,6 +36,18 @@ async function checkIfPortIsAvailable(port: number): Promise<boolean> {
       .once('listening', () => tester.once('close', () => resolve(true)).close()) // If it starts listening, the port is free
       .listen(port);
   });
+}
+
+// Exported function to be used during session creation to get an available port
+export async function getUnusedPortAtSessionCreation(): Promise<number> {
+  let port: number = 0; // Initialize port with a default value
+  let isPortAvailable = false;
+
+  while (!isPortAvailable) {
+    port = await getFreePortWithCheck();
+    isPortAvailable = await checkIfPortIsAvailable(port); // Check if the port is still available before assigning
+  }
+  return port;
 }
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
