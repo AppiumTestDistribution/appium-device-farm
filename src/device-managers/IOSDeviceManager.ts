@@ -18,42 +18,6 @@ import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
 import { exec } from 'child_process';
 import semver from 'semver';
-import net from 'net';
-
-// Function to find a free port and check it
-async function getFreePortWithCheck(): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
-    const server = net.createServer();
-    server.unref(); // Avoid holding the program open
-    server.on('error', reject);
-    server.listen(0, () => {
-      const port = (server.address() as net.AddressInfo).port;
-      server.close(() => resolve(port));
-    });
-  });
-}
-
-// Function to get a valid unused port
-async function getUnusedPort(): Promise<number> {
-  let port: number = 0; // Initialize port with a default value
-  let isPortAvailable = false;
-
-  while (!isPortAvailable) {
-    port = await getFreePortWithCheck();
-    isPortAvailable = await checkIfPortIsAvailable(port);
-  }
-  return port;
-}
-
-// Function to check if a given port is available
-async function checkIfPortIsAvailable(port: number): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
-    const tester = net.createServer()
-      .once('error', () => resolve(false)) // If there's an error, port is in use
-      .once('listening', () => tester.once('close', () => resolve(true)).close()) // If it starts listening, the port is free
-      .listen(port);
-  });
-}
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
