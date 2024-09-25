@@ -3,7 +3,7 @@ import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach } from '../helpers';
+import { asyncForEach, getFreePort, getUnusedPort } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
