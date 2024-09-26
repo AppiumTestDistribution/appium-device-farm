@@ -229,7 +229,26 @@ export const IOSDeviceInfoMap: any = {
     Height: '932',
     Model: 'iPhone 15 Pro Max',
   },
-  // iPads
+  'iPhone16,4': {
+    Width: '393',
+    Height: '852',
+    Model: 'iPhone 16',
+  },
+  'iPhone16,5': {
+    Width: '430',
+    Height: '932',
+    Model: 'iPhone 16 Plus',
+  },
+  'iPhone16,1': {
+    Width: '393',
+    Height: '852',
+    Model: 'iPhone 16 Pro',
+  },
+  'iPhone16,2': {
+    Width: '430',
+    Height: '932',
+    Model: 'iPhone 16 Pro Max',
+  },
   'iPad4,1': {
     Width: '768',
     Height: '1024',
