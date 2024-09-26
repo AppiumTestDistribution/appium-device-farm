@@ -3,7 +3,7 @@ import { flatten, isEmpty } from 'lodash';
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort } from '../helpers';
+import { asyncForEach, getFreePortWithCheck } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
@@ -223,8 +223,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     } else {
       host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
-    const wdaLocalPort = await getFreePort();
-    const mjpegServerPort = await getFreePort();
+    const wdaLocalPort = await getFreePortWithCheck();
+    const mjpegServerPort = await getFreePortWithCheck();
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
@@ -296,8 +296,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
-      const wdaLocalPort = await getFreePort();
-      const mjpegServerPort = await getFreePort();
+      const wdaLocalPort = await getFreePortWithCheck();
+      const mjpegServerPort = await getFreePortWithCheck();
       const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
       const modelInfo = this.findKeyByValue(productModel) || { Width: '', Height: '' };
       returnedSimulators.push(
