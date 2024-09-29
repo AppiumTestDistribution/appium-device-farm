@@ -1,3 +1,9 @@
+## [9.3.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.11...v9.3.0) (2024-09-29)
+
+### Features
+
+* add support for keyboard interaction ([#1402](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1402)) ([5846b92](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5846b924b4a37521db52f72197dc681d77ed727a))
+
 ## [9.2.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.10...v9.2.11) (2024-09-02)
 
 ### Bug Fixes
