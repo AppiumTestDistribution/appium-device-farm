@@ -239,11 +239,15 @@ export const IOSDeviceInfoMap: any = {
     Height: '932',
     Model: 'iPhone 16 Plus',
   },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
   'iPhone16,1': {
     Width: '393',
     Height: '852',
     Model: 'iPhone 16 Pro',
   },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
   'iPhone16,2': {
     Width: '430',
     Height: '932',
