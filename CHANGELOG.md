@@ -1,3 +1,9 @@
+## [9.4.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.3.0...v9.4.0) (2024-10-02)
+
+### Features
+
+* add support for paste and arrow keys ([#1404](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1404)) ([1404592](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1404592714d359c4eb2f5bcb116d0860698fc0eb))
+
 ## [9.3.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.2.11...v9.3.0) (2024-09-29)
 
 ### Features
