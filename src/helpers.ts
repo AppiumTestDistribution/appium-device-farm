@@ -6,13 +6,44 @@ import getPort from 'get-port';
 import { IDevice } from './interfaces/IDevice';
 import _ from 'lodash';
 import log from './logger';
-import Cloud from './enums/Cloud';
+import Cloud from './enums/Cloud';    
 import normalizeUrl from 'normalize-url';
 import ora from 'ora';
 import asyncWait from 'async-wait-until';
 import axios from 'axios';
 import { FakeModuleLoader } from './fake-module-loader';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
+import net from 'net';
+
+// Function to check if a specific port is available
+function isPortAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const tester = net.createServer()
+      .once('error', (err: NodeJS.ErrnoException) => { 
+        if (err.code === 'EADDRINUSE') { // If the error code is 'EADDRINUSE'
+          resolve(false); // Port is in use
+        } else {
+          reject(err); // If another error occurs, throw the error
+        }
+      })
+      .once('listening', () => {
+        tester.close(() => resolve(true)); // If the port is available, return true and close the server
+      })
+      .listen(port); // Attempt to start a server on the specified port
+  });
+}
+
+// Exported function to find a free port
+export async function getFreePortWithCheck(): Promise<number> {
+  const port = await getPort(); // Get a free port from the system
+  const available = await isPortAvailable(port); // Check if the port is actually available
+
+  if (!available) {
+    return getFreePortWithCheck(); // If the port is in use, try finding another port
+  }
+
+  return port; // Return the available port
+}
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 export async function asyncForEach(
@@ -26,6 +57,10 @@ export async function asyncForEach(
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
   }
+}
+
+export async function getFreePort() {
+  return await getPort();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -69,10 +104,6 @@ export function checkIfPathIsAbsolute(configPath: string) {
   return path.isAbsolute(configPath);
 }
 
-export async function getFreePort() {
-  return await getPort();
-}
-
 export function nodeUrl(device: IDevice, basePath = ''): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
   if (device.hasOwnProperty('cloud')) {
@@ -86,7 +117,7 @@ export function nodeUrl(device: IDevice, basePath = ''): string {
       }/wd/hub`;
     }
   }
-  // hardcoded the `/wd/hub` for now. This can be fetch from serverArgs.basePath
+  // hardcoded the `/wd/hub` for now. This can be fetched from serverArgs.basePath
   return `${host}${basePath || ''}`;
 }
 
@@ -108,6 +139,7 @@ export function hasHubArgument(cliArgs: any) {
 export function hasCloudArgument(cliArgs: any) {
   return _.has(cliArgs, 'plugin["device-farm"].cloud');
 }
+
 // Standard, non-prefixed capabilities (see https://www.w3.org/TR/webdriver/#dfn-table-of-standard-capabilities)
 const STANDARD_CAPS = [
   'browserName',
@@ -151,7 +183,7 @@ export function stripAppiumPrefixes(caps: any) {
         APPIUM_VENDOR_PREFIX.length,
       ) as string;
 
-    // If it's standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
+    // If it's a standard capability that was prefixed, add it to an array of incorrectly prefixed capabilities
     if (isStandardCap(strippedCapName)) {
       badPrefixedCaps.push(strippedCapName);
       if (_.isNil(strippedCaps[strippedCapName])) {
@@ -172,7 +204,7 @@ export function stripAppiumPrefixes(caps: any) {
     log.warn(
       `The capabilities ${JSON.stringify(
         badPrefixedCaps,
-      )} are standard capabilities and do not require "appium:" prefix`,
+      )} are standard capabilities and do not require the "appium:" prefix`,
     );
   }
   return strippedCaps;
@@ -225,7 +257,7 @@ export function safeParseJson(jsonString: string) {
 }
 
 export async function loadExternalModules(): Promise<IExternalModuleLoader> {
-  // TODO: Should handle DB failures in different way
+  // TODO: Should handle DB failures in a different way
 
   // eslint-disable-next-line
   // @ts-ignore
