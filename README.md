@@ -171,6 +171,26 @@ The Appium Device Farm Plugin, including both open source and obfuscated proprie
 
 For full license details, please see the [LICENSE](LICENSE) file in this repository. If you have any questions about the licensing or use of the Appium Device Farm Plugin, please open an issue in this repository.
 
+### Devices Page
+
+![alt text](image.png)
+
+### Use Devices Page
+
+![alt text](image-4.png)
+
+### Builds Page
+
+![alt text](image-1.png)
+
+### Apps Page
+
+![alt text](image-2.png)
+
+### Stats Page
+
+![alt text](image-3.png)
+
 ## Thanks to contributors 💙
 
 <a href="https://github.com/AppiumTestDistribution/appium-device-farm/graphs/contributors">
