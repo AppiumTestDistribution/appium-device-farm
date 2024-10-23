@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository with submodules
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -66,7 +66,7 @@ jobs:
 
     steps:
       - name: Checkout repository with out submodule
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run script
         run: |
           npm ci
@@ -144,7 +144,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -168,7 +168,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -194,7 +194,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -212,7 +212,7 @@ jobs:
         node: [ 20 ]
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -239,7 +239,7 @@ jobs:
 
    steps:
      - name: Checkout repository with submodules
-       uses: actions/checkout@v3
+       uses: actions/checkout@v4
        with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
