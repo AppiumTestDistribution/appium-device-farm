@@ -12,6 +12,7 @@ import { ATDRepository } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { v4 as uuidv4 } from 'uuid';
+import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   remote: [`http://${ip.address()}:4723`],
@@ -19,6 +20,8 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
 });
 const NODE_ID = uuidv4();
 const REQUEST_ID = uuidv4();
+
+sessionRequestMap.set(REQUEST_ID, {} as any);
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {

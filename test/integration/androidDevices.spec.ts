@@ -15,6 +15,7 @@ import { IDevice } from '../../src/interfaces/IDevice';
 import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
 import chaiAsPromised from 'chai-as-promised';
 import { v4 as uuidv4 } from 'uuid';
+import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 
 chai.use(chaiAsPromised);
 
@@ -25,6 +26,8 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
 
 const NODE_ID = uuidv4();
 const REQUEST_ID = uuidv4();
+sessionRequestMap.set(REQUEST_ID, {} as any);
+
 describe('Android Test', () => {
   const deviceManager = new DeviceFarmManager(
     'android',
