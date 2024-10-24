@@ -1,3 +1,9 @@
+## [9.4.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.1...v9.4.2) (2024-10-24)
+
+### Bug Fixes
+
+* bump version ([#1426](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1426)) ([78613c7](https://github.com/AppiumTestDistribution/appium-device-farm/commit/78613c7e1f584fce769978b1e96c13501b223ac4))
+
 ## [9.4.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.0...v9.4.1) (2024-10-04)
 
 ### Bug Fixes
