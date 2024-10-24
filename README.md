@@ -173,23 +173,23 @@ For full license details, please see the [LICENSE](LICENSE) file in this reposit
 
 ### Devices Page
 
-![alt text](image.png)
+![alt text](assets/image.png)
 
 ### Use Devices Page
 
-![alt text](image-4.png)
+![alt text](assets/image-4.png)
 
 ### Builds Page
 
-![alt text](image-1.png)
+![alt text](assets/image-1.png)
 
 ### Apps Page
 
-![alt text](image-2.png)
+![alt text](assets/image-2.png)
 
 ### Stats Page
 
-![alt text](image-3.png)
+![alt text](assets/image-3.png)
 
 ## Thanks to contributors 💙
 
