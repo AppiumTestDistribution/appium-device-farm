@@ -1,3 +1,9 @@
+## [9.4.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.2...v9.4.3) (2024-10-24)
+
+### Bug Fixes
+
+* improve device allocation and session creation logic ([#1427](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1427)) ([4405f79](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4405f79e9f47bfea32531310385f545b376911a8))
+
 ## [9.4.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.1...v9.4.2) (2024-10-24)
 
 ### Bug Fixes
