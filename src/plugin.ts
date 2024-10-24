@@ -277,7 +277,8 @@ class DevicePlugin extends BasePlugin {
       .reduce((acc, key) => acc + caps[key], DEVICE_MANAGER_LOCK_NAME)
       .toLowerCase()
       .split('')
-      .sort();
+      .sort()
+      .join();
   }
 
   async createSession(
