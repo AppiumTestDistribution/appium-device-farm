@@ -52,6 +52,7 @@ export async function androidCapabilities(
   freeDevice: IDevice,
   options: { liveVideo: boolean },
 ) {
+  caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort();
@@ -89,6 +90,7 @@ export async function iOSCapabilities(
   },
   options: { liveVideo: boolean },
 ) {
+  caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
