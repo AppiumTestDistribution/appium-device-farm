@@ -278,7 +278,7 @@ class DevicePlugin extends BasePlugin {
       .toLowerCase()
       .split('')
       .sort()
-      .join();
+      .join('');
   }
 
   async createSession(
