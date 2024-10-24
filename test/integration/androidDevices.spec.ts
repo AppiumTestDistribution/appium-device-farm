@@ -24,7 +24,7 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
 });
 
 const NODE_ID = uuidv4();
-
+const REQUEST_ID = uuidv4();
 describe('Android Test', () => {
   const deviceManager = new DeviceFarmManager(
     'android',
@@ -61,7 +61,13 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    const devices = await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    const devices = await allocateDeviceForSession(
+      REQUEST_ID,
+      capabilities,
+      1000,
+      1000,
+      pluginArgs,
+    );
     const allDeviceIds = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: devices.udid })
@@ -99,7 +105,7 @@ describe('Android Test', () => {
       return devices.length === 2 && devices.every((device: IDevice) => !device.offline);
     });
 
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs);
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 1000, pluginArgs);
     const allDeviceIds = (await ATDRepository.DeviceModel).chain().find().data();
     allDeviceIds.forEach((device) => expect(device.busy).to.be.true);
   });
@@ -125,13 +131,14 @@ describe('Android Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'Device is busy or blocked.. Device request: {"platform":"android"}',
+          ),
     );
   });
 });

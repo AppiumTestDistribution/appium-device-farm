@@ -18,6 +18,7 @@ const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   iosDeviceType: 'both',
 });
 const NODE_ID = uuidv4();
+const REQUEST_ID = uuidv4();
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {
@@ -52,13 +53,14 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'No device matching request.. Device request: {"platform":"ios","deviceType":"real"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'No device matching request.. Device request: {"platform":"ios","deviceType":"real"}',
+          ),
     );
   });
 
@@ -83,13 +85,14 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
+          ),
     );
   });
 });

@@ -42,12 +42,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  hasCloudArgument,
-  loadExternalModules,
-  nodeUrl,
-  stripAppiumPrefixes,
-} from './helpers';
+import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -274,6 +269,17 @@ class DevicePlugin extends BasePlugin {
     }
     return deviceTypes;
   }
+
+  getLockName(caps: Record<string, any>) {
+    const keys = ['platformName', 'appium:platformVersion', 'appium:udids'];
+    return keys
+      .filter((key) => !!caps[key])
+      .reduce((acc, key) => acc + caps[key], DEVICE_MANAGER_LOCK_NAME)
+      .toLowerCase()
+      .split('')
+      .sort();
+  }
+
   async createSession(
     next: () => any,
     driver: any,
@@ -283,12 +289,14 @@ class DevicePlugin extends BasePlugin {
   ) {
     log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
     log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
-    const pendingSessionId = uuidv4();
-    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
     } = caps;
+    const pendingSessionId = requiredCaps['appium:requestId'];
+    delete requiredCaps['appium:requestId'];
+    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
+
     stripAppiumPrefixes(requiredCaps);
     stripAppiumPrefixes(allFirstMatchCaps);
     const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
@@ -303,12 +311,14 @@ class DevicePlugin extends BasePlugin {
     /**
      *  Wait untill a free device is available for the given capabilities
      */
+    console.log(`Acquiring Lock with name ${this.getLockName(mergedCapabilites)}`);
     const device = await commandsQueueGuard.acquire(
-      DEVICE_MANAGER_LOCK_NAME,
+      this.getLockName(mergedCapabilites),
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
           return await allocateDeviceForSession(
+            pendingSessionId,
             caps,
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,

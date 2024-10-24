@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 const simctl = new Simctl();
 const name = 'My Device Name';
 const NODE_ID = uuidv4();
+const REQUEST_ID = uuidv4();
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   remote: [`http://${ip.address()}:4723`],
@@ -85,7 +86,7 @@ describe('Max sessions CLI argument test', () => {
       },
       firstMatch: [{}],
     };
-    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
 
     const allDeviceIds = (await ATDRepository.DeviceModel)
       .chain()
@@ -106,6 +107,7 @@ describe('Max sessions CLI argument test', () => {
       firstMatch: [{}],
     };
     await allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       6000,
       100,
@@ -150,13 +152,14 @@ describe('Max sessions CLI argument test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"ios","deviceType":"simulator"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'Device is busy or blocked.. Device request: {"platform":"ios","deviceType":"simulator"}',
+          ),
     );
   });
 });
@@ -193,7 +196,7 @@ describe('IOS Simulator Test', () => {
       firstMatch: [{}],
     };
     // console.log('devices: ', await deviceManager.getDevices())
-    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid })
@@ -231,7 +234,7 @@ describe('IOS Simulator Test', () => {
       firstMatch: [{}],
     };
     // console.log('devices: ', await deviceManager.getDevices())
-    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
 
     const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
@@ -268,7 +271,13 @@ describe('IOS Simulator Test', () => {
         },
         firstMatch: [{}],
       };
-      const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+      const device = await allocateDeviceForSession(
+        REQUEST_ID,
+        capabilities,
+        6000,
+        1000,
+        pluginArgs,
+      );
 
       const allocatedSimulator = (await ATDRepository.DeviceModel)
         .chain()
@@ -328,7 +337,7 @@ describe('Boot simulator test', async () => {
       firstMatch: [{}],
     };
     const devices = await deviceManager.getDevices();
-    const device = await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs);
+    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
     const allocatedSimulator = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: device.udid })

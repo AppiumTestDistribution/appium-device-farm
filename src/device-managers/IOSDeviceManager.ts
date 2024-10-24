@@ -339,7 +339,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     } else {
       return deviceTypes.filter(
         (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
-      )[0].modelIdentifier;
+      )[0]?.modelIdentifier;
     }
   }
 

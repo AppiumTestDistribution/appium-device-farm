@@ -42,6 +42,7 @@ import { ATDRepository } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
 import getPort from 'get-port';
+import { sessionRequestMap } from './proxy/wd-command-proxy';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -88,6 +89,7 @@ export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
  * @returns
  */
 export async function allocateDeviceForSession(
+  requestId: string,
   capability: ISessionCapability,
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
@@ -110,6 +112,14 @@ export async function allocateDeviceForSession(
   try {
     await waitUntil(
       async () => {
+        if (!sessionRequestMap.has(requestId)) {
+          log.error(
+            `Client has closed the connection for the new session request with id ${requestId}`,
+          );
+          throw new Error(
+            `Client has closed the connection for the new session request with id ${requestId}`,
+          );
+        }
         const maxSessions = getDeviceManager().getMaxSessionCount();
         const busyDevicesCount = await getBusyDevicesCount();
         log.debug(`Max session count: ${maxSessions}, Busy device count: ${busyDevicesCount}`);

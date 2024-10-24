@@ -8,9 +8,11 @@ import axios from 'axios';
 import log from '../logger';
 import { getSessionIdFromUrl, hasHubArgument } from '../helpers';
 import { ExpressMiddleware } from '../interfaces/IExternalModule';
+import { v4 } from 'uuid';
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();
+export const sessionRequestMap: Map<string, Request> = new Map();
 
 function getProxyServer() {
   return process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
@@ -53,17 +55,30 @@ export function removeProxyHandler(sessionId: string) {
 
 function handler(cliArgs: Record<string, any>, middlewares: ExpressMiddleware[]) {
   const WEBDRIVER_BASE_PATH = (cliArgs['basePath'] || '').replace(/\/$/, '') + '/session';
-  const isHub = !hasHubArgument(cliArgs); //if hub cliArg is provided, then current appium process serves as a NODE
+  const isNode = !hasHubArgument(cliArgs); //if hub cliArg is provided, then current appium process serves as a NODE
   return async (req: Request, res: Response, next: NextFunction) => {
     if (new RegExp(/wd-internal\//).test(req.url)) {
       req.url = req.originalUrl = req.url.replace('wd-internal/', '');
       return next();
     }
-    if (isHub && !req.path.startsWith(WEBDRIVER_BASE_PATH)) {
+    if (isNode && !req.path.startsWith(WEBDRIVER_BASE_PATH)) {
       log.info(
         `Received non-webdriver request with url ${req.path}. So, not proxying it to downstream.`,
       );
       return next();
+    }
+
+    if (isNode && req.method === 'POST' && req.path.endsWith(WEBDRIVER_BASE_PATH)) {
+      const id = v4();
+      sessionRequestMap.set(id, req);
+      req.body = _.merge(req.body, {
+        capabilities: {
+          alwaysMatch: { 'appium:requestId': id },
+        },
+      });
+      req.socket.on('close', () => {
+        sessionRequestMap.delete(id);
+      });
     }
 
     const sessionId = getSessionIdFromUrl(req.url);
