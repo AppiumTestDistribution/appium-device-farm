@@ -51,6 +51,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         return simulators;
       } else {
         // return both real and simulated devices
+        log.debug('Getting both real and simulated devices');
         return flatten(
           await Promise.all([
             this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
@@ -157,6 +158,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           userBlocked: false,
         });
       } else {
+        log.debug(`Getting device info for ${udid}`);
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
         const goIOS = process.env.GO_IOS;
         if (goIOS && semver.satisfies(deviceInfo.sdk, '>=17.0.0')) {
@@ -228,7 +230,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
-    const modelInfo = this.findKeyByValue(ProductType);
+    const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
