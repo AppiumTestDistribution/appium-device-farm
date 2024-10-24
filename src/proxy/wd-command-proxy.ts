@@ -68,7 +68,7 @@ function handler(cliArgs: Record<string, any>, middlewares: ExpressMiddleware[])
       return next();
     }
 
-    if (isNode && req.method === 'POST' && req.path.endsWith(WEBDRIVER_BASE_PATH)) {
+    if (req.method === 'POST' && req.path.endsWith(WEBDRIVER_BASE_PATH)) {
       const id = v4();
       sessionRequestMap.set(id, req);
       req.body = _.merge(req.body, {
