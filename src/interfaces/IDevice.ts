@@ -40,4 +40,5 @@ export interface IDevice {
   prebuiltWDAPath?: string;
   tags: Array<string>;
   webDriverAgentUrl?: string;
+  webDriverAgentHost?: string;
 }
