@@ -1,3 +1,9 @@
+## [9.4.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.4...v9.4.5) (2024-10-25)
+
+### Bug Fixes
+
+* use dynamic ports for wda ([#1431](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1431)) ([bf390bd](https://github.com/AppiumTestDistribution/appium-device-farm/commit/bf390bdbc6eddb1ed9bf4fe2108064ecbe1e662e))
+
 ## [9.4.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.3...v9.4.4) (2024-10-25)
 
 ### Bug Fixes
