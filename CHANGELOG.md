@@ -1,3 +1,9 @@
+## [9.4.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.3...v9.4.4) (2024-10-25)
+
+### Bug Fixes
+
+* enable livestream for android based on capability ([#1430](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1430)) ([46d2a04](https://github.com/AppiumTestDistribution/appium-device-farm/commit/46d2a0455f20159fb20009e73c75b5795fed0ecd))
+
 ## [9.4.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.2...v9.4.3) (2024-10-24)
 
 ### Bug Fixes
