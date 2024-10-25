@@ -249,6 +249,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       width: modelInfo.Width,
       height: modelInfo.Height,
       tags: [],
+      webDriverAgentHost: `http://${pluginArgs.bindHostOrIp}`,
       webDriverAgentUrl: `http://${pluginArgs.bindHostOrIp}:${wdaLocalPort}`,
     });
   }

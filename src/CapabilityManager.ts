@@ -87,6 +87,7 @@ export async function iOSCapabilities(
     wdaLocalPort?: number;
     derivedDataPath?: string;
     wdaBundleId?: string;
+    webDriverAgentHost?: string;
   },
   options: { liveVideo: boolean },
 ) {
@@ -95,10 +96,10 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort;
   caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
     ? freeDevice.mjpegServerPort
     : undefined;
+  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort();
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
       where: { fileName: 'wda-resign.ipa' },
@@ -108,8 +109,9 @@ export async function iOSCapabilities(
       caps.firstMatch[0]['appium:updatedWDABundleId'] = wdaInfo.appBundleId;
       caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
     } else if (wdaInfo && process.env.GO_IOS) {
+      caps.firstMatch[0]['appium:webDriverAgentUrl'] =
+        freeDevice.webDriverAgentUrl = `${freeDevice.webDriverAgentHost}:${freeDevice.wdaLocalPort}`;
       delete caps.firstMatch[0]['appium:wdaLocalPort'];
-      caps.firstMatch[0]['appium:webDriverAgentUrl'] = freeDevice.webDriverAgentUrl;
     }
   }
 
