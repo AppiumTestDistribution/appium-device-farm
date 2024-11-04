@@ -91,14 +91,14 @@ export async function iOSCapabilities(
   },
   options: { liveVideo: boolean },
 ) {
+  freeDevice.mjpegServerPort = options.liveVideo ? await getPort() : undefined;
+
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
-    ? freeDevice.mjpegServerPort
-    : undefined;
+  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort();
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaInfo = await prisma.appInformation.findFirst({
