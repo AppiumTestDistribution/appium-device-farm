@@ -1,3 +1,9 @@
+## [9.4.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.5...v9.4.6) (2024-11-18)
+
+### Bug Fixes
+
+* force npm publish ([#1449](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1449)) ([c390b42](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c390b42de113e312fb030e8b7e461c5509e8ae96))
+
 ## [9.4.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.4...v9.4.5) (2024-10-25)
 
 ### Bug Fixes
