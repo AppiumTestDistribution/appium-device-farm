@@ -4,6 +4,7 @@ enum Cloud {
   SAUCELABS = 'sauce',
   LAMBDATEST = 'lambdatest',
   HEADSPIN = 'headspin',
+  TESTINGBOT = 'testingbot'
 }
 
 export default Cloud;
