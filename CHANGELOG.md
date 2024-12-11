@@ -1,3 +1,9 @@
+## [9.4.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.6...v9.4.7) (2024-12-11)
+
+### Bug Fixes
+
+* Fix/lambdatest ([#1468](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1468)) ([33aae24](https://github.com/AppiumTestDistribution/appium-device-farm/commit/33aae24ea38d954069bb61960b7bb8ee9ada5dce))
+
 ## [9.4.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.5...v9.4.6) (2024-11-18)
 
 ### Bug Fixes
