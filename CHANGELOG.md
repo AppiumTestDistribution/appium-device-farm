@@ -1,3 +1,9 @@
+## [9.4.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.7...v9.4.8) (2024-12-11)
+
+### Bug Fixes
+
+* streamig issues ([#1467](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1467)) ([4dd563a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4dd563a507662c0bf4ff5b2e53df5b065d6d9d89))
+
 ## [9.4.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.6...v9.4.7) (2024-12-11)
 
 ### Bug Fixes
