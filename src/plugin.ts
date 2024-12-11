@@ -480,9 +480,16 @@ class DevicePlugin extends BasePlugin {
     let capabilitiesToCreateSession = { capabilities: caps };
 
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
-      capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
-        desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
-      });
+      if(capabilitiesToCreateSession.capabilities.alwaysMatch && Object.keys(capabilitiesToCreateSession.capabilities.alwaysMatch).length == 0) {
+        delete capabilitiesToCreateSession.capabilities.alwaysMatch;
+      }
+      if(capabilitiesToCreateSession.capabilities.firstMatch && 
+        _.isArray(capabilitiesToCreateSession.capabilities.firstMatch) && 
+        (!capabilitiesToCreateSession.capabilities.firstMatch.length || 
+          capabilitiesToCreateSession.capabilities.firstMatch.every(m => Object.keys(m).length ==0 ))) {
+            //@ts-ignore
+        delete capabilitiesToCreateSession.capabilities.firstMatch;
+      }
     }
 
     log.info(
