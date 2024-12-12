@@ -95,7 +95,12 @@ If you want to provide the custom path of WebDriverAgent project then set _WDA_P
 appium plugin run device-farm prepare-wda --wda-project-path=<path-to-WDA-project> --mobile-provisioning-file=<path-to-provision-profile>
 ```
 
-You should have all the provision certificates installed on your machine to build the WebDriverAgent from source in path.
+You should have all the provision certificates installed on your machine before building the WebDriverAgent from source. For Xcode versions 15 or below, ensure they are located in:
 ```
 ~/Library/MobileDevice/Provisioning\ Profiles
+```
+
+For Xcode versions 16 and above, place them in:
+```
+~/Library/Developer/Xcode/UserData/Provisioning\ Profiles
 ```
