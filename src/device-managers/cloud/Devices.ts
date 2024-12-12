@@ -36,7 +36,7 @@ export default class Devices {
           sdk: d['os_version'],
         };
       }
-      if (this.isSauceLabs() || this.isLambdaTest() || this.isHeadSpin()) {
+      if (this.isSauceLabs() || this.isLambdaTest() || this.isHeadSpin() || this.isTestingBot()) {
         this.validateSchema(sauceOrLambdaSchema);
         cloudDeviceProperties = {
           name: d.deviceName,
@@ -92,5 +92,9 @@ export default class Devices {
 
   private isHeadSpin() {
     return this.cloud.cloudName.toLowerCase() === Cloud.HEADSPIN;
+  }
+
+  private isTestingBot() {
+    return this.cloud.cloudName.toLowerCase() === Cloud.TESTINGBOT;
   }
 }
