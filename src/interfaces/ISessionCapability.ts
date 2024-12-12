@@ -46,7 +46,7 @@ export type CreateSessionResponseInternal = {
     // session id
     string,
     // capabilities
-    ISessionCapability,
+    Record<string, any>,
     // protocol
     string?,
   ];
@@ -55,7 +55,7 @@ export type CreateSessionResponseInternal = {
 export type W3CNewSessionResponse = {
   value: {
     sessionId: string;
-    capabilities: ISessionCapability;
+    capabilities: Record<string, any>;
   };
 };
 
