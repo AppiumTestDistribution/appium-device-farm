@@ -1,3 +1,9 @@
+## [9.4.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.9...v9.4.10) (2024-12-12)
+
+### Bug Fixes
+
+* imporve port management for ios parallel execution ([#1470](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1470)) ([a6992b5](https://github.com/AppiumTestDistribution/appium-device-farm/commit/a6992b5caa30aa09141ed9d0f5ef5d7b4301f9c1))
+
 ## [9.4.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.8...v9.4.9) (2024-12-12)
 
 ### Bug Fixes
