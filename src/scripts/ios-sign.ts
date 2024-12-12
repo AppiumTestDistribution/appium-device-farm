@@ -18,10 +18,31 @@ import { select } from '@inquirer/prompts';
 
 const execAsync = util.promisify(exec);
 const WDA_BUILD_PATH = '/appium_wda_ios/Build/Products/Debug-iphoneos';
-const PROVISION_FILE_PATH_PREFIX = path.join(
-  os.homedir(),
-  'Library/MobileDevice/Provisioning Profiles',
-);
+
+async function getXcodeMajorVersion(): Promise<number> {
+  const { stdout } = await execAsync('xcodebuild -version');
+  const match = stdout.match(/Xcode (\d+)\./);
+  if (!match) {
+    throw new Error('Unable to determine Xcode version');
+  }
+  return parseInt(match[1], 10);
+}
+
+async function getProvisioningProfilePath(): Promise<string> {
+  const xcodeVersion = await getXcodeMajorVersion();
+  
+  if (xcodeVersion <= 15) {
+    return path.join(
+      os.homedir(),
+      'Library/MobileDevice/Provisioning Profiles'
+    );
+  } else {
+    return path.join(
+      os.homedir(),
+      'Library/Developer/Xcode/UserData/Provisioning Profiles'
+    );
+  }
+}
 
 type Context = ListrContext & CliOptions;
 
@@ -55,7 +76,21 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
     }
     return mobileProvisioningFile;
   } else {
-    const provisioningFiles = provision.read();
+    const provisionFileDir = await getProvisioningProfilePath();
+    
+    if (!fs.existsSync(provisionFileDir)) {
+      throw new Error(`Provisioning directory does not exist: ${provisionFileDir}`);
+    }
+
+    const files = fs.readdirSync(provisionFileDir, { encoding: 'utf8' })
+      .filter(file => file.endsWith('.mobileprovision'));
+
+    const provisioningFiles = files.map(file => {
+      const fullPath = path.join(provisionFileDir, file);
+      const mp = provision.readFromFile(fullPath);
+      return { ...mp, _filePath: fullPath };
+    });
+    
     if (!provisioningFiles || !provisioningFiles.length) {
       throw new Error('No mobileprovision file found on the machine');
     }
@@ -66,8 +101,8 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
         name: `${file.Name.split(':')[1] || file.Name} (Team: ${file.TeamName}) (${file.UUID})`,
       })),
     });
-
-    return path.join(PROVISION_FILE_PATH_PREFIX, `${prompt}.mobileprovision`);
+    
+    return path.join(await getProvisioningProfilePath(), `${prompt}.mobileprovision`);
   }
 };
 
