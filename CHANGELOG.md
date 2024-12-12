@@ -1,3 +1,9 @@
+## [9.4.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.8...v9.4.9) (2024-12-12)
+
+### Bug Fixes
+
+* Unable to take ios devices from node for manual interaction ([#1469](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1469)) ([9c079e8](https://github.com/AppiumTestDistribution/appium-device-farm/commit/9c079e8babc3b6ef20e2adae3394f72aeb40dc97))
+
 ## [9.4.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.7...v9.4.8) (2024-12-11)
 
 ### Bug Fixes
