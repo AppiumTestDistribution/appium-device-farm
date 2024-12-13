@@ -1,3 +1,9 @@
+## [9.4.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.10...v9.4.11) (2024-12-13)
+
+### Bug Fixes
+
+* provisioning profile file path after Xcode 16 ([#1471](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1471)) ([3114a4d](https://github.com/AppiumTestDistribution/appium-device-farm/commit/3114a4d566bd871ce0bb2299376726b729fa21ec))
+
 ## [9.4.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.9...v9.4.10) (2024-12-12)
 
 ### Bug Fixes
