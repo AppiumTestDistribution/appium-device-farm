@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: recursive
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_TOKEN }}
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           # Add your script commands here
@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
          npm ci
@@ -115,7 +115,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -147,7 +147,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -171,7 +171,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -197,7 +197,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -215,7 +215,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -242,7 +242,7 @@ jobs:
        uses: actions/checkout@v3
        with:
         submodules: recursive
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_TOKEN }}
      - name: Build
        run: |
         npm ci
