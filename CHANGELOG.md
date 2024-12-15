@@ -1,3 +1,9 @@
+## [9.4.12](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.11...v9.4.12) (2024-12-15)
+
+### Bug Fixes
+
+* handle permission errors dutring adb list package ([#1473](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1473)) ([5db19fa](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5db19fa9f0a6dab3844bdc784e5c820a56ef8170))
+
 ## [9.4.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.10...v9.4.11) (2024-12-13)
 
 ### Bug Fixes
