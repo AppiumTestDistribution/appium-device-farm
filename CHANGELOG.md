@@ -1,3 +1,9 @@
+## [9.4.13](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.12...v9.4.13) (2024-12-16)
+
+### Bug Fixes
+
+* add logic to ignore websocket connectivity ([#1477](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1477)) ([47c403b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/47c403b629d607da273d5cba3365b9eb4d4631cd))
+
 ## [9.4.12](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.11...v9.4.12) (2024-12-15)
 
 ### Bug Fixes
