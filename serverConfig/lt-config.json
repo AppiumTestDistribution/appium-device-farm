@@ -3,15 +3,15 @@
     "port": 31337,
     "plugin": {
       "device-farm": {
-        "platform": "android",
+        "platform": "ios",
         "cloud": {
           "cloudName": "lambdatest",
           "url": "https://mobile-hub.lambdatest.com/wd/hub",
           "devices": [
             {
-              "platformVersion": "11",
-              "deviceName": "Pixel 3a",
-              "platform": "android"
+              "platformVersion": "14",
+              "deviceName": "iPhone.*",
+              "platform": "ios"
             }
           ]
         }
