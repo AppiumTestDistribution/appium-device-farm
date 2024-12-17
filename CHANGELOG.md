@@ -1,3 +1,9 @@
+## [9.4.14](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.13...v9.4.14) (2024-12-17)
+
+### Bug Fixes
+
+* LT device allocation ([#1482](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1482)) ([357c094](https://github.com/AppiumTestDistribution/appium-device-farm/commit/357c094aac8cc793cc0c7a33fd53bb169f589645))
+
 ## [9.4.13](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.12...v9.4.13) (2024-12-16)
 
 ### Bug Fixes
