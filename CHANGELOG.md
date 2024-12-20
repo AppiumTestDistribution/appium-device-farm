@@ -1,3 +1,9 @@
+## [9.4.15](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.14...v9.4.15) (2024-12-20)
+
+### Bug Fixes
+
+* added missing nodeId for ios simulators when registered from node ([#1487](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1487)) ([b4f6a0c](https://github.com/AppiumTestDistribution/appium-device-farm/commit/b4f6a0c5a959a7560353dbb44fc084b9bedfec85))
+
 ## [9.4.14](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.13...v9.4.14) (2024-12-17)
 
 ### Bug Fixes
