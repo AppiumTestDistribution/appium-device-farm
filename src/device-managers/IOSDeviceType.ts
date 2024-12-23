@@ -229,31 +229,29 @@ export const IOSDeviceInfoMap: any = {
     Height: '932',
     Model: 'iPhone 15 Pro Max',
   },
-  'iPhone16,4': {
+  'iPhone17,3': {
     Width: '393',
     Height: '852',
     Model: 'iPhone 16',
   },
-  'iPhone16,5': {
+
+'iPhone17,4': {
     Width: '430',
     Height: '932',
     Model: 'iPhone 16 Plus',
   },
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  'iPhone16,1': {
-    Width: '393',
-    Height: '852',
+'iPhone17,1': {
+    Width: '402',
+    Height: '874',
     Model: 'iPhone 16 Pro',
   },
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  'iPhone16,2': {
-    Width: '430',
-    Height: '932',
-    Model: 'iPhone 16 Pro Max',
+
+'iPhone17,2': {
+    Width: '440',
+    Height: '956',
+    Model: 'iPhone 16 Pro Max’,
   },
-  'iPad4,1': {
+'iPad4,1': {
     Width: '768',
     Height: '1024',
     Model: 'iPad Air',
