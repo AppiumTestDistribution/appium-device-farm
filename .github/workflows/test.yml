@@ -12,10 +12,16 @@ jobs:
         node: [20]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          token: ${{ github.PAT_TOKEN }}
-          submodules: true
+          path: main
+
+      - name: Checkout private tools
+        uses: actions/checkout@v4
+        with:
+          submodule: true
+          token: ${{ secrets.GH_PAT }}
 
       - name: Checkout submodules
         shell: bash
