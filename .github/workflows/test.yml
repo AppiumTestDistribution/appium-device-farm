@@ -12,6 +12,8 @@ jobs:
         node: [20]
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
     - name: Checkout repository with submodules
       run: |
         git config --file .gitmodules --get-regexp url | while read url; do
