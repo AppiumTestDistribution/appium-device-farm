@@ -12,12 +12,13 @@ jobs:
         node: [20]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    - name: Checkout repository with submodules
-      run: |
-        git config --file .gitmodules --get-regexp url | while read url; do
-          git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.PAT_TOKEN }}:${{ secrets.PAT_TOKEN }}@github.com\//")
-        done
-        git submodule sync
-        git submodule update --init --recursive
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
