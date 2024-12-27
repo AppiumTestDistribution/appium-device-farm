@@ -20,8 +20,8 @@ jobs:
       - name: Checkout private tools
         uses: actions/checkout@v4
         with:
-          submodule: true
-          token: ${{ secrets.GH_PAT }}
+          submodules: true
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Checkout submodules
         shell: bash
