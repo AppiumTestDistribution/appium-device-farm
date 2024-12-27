@@ -1,3 +1,10 @@
+## [9.4.16](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.15...v9.4.16) (2024-12-27)
+
+### Bug Fixes
+
+* Update IOSDeviceType.ts ([#1488](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1488)) ([55165df](https://github.com/AppiumTestDistribution/appium-device-farm/commit/55165df913a3121f74c2df40274e38e8494ecdd6))
+* Update IOSDeviceType.ts ([#1492](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1492)) ([b5f13f5](https://github.com/AppiumTestDistribution/appium-device-farm/commit/b5f13f5b13cf84b3c9506150dd168fb8a7718989))
+
 ## [9.4.15](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.14...v9.4.15) (2024-12-20)
 
 ### Bug Fixes
