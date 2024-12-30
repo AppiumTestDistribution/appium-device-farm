@@ -10,19 +10,14 @@ export default class CapabilityManager {
   }
 
   getCapability() {
-    if(this.freeDevice.cloud.toLowerCase() !== Cloud.LAMBDATEST) {
-      const entries = Object.entries(this.freeDevice.capability);
-      if (!this.capabilities.alwaysMatch) {
-        this.capabilities.alwaysMatch = {};
-      }
-  
-      entries.map(([key, val]) => {
-        this.capabilities.alwaysMatch[`appium:${key}`] = val;
-      });
-      if (this.freeDevice.cloud.toLowerCase() === Cloud.PCLOUDY) {
-        this.capabilities.alwaysMatch['appium:pCloudy_ApiKey'] = process.env.CLOUD_KEY;
-        this.capabilities.alwaysMatch['appium:pCloudy_Username'] = process.env.CLOUD_USERNAME;
-      }
+    const capsToUpdate = this.capabilities.firstMatch? this.capabilities.firstMatch[0] : this.capabilities.alwaysMatch;
+    const entries = Object.entries(this.freeDevice.capability);
+    entries.map(([key, val]) => {
+      capsToUpdate[`appium:${key}`] = val;
+    });
+    if (this.freeDevice.cloud.toLowerCase() === Cloud.PCLOUDY) {
+      capsToUpdate['appium:pCloudy_ApiKey'] = process.env.CLOUD_KEY;
+      capsToUpdate['appium:pCloudy_Username'] = process.env.CLOUD_USERNAME;
     }
     return this.capabilities;
   }
