@@ -23,4 +23,4 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: recursive
-        token: ${{ secrets.CI }}
+        token: ${{ secrets.SUB_MODULE }}
