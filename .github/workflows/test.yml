@@ -19,6 +19,7 @@ jobs:
 
       - name: Checkout submodules
         run: |
+          cd appium-device-farm
           echo 'https://AppiumTestDistribution:${{secrets.CI}}@github.com' >~/.git-credentials
           git config --global credential.helper store
           git submodule update --init --recursive
