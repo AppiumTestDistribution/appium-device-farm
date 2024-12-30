@@ -18,6 +18,7 @@ jobs:
           path: main
 
       - name: Checkout submodules
+        shell: bash
         run: |
           cd appium-device-farm
           echo 'https://AppiumTestDistribution:${{secrets.CI}}@github.com' >~/.git-credentials
