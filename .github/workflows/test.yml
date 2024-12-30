@@ -20,7 +20,8 @@ jobs:
         node: [20]
 
     steps:
-    - name: Checkout repository with submodules
-      uses: jwsi/submodule-checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
-        ssh-key: ${{ secrets.SUB_MODULE }}
+        token: ${{ secrets.CI }}
+        submodules: recursive}
