@@ -17,6 +17,9 @@ jobs:
         with:
           path: main
 
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      
       - name: Checkout private tools
         uses: actions/checkout@v4
         with:
