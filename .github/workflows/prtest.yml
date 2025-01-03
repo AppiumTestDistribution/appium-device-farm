@@ -1,9 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 
 jobs:
   buildWithSubmodule:
@@ -16,9 +14,6 @@ jobs:
     steps:
     - name: Checkout repository with submodules
       uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        token: ${{ secrets.PAT_TOKEN }}
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
