@@ -1,4 +1,4 @@
-name: PR_CI
+name: PR-CI
 
 on:
   pull_request:
