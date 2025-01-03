@@ -1,9 +1,7 @@
-name: CI
+name: PR-CI
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 
 jobs:
   buildWithSubmodule:
@@ -16,9 +14,6 @@ jobs:
     steps:
     - name: Checkout repository with submodules
       uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        token: ${{ secrets.PAT_TOKEN }}
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
@@ -46,9 +41,6 @@ jobs:
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           # Add your script commands here
@@ -83,9 +75,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
          npm ci
@@ -115,9 +104,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -147,9 +133,6 @@ jobs:
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -171,9 +154,6 @@ jobs:
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -197,9 +177,6 @@ jobs:
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Build
         run: |
           npm ci
@@ -215,9 +192,6 @@ jobs:
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -242,9 +216,6 @@ jobs:
    steps:
      - name: Checkout repository with submodules
        uses: actions/checkout@v3
-       with:
-        submodules: recursive
-        token: ${{ secrets.PAT_TOKEN }}
      - name: Build
        run: |
         npm ci
