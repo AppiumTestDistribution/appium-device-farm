@@ -320,6 +320,8 @@ export async function userUnblockDevice(udid: string, host: string) {
     .update(function (device: IDevice) {
       device.userBlocked = false;
       device.busy = false;
+      device.session_id = undefined;
+      device.sessionResponse = undefined;
     });
 }
 
