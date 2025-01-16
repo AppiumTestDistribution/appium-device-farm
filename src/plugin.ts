@@ -387,6 +387,7 @@ class DevicePlugin extends BasePlugin {
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
+        sessionResponse: sessionResponse,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
@@ -494,6 +495,7 @@ class DevicePlugin extends BasePlugin {
             (m) => Object.keys(m).length == 0,
           ))
       ) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         delete capabilitiesToCreateSession.capabilities.firstMatch;
       }

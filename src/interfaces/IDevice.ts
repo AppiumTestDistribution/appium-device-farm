@@ -41,4 +41,5 @@ export interface IDevice {
   tags: Array<string>;
   webDriverAgentUrl?: string;
   webDriverAgentHost?: string;
+  sessionResponse?: Record<string, any>;
 }
