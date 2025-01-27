@@ -511,6 +511,16 @@ export const IOSDeviceInfoMap: any = {
     Height: '1133',
     Model: 'iPad Mini 6',
   },
+  'iPad16,1': {
+    Width: '744',
+    Height: '1133',
+    Model: 'iPad Mini 7(A17 Pro)',
+  },
+  'iPad16,2': {
+    Width: '744',
+    Height: '1133',
+    Model: 'iPad Mini 7(A17 Pro)',
+  },
   'iPad12,1': {
     Width: '810',
     Height: '1080',
