@@ -120,6 +120,12 @@ Clone this project from GitHub and run:
 npm install
 ```
 
+Build the project:
+
+```bash
+npm run build
+```
+
 To run unit/functional tests:
 
 ```bash
