@@ -354,20 +354,25 @@ class DevicePlugin extends BasePlugin {
       await EventBus.fire(
         new BeforeSessionCreatedEvent({ device, sessionType: sessionType, caps }),
       );
-      
-      if (device.platform === 'ios' && device.realDevice) {
+
+      session = await next();
+
+      if (
+        device.platform === 'ios' &&
+        device.realDevice &&
+        device.nodeId === DevicePlugin.NODE_ID
+      ) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
         try {
           await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
             usePortForwarding: true,
             devicePort: device.mjpegServerPort,
           });
-        } catch(err){
+        } catch (err) {
           /* Not required for now as the port forwarding is handled by xcuitest river itself */
           log.warn(`Error while forwarding ios port to real device ${device.udid}. Error: ${err}`);
         }
       }
-      session = await next();
 
       debugLog(`📱 Session response: ${JSON.stringify(session)}`);
     }
