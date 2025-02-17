@@ -354,12 +354,18 @@ class DevicePlugin extends BasePlugin {
       await EventBus.fire(
         new BeforeSessionCreatedEvent({ device, sessionType: sessionType, caps }),
       );
+      
       if (device.platform === 'ios' && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
-        await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
-          usePortForwarding: true,
-          devicePort: device.mjpegServerPort,
-        });
+        try {
+          await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
+            usePortForwarding: true,
+            devicePort: device.mjpegServerPort,
+          });
+        } catch(err){
+          /* Not required for now as the port forwarding is handled by xcuitest river itself */
+          log.warn(`Error while forwarding ios port to real device ${device.udid}. Error: ${err}`);
+        }
       }
       session = await next();
 
@@ -387,6 +393,7 @@ class DevicePlugin extends BasePlugin {
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
+        sessionResponse: sessionResponse,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
@@ -494,6 +501,7 @@ class DevicePlugin extends BasePlugin {
             (m) => Object.keys(m).length == 0,
           ))
       ) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         delete capabilitiesToCreateSession.capabilities.firstMatch;
       }
@@ -607,7 +615,11 @@ class DevicePlugin extends BasePlugin {
     const res = await next();
     await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
     if (device?.platform === 'ios' && device.realDevice) {
-      await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+      try {
+        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+      } catch (err) {
+        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
+      }
     }
     return res;
   }

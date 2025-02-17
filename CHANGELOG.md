@@ -1,3 +1,15 @@
+## [9.5.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.17...v9.5.0) (2025-01-16)
+
+### Features
+
+* improve device streaming and support for remote network ([#1511](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1511)) ([ff01caa](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ff01caa6b5a59ede00dcd0f6048260a795bc12e1))
+
+## [9.4.17](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.16...v9.4.17) (2025-01-03)
+
+### Miscellaneous Chores
+
+* add workflow for main and PR ([#1498](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1498)) ([9524846](https://github.com/AppiumTestDistribution/appium-device-farm/commit/952484643f744117a602f561af857b8a7ffb7d48))
+
 ## [9.4.16](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.15...v9.4.16) (2024-12-27)
 
 ### Bug Fixes

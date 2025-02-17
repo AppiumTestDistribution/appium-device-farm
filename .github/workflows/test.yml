@@ -11,6 +11,10 @@ on:
       CI:
         required: true
 
+  push:
+    branches:
+      - main
+
 jobs:
   buildWithSubmodule:
     name: Run Unit Test
