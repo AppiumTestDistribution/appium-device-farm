@@ -1,3 +1,11 @@
+## [9.5.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.0...v9.5.1) (2025-02-17)
+
+### Bug Fixes
+
+* revert ios streaming from ws to http ([#1533](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1533)) ([6ed8641](https://github.com/AppiumTestDistribution/appium-device-farm/commit/6ed86411cdbcbd3fe3d8819ea209a7d91e89385c))
+* update publish yaml for submodule checkout ([#1535](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1535)) ([4d60fbf](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4d60fbf2c5aa5a5aa52cf8acea0fddd4c011cb64))
+* update Width and Height for iPad Mini 7 ([#1522](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1522)) ([2998a89](https://github.com/AppiumTestDistribution/appium-device-farm/commit/2998a89dbe4b5f591f2780a9ef273d7457ad9cd5))
+
 ## [9.5.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.4.17...v9.5.0) (2025-01-16)
 
 ### Features
