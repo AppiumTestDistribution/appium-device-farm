@@ -103,7 +103,7 @@ export const DefaultPluginArgs: IPluginArgs = {
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
   remoteConnectionTimeout: 60000,
-  liveStreaming: false,
+  liveStreaming: true,
   wdaBundleId: '',
   preBuildWDAPath: '',
 };

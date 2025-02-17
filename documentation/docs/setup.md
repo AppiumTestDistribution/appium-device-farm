@@ -7,7 +7,7 @@ hide:
 
 Appium version 2.4.X
 
-Make sure to install go-ios for real device testing. Refer [go-ios](https://github.com/danielpaulus/go-ios)
+Make sure to install go-ios for real device testing on non MAC system. setup path to go-ios in process.env.GO_IOS Refer [go-ios](https://github.com/danielpaulus/go-ios)
 
 ## Installation - Server
 

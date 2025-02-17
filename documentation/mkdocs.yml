@@ -26,7 +26,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: ""
+          format: ''
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -50,4 +50,5 @@ nav:
   - Reference:
       - server-args.md
       - capabilities.md
+      - ios-signing.md
       - reference/commands/sample.md

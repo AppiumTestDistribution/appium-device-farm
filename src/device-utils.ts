@@ -6,7 +6,6 @@ import {
   isDeviceFarmRunning,
   isMac,
 } from './helpers';
-import { ServerCLI } from './types/CLIArgs';
 import { Platform } from './types/Platform';
 import {
   androidCapabilities,
@@ -42,6 +41,8 @@ import { IPluginArgs } from './interfaces/IPluginArgs';
 import { ATDRepository } from './data-service/db';
 import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
+import getPort from 'get-port';
+import { sessionRequestMap } from './proxy/wd-command-proxy';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -88,6 +89,7 @@ export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
  * @returns
  */
 export async function allocateDeviceForSession(
+  requestId: string,
   capability: ISessionCapability,
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
@@ -110,6 +112,14 @@ export async function allocateDeviceForSession(
   try {
     await waitUntil(
       async () => {
+        if (!sessionRequestMap.has(requestId)) {
+          log.error(
+            `Client has closed the connection for the new session request with id ${requestId}`,
+          );
+          throw new Error(
+            `Client has closed the connection for the new session request with id ${requestId}`,
+          );
+        }
         const maxSessions = getDeviceManager().getMaxSessionCount();
         const busyDevicesCount = await getBusyDevicesCount();
         log.debug(`Max session count: ${maxSessions}, Busy device count: ${busyDevicesCount}`);
@@ -178,7 +188,16 @@ export async function updateCapabilityForDevice(
   device: IDevice,
   options: { liveVideo: boolean },
 ) {
+  const mergedCapabilites = Object.assign(
+    {},
+    capability.alwaysMatch,
+    capability.firstMatch[0] || {},
+  );
   if (!device.hasOwnProperty('cloud')) {
+    if (mergedCapabilites['appium:automationName']?.toLowerCase() === 'flutterintegration') {
+      capability.firstMatch[0]['appium:flutterSystemPort'] = await getPort();
+    }
+
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
       await androidCapabilities(capability, device, options);
     } else {
@@ -259,8 +278,8 @@ export function getDeviceFiltersFromCapability(
   pluginArgs: IPluginArgs,
 ): IDeviceFilterOptions {
   const platform: Platform = capability['platformName'].toLowerCase();
-  const udids = capability[DEVICE_FARM_CAPABILITIES.UDIDS]
-    ? capability[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
+  const udids = deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.UDIDS]
+    ? deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.UDIDS].split(',').map(_.trim)
     : process.env.UDIDS?.split(',').map(_.trim);
   /* Based on the app file extension, we will decide whether to run the
    * test on real device or simulator.

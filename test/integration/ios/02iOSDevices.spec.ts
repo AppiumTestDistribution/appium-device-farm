@@ -12,12 +12,16 @@ import { ATDRepository } from '../../../src/data-service/db';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { v4 as uuidv4 } from 'uuid';
+import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
   remote: [`http://${ip.address()}:4723`],
   iosDeviceType: 'both',
 });
 const NODE_ID = uuidv4();
+const REQUEST_ID = uuidv4();
+
+sessionRequestMap.set(REQUEST_ID, {} as any);
 
 describe('IOS Test', () => {
   beforeEach('Release devices', async () => {
@@ -52,13 +56,14 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'No device matching request.. Device request: {"platform":"ios","deviceType":"real"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'No device matching request.. Device request: {"platform":"ios","deviceType":"real"}',
+          ),
     );
   });
 
@@ -83,13 +88,14 @@ describe('IOS Test', () => {
       },
       firstMatch: [{}],
     };
-    await allocateDeviceForSession(capabilities, 6000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'iosDeviceType value is set to "real" but app provided is not suitable for real device.',
+          ),
     );
   });
 });

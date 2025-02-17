@@ -18,7 +18,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: ""
 extra_css:
   - assets/stylesheets/extra.css
 extra:
@@ -37,3 +37,4 @@ nav:
       - server-args.md
       - capabilities.md
       - reference/commands/sample.md
+      - reference/commands/a.md

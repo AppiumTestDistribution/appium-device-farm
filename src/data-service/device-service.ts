@@ -320,6 +320,8 @@ export async function userUnblockDevice(udid: string, host: string) {
     .update(function (device: IDevice) {
       device.userBlocked = false;
       device.busy = false;
+      device.session_id = undefined;
+      device.sessionResponse = undefined;
     });
 }
 
@@ -373,6 +375,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
           function (device: IDevice) {
             debugLog(`Unblocking device ${device.udid} from host ${device.host}`);
             device.session_id = undefined;
+            device.sessionResponse = undefined;
             device.busy = false;
             device.userBlocked = false;
             device.lastCmdExecutedAt = undefined;

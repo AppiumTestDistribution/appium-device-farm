@@ -16,6 +16,8 @@ import { addNewDevice, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
+import { exec } from 'child_process';
+import semver from 'semver';
 
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
@@ -49,6 +51,7 @@ export default class IOSDeviceManager implements IDeviceManager {
         return simulators;
       } else {
         // return both real and simulated devices
+        log.debug('Getting both real and simulated devices');
         return flatten(
           await Promise.all([
             this.getRealDevices(existingDeviceDetails, this.pluginArgs, this.hostPort),
@@ -155,7 +158,22 @@ export default class IOSDeviceManager implements IDeviceManager {
           userBlocked: false,
         });
       } else {
+        log.debug(`Getting device info for ${udid}`);
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
+        const goIOS = process.env.GO_IOS;
+        if (goIOS && semver.satisfies(deviceInfo.sdk, '>=17.0.0')) {
+          //Check for version above 17+ and presence for Go IOS
+          try {
+            log.info('Running go-ios agent');
+            const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
+            exec(startTunnel, (error, stdout, stderr) => {
+              console.log(`stdout: ${stdout}`);
+              console.error(`stderr: ${stderr}`);
+            });
+          } catch (err) {
+            log.error(err);
+          }
+        }
         deviceState.push(deviceInfo);
       }
     });
@@ -212,7 +230,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
-    const modelInfo = this.findKeyByValue(ProductType);
+    const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     return Object.assign({
       wdaLocalPort,
       mjpegServerPort,
@@ -231,6 +249,8 @@ export default class IOSDeviceManager implements IDeviceManager {
       width: modelInfo.Width,
       height: modelInfo.Height,
       tags: [],
+      webDriverAgentHost: `http://${pluginArgs.bindHostOrIp}`,
+      webDriverAgentUrl: `http://${pluginArgs.bindHostOrIp}:${wdaLocalPort}`,
     });
   }
 
@@ -305,6 +325,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           ),
           preBuildWDAPath: this.pluginArgs.preBuildWDAPath,
           tags: [],
+          nodeId: this.nodeId,
         }),
       );
     }
@@ -320,7 +341,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     } else {
       return deviceTypes.filter(
         (deviceType: any) => deviceType.identifier === device.deviceTypeIdentifier,
-      )[0].modelIdentifier;
+      )[0]?.modelIdentifier;
     }
   }
 
@@ -344,8 +365,8 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.error(`The following runtimes are not available: ${unAavailableRuntimes.join(', ')}`);
       }
 
-      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 1;
-      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 1;
+      const iOSSimulators = flatten(Object.values(await simctl.getDevices(null, 'iOS'))).length > 0;
+      const tvSimulators = flatten(Object.values(await simctl.getDevices(null, 'tvOS'))).length > 0;
 
       log.debug(`iOS Simulators: ${iOSSimulators}`);
       log.debug(`tvOS Simulators: ${tvSimulators}`);

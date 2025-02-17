@@ -1,0 +1,28 @@
+name: Release
+
+on:
+   workflow_dispatch:
+   push:
+      branches: [ main ]
+
+jobs:
+   build:
+      runs-on: macos-latest
+      steps:
+         - uses: actions/checkout@v3
+           with:
+             submodules: recursive
+             token: ${{ secrets.PAT_TOKEN }}
+         - uses: actions/setup-node@v3
+           with:
+              node-version: lts/*
+              check-latest: true
+         - run: npm install --no-package-lock
+           name: Install dependencies
+         - run: npm run bundle
+           name: Build
+         - run: npx semantic-release
+           env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              NPM_TOKEN: ${{ secrets.npm_token }}
+           name: Release

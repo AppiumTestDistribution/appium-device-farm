@@ -42,13 +42,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import {
-  hasCloudArgument,
-  hasHubArgument,
-  loadExternalModules,
-  nodeUrl,
-  stripAppiumPrefixes,
-} from './helpers';
+import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -75,6 +69,7 @@ import { BeforeSessionCreatedEvent } from './events/before-session-create-event'
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
+import { waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -147,8 +142,9 @@ class DevicePlugin extends BasePlugin {
       pluginArgs = Object.assign({}, DefaultPluginArgs);
     }
     if (
-      pluginArgs.platform.toLowerCase() === 'android' ||
-      pluginArgs.platform.toLowerCase() == 'both'
+      (pluginArgs.platform.toLowerCase() === 'android' ||
+        pluginArgs.platform.toLowerCase() == 'both') &&
+      !pluginArgs.cloud
     ) {
       DevicePlugin.adbInstance = await ADB.createADB({ adbExecTimeout: 60000 });
     }
@@ -273,6 +269,18 @@ class DevicePlugin extends BasePlugin {
     }
     return deviceTypes;
   }
+
+  getLockName(caps: Record<string, any>) {
+    const keys = ['platformName', 'appium:platformVersion', 'appium:udids'];
+    return keys
+      .filter((key) => !!caps[key])
+      .reduce((acc, key) => acc + caps[key], DEVICE_MANAGER_LOCK_NAME)
+      .toLowerCase()
+      .split('')
+      .sort()
+      .join('');
+  }
+
   async createSession(
     next: () => any,
     driver: any,
@@ -282,15 +290,18 @@ class DevicePlugin extends BasePlugin {
   ) {
     log.debug(`📱 pluginArgs: ${JSON.stringify(this.pluginArgs)}`);
     log.debug(`Receiving session request at host: ${this.pluginArgs.bindHostOrIp}`);
-    const pendingSessionId = uuidv4();
-    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
     const {
       alwaysMatch: requiredCaps = {}, // If 'requiredCaps' is undefined, set it to an empty JSON object (#2.1)
       firstMatch: allFirstMatchCaps = [{}], // If 'firstMatch' is undefined set it to a singleton list with one empty object (#3.1)
     } = caps;
+    const pendingSessionId = requiredCaps['appium:requestId'];
+    delete requiredCaps['appium:requestId'];
+    log.debug(`📱 Creating temporary session capability_id: ${pendingSessionId}`);
+
     stripAppiumPrefixes(requiredCaps);
     stripAppiumPrefixes(allFirstMatchCaps);
     const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
+    log.info(`Merged Capabilities: ${JSON.stringify(mergedCapabilites, null, 2)}`);
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
@@ -301,12 +312,14 @@ class DevicePlugin extends BasePlugin {
     /**
      *  Wait untill a free device is available for the given capabilities
      */
+    console.log(`Acquiring Lock with name ${this.getLockName(mergedCapabilites)}`);
     const device = await commandsQueueGuard.acquire(
-      DEVICE_MANAGER_LOCK_NAME,
+      this.getLockName(mergedCapabilites),
       async (): Promise<IDevice> => {
         //await refreshDeviceList();
         try {
           return await allocateDeviceForSession(
+            pendingSessionId,
             caps,
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
@@ -338,14 +351,21 @@ class DevicePlugin extends BasePlugin {
         : device.nodeId !== DevicePlugin.NODE_ID
           ? SessionType.REMOTE
           : SessionType.LOCAL;
-
-      await EventBus.fire(new BeforeSessionCreatedEvent({ device, sessionType: sessionType }));
+      await EventBus.fire(
+        new BeforeSessionCreatedEvent({ device, sessionType: sessionType, caps }),
+      );
+      
       if (device.platform === 'ios' && device.realDevice) {
         log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
-        await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
-          usePortForwarding: true,
-          devicePort: device.mjpegServerPort,
-        });
+        try {
+          await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
+            usePortForwarding: true,
+            devicePort: device.mjpegServerPort,
+          });
+        } catch(err){
+          /* Not required for now as the port forwarding is handled by xcuitest river itself */
+          log.warn(`Error while forwarding ios port to real device ${device.udid}. Error: ${err}`);
+        }
       }
       session = await next();
 
@@ -373,12 +393,12 @@ class DevicePlugin extends BasePlugin {
         session_id: sessionId,
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
+        sessionResponse: sessionResponse,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
       if (!mergedCapabilites['df:skipReport']) {
-        log.info('Skipping dashboard report');
         await EventBus.fire(
           new SessionCreatedEvent({
             sessionId,
@@ -390,6 +410,8 @@ class DevicePlugin extends BasePlugin {
             adb: DevicePlugin.adbInstance,
           }),
         );
+      } else {
+        log.info('Skipping dashboard report');
       }
       log.info(
         `${pendingSessionId} 📱 Updating Device ${device.udid} with session ID ${sessionId}`,
@@ -397,7 +419,8 @@ class DevicePlugin extends BasePlugin {
       if (device.platform.toLowerCase() === 'ios' && !isRemoteOrCloudSession) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const wda = driver.sessions[sessionId].wda.jwproxy;
+        const sessionDriver = driver.sessions[sessionId].proxydriver || driver.sessions[sessionId];
+        const wda = sessionDriver.wda.jwproxy;
         const proxiedInfo = {
           proxyUrl: `${wda.scheme}://${wda.server}:${wda.port}`,
           proxySessionId: wda.sessionId,
@@ -461,12 +484,27 @@ class DevicePlugin extends BasePlugin {
     caps: ISessionCapability,
   ): Promise<CreateSessionResponseInternal | Error> {
     const remoteUrl = `${nodeUrl(device, DevicePlugin.nodeBasePath)}/session`;
-    let capabilitiesToCreateSession = { capabilities: caps };
+    const capabilitiesToCreateSession = { capabilities: caps };
 
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
-      capabilitiesToCreateSession = Object.assign(capabilitiesToCreateSession, {
-        desiredCapabilities: capabilitiesToCreateSession.capabilities.alwaysMatch,
-      });
+      if (
+        capabilitiesToCreateSession.capabilities.alwaysMatch &&
+        Object.keys(capabilitiesToCreateSession.capabilities.alwaysMatch).length == 0
+      ) {
+        delete capabilitiesToCreateSession.capabilities.alwaysMatch;
+      }
+      if (
+        capabilitiesToCreateSession.capabilities.firstMatch &&
+        _.isArray(capabilitiesToCreateSession.capabilities.firstMatch) &&
+        (!capabilitiesToCreateSession.capabilities.firstMatch.length ||
+          capabilitiesToCreateSession.capabilities.firstMatch.every(
+            (m) => Object.keys(m).length == 0,
+          ))
+      ) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        delete capabilitiesToCreateSession.capabilities.firstMatch;
+      }
     }
 
     log.info(
@@ -577,7 +615,11 @@ class DevicePlugin extends BasePlugin {
     const res = await next();
     await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
     if (device?.platform === 'ios' && device.realDevice) {
-      await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+      try {
+        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+      } catch (err) {
+        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
+      }
     }
     return res;
   }

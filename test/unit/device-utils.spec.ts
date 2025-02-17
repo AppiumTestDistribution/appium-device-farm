@@ -11,14 +11,17 @@ import { Container } from 'typedi';
 import { allocateDeviceForSession } from '../../src/device-utils';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { IDevice } from '../../src/interfaces/IDevice';
-import { remove } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 
 chai.should();
 chai.use(sinonChai);
 const expect = chai.expect;
 const sandbox = sinon.createSandbox();
 const NODE_ID = uuidv4();
+const REQUEST_ID = uuidv4();
+
+sessionRequestMap.set(REQUEST_ID, {} as any);
 
 describe('Device Utils', () => {
   const hub1Device = {
@@ -123,6 +126,7 @@ describe('Device Utils', () => {
       firstMatch: [{}],
     };
     const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       1000,
       1000,
@@ -141,13 +145,14 @@ describe('Device Utils', () => {
     )[0];
 
     expect(foundDevice.busy).to.be.true;
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"http://192.168.0.226:4723"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"http://192.168.0.226:4723"}',
+          ),
     );
   });
 
@@ -175,6 +180,7 @@ describe('Device Utils', () => {
       firstMatch: [{}],
     };
     const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       1000,
       1000,
@@ -193,6 +199,7 @@ describe('Device Utils', () => {
     )[0];
     expect(foundDevice.tags).to.be.deep.eq(['team1', 'team33']);
     const allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       1000,
       1000,
@@ -205,13 +212,14 @@ describe('Device Utils', () => {
       )
     )[0];
     expect(foundSecondDevice.tags).to.be.deep.eq(['team22', 'teamAutomation']);
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","tags":["team1","teamAutomation"]}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","tags":["team1","teamAutomation"]}',
+          ),
     );
   });
   it('Allocating device should set device to be busy', async function () {
@@ -235,6 +243,7 @@ describe('Device Utils', () => {
       firstMatch: [{}],
     };
     const allocatedDeviceForFirstSession = await DeviceUtils.allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       1000,
       1000,
@@ -264,6 +273,7 @@ describe('Device Utils', () => {
     filterDeviceWithSameUDID.filter((device) => !device.busy).length.should.be.equal(1);
 
     const allocatedDeviceForSecondSession = await DeviceUtils.allocateDeviceForSession(
+      REQUEST_ID,
       capabilities,
       1000,
       1000,
@@ -289,13 +299,14 @@ describe('Device Utils', () => {
     expect(filterDeviceWithSameUDID[1].busy).to.be.true;
     expect(foundSecondDevice.busy).to.be.true;
 
-    await allocateDeviceForSession(capabilities, 1000, 1000, pluginArgs).catch((error) =>
-      expect(error)
-        .to.be.an('error')
-        .with.property(
-          'message',
-          'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
-        ),
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 1000, pluginArgs).catch(
+      (error) =>
+        expect(error)
+          .to.be.an('error')
+          .with.property(
+            'message',
+            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
+          ),
     );
   });
 
