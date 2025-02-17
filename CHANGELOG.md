@@ -1,3 +1,9 @@
+## [9.5.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.1...v9.5.2) (2025-02-17)
+
+### Bug Fixes
+
+* ios port forwarding for real device ([#1539](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1539)) ([c4b8ef0](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c4b8ef0186816b2c805fbb2ef9778c84b617ccc3))
+
 ## [9.5.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.0...v9.5.1) (2025-02-17)
 
 ### Bug Fixes
