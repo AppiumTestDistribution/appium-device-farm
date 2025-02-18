@@ -399,6 +399,7 @@ class DevicePlugin extends BasePlugin {
         lastCmdExecutedAt: new Date().getTime(),
         sessionStartTime: new Date().getTime(),
         sessionResponse: sessionResponse,
+        mjpegServerPort: sessionResponse.mjpegServerPort,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
