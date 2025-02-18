@@ -1,3 +1,9 @@
+## [9.5.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.2...v9.5.3) (2025-02-18)
+
+### Bug Fixes
+
+* update screen size for iPad Pro 13-inch ([#1549](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1549)) ([f46418f](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f46418f3189dedc53964b660743472c8d585b159))
+
 ## [9.5.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.1...v9.5.2) (2025-02-17)
 
 ### Bug Fixes
