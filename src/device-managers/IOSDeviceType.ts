@@ -235,23 +235,23 @@ export const IOSDeviceInfoMap: any = {
     Model: 'iPhone 16',
   },
 
-'iPhone17,4': {
+  'iPhone17,4': {
     Width: '430',
     Height: '932',
     Model: 'iPhone 16 Plus',
   },
-'iPhone17,1': {
+  'iPhone17,1': {
     Width: '402',
     Height: '874',
     Model: 'iPhone 16 Pro',
   },
 
-'iPhone17,2': {
+  'iPhone17,2': {
     Width: '440',
     Height: '956',
     Model: 'iPhone 16 Pro Max',
   },
-'iPad4,1': {
+  'iPad4,1': {
     Width: '768',
     Height: '1024',
     Model: 'iPad Air',
@@ -572,13 +572,13 @@ export const IOSDeviceInfoMap: any = {
     Model: 'iPad (10th Gen)',
   },
   'iPad16,6': {
-    Width: '820',
-    Height: '1180',
+    Width: '1024',
+    Height: '1366',
     Model: 'iPad Pro 13-inch (M4) Wi-Fi + Cellular',
   },
   'iPad16,5': {
-    Width: '820',
-    Height: '1180',
+    Width: '1024',
+    Height: '1366',
     Model: 'iPad Pro 13-inch (M4) Wi-Fi',
   },
   'iPad16,4': {
