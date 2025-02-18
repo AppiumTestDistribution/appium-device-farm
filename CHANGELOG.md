@@ -1,3 +1,9 @@
+## [9.5.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.3...v9.5.4) (2025-02-18)
+
+### Bug Fixes
+
+* handle proper mjpegServerPort for ios streaming from node ([#1550](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1550)) ([07bd279](https://github.com/AppiumTestDistribution/appium-device-farm/commit/07bd279af1492e8f2ebab35ef5f067bd92b5c833))
+
 ## [9.5.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.2...v9.5.3) (2025-02-18)
 
 ### Bug Fixes
