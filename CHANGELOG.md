@@ -1,3 +1,13 @@
+## [9.6.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.4...v9.6.0) (2025-02-20)
+
+### Features
+
+* add ability to customize stream parameters ([#1556](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1556)) ([5d2780a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5d2780a067a3ad348b076fdba68959ee50d2ae45))
+
+### Bug Fixes
+
+* ts build errors ([#1557](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1557)) ([93747bc](https://github.com/AppiumTestDistribution/appium-device-farm/commit/93747bc91bbf0e2992dba5c8217200c88280c834))
+
 ## [9.5.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.3...v9.5.4) (2025-02-18)
 
 ### Bug Fixes
