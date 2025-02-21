@@ -189,6 +189,10 @@ For full license details, please see the [LICENSE](LICENSE) file in this reposit
 
 ![alt text](assets/image-1.png)
 
+### Session Info Page
+
+![alt text](assets/image-5.png)
+
 ### Apps Page
 
 ![alt text](assets/image-2.png)
