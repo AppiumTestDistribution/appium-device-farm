@@ -15,6 +15,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   SCREENSHOT_ON_FAILURE = 'screenshotOnFailure',
   DEVICE_FARM_OPTIONS = 'df:options',
   DEVICE_TIMEOUT = 'deviceAvailabilityTimeout',
+  SCREENSHOT_ON_ALL = "screenshotOnFailure",
   DEVICE_QUERY_INTERVAL = 'deviceRetryInterval',
   iPHONEONLY = 'iPhoneOnly',
   iPADONLY = 'iPadOnly',
