@@ -21,38 +21,6 @@ With Appium Device-farm, teams can:
 5. Monitor and manage test sessions through a user-friendly dashboard, providing real-time visibility into ongoing tests and detailed logs for easy debugging and troubleshooting.
 6. Record and replay test runs, enabling teams to review test executions, reproduce issues, and ensure thorough testing coverage.
 
----
-
-## 📺 Streaming Settings
-The **Streaming Settings** section allows you to customize the streaming performance and quality of the emulator or real device screen within the Appium Device-farm dashboard. This is particularly useful when running remote tests or sharing device sessions in real-time, ensuring the best balance between performance and visual clarity.
-
-<img width="801" alt="image" src="https://github.com/user-attachments/assets/faec9a56-7a45-4dd4-9595-494e40c9d58d" />
-
-
-### 🔧 Settings Descriptions:
-- **Framerate (1 - 60):**  
-  Sets the number of frames per second (FPS) for the streamed display.  
-  - Higher values (e.g., 60) provide smoother motion but increase resource usage.  
-  - Lower values (e.g., 10) can improve stability under low bandwidth conditions.  
-
-- **Video Quality (1 - 100):**  
-  Controls the visual quality of the stream.  
-  - `0` offers the lowest quality to save bandwidth.  
-  - `100` delivers the highest clarity, useful for detailed UI inspections.  
-  - Adjust this setting to balance visual clarity with network constraints.  
-
-- **Scaling Factor (1 - 100):**  
-  Adjusts the size of the streamed display.  
-  - `100` represents the original size.  
-  - Lower values shrink the display, helpful when viewing multiple devices simultaneously.  
-
-- **Save Settings:**  
-  Click this button to apply the changes. All adjustments will take effect immediately for the ongoing session.  
-
-These settings are designed to offer flexibility, allowing testers to tailor the streaming experience based on their hardware, network conditions, and testing needs.
-
----
-
 # 🎯 Testimonials
 
 ## 🏢 Enterprise Team Experience
@@ -101,7 +69,7 @@ Appium Device-farm has not only optimized our testing processes but also signifi
 
 <details>
 <summary><b>🚀 Simple Set-Up Process and Very Scalable</b></summary>
-
+	
 Appium Device Farm was instrumental in our transition from a third-party device farm service to a fully in-house setup. What we initially thought would be a lengthy, challenging process turned out to be remarkably smooth and efficient, taking less than two weeks instead of the expected month.
 
 The setup is surprisingly straightforward — so much so that it almost feels too good to be true. The built-in dashboard provides an excellent interface for tracking and debugging sessions, and the hub/node topology enables easy scalability across multiple PCs, making it perfect for our growing needs.
@@ -116,7 +84,9 @@ I highly recommend Appium Device Farm to anyone looking to establish their own a
 <summary><b>🛠️ Streamlined Testing Experience</b></summary>
 
 - ✨ Appium device farms makes both developer and testers life easy with the capability and features available.
+
 - 🔄 Due to pandemic situations we are unable to test different applications on different devices but with the remote control feature we are able to test everything by keeping all devices connected in one place.
+
 - 🔍 With the help of appium dashboard feature it makes life easy to identify, debug and fix the issues without keeping more effort.
 </details>
 
@@ -124,6 +94,7 @@ I highly recommend Appium Device Farm to anyone looking to establish their own a
 <summary><b>⚙️ Improved Configuration and Compatibility Testing</b></summary>
 
 - ⚡ Previously we are using appium start the server and stop the server for each test and it needs to build the configuration files runtime by checking ports available and all… but with the help of device farm able to configure the grid within minutes without facing any issues which reduces the more manual and monitoring effort.
+
 - 🔄 With the help of apps feature we are able perform backward compatibility testing without doing any manual intervention just by passing automation name in the capacity with the help of appium device farm.
 </details>
 
@@ -138,7 +109,7 @@ The support and resources provided by the Appium device farm team were invaluabl
 
 ## Documentation
 
-The [Documentation](https://devicefarm.org/) is hosted separately at  
+The [Documentation](https://devicefarm.org/) is hosted separately at
 [Device Farm](https://devicefarm.org/)
 
 ## Contributing & Development
@@ -178,14 +149,14 @@ Navigate to site directory and open index.html to view the site locally.
 
 The Appium Device Farm Plugin uses a hybrid licensing model to balance open-source principles with the protection of certain proprietary components:
 
-1. **Open Source Components**:  
+1. **Open Source Components**:
    The majority of this project is open source and licensed under the MIT License. This includes all files and directories except those explicitly listed as proprietary.
 
-2. **Proprietary Components**:  
+2. **Proprietary Components**:
    The following components, while included in the distribution, are proprietary and provided in an obfuscated form:
 
-   - src/modules/  
-   - dashboard-frontend  
+   - src/modules/
+   - dashboard-frontend
 
    These components are integral parts of the plugin but their source code is not open for modification or redistribution.
 
