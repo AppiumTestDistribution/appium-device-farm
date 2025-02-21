@@ -1,3 +1,9 @@
+## [9.7.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.0...v9.7.1) (2025-02-21)
+
+### Bug Fixes
+
+* useDevice card issue on browser reload ([#1567](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1567)) ([d37779b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d37779bd3c67dcdfb5d4c91638a83f81758b7f65))
+
 ## [9.7.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.6.0...v9.7.0) (2025-02-21)
 
 ### Features
