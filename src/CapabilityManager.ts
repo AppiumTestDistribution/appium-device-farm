@@ -13,6 +13,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   VIDEO_TIME_LIMIT = 'videoTimeLimit',
   LIVE_VIDEO = 'liveVideo',
   SCREENSHOT_ON_FAILURE = 'screenshotOnFailure',
+  SCREENSHOT_ON_ALL = 'screenshotOnAll',
   DEVICE_FARM_OPTIONS = 'df:options',
   DEVICE_TIMEOUT = 'deviceAvailabilityTimeout',
   SCREENSHOT_ON_ALL = "screenshotOnFailure",
