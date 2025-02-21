@@ -394,3 +394,21 @@ export async function unblockDeviceMatchingFilter(filter: object) {
     log.warn(`Unable to find device to unblock with filter ${JSON.stringify(filter)}`);
   }
 }
+export async function updateDeviceName(host: string, udid: string, name: string): Promise<boolean> {
+  const deviceModel = await ATDRepository.DeviceModel;
+  const device = deviceModel.chain().find({ udid: udid, host: host }).data()[0];
+  
+  if (device) {
+    deviceModel
+      .chain()
+      .find({ udid: udid, host: host })
+      .update(function (device: IDevice) {
+        device.name = name;
+      });
+    log.info(`Updated name for device ${udid} to ${name}`);
+    return true;
+  }
+  
+  log.warn(`Device ${udid} not found for name update`);
+  return false;
+}
