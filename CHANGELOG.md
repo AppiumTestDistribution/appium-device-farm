@@ -1,3 +1,9 @@
+## [9.7.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.1...v9.7.2) (2025-02-21)
+
+### Bug Fixes
+
+* build error ([#1568](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1568)) ([0720ab8](https://github.com/AppiumTestDistribution/appium-device-farm/commit/0720ab8bbd8a00d26fd64fc3ab45470be9325b63))
+
 ## [9.7.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.0...v9.7.1) (2025-02-21)
 
 ### Bug Fixes
