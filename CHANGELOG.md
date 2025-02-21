@@ -1,3 +1,9 @@
+## [9.7.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.6.0...v9.7.0) (2025-02-21)
+
+### Features
+
+* 1459 add support to edit device name in the dashboard ([#1564](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1564)) ([9771ddb](https://github.com/AppiumTestDistribution/appium-device-farm/commit/9771ddbafdcbbff3ac6555ae0535b2a1353690b4))
+
 ## [9.6.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.5.4...v9.6.0) (2025-02-20)
 
 ### Features
