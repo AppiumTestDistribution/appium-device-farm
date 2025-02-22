@@ -1,3 +1,9 @@
+## [9.8.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.2...v9.8.0) (2025-02-22)
+
+### Features
+
+* making the UI great again  ([#1560](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1560)) ([815554f](https://github.com/AppiumTestDistribution/appium-device-farm/commit/815554f491d986f8e256012553683eb999f3e420))
+
 ## [9.7.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.1...v9.7.2) (2025-02-21)
 
 ### Bug Fixes
