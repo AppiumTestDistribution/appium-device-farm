@@ -235,7 +235,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   // }
   if (filter.udid) {
     const askedDevice: Array<any> = deviceModel.chain().find({ udid: filter.udid }).data();
-    if (askedDevice[0].userBlocked) {
+    if (askedDevice.length && askedDevice[0].userBlocked) {
       delete filter.busy;
       delete filter.userBlocked;
     }
