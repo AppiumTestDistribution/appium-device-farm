@@ -7,15 +7,17 @@ import log from './logger';
 
 const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
 const deviceFarmHome = getDeviceFarmHome();
+
 function getDeviceFarmHome() {
+  let deviceFarmHome = basePath;
   if(process.env.DEVICE_FARM_HOME) {
-    if(!fs.existsSync(process.env.DEVICE_FARM_HOME)) {
-      fs.mkdirSync(process.env.DEVICE_FARM_HOME, { recursive: true });
-    }
-    log.info("Using Metadata Path: ", process.env.DEVICE_FARM_HOME);
-    return process.env.DEVICE_FARM_HOME;
+    deviceFarmHome = process.env.DEVICE_FARM_HOME;
+  } 
+  if(!fs.existsSync(deviceFarmHome)) {
+    fs.mkdirSync(deviceFarmHome, { recursive: true });
   }
-  return basePath;
+  log.info("Using Metadata Path: ", deviceFarmHome);
+  return deviceFarmHome;
 }
 
 
@@ -37,7 +39,6 @@ function getServerMetadata() {
   } else {
     fs.writeFileSync(metaFile, JSON.stringify(defaultMetadata));
   }
-  console.log(defaultMetadata);
   return defaultMetadata;
 }
 
