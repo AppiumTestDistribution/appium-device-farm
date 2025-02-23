@@ -4,4 +4,7 @@ export type Config = {
   sessionAssetsPath: string;
   takeScreenshotsFor: Array<string>;
   appsPath: string;
+  serverMetadata: {
+    id: string;
+  }
 };
