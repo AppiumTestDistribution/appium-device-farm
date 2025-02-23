@@ -116,6 +116,7 @@ async function updateDeviceInfo(request: Request, response: Response) {
 async function blockDevice(request: Request, response: Response) {
   const requestBody = request.body;
   const device = await getDevice(requestBody);
+  log.info('Device to block', device);
   if (!_.isNil(device)) {
     await userBlockDevice(device.udid, device.host);
   }
@@ -127,6 +128,7 @@ async function blockDevice(request: Request, response: Response) {
 async function unBlockDevice(request: Request, response: Response) {
   const requestBody = request.body;
   const device = await getDevice(requestBody);
+  log.info('Device to unblock', JSON.stringify(device));
   if (!_.isNil(device)) {
     await userUnblockDevice(device.udid, device.host);
   }

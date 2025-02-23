@@ -9,6 +9,30 @@ import { prisma } from '../prisma';
 
 type PrismaDeviceModel = NonNullable<Awaited<ReturnType<typeof prisma.device.findFirst>>>;
 
+// Helper function to convert BigInt to Number in objects
+function convertBigIntToNumber(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === 'bigint') {
+    return Number(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntToNumber);
+  }
+
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const key in obj) {
+      converted[key] = convertBigIntToNumber(obj[key]);
+    }
+    return converted;
+  }
+
+  return obj;
+}
 // Helper function to convert Prisma Device to IDevice
 export function prismaToIDevice(device: PrismaDeviceModel | null): IDevice | null {
   if (!device) return null;
@@ -229,7 +253,6 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
 
   const where: WhereClause = {
     host: { not: '' },
-    userBlocked: false,
   };
 
   if (filterOptions.platform) where.platform = filterOptions.platform;
@@ -242,8 +265,10 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   if (filterOptions.offline !== undefined) where.offline = filterOptions.offline;
   if (filterOptions.userBlocked !== undefined) where.userBlocked = filterOptions.userBlocked;
   
-  if (filterOptions.udid?.length) {
-    where.udid = { in: filterOptions.udid };
+  if (filterOptions.udid) {
+    where.udid = { 
+      in: Array.isArray(filterOptions.udid) ? filterOptions.udid : [filterOptions.udid]
+    };
   }
 
   if (filterOptions.deviceType) where.deviceType = filterOptions.deviceType;
@@ -253,9 +278,8 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   if (filterOptions.tags?.length) {
     where.tags = { contains: filterOptions.tags.join(',') };
   }
-
+  log.info(JSON.stringify(where));
   const devices = await prisma.device.findMany({ where });
-  
   // Post-process for semver comparisons
   return devices
     .map(prismaToIDevice)
