@@ -1,3 +1,9 @@
+## [9.8.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.0...v9.8.1) (2025-02-23)
+
+### Bug Fixes
+
+* make debugging simple by serving appium logs in the dashboard ([#1576](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1576)) ([c787f97](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c787f97ed316b69461c1bfefeeb17610a1920944))
+
 ## [9.8.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.7.2...v9.8.0) (2025-02-22)
 
 ### Features
