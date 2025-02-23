@@ -92,3 +92,52 @@ model DeviceTags {
 
   @@unique([host, udid])
 }
+
+model Device {
+  id                           String    @id @default(uuid())
+  systemPort                   Int
+  host                        String
+  proxyPort                   Int?
+  proxyHost                   String?
+  wdaLocalPort                Int?
+  name                        String
+  udid                        String
+  state                       String
+  sdk                         String
+  platform                    String
+  deviceType                  String
+  busy                        Boolean    @default(false)
+  userBlocked                 Boolean    @default(false)
+  realDevice                  Boolean
+  session_id                  String?
+  offline                     Boolean    @default(false)
+  mjpegServerPort             Int?
+  lastCmdExecutedAt           BigInt?
+  totalUtilizationTimeMilliSec BigInt    @default(0)
+  sessionStartTime            BigInt     @default(0)
+  newCommandTimeout           Int?
+  cloud                       String?    // JSON string
+  derivedDataPath             String?
+  chromeDriverPath            String?    // JSON string
+  capability                  String?    // JSON string
+  adbRemoteHost               String
+  adbPort                     Int
+  nodeId                      String?
+  width                       String
+  height                      String
+  liveStreaming               Boolean?
+  wdaBundleId                 String?
+  productModel                String?
+  deviceTypeIdentifier        String?
+  proxyUrl                    String?
+  proxySessionId              String?
+  prebuiltWDAPath             String?
+  tags                        String?    // Comma-separated string
+  webDriverAgentUrl           String?
+  webDriverAgentHost          String?
+  sessionResponse             String?    // JSON string
+  createdAt                   DateTime   @default(now())
+  updatedAt                   DateTime   @updatedAt
+
+  @@unique([host, udid])
+}

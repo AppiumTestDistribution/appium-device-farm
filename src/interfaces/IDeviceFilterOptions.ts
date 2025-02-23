@@ -1,7 +1,7 @@
 import { Platform } from '../types/Platform';
 import { DeviceType } from '../types/DeviceType';
 
-export interface IDeviceFilterOptions {
+export interface IDeviceFilterOptions extends Record<string, unknown> {
   platform?: Platform;
   platformVersion?: string;
   name?: string;
