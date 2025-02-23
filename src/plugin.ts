@@ -59,7 +59,7 @@ import ip from 'ip';
 import _ from 'lodash';
 import { ATDRepository } from './data-service/db';
 import EventBus from './notifier/event-bus';
-import { config as pluginConfig } from './config';
+import { config, config as pluginConfig } from './config';
 import { SessionCreatedEvent } from './events/session-created-event';
 import debugLog from './debugLog';
 import http from 'http';
@@ -69,7 +69,6 @@ import { BeforeSessionCreatedEvent } from './events/before-session-create-event'
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
-import { waitForCondition } from 'asyncbox';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -87,6 +86,7 @@ class DevicePlugin extends BasePlugin {
   private static httpServer: any;
   private static adbInstance: any;
   public static serverUrl: string;
+  public static serverArgs: Record<string, any>;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -129,6 +129,7 @@ class DevicePlugin extends BasePlugin {
     DevicePlugin.httpServer = httpServer;
 
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
+    DevicePlugin.serverArgs = cliArgs;
     externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
@@ -156,7 +157,7 @@ class DevicePlugin extends BasePlugin {
       EventBus,
       DevicePlugin.adbInstance,
     );
-    DevicePlugin.NODE_ID = uuidv4();
+    DevicePlugin.NODE_ID = config.serverMetadata.id;
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
     DevicePlugin.nodeBasePath = cliArgs.basePath;

@@ -1,12 +1,51 @@
 import * as os from 'os';
 import * as path from 'path';
+import * as fs from "fs";
 import { Config } from './types/Config';
+import {v4 as uuid} from "uuid"
+import log from './logger';
+
 const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
+const deviceFarmHome = getDeviceFarmHome();
+function getDeviceFarmHome() {
+  if(process.env.DEVICE_FARM_HOME) {
+    if(!fs.existsSync(process.env.DEVICE_FARM_HOME)) {
+      fs.mkdirSync(process.env.DEVICE_FARM_HOME, { recursive: true });
+    }
+    log.info("Using Metadata Path: ", process.env.DEVICE_FARM_HOME);
+    return process.env.DEVICE_FARM_HOME;
+  }
+  return basePath;
+}
+
+
+function getServerMetadata() {
+  const metaFile = path.join(getDeviceFarmHome(), "metadata.json");
+  let defaultMetadata = {
+    id: uuid()
+  }
+  if(fs.existsSync(metaFile)) {
+    const metadata = JSON.parse(fs.readFileSync(metaFile, "utf-8"));
+    if(!metadata || !metadata.id) {
+      fs.writeFileSync(metaFile, JSON.stringify(Object.assign(defaultMetadata, metadata)));
+      return {
+        ...defaultMetadata,
+        ...metadata
+      }
+    }
+    return metadata
+  } else {
+    fs.writeFileSync(metaFile, JSON.stringify(defaultMetadata));
+  }
+  console.log(defaultMetadata);
+  return defaultMetadata;
+}
 
 export const config: Config = {
   cacheDir: basePath,
   databasePath: `${basePath}/device-farm-latest.db?connection_limit=1`,
-  sessionAssetsPath: path.join(basePath, 'assets', 'sessions'),
+  sessionAssetsPath: path.join(deviceFarmHome, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
-  appsPath: path.join(basePath, 'assets'),
+  appsPath: path.join(deviceFarmHome, 'assets'),
+  serverMetadata : getServerMetadata()
 };
