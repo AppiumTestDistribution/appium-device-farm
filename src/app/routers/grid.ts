@@ -16,7 +16,7 @@ import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 import { prisma } from '../../prisma';
-import { prismaToIDevice } from '../../data-service/device-service'; // Add this import
+import { prismaToIDevice } from '../../data-service/device-service';
 
 const SERVER_UP_TIME = new Date().toISOString();
 
@@ -64,9 +64,16 @@ async function getDeviceByPlatform(request: Request, response: Response) {
   if (!platform || ['ios', 'android'].indexOf(platform.toLowerCase()) < 0) {
     return response.status(200).send([]);
   }
-  let devices = (await ATDRepository.DeviceModel).find({
-    platform: platform.toLowerCase(),
+  let devices = await prisma.device.findMany({
+    where: {
+      platform: platform.toLowerCase()
+    }
   });
+  // Convert Prisma devices to IDevice type and handle BigInt values
+  devices = devices
+    .map(prismaToIDevice)
+    .filter((d): d is IDevice => Boolean(d))
+    .map(convertBigIntToNumber);
 
   if (!_.isNil(deviceType)) {
     devices = devices.filter((value) => value.deviceType === deviceType);
