@@ -6,33 +6,10 @@ import semver from 'semver';
 import debugLog from '../debugLog';
 import type { DeviceTags, Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
+import { convertBigIntToNumber } from '../helpers';
 
 type PrismaDeviceModel = NonNullable<Awaited<ReturnType<typeof prisma.device.findFirst>>>;
 
-// Helper function to convert BigInt to Number in objects
-function convertBigIntToNumber(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  if (typeof obj === 'bigint') {
-    return Number(obj);
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(convertBigIntToNumber);
-  }
-
-  if (typeof obj === 'object') {
-    const converted: any = {};
-    for (const key in obj) {
-      converted[key] = convertBigIntToNumber(obj[key]);
-    }
-    return converted;
-  }
-
-  return obj;
-}
 // Helper function to convert Prisma Device to IDevice
 export function prismaToIDevice(device: PrismaDeviceModel | null): IDevice | null {
   if (!device) return null;
@@ -395,7 +372,7 @@ export async function unblockDeviceMatchingFilter(filter: IDeviceFilterOptions) 
   if (filter.udid?.length === 1) {
     where.udid = filter.udid[0];
   } else if (filter.udid?.length) {
-    where.udid = { in: filter.udid };
+    where.udid = { in: Array.isArray(filter.udid) ? filter.udid : [filter.udid] };
   }
   
   if (filter.host) where.host = filter.host;

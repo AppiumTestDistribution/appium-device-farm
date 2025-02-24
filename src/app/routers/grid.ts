@@ -105,16 +105,20 @@ async function registerNode(request: Request, response: Response) {
 async function updateDeviceInfo(request: Request, response: Response) {
   const requestBody = request.body;
   const { udid, ...deviceInfo } = requestBody;
-  const devices = (await ATDRepository.DeviceModel).find({ udid });
-  if (devices.length === 0) {
+  
+  const device = await prisma.device.findFirst({
+    where: { udid }
+  });
+
+  if (!device) {
     return response.status(404).send(`Device with udid ${udid} not found`);
   }
-  const device = devices[0];
-  const updatedDevice = {
-    ...device,
-    ...deviceInfo,
-  };
-  await (await ATDRepository.DeviceModel).update(updatedDevice);
+
+  await prisma.device.update({
+    where: { id: device.id },
+    data: deviceInfo
+  });
+
   response.status(200).send({
     success: true,
   });

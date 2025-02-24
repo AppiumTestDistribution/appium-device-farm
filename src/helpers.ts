@@ -87,6 +87,31 @@ export function checkDeviceHasNoCloud(device: IDevice) {
   return false;
 }
 
+// Helper function to convert BigInt to Number in objects
+export function convertBigIntToNumber(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === 'bigint') {
+    return Number(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntToNumber);
+  }
+
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const key in obj) {
+      converted[key] = convertBigIntToNumber(obj[key]);
+    }
+    return converted;
+  }
+
+  return obj;
+}
+
 
 export function nodeUrl(device: IDevice, basePath = ''): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
