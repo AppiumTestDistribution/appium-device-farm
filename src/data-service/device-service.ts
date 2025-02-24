@@ -59,7 +59,7 @@ function iDeviceToPrisma(device: Partial<IDevice>, isCreate = false): Prisma.Dev
     lastCmdExecutedAt: device.lastCmdExecutedAt ? BigInt(device.lastCmdExecutedAt) : null,
     totalUtilizationTimeMilliSec: device.totalUtilizationTimeMilliSec ? BigInt(device.totalUtilizationTimeMilliSec) : BigInt(0),
     sessionStartTime: device.sessionStartTime ? BigInt(device.sessionStartTime) : BigInt(0),
-    cloud: device.cloud ? JSON.stringify(device.cloud) : null,
+    cloud: device.cloud ? JSON.stringify(device.cloud) : 'false',
     chromeDriverPath: device.chromeDriverPath ? JSON.stringify(device.chromeDriverPath) : null,
     capability: device.capability ? JSON.stringify(device.capability) : null,
     sessionResponse: device.sessionResponse ? JSON.stringify(device.sessionResponse) : null,
@@ -341,8 +341,8 @@ export async function updatedAllocatedDevice(device: IDevice, updateData: Partia
       host: device.host
     }
   });
-  
-  log.info(`Updated allocated device: "${JSON.stringify(updatedDevice)}"`);
+  const loggableUpdatedDevice = convertBigIntToNumber(updatedDevice);
+  log.info(`Updated allocated device: "${JSON.stringify(loggableUpdatedDevice)}"`);
 }
 
 export async function updateCmdExecutedTime(sessionId: string) {

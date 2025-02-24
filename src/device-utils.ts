@@ -1,6 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import {
   cachePath,
+  checkDeviceHasNoCloud,
   checkIfPathIsAbsolute,
   isAppiumRunningAt,
   isDeviceFarmRunning,
@@ -193,7 +194,9 @@ export async function updateCapabilityForDevice(
     capability.alwaysMatch,
     capability.firstMatch[0] || {},
   );
-  if (!device.hasOwnProperty('cloud')) {
+  log.info(checkDeviceHasNoCloud(device));
+  log.info(JSON.stringify(device));
+  if (checkDeviceHasNoCloud(device)) {
     if (mergedCapabilites['appium:automationName']?.toLowerCase() === 'flutterintegration') {
       capability.firstMatch[0]['appium:flutterSystemPort'] = await getPort();
     }
@@ -420,10 +423,10 @@ export async function removeStaleDevices(currentHost: string) {
   });
 
   const nodeHosts = nodeDevices
-    .filter((device) => !device.hasOwnProperty('cloud'))
+    .filter((device) => !checkDeviceHasNoCloud(device))
     .map((device) => device.host);
   const cloudHosts = nodeDevices
-    .filter((device) => device.hasOwnProperty('cloud'))
+    .filter((device) => checkDeviceHasNoCloud(device))
     .map((device) => device.host);
   const aliveHosts = (await Promise.allSettled(
     nodeHosts.map(async (host) => {

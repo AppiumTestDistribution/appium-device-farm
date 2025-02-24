@@ -73,9 +73,24 @@ export async function getFreePort() {
   return await getPort();
 }
 
+export function checkDeviceHasNoCloud(device: IDevice) {
+  // Input validation
+  if (!device || typeof device !== 'object') {
+      throw new Error('Invalid device object provided');
+  }
+
+  // Check if cloud property exists and is false
+  if ('cloud' in device && device.cloud === false) {
+      return true;
+  }
+
+  return false;
+}
+
+
 export function nodeUrl(device: IDevice, basePath = ''): string {
   const host = normalizeUrl(device.host, { removeTrailingSlash: false });
-  if (device.hasOwnProperty('cloud')) {
+  if (!checkDeviceHasNoCloud(device)) {
     if (device.cloud.toLowerCase() === Cloud.PCLOUDY) {
       return `${host}/wd/hub`;
     } else if (device.cloud.toLowerCase() === Cloud.HEADSPIN) {

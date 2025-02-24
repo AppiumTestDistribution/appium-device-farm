@@ -42,7 +42,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
+import { checkDeviceHasNoCloud, hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -493,7 +493,7 @@ class DevicePlugin extends BasePlugin {
     const remoteUrl = `${nodeUrl(device, DevicePlugin.nodeBasePath)}/session`;
     const capabilitiesToCreateSession = { capabilities: caps };
 
-    if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
+    if (!checkDeviceHasNoCloud(device) && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
       if (
         capabilitiesToCreateSession.capabilities.alwaysMatch &&
         Object.keys(capabilitiesToCreateSession.capabilities.alwaysMatch).length == 0
