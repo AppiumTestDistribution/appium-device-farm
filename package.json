@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "9.8.1",
+  "version": "9.8.2",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices.",
   "main": "./lib/src/main.js",
   "scripts": {

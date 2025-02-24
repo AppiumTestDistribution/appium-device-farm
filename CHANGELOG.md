@@ -1,3 +1,9 @@
+## [9.8.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.1...v9.8.2) (2025-02-24)
+
+### Bug Fixes
+
+* installation issue due to incorrect config loading ([#1578](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1578)) ([f4eca35](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f4eca35dc80bd79bef2deea93204a0d90d51e094))
+
 ## [9.8.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.0...v9.8.1) (2025-02-23)
 
 ### Bug Fixes
