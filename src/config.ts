@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from "fs";
 import { Config } from './types/Config';
 import {v4 as uuid} from "uuid"
-import log from './logger';
 
 const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
 const deviceFarmHome = getDeviceFarmHome();
@@ -16,7 +15,7 @@ function getDeviceFarmHome() {
   if(!fs.existsSync(deviceFarmHome)) {
     fs.mkdirSync(deviceFarmHome, { recursive: true });
   }
-  log.info("Using Metadata Path: ", deviceFarmHome);
+  console.info("Using Metadata Path: ", deviceFarmHome);
   return deviceFarmHome;
 }
 
@@ -43,8 +42,8 @@ function getServerMetadata() {
 }
 
 export const config: Config = {
-  cacheDir: basePath,
-  databasePath: `${basePath}/device-farm-latest.db?connection_limit=1`,
+  cacheDir: deviceFarmHome,
+  databasePath: `${deviceFarmHome}/device-farm-latest.db?connection_limit=1`,
   sessionAssetsPath: path.join(deviceFarmHome, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
   appsPath: path.join(deviceFarmHome, 'assets'),
