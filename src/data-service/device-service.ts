@@ -63,9 +63,10 @@ function iDeviceToPrisma(device: Partial<IDevice>, isCreate = false): Prisma.Dev
     chromeDriverPath: device.chromeDriverPath ? JSON.stringify(device.chromeDriverPath) : null,
     capability: device.capability ? JSON.stringify(device.capability) : null,
     sessionResponse: device.sessionResponse ? JSON.stringify(device.sessionResponse) : null,
-    tags: Array.isArray(device.tags) && device.tags.length > 0 
+    tags: Array.isArray(device.tags) && device.tags.length > 0
     ? device.tags.join(',')
     : null,
+    mjpegServerPort: device.mjpegServerPort ?? null
     };
 
   if (isCreate) {
