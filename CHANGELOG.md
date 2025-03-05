@@ -1,3 +1,9 @@
+## [9.8.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.2...v9.8.3) (2025-03-05)
+
+### Bug Fixes
+
+* display realtime adb logs during manual device control ([#1581](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1581)) ([70d6efa](https://github.com/AppiumTestDistribution/appium-device-farm/commit/70d6efa54bbc040043f6a1a05fc07fdfbb3b85c0))
+
 ## [9.8.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.1...v9.8.2) (2025-02-24)
 
 ### Bug Fixes
