@@ -41,7 +41,7 @@ export const sauceOrLambdaSchema = {
   properties: {
     cloudName: {
       type: 'string',
-      description: 'specify cloudName as sauce or lambdatest',
+      description: 'specify cloudName as sauce , lambdatest or testingbot',
     },
     url: {
       type: 'string',
