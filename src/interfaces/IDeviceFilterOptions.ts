@@ -15,4 +15,5 @@ export interface IDeviceFilterOptions {
   session_id?: string;
   filterByHost?: string;
   tags?: string[];
+  host?: string;
 }

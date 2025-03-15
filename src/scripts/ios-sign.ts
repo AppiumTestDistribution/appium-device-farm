@@ -30,17 +30,11 @@ async function getXcodeMajorVersion(): Promise<number> {
 
 async function getProvisioningProfilePath(): Promise<string> {
   const xcodeVersion = await getXcodeMajorVersion();
-  
+
   if (xcodeVersion <= 15) {
-    return path.join(
-      os.homedir(),
-      'Library/MobileDevice/Provisioning Profiles'
-    );
+    return path.join(os.homedir(), 'Library/MobileDevice/Provisioning Profiles');
   } else {
-    return path.join(
-      os.homedir(),
-      'Library/Developer/Xcode/UserData/Provisioning Profiles'
-    );
+    return path.join(os.homedir(), 'Library/Developer/Xcode/UserData/Provisioning Profiles');
   }
 }
 
@@ -77,20 +71,21 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
     return mobileProvisioningFile;
   } else {
     const provisionFileDir = await getProvisioningProfilePath();
-    
+
     if (!fs.existsSync(provisionFileDir)) {
       throw new Error(`Provisioning directory does not exist: ${provisionFileDir}`);
     }
 
-    const files = fs.readdirSync(provisionFileDir, { encoding: 'utf8' })
-      .filter(file => file.endsWith('.mobileprovision'));
+    const files = fs
+      .readdirSync(provisionFileDir, { encoding: 'utf8' })
+      .filter((file) => file.endsWith('.mobileprovision'));
 
-    const provisioningFiles = files.map(file => {
+    const provisioningFiles = files.map((file) => {
       const fullPath = path.join(provisionFileDir, file);
       const mp = provision.readFromFile(fullPath);
       return { ...mp, _filePath: fullPath };
     });
-    
+
     if (!provisioningFiles || !provisioningFiles.length) {
       throw new Error('No mobileprovision file found on the machine');
     }
@@ -101,7 +96,7 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
         name: `${file.Name.split(':')[1] || file.Name} (Team: ${file.TeamName}) (${file.UUID})`,
       })),
     });
-    
+
     return path.join(await getProvisioningProfilePath(), `${prompt}.mobileprovision`);
   }
 };
@@ -116,7 +111,7 @@ const getWdaProject = async (wdaProjectPath?: string) => {
 
   try {
     const { stdout } = await execAsync('find $HOME/.appium -name WebDriverAgent.xcodeproj');
-    return path.dirname(stdout.trim());
+    return path.dirname(stdout.trim().split('\n')[0]);
   } catch (err) {
     throw new Error('Unable to find WebDriverAgent project');
   }
@@ -131,6 +126,7 @@ async function buildWebDriverAgent(projectDir: string, logger: any) {
     await execAsync(buildCommand, { cwd: projectDir, maxBuffer: undefined });
     return `${projectDir}/${WDA_BUILD_PATH}/WebDriverAgentRunner-Runner.app`;
   } catch (error) {
+    console.log(error);
     throw new Error(`❌ Error building WebDriverAgent: ${(error as any)?.message}`);
   }
 }

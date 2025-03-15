@@ -165,7 +165,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
       deviceInfo = await Promise.all([
         this.getDeviceVersion(adbInstance, device.udid),
         this.isRealDevice(adbInstance, device.udid),
-        this.getDeviceName(adbInstance, device.udid),
         this.getChromeVersion(adbInstance, device.udid, pluginArgs),
         this.getDeviceSize(adbInstance, device.udid),
       ]);
@@ -174,7 +173,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
       return undefined;
     }
 
-    const [sdk, realDevice, name, chromeDriverPath, deviceSize] = deviceInfo;
+    const [sdk, realDevice, chromeDriverPath, deviceSize] = deviceInfo;
+    const name = await this.getDeviceName(adbInstance, device.udid, realDevice);
 
     // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
     if (!pluginArgs.skipChromeDownload && chromeDriverPath === undefined) {
@@ -385,8 +385,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
       this.initiateAbortControl(newDevice.udid);
       let bootCompleted = false;
       try {
-        await this.waitBootEmulator(originalADB, newDevice.udid);
+        const isRealDevice = await this.isRealDevice(originalADB, newDevice.udid);
+        if (!isRealDevice) {
+          await this.waitBootEmulator(originalADB, newDevice.udid);
+        }
         bootCompleted = true;
+
         await sleep(6000);
       } catch (error) {
         log.info(`Device ${newDevice.udid} boot did not complete. Error: ${error}`);
@@ -621,9 +625,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     return sdkRoot;
   }
-  private getDeviceName = async (adbInstance: any, udid: string): Promise<string | undefined> => {
-    let deviceName = await this.getDeviceProperty(await adbInstance, udid, 'ro.product.name');
+  private getDeviceName = async (
+    adbInstance: any,
+    udid: string,
+    isRealDevice: boolean,
+  ): Promise<string | undefined> => {
+    const props = isRealDevice
+      ? ['ro.vendor.oplus.market.name', 'ro.display.series', 'ro.product.name']
+      : ['ro.kernel.qemu.avd_name', 'ro.boot.qemu.avd_name'];
 
+    let deviceName;
+
+    for (const prop of props) {
+      deviceName = await this.getDeviceProperty(adbInstance, udid, prop);
+      if (deviceName && deviceName.trim() !== '') {
+        break;
+      }
+    }
     if (!deviceName || (deviceName && deviceName.trim() === '')) {
       // If the device name is null or empty, try to get it from the Bluetooth manager.
       deviceName = await (
