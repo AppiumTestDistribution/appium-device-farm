@@ -15,6 +15,7 @@ import Container from 'typedi';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
+import { DevicePlugin } from '../../plugin';
 
 const SERVER_UP_TIME = new Date().toISOString();
 async function getDevices(request: Request, response: Response) {
@@ -118,6 +119,9 @@ async function unBlockDevice(request: Request, response: Response) {
   const device = await getDevice(requestBody);
   if (!_.isNil(device)) {
     await userUnblockDevice(device.udid, device.host);
+  }
+  if (device?.nodeId != DevicePlugin.NODE_ID) {
+    await axios.post(`${device?.host}/device-farm/api/unblock`, requestBody);
   }
   response.status(200).send({
     success: true,

@@ -84,7 +84,7 @@ class DevicePlugin extends BasePlugin {
   public static NODE_ID: string;
   public static IS_HUB = false;
   private static httpServer: any;
-  private static adbInstance: any;
+  public static adbInstance: any;
   public static serverUrl: string;
   public static serverArgs: Record<string, any>;
 
@@ -157,7 +157,9 @@ class DevicePlugin extends BasePlugin {
       EventBus,
       DevicePlugin.adbInstance,
     );
+    const hubArgument = pluginArgs.hub;
     DevicePlugin.NODE_ID = config.serverMetadata.id;
+    DevicePlugin.IS_HUB = !pluginArgs.hub;
     log.info('Cli Args: ' + JSON.stringify(cliArgs));
 
     DevicePlugin.nodeBasePath = cliArgs.basePath;
@@ -208,8 +210,6 @@ class DevicePlugin extends BasePlugin {
 
     await addCLIArgs(cliArgs);
 
-    const hubArgument = pluginArgs.hub;
-
     if (hubArgument !== undefined) {
       log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
       // hub may have been restarted, so let's send device list regularly
@@ -219,7 +219,6 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.sendNodeDevicesToHubIntervalMs,
       );
     } else {
-      DevicePlugin.IS_HUB = true;
       DevicePlugin.serverUrl = `http://${pluginArgs.bindHostOrIp}:${cliArgs.port}`;
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
@@ -431,6 +430,7 @@ class DevicePlugin extends BasePlugin {
         const proxiedInfo = {
           proxyUrl: `${wda.scheme}://${wda.server}:${wda.port}`,
           proxySessionId: wda.sessionId,
+          sessionId: sessionId,
         };
         await updatedAllocatedDevice(device, proxiedInfo);
         if (this.pluginArgs.hub !== undefined) {

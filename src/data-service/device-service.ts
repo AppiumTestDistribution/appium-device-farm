@@ -225,7 +225,7 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
         default:
           // do not remove this line as it will help us to know if we have missed any filter options
           // eslint-disable-next-line no-case-declarations
-          const exhaustiveCheck: never = key;
+          const exhaustiveCheck = key;
           break;
       }
     });
@@ -397,7 +397,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
 export async function updateDeviceName(host: string, udid: string, name: string): Promise<boolean> {
   const deviceModel = await ATDRepository.DeviceModel;
   const device = deviceModel.chain().find({ udid: udid, host: host }).data()[0];
-  
+
   if (device) {
     deviceModel
       .chain()
@@ -408,7 +408,7 @@ export async function updateDeviceName(host: string, udid: string, name: string)
     log.info(`Updated name for device ${udid} to ${name}`);
     return true;
   }
-  
+
   log.warn(`Device ${udid} not found for name update`);
   return false;
 }
