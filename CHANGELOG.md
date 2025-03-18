@@ -1,3 +1,9 @@
+## [9.8.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.3...v9.8.4) (2025-03-18)
+
+### Bug Fixes
+
+* add support for file browser and app management for android ([#1597](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1597)) ([4aed0d5](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4aed0d5defc2628a72af5fb994e06b61baf5ffee))
+
 ## [9.8.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.2...v9.8.3) (2025-03-05)
 
 ### Bug Fixes
