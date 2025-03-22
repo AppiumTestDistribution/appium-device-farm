@@ -14,241 +14,27 @@ jobs:
         node: [20]
 
     steps:
-    - name: Checkout repository with submodules
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        token: ${{ secrets.PAT_TOKEN }}
-    - name: Setup Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: 17
-
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2.0.10
-    - name: Run script
-      run: |
-        # Add your script commands here
-        npm ci
-        npm run bundle
-    - name: Run Unit Test
-      run: |
-        # Add your script commands here
-        npm test
-  HubWithNoPlatform:
-    name: Run E2E Plugin Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20]
-
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-          # Add your script commands here
-          npm ci
-          npm run bundle
-      - name: Run E2E Plugin Test without Platform
-        run: |
-          # Add your script commands here
-          npm run test-e2e
-
-  buildWithOutSubmodule:
-    name: Build with Out Submodule
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node: [20]
-
-    steps:
-      - name: Checkout repository with out submodule
-        uses: actions/checkout@v3
-      - name: Run script
-        run: |
-          npm ci
-          npm run bundle
-  AndroidIntegrationTest:
-    name: Run Android Integration Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [29]
-        target: [google_apis]
-    steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-         npm ci
-         npm run bundle
+          path: main
 
-      - name: Enable KVM
+      - name: Checkout submodules
+        shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          profile: Nexus 6
-          script: npm run integration-android
-  E2EHubAndNodeTest:
-    name: Run E2EHubAndNodeTest
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [ 29 ]
-        target: [ google_apis ]
-    steps:
-      - name: checkout
+          echo 'https://AppiumTestDistribution:${{secrets.CI}}@github.com' >~/.git-credentials
+          git config --global credential.helper store
+          git submodule update --init --recursive
+      
+      - name: Checkout private tools
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
+          submodules: true
+          token: ${{ secrets.CI }}
 
-      - name: Enable KVM
+      - name: Checkout submodules
+        shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          profile: Nexus 6
-          script: npm run test-e2e-hubnode
-  IOSIntegrationTest:
-    name: Run iOS Integration Test
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node: [ 20 ]
-
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
-      - name: Run iOS Integration Test
-        run: |
-          npm run integration-ios
-
-
-
-
-  E2EPluginTest:
-    name: Run Plugin Test
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node: [ 20 ]
-
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
-      - name: Run e2e plugin Test
-        run: |
-          npm run test-e2e
-      - name: Run E2E BrowserStack Test
-        run: |
-          npm run test-e2e-browserstack
-      - name: Run E2E PCloudy Test
-        run: |
-          npm run test-e2e-pcloudy
-
-  BrowserStackTest:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node: [ 20 ]
-
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
-      - name: Run BrowserStack Test
-        run: |
-          CLOUD_USERNAME=${{ secrets.BS_USERNAME }} CLOUD_KEY=${{ secrets.BS_PASSWORD }} BS_ANDROID_CLOUD_APP=${{ secrets.BS_ANDROID_CLOUD_APP }} npm run test-parallel-bs
-  BrowserStackTest_Linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [ 20 ]
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.10
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
-      - name: Run BrowserStack Test
-        run: |
-          CLOUD_USERNAME=${{ secrets.BS_USERNAME }} CLOUD_KEY=${{ secrets.BS_PASSWORD }} BS_IOS_CLOUD_APP=${{ secrets.BS_IOS_CLOUD_APP }} npm run test-parallel-ios-bs
-  LambdaTest:
-   runs-on: macos-latest
-   strategy:
-      matrix:
-       node: [ 20 ]
-
-   steps:
-     - name: Checkout repository with submodules
-       uses: actions/checkout@v3
-       with:
-        submodules: recursive
-        token: ${{ secrets.PAT_TOKEN }}
-     - name: Build
-       run: |
-        npm ci
-        npm run bundle
-     - name: Run LT Test
-       run: |
-          CLOUD_USERNAME=${{ secrets.LT_USERNAME }} CLOUD_KEY=${{ secrets.LT_PASSWORD }} LT_CLOUD_APP=${{ secrets.LT_CLOUD_APP }} npm run test-parallel-lt
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
