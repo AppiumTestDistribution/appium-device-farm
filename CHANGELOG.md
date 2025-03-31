@@ -1,3 +1,9 @@
+## [9.8.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.4...v9.8.5) (2025-03-31)
+
+### Bug Fixes
+
+* address open issues and update base plugin versions ([#1631](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1631)) ([19b0cd1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/19b0cd1b40fb61f2550dbe00e9f9d25d4c41ed50))
+
 ## [9.8.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.3...v9.8.4) (2025-03-18)
 
 ### Bug Fixes
