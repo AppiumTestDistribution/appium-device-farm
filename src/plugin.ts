@@ -90,13 +90,15 @@ class DevicePlugin extends BasePlugin {
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
+    /* To fix cannot read properties `constructor` of undefined error due to changes in appium log */
+    this.updateLogPrefix = null;
     // here, CLI Args are already pluginArgs. Different case for updateServer
     log.debug(`📱 Plugin Args: ${JSON.stringify(cliArgs)}`);
     // plugin args will assign undefined value as well for bindHostOrIp
     this.pluginArgs = Object.assign({}, DefaultPluginArgs, cliArgs as unknown as IPluginArgs);
     // not pretty but will do for now
     if (this.pluginArgs.bindHostOrIp === undefined) {
-      this.pluginArgs.bindHostOrIp = ip.address();
+      this.pluginArgs.bindHostOrIp = ip.address('ipv4');
     }
   }
 
