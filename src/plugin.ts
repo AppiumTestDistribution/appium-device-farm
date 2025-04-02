@@ -630,6 +630,15 @@ class DevicePlugin extends BasePlugin {
         log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
       }
     }
+    // add unblockDevice call
+    if (device?.udid && device?.host) {
+      try {
+        await unblockDevice(device.udid, device.host);
+        log.info(`Device ${device.udid} unblocked successfully.`);
+      } catch (err) {
+        log.warn(`Failed to unblock device ${device.udid}. Error: ${err}`);
+      }
+    }
     return res;
   }
 }
