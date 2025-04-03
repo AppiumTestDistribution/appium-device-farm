@@ -92,3 +92,46 @@ model DeviceTags {
 
   @@unique([host, udid])
 }
+
+model User {
+  id           String       @id @default(uuid())
+  username     String       @unique @map("username")
+  password     String       @map("password")
+  role         String       @default("user") @map("role") // "admin" or "user"
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  teamMembers  TeamMember[] @relation("UserToTeamMember")
+}
+
+model Team {
+  id                String             @id @default(uuid())
+  name              String             @unique @map("name")
+  description       String?            @map("description")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  teamMembers       TeamMember[]       @relation("TeamToTeamMember")
+  deviceAllocations DeviceAllocation[] @relation("TeamToDeviceAllocation")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation("UserToTeamMember", fields: [userId], references: [id], onDelete: Cascade)
+  teamId    String   @map("team_id")
+  team      Team     @relation("TeamToTeamMember", fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, teamId])
+}
+
+model DeviceAllocation {
+  id          String   @id @default(uuid())
+  deviceUdid  String   @map("device_udid")
+  teamId      String   @map("team_id")
+  team        Team     @relation("TeamToDeviceAllocation", fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([deviceUdid, teamId])
+}

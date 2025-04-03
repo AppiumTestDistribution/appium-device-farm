@@ -9,6 +9,8 @@ import { config } from '../config';
 import _ from 'lodash';
 
 import GridRouter from './routers/grid';
+import authRouter from '../auth/routers';
+import { userService } from '../auth/services/user.service';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
 
 let dashboardPluginUrl: any = null;
@@ -72,6 +74,15 @@ router.use(staticFilesRouter);
 
 function createRouter(pluginArgs: IPluginArgs) {
   GridRouter.register(apiRouter, pluginArgs);
+
+  // Initialize admin user if needed
+  userService.createInitialAdminIfNeeded().catch((err) => {
+    console.error('Error creating initial admin user:', err);
+  });
+
+  // Mount the auth router
+  router.use('/admin', authRouter);
+
   return router;
 }
 
