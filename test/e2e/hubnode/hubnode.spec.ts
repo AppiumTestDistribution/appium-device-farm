@@ -166,9 +166,8 @@ describe('E2E Hub and Node', () => {
       'appium:uiautomator2ServerInstallTimeout': 90000,
     } as unknown as WebdriverIO.Capabilities;
 
-    await expect(
-      remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as any),
-    ).to.eventually.be.rejected;
+    await expect(remote({ ...WDIO_PARAMS, capabilities: nonExistentAppCapabilities } as any)).to
+      .eventually.be.rejected;
 
     // check device-farm endpoint using axios: /api/queue/length
     const res = await axios.get(
