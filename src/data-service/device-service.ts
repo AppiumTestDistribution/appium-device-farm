@@ -271,7 +271,7 @@ export async function getDevice(filterOptions: IDeviceFilterOptions): Promise<ID
 }
 
 export async function updatedAllocatedDevice(device: IDevice, updateData: Partial<IDevice>) {
-  log.info(`Updating allocated device: "${JSON.stringify(device)}"`);
+  log.info(`Updating allocated device with data: "${JSON.stringify(updateData)}"`);
   (await ATDRepository.DeviceModel)
     .chain()
     .find({ udid: device.udid, host: device.host })

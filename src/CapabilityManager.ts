@@ -4,7 +4,12 @@ import _ from 'lodash';
 import { IDevice } from './interfaces/IDevice';
 import { prisma } from './prisma';
 import { DevicePlugin } from './plugin';
-
+import log from './logger';
+import { installIPA, portForwardAndWaitForWDA } from './modules/device-control/DeviceHelper';
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import { updatedAllocatedDevice } from './data-service/device-service';
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
   SESSION_NAME = 'name',
@@ -12,7 +17,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   VIDEO_RESOLUTION = 'videoResolution',
   VIDEO_TIME_LIMIT = 'videoTimeLimit',
   LIVE_VIDEO = 'liveVideo',
-  SCREENSHOT_ON_FAILURE = "screenshotOnFailure",
+  SCREENSHOT_ON_FAILURE = 'screenshotOnFailure',
   SCREENSHOT_ON_ALL = 'screenshotOnAll',
   DEVICE_FARM_OPTIONS = 'df:options',
   DEVICE_TIMEOUT = 'deviceAvailabilityTimeout',
@@ -78,22 +83,13 @@ export async function androidCapabilities(
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: {
-    webDriverAgentUrl?: any;
-    udid: any;
-    name: string;
-    realDevice: boolean;
-    sdk: string;
-    mjpegServerPort?: number;
-    wdaLocalPort?: number;
-    derivedDataPath?: string;
-    wdaBundleId?: string;
-    webDriverAgentHost?: string;
-  },
+  freeDevice: IDevice,
   options: { liveVideo: boolean },
 ) {
   freeDevice.mjpegServerPort = options.liveVideo ? await getPort() : undefined;
-
+  await updatedAllocatedDevice(freeDevice, {
+    mjpegServerPort: freeDevice.mjpegServerPort,
+  });
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
@@ -112,6 +108,35 @@ export async function iOSCapabilities(
     } else if (wdaInfo && process.env.GO_IOS) {
       caps.firstMatch[0]['appium:webDriverAgentUrl'] =
         freeDevice.webDriverAgentUrl = `${freeDevice.webDriverAgentHost}:${freeDevice.wdaLocalPort}`;
+      await updatedAllocatedDevice(freeDevice, {
+        wdaLocalPort: freeDevice.wdaLocalPort,
+      });
+      log.info(
+        `📱 Installing resigned WDA on real device ${freeDevice.udid} with final WDAPort ${freeDevice.wdaLocalPort}`,
+      );
+      const mergedCaps = Object.assign(
+        {},
+        caps.firstMatch ? caps.firstMatch[0] : {},
+        caps.alwaysMatch,
+      );
+      if (mergedCaps['df:skipReport']) {
+        log.info(`Handling resigned WDA for real device ${freeDevice.udid}`);
+        const resignedWDA = path.join(
+          os.homedir(),
+          '.cache',
+          'appium-device-farm',
+          'assets',
+          'wda-resign.ipa',
+        );
+        if (fs.existsSync(resignedWDA)) {
+          await installIPA(resignedWDA, freeDevice.udid);
+          await portForwardAndWaitForWDA({
+            udid: freeDevice.udid,
+            wdaLocalPort: caps.firstMatch[0]['appium:wdaLocalPort'],
+          });
+        }
+      }
+
       delete caps.firstMatch[0]['appium:wdaLocalPort'];
     }
   }
