@@ -1,3 +1,9 @@
+## [9.8.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.5...v9.8.6) (2025-04-21)
+
+### Bug Fixes
+
+* Running device-farm in non mac ([#1653](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1653)) ([8e7beca](https://github.com/AppiumTestDistribution/appium-device-farm/commit/8e7becae3047fbb161935ca294beb795e5f759a3))
+
 ## [9.8.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.4...v9.8.5) (2025-03-31)
 
 ### Bug Fixes
