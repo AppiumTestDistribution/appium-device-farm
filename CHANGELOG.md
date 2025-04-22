@@ -1,3 +1,9 @@
+## [9.8.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.6...v9.8.7) (2025-04-22)
+
+### Bug Fixes
+
+* iOS resigning script ([#1655](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1655)) ([3f565b4](https://github.com/AppiumTestDistribution/appium-device-farm/commit/3f565b450a5b1271d91c30aace9d697e5c585aca))
+
 ## [9.8.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.5...v9.8.6) (2025-04-21)
 
 ### Bug Fixes
