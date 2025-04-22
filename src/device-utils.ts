@@ -144,6 +144,9 @@ export async function allocateDeviceForSession(
     delete filterCopy.userBlocked;
 
     const possibleDevice = await getDevice(filterCopy);
+    if (possibleDevice && possibleDevice.busy == true && !possibleDevice?.session_id) {
+      await unblockDevice(possibleDevice.udid, possibleDevice.host);
+    }
 
     let failureReason = 'No device matching request.';
     if (possibleDevice?.busy || possibleDevice?.userBlocked) {

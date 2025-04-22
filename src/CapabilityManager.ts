@@ -5,6 +5,7 @@ import { IDevice } from './interfaces/IDevice';
 import { prisma } from './prisma';
 import { DevicePlugin } from './plugin';
 import log from './logger';
+import { updatedAllocatedDevice } from './data-service/device-service';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -79,18 +80,7 @@ export async function androidCapabilities(
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: {
-    webDriverAgentUrl?: any;
-    udid: any;
-    name: string;
-    realDevice: boolean;
-    sdk: string;
-    mjpegServerPort?: number;
-    wdaLocalPort?: number;
-    derivedDataPath?: string;
-    wdaBundleId?: string;
-    webDriverAgentHost?: string;
-  },
+  freeDevice: IDevice,
   options: { liveVideo: boolean },
 ) {
   if (!process.env.GO_IOS) {
@@ -134,6 +124,11 @@ export async function iOSCapabilities(
     deleteMatch.push('appium:mjpegServerPort');
   }
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
+  await updatedAllocatedDevice(freeDevice, {
+    wdaLocalPort: freeDevice.wdaLocalPort,
+    mjpegServerPort: freeDevice.mjpegServerPort,
+    webDriverAgentUrl: freeDevice.webDriverAgentUrl,
+  });
 }
 
 export function getDeviceFarmCapabilities(caps: ISessionCapability) {
