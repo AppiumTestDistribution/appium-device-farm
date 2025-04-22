@@ -18,6 +18,8 @@ import { select } from '@inquirer/prompts';
 
 const execAsync = util.promisify(exec);
 const WDA_BUILD_PATH = '/appium_wda_ios/Build/Products/Debug-iphoneos';
+let bundleIdName: { uuid: string; name: string }[] | null = null;
+let freeBundleID: { uuid: string; name: string } | null = null;
 
 async function getXcodeMajorVersion(): Promise<number> {
   const { stdout } = await execAsync('xcodebuild -version');
@@ -96,6 +98,23 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
         name: `${file.Name.split(':')[1] || file.Name} (Team: ${file.TeamName}) (${file.UUID})`,
       })),
     });
+
+    const isFreeAccount = await select({
+      message: 'Is this a free or enterprise account provisioning profile?',
+      choices: [
+        { value: true, name: 'Free Account' },
+        { value: false, name: 'Enterprise Account' },
+      ],
+    });
+    if (isFreeAccount) {
+      bundleIdName = provisioningFiles.map((file) => {
+        return { uuid: file.UUID, name: `${file.Name.split(':')[1] || file.Name}` };
+      });
+    }
+    freeBundleID =
+      bundleIdName?.find((d: any) => {
+        return d.uuid === prompt;
+      }) || null;
 
     return path.join(await getProvisioningProfilePath(), `${prompt}.mobileprovision`);
   }
@@ -220,10 +239,21 @@ async function zipPayloadDirectory(
         task: async (context, task) => {
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
           const ipaPath = `${wdaBuildPath}/wda-resign.ipa`;
-          const as = new Applesign({
-            mobileprovision: mobileProvisioningFile,
-            outfile: ipaPath,
-          });
+
+          let appleOptions: any;
+          if (freeBundleID) {
+            appleOptions = {
+              mobileprovision: mobileProvisioningFile,
+              outfile: ipaPath,
+              bundleId: freeBundleID.name.replace(/^\s+|\s+$/g, ''),
+            };
+          } else {
+            appleOptions = {
+              mobileprovision: mobileProvisioningFile,
+              outfile: ipaPath,
+            };
+          }
+          const as = new Applesign(appleOptions);
           await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
           task.title = `Successfully signed WebDriverAgent file  ${ipaPath}`;
         },
