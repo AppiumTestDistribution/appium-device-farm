@@ -112,7 +112,7 @@ model Team {
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   teamMembers       TeamMember[]       @relation("TeamToTeamMember")
-  deviceAllocations DeviceAllocation[] @relation("TeamToDeviceAllocation")
+  teamDevices       TeamDevice[]       @relation("TeamToTeamDevice")
 }
 
 model TeamMember {
@@ -127,13 +127,31 @@ model TeamMember {
   @@unique([userId, teamId])
 }
 
-model DeviceAllocation {
-  id          String   @id @default(uuid())
-  deviceUdid  String   @map("device_udid")
-  teamId      String   @map("team_id")
-  team        Team     @relation("TeamToDeviceAllocation", fields: [teamId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model TeamDevice {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  teamId    String   @map("team_id")
+  team      Team     @relation("TeamToTeamDevice", fields: [teamId], references: [id], onDelete: Cascade)
+  device    Device   @relation("DeviceToTeamDevice", fields: [deviceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([deviceUdid, teamId])
+  @@unique([deviceId, teamId])
+}
+
+model Device {
+  id              String   @id
+  udid            String   @map("udid")
+  host            String   @map("host")
+  platform        String   @map("platform") // ios, android
+  version         String   @map("version")
+  name            String   @map("name")
+  tags            String?  @map("tags")
+  real            Boolean  @default(false) @map("real")
+  usage           Int      @default(0) @map("usage")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  teamDevices     TeamDevice[] @relation("DeviceToTeamDevice")
+
+  @@unique([udid, host])
 }

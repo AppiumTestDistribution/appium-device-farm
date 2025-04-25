@@ -110,6 +110,7 @@
     "jsonschema": "1.4.1",
     "jsonwebtoken": "^9.0.2",
     "listr": "^0.14.3",
+    "local-cors-proxy": "^1.1.0",
     "lodash": "4.17.21",
     "lokijs": "^1.5.12",
     "lru-cache": "^10.2.2",
@@ -134,6 +135,7 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
+    "uuid-by-string": "^4.0.0",
     "ws": "^8.17.0",
     "yargs": "^17.7.2"
   },

@@ -16,8 +16,15 @@ import { IPluginArgs } from '../../interfaces/IPluginArgs';
 import { IDevice } from '../../interfaces/IDevice';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 import { DevicePlugin } from '../../plugin';
+import { prisma } from '../../prisma';
 
 const SERVER_UP_TIME = new Date().toISOString();
+
+async function getSavedDevices(request: Request, response: Response) {
+  const devices = await prisma.device.findMany();
+  return response.json(devices);
+}
+
 async function getDevices(request: Request, response: Response) {
   let devices = (await ATDRepository.DeviceModel).find();
   const { sessionId } = request.query;
@@ -261,6 +268,7 @@ async function handleTestExecutionMetaData(req: Request, res: Response) {
 
 function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', getDevices);
+  router.get('/saved_devices', getSavedDevices);
   router.get('/device/:platform', getDeviceByPlatform);
   router.post('/register', registerNode);
   router.post('/updateDeviceInfo', updateDeviceInfo);

@@ -118,25 +118,6 @@ export class TeamController {
   }
 
   /**
-   * Remove user from team
-   */
-  async removeUserFromTeam(req: Request, res: Response) {
-    try {
-      const { teamId, userId } = req.body;
-
-      if (!teamId || !userId) {
-        return res.status(400).json({ message: 'Team ID and User ID are required' });
-      }
-
-      await teamService.removeUserFromTeam(userId, teamId);
-      return res.status(200).json({ message: 'User removed from team successfully' });
-    } catch (error: any) {
-      log.error(`Error removing user from team: ${error}`);
-      return res.status(400).json({ message: error.message || 'Error removing user from team' });
-    }
-  }
-
-  /**
    * Get teams for user
    */
   async getTeamsForUser(req: Request, res: Response) {
@@ -152,6 +133,27 @@ export class TeamController {
     } catch (error: any) {
       log.error(`Error getting teams for user: ${error}`);
       return res.status(400).json({ message: error.message || 'Error getting teams for user' });
+    }
+  }
+
+  /**
+   * Add user to team
+   */
+  async addDeviceToTeam(req: Request, res: Response) {
+    try {
+      const { id: teamId } = req.params;
+      const { add, remove } = req.body;
+
+      if (!teamId || !add || !remove) {
+        return res.status(400).json({ message: 'Team ID and User ID are required' });
+      }
+
+      await teamService.removeDeviceFromTeam(remove, teamId);
+      const teamDevice = await teamService.addDeviceToTeam(add, teamId);
+      return res.status(201).json(teamDevice);
+    } catch (error: any) {
+      log.error(`Error adding user to team: ${error}`);
+      return res.status(400).json({ message: error.message || 'Error adding user to team' });
     }
   }
 }

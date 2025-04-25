@@ -7,6 +7,11 @@ import log from '../../logger';
  * Device allocation controller
  */
 export class DeviceAllocationController {
+  async getAllDevices(req: Request, res: Response) {
+    const devices = await deviceAllocationService.getAllDevices();
+    return res.status(200).json(devices);
+  }
+
   /**
    * Allocate device to team
    */
@@ -52,8 +57,8 @@ export class DeviceAllocationController {
    */
   async getAllDeviceAllocations(req: Request, res: Response) {
     try {
-      const allocations = await deviceAllocationService.getAllDeviceAllocations();
-      return res.status(200).json(allocations);
+      // const allocations = await deviceAllocationService.getAllDeviceAllocations();
+      return res.status(200).json([]);
     } catch (error: any) {
       log.error(`Error getting device allocations: ${error}`);
       return res.status(400).json({ message: error.message || 'Error getting device allocations' });
@@ -71,8 +76,8 @@ export class DeviceAllocationController {
         return res.status(400).json({ message: 'Team ID is required' });
       }
 
-      const allocations = await deviceAllocationService.getDeviceAllocationsForTeam(teamId);
-      return res.status(200).json(allocations);
+      // const allocations = await deviceAllocationService.getDeviceAllocationsForTeam(teamId);
+      return res.status(200).json([]);
     } catch (error: any) {
       log.error(`Error getting device allocations for team: ${error}`);
       return res

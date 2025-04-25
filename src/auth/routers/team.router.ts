@@ -18,14 +18,15 @@ router.post(
   adminOnly,
   teamController.addUserToTeam.bind(teamController),
 );
-router.delete(
-  '/:id/members',
-  authMiddleware,
-  adminOnly,
-  teamController.removeUserFromTeam.bind(teamController),
-);
 
 // Get teams for user
 router.get('/user/:userId', authMiddleware, teamController.getTeamsForUser.bind(teamController));
+
+router.post(
+  '/:id/devices',
+  authMiddleware,
+  adminOnly,
+  teamController.addDeviceToTeam.bind(teamController),
+);
 
 export default router;

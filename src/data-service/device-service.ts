@@ -5,9 +5,18 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
-import { DeviceTags } from '@prisma/client';
+import { Device, DeviceTags } from '@prisma/client';
 import { prisma } from '../prisma';
+import getUuid from 'uuid-by-string';
 // import { setDeviceState, setDeviceStateWhenUnplugged } from '../modules/device-control/DeviceHelper';
+
+export function generateDeviceId(device: IDevice) {
+  if (device.realDevice || device.platform === 'ios') {
+    return getUuid(device.udid);
+  } else {
+    return getUuid(`${device.udid}-${device.host}`);
+  }
+}
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
   for await (const device of devices) {
@@ -24,6 +33,43 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
+
+  const savedDevices = await prisma.device.findMany();
+  const devicesToAdd = devices
+    .filter(
+      (device) =>
+        !savedDevices.some(
+          (savedDevice) =>
+            savedDevice.id ===
+            generateDeviceId({
+              ...device,
+              host: host!,
+            }),
+        ),
+    )
+    .map(
+      (device) =>
+        ({
+          id: generateDeviceId({
+            ...device,
+            host: host!,
+          }),
+          name: device.name,
+          udid: device.udid,
+          host: device.host,
+          platform: device.platform,
+          version: device.sdk,
+          real: device.realDevice,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          tags: null,
+        }) as Device,
+    );
+
+  await prisma.device.createMany({
+    data: devicesToAdd,
+  });
+
   const addedDevices = devices.map(async function (
     device: IDevice & { $loki?: number; meta?: object },
   ) {

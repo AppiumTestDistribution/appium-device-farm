@@ -6,6 +6,11 @@ import { ATDRepository } from '../../data-service/db';
  * Device allocation service for handling device allocation operations
  */
 export class DeviceAllocationService {
+  async getAllDevices() {
+    const devices = await prisma.device.findMany();
+    return devices;
+  }
+
   /**
    * Allocate device to team
    */
@@ -29,9 +34,9 @@ export class DeviceAllocationService {
       }
 
       // Check if device is already allocated to this team
-      const existingAllocation = await prisma.deviceAllocation.findFirst({
+      const existingAllocation = await prisma.teamDevice.findFirst({
         where: {
-          deviceUdid,
+          deviceId: deviceUdid,
           teamId,
         },
       });
@@ -41,9 +46,9 @@ export class DeviceAllocationService {
       }
 
       // Allocate device to team
-      const allocation = await prisma.deviceAllocation.create({
+      const allocation = await prisma.teamDevice.create({
         data: {
-          deviceUdid,
+          deviceId: deviceUdid,
           teamId,
         },
         include: {
@@ -64,9 +69,9 @@ export class DeviceAllocationService {
   async deallocateDeviceFromTeam(deviceUdid: string, teamId: string) {
     try {
       // Check if device is allocated to team
-      const allocation = await prisma.deviceAllocation.findFirst({
+      const allocation = await prisma.teamDevice.findFirst({
         where: {
-          deviceUdid,
+          deviceId: deviceUdid,
           teamId,
         },
       });
@@ -76,7 +81,7 @@ export class DeviceAllocationService {
       }
 
       // Deallocate device from team
-      await prisma.deviceAllocation.delete({
+      await prisma.teamDevice.delete({
         where: {
           id: allocation.id,
         },
@@ -92,9 +97,9 @@ export class DeviceAllocationService {
   /**
    * Get all device allocations
    */
-  async getAllDeviceAllocations() {
+  async getAllteamDevices() {
     try {
-      const allocations = await prisma.deviceAllocation.findMany({
+      const allocations = await prisma.teamDevice.findMany({
         include: {
           team: true,
         },
@@ -110,9 +115,9 @@ export class DeviceAllocationService {
   /**
    * Get device allocations for team
    */
-  async getDeviceAllocationsForTeam(teamId: string) {
+  async getteamDevicesForTeam(teamId: string) {
     try {
-      const allocations = await prisma.deviceAllocation.findMany({
+      const allocations = await prisma.teamDevice.findMany({
         where: {
           teamId,
         },
@@ -130,9 +135,9 @@ export class DeviceAllocationService {
    */
   async getTeamsForDevice(deviceUdid: string) {
     try {
-      const allocations = await prisma.deviceAllocation.findMany({
+      const allocations = await prisma.teamDevice.findMany({
         where: {
-          deviceUdid,
+          deviceId: deviceUdid,
         },
         include: {
           team: true,
@@ -178,9 +183,9 @@ export class DeviceAllocationService {
       const teamIds = teamMembers.map((member) => member.teamId);
 
       // Check if any of the user's teams have access to the device
-      const allocations = await prisma.deviceAllocation.findMany({
+      const allocations = await prisma.teamDevice.findMany({
         where: {
-          deviceUdid,
+          deviceId: deviceUdid,
           teamId: {
             in: teamIds,
           },
@@ -227,22 +232,22 @@ export class DeviceAllocationService {
       const teamIds = teamMembers.map((member) => member.teamId);
 
       // Get device allocations for user's teams
-      const allocations = await prisma.deviceAllocation.findMany({
+      const allocations = await prisma.teamDevice.findMany({
         where: {
           teamId: {
             in: teamIds,
           },
         },
         select: {
-          deviceUdid: true,
+          deviceId: true,
         },
       });
 
-      const deviceUdids = allocations.map((allocation) => allocation.deviceUdid);
+      const deviceIds = allocations.map((allocation) => allocation.deviceId);
 
       // Get devices
       const deviceModel = await ATDRepository.DeviceModel;
-      return deviceModel.find({ udid: { $in: deviceUdids } });
+      return deviceModel.find({ id: { $in: deviceIds } });
     } catch (error) {
       log.error(`Error getting accessible devices for user: ${error}`);
       throw error;
