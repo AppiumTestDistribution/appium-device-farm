@@ -52,7 +52,7 @@ export class TeamService {
               },
             },
           },
-          deviceAllocations: true,
+          teamDevices: true,
         },
       });
 
@@ -82,7 +82,7 @@ export class TeamService {
               },
             },
           },
-          deviceAllocations: true,
+          teamDevices: true,
         },
       });
 
@@ -237,6 +237,93 @@ export class TeamService {
   }
 
   /**
+   * Add devices to team
+   */
+  async addDeviceToTeam(deviceIds: string[], teamId: string) {
+    try {
+      // Check if users exist
+      const devices = await prisma.device.findMany({
+        where: { id: { in: deviceIds } },
+      });
+
+      if (devices.length !== deviceIds.length) {
+        throw new Error('One or more devices not found');
+      }
+
+      // Check if team exists
+      const team = await prisma.team.findUnique({
+        where: { id: teamId },
+      });
+
+      if (!team) {
+        throw new Error('Team not found');
+      }
+
+      // Check for existing devices
+      const existingDevices = await prisma.teamDevice.findMany({
+        where: {
+          deviceId: { in: deviceIds },
+          teamId,
+        },
+      });
+
+      if (existingDevices.length > 0) {
+        const existingDeviceIds = existingDevices.map((m) => m.deviceId);
+        throw new Error(
+          `Devices with IDs ${existingDeviceIds.join(', ')} are already members of this team`,
+        );
+      }
+
+      // Add users to team
+      const teamDevices = await prisma.teamDevice.createMany({
+        data: deviceIds.map((deviceId) => ({
+          deviceId,
+          teamId,
+        })),
+      });
+
+      // Fetch the created team members with their user details
+      const createdTeamDevices = await prisma.teamDevice.findMany({
+        where: {
+          deviceId: { in: deviceIds },
+          teamId,
+        },
+        include: {
+          device: true,
+          team: true,
+        },
+      });
+
+      return createdTeamDevices;
+    } catch (error) {
+      log.error(`Error adding devices to team: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove Device from team
+   */
+  async removeDeviceFromTeam(deviceIds: string[], teamId: string) {
+    try {
+      // Remove users from team
+      await prisma.teamDevice.deleteMany({
+        where: {
+          teamId: teamId,
+          deviceId: {
+            in: deviceIds,
+          },
+        },
+      });
+
+      return { success: true };
+    } catch (error) {
+      log.error(`Error removing devices from team: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Get teams for user
    */
   async getTeamsForUser(userId: string) {
@@ -248,7 +335,7 @@ export class TeamService {
         include: {
           team: {
             include: {
-              deviceAllocations: true,
+              teamDevices: true,
             },
           },
         },
