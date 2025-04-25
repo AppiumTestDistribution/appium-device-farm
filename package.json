@@ -42,7 +42,8 @@
     "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android --plugin-device-farm-max-sessions=8",
     "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
-    "postinstall": "npm run run-db-migration"
+    "postinstall": "npm run run-db-migration",
+    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444"
   },
   "repository": {
     "type": "git",
@@ -201,7 +202,7 @@
     "sinon": "17.0.1",
     "sinon-chai": "^3.7.0",
     "ts-node": "10.9.2",
-    "typescript": "5.5.4",
+    "typescript": "^5.5.4",
     "wait-on": "^7.2.0",
     "webdriverio": "^8.20.4",
     "webpack-cli": "^5.1.4",

@@ -13,13 +13,13 @@ router.delete('/:id', authMiddleware, adminOnly, teamController.deleteTeam.bind(
 
 // Team membership routes
 router.post(
-  '/members',
+  '/:id/members',
   authMiddleware,
   adminOnly,
   teamController.addUserToTeam.bind(teamController),
 );
 router.delete(
-  '/members',
+  '/:id/members',
   authMiddleware,
   adminOnly,
   teamController.removeUserFromTeam.bind(teamController),
