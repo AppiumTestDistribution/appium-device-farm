@@ -95,6 +95,8 @@ model DeviceTags {
 
 model User {
   id           String       @id @default(uuid())
+  firstname    String
+  lastname     String
   username     String       @unique @map("username")
   password     String       @map("password")
   role         String       @default("user") @map("role") // "admin" or "user"

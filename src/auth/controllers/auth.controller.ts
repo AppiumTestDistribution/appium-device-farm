@@ -12,13 +12,19 @@ export class AuthController {
    */
   async register(req: Request, res: Response) {
     try {
-      const { username, password, role } = req.body;
+      const { username, password, role, firstname, lastname } = req.body;
 
       if (!username || !password) {
         return res.status(400).json({ message: 'Username and password are required' });
       }
 
-      const user = await userService.createUser(username, password, role);
+      const user = await userService.createUser({
+        username,
+        password,
+        role,
+        firstname,
+        lastname,
+      });
 
       return res.status(201).json(user);
     } catch (error: any) {

@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { JwtPayload } from '../middleware/auth.middleware';
 import log from '../../logger';
+import { User } from '@prisma/client';
 
 // JWT secret key - should be in environment variables in production
 const JWT_SECRET = process.env.JWT_SECRET || 'device-farm-secret-key';
@@ -18,7 +19,13 @@ export class UserService {
   /**
    * Create a new user
    */
-  async createUser(username: string, password: string, role: 'admin' | 'user' = 'user') {
+  async createUser({
+    username,
+    password,
+    firstname,
+    lastname,
+    role,
+  }: Pick<User, 'username' | 'password' | 'firstname' | 'lastname' | 'role'>) {
     try {
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -38,6 +45,8 @@ export class UserService {
           username,
           password: hashedPassword,
           role,
+          firstname,
+          lastname,
         },
       });
 
@@ -145,6 +154,8 @@ export class UserService {
         select: {
           id: true,
           username: true,
+          firstname: true,
+          lastname: true,
           role: true,
           createdAt: true,
           updatedAt: true,
@@ -168,6 +179,8 @@ export class UserService {
         select: {
           id: true,
           username: true,
+          firstname: true,
+          lastname: true,
           role: true,
           createdAt: true,
           updatedAt: true,
@@ -202,18 +215,58 @@ export class UserService {
   }
 
   /**
+   * Delete user
+   */
+  async updateUser(
+    userId: string,
+    data: Pick<User, 'firstname' | 'lastname' | 'role' | 'password'>,
+  ) {
+    try {
+      if (data.password) {
+        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+        data.password = hashedPassword;
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          firstname: data.firstname,
+          lastname: data.lastname,
+          role: data.role,
+          ...(data.password && { password: data.password }),
+        },
+      });
+
+      return { success: true };
+    } catch (error) {
+      log.error(`Error deleting user: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Create initial admin user if no users exist
    */
   async createInitialAdminIfNeeded() {
     try {
-      const userCount = await prisma.user.count();
+      const userCount = await prisma.user.count({
+        where: {
+          role: 'admin',
+        },
+      });
 
       if (userCount === 0) {
         // Create default admin user
         const defaultAdminUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
         const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin';
 
-        await this.createUser(defaultAdminUsername, defaultAdminPassword, 'admin');
+        await this.createUser({
+          username: defaultAdminUsername,
+          password: defaultAdminPassword,
+          role: 'admin',
+          firstname: 'Admin',
+          lastname: 'User',
+        });
         log.info(`Created initial admin user: ${defaultAdminUsername}`);
       }
     } catch (error) {

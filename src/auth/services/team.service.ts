@@ -144,17 +144,17 @@ export class TeamService {
   }
 
   /**
-   * Add user to team
+   * Add users to team
    */
-  async addUserToTeam(userId: string, teamId: string) {
+  async addUserToTeam(userIds: string[], teamId: string) {
     try {
-      // Check if user exists
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
+      // Check if users exist
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
       });
 
-      if (!user) {
-        throw new Error('User not found');
+      if (users.length !== userIds.length) {
+        throw new Error('One or more users not found');
       }
 
       // Check if team exists
@@ -166,22 +166,33 @@ export class TeamService {
         throw new Error('Team not found');
       }
 
-      // Check if user is already in team
-      const existingMembership = await prisma.teamMember.findFirst({
+      // Check for existing memberships
+      const existingMemberships = await prisma.teamMember.findMany({
         where: {
-          userId,
+          userId: { in: userIds },
           teamId,
         },
       });
 
-      if (existingMembership) {
-        throw new Error('User is already a member of this team');
+      if (existingMemberships.length > 0) {
+        const existingUserIds = existingMemberships.map((m) => m.userId);
+        throw new Error(
+          `Users with IDs ${existingUserIds.join(', ')} are already members of this team`,
+        );
       }
 
-      // Add user to team
-      const teamMember = await prisma.teamMember.create({
-        data: {
+      // Add users to team
+      const teamMembers = await prisma.teamMember.createMany({
+        data: userIds.map((userId) => ({
           userId,
+          teamId,
+        })),
+      });
+
+      // Fetch the created team members with their user details
+      const createdTeamMembers = await prisma.teamMember.findMany({
+        where: {
+          userId: { in: userIds },
           teamId,
         },
         include: {
@@ -196,9 +207,9 @@ export class TeamService {
         },
       });
 
-      return teamMember;
+      return createdTeamMembers;
     } catch (error) {
-      log.error(`Error adding user to team: ${error}`);
+      log.error(`Error adding users to team: ${error}`);
       throw error;
     }
   }
@@ -206,30 +217,21 @@ export class TeamService {
   /**
    * Remove user from team
    */
-  async removeUserFromTeam(userId: string, teamId: string) {
+  async removeUserFromTeam(userIds: string[], teamId: string) {
     try {
-      // Check if user is in team
-      const teamMember = await prisma.teamMember.findFirst({
+      // Remove users from team
+      await prisma.teamMember.deleteMany({
         where: {
-          userId,
-          teamId,
-        },
-      });
-
-      if (!teamMember) {
-        throw new Error('User is not a member of this team');
-      }
-
-      // Remove user from team
-      await prisma.teamMember.delete({
-        where: {
-          id: teamMember.id,
+          teamId: teamId,
+          userId: {
+            in: userIds,
+          },
         },
       });
 
       return { success: true };
     } catch (error) {
-      log.error(`Error removing user from team: ${error}`);
+      log.error(`Error removing users from team: ${error}`);
       throw error;
     }
   }

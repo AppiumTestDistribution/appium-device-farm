@@ -101,13 +101,15 @@ export class TeamController {
    */
   async addUserToTeam(req: Request, res: Response) {
     try {
-      const { teamId, userId } = req.body;
+      const { id: teamId } = req.params;
+      const { add, remove } = req.body;
 
-      if (!teamId || !userId) {
+      if (!teamId || !add || !remove) {
         return res.status(400).json({ message: 'Team ID and User ID are required' });
       }
 
-      const teamMember = await teamService.addUserToTeam(userId, teamId);
+      await teamService.removeUserFromTeam(remove, teamId);
+      const teamMember = await teamService.addUserToTeam(add, teamId);
       return res.status(201).json(teamMember);
     } catch (error: any) {
       log.error(`Error adding user to team: ${error}`);

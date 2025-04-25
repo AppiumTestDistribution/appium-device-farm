@@ -3,7 +3,6 @@ import { deviceAllocationController } from '../controllers/device-allocation.con
 import { authMiddleware, adminOnly } from '../middleware/auth.middleware';
 
 const router = Router();
-
 // Device allocation routes (admin only)
 router.post(
   '/',
