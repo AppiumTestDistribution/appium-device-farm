@@ -16,4 +16,5 @@ export interface IDeviceFilterOptions {
   filterByHost?: string;
   tags?: string[];
   host?: string;
+  userId?: string;
 }

@@ -11,7 +11,7 @@ import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
 import NodeDevices from './NodeDevices';
-import { addNewDevice, removeDevice } from '../data-service/device-service';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
@@ -197,6 +197,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
       host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
     return {
+      id: generateDeviceId({
+        udid: device.udid,
+        realDevice: realDevice,
+        nodeId: this.nodeId,
+        platform: 'android',
+      } as any),
       adbRemoteHost: adbInstance.adbHost,
       adbPort: adbInstance.adbPort,
       systemPort,
