@@ -8,6 +8,7 @@ import {
   getDevice,
   removeDevice,
   userUnblockDevice,
+  getAllDevices,
 } from '../../data-service/device-service';
 import log from '../../logger';
 import { DeviceFarmManager } from '../../device-managers';
@@ -17,6 +18,11 @@ import { IDevice } from '../../interfaces/IDevice';
 import { saveTestExecutionMetaData } from '../../wdio-service/wdio-service';
 import { DevicePlugin } from '../../plugin';
 import { prisma } from '../../prisma';
+import {
+  adminOnly,
+  AuthenticatedRequest,
+  authMiddleware,
+} from '../../auth/middleware/auth.middleware';
 
 const SERVER_UP_TIME = new Date().toISOString();
 
@@ -26,31 +32,12 @@ async function getSavedDevices(request: Request, response: Response) {
 }
 
 async function getDevices(request: Request, response: Response) {
-  let devices = (await ATDRepository.DeviceModel).find();
+  const { user } = request as AuthenticatedRequest;
+  const filterOptions = user?.role === 'admin' ? {} : { userId: user?.userId };
+  let devices = await getAllDevices(filterOptions as any);
   const { sessionId } = request.query;
   if (sessionId) {
     return response.json(devices.find((value) => value.session_id === sessionId));
-  }
-  /* dashboard-plugin-url is the base url for opening the appium-dashboard-plugin
-   * This value will be attached to all express request via middleware
-   */
-  const dashboardPluginUrl = (request as any)['dashboard-plugin-url'];
-  if (dashboardPluginUrl) {
-    const sessions =
-      (await axios.get(`${dashboardPluginUrl}/api/sessions?start_time=${SERVER_UP_TIME}`)).data
-        ?.result?.rows || [];
-    const deviceSessionMap: any = {};
-    sessions.forEach((session: any) => {
-      if (!deviceSessionMap[session.udid]) {
-        deviceSessionMap[session.udid] = [];
-      }
-      deviceSessionMap[session.udid].push(session);
-    });
-    devices = devices.map((d) => {
-      d.dashboard_link = `${dashboardPluginUrl}?deviceUDID=${d.udid}&start_time=${SERVER_UP_TIME}`;
-      d.total_session_count = deviceSessionMap[d.udid]?.length || 0;
-      return d;
-    });
   }
   return response.json(devices);
 }
@@ -267,9 +254,9 @@ async function handleTestExecutionMetaData(req: Request, res: Response) {
 }
 
 function register(router: Router, pluginArgs: IPluginArgs) {
-  router.get('/device', getDevices);
-  router.get('/saved_devices', getSavedDevices);
-  router.get('/device/:platform', getDeviceByPlatform);
+  router.get('/device', authMiddleware, getDevices);
+  router.get('/saved_devices', authMiddleware, adminOnly, getSavedDevices);
+  router.get('/device/:platform', authMiddleware, getDeviceByPlatform);
   router.post('/register', registerNode);
   router.post('/updateDeviceInfo', updateDeviceInfo);
   router.post('/block', blockDevice);

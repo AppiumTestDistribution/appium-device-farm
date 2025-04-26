@@ -12,7 +12,7 @@ import fs from 'fs-extra';
 import Devices from './cloud/Devices';
 import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';
-import { addNewDevice, removeDevice } from '../data-service/device-service';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
@@ -232,6 +232,12 @@ export default class IOSDeviceManager implements IDeviceManager {
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     return Object.assign({
+      id: generateDeviceId({
+        udid: udid,
+        realDevice: true,
+        nodeId: this.nodeId,
+        platform: 'ios',
+      } as any),
       wdaLocalPort,
       mjpegServerPort,
       udid,
@@ -306,6 +312,12 @@ export default class IOSDeviceManager implements IDeviceManager {
       returnedSimulators.push(
         Object.assign({
           ...device,
+          id: generateDeviceId({
+            udid: device.udid,
+            realDevice: false,
+            nodeId: this.nodeId,
+            platform: 'ios',
+          } as any),
           wdaLocalPort,
           mjpegServerPort,
           busy: false,
