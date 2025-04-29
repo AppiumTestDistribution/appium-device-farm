@@ -4,6 +4,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { JwtPayload } from '../middleware/auth.middleware';
 import log from '../../logger';
 import { User } from '@prisma/client';
+import { generateAccessKey } from '../../utils/auth';
 
 // JWT secret key - should be in environment variables in production
 const JWT_SECRET = process.env.JWT_SECRET || 'device-farm-secret-key';
@@ -38,6 +39,7 @@ export class UserService {
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      const accessKey = generateAccessKey(username);
 
       // Create user
       const user = await prisma.user.create({
@@ -47,6 +49,8 @@ export class UserService {
           role,
           firstname,
           lastname,
+          accessKey,
+          isActive: true,
         },
       });
 
@@ -57,6 +61,8 @@ export class UserService {
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        isActive: user.isActive,
+        accessKey: user.accessKey,
       };
     } catch (error) {
       log.error(`Error creating user: ${error}`);
@@ -85,6 +91,10 @@ export class UserService {
         throw new Error('Invalid credentials');
       }
 
+      if (!user.isActive) {
+        throw new Error('User is not active');
+      }
+
       // Generate JWT token
       const payload: JwtPayload = {
         userId: user.id,
@@ -100,6 +110,12 @@ export class UserService {
           id: user.id,
           username: user.username,
           role: user.role,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          accessKey: user.accessKey,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          isActive: user.isActive,
         },
       };
     } catch (error) {
@@ -157,6 +173,7 @@ export class UserService {
           firstname: true,
           lastname: true,
           role: true,
+          isActive: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -182,6 +199,39 @@ export class UserService {
           firstname: true,
           lastname: true,
           role: true,
+          accessKey: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      log.error(`Error getting user: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user by accessKey
+   */
+  async getUserByAccessKey(accessKey: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { accessKey },
+        select: {
+          id: true,
+          username: true,
+          firstname: true,
+          lastname: true,
+          role: true,
+          accessKey: true,
+          isActive: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -272,6 +322,28 @@ export class UserService {
     } catch (error) {
       log.error(`Error creating initial admin: ${error}`);
     }
+  }
+
+  async activateUser(userId: string) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: true },
+    });
+  }
+
+  async deactivateUser(userId: string) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
+  }
+
+  async getDefaultUser() {
+    return await prisma.user.findFirst({
+      where: {
+        role: 'admin',
+      },
+    });
   }
 }
 

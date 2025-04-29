@@ -100,6 +100,7 @@
     "express": "^4.17.3",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
+    "generate-api-key": "^1.0.2",
     "get-port": "^5.1.1",
     "http-proxy-agent": "7.0.2",
     "http-proxy-middleware": "^3.0.0-beta.1",
@@ -181,8 +182,8 @@
     "@wdio/types": "^8.24.2",
     "appium": "^2.17.1",
     "appium-flutter-integration-driver": "^1.1.3",
-    "appium-uiautomator2-driver": "^4.1.5",
-    "appium-xcuitest-driver": "9.2.1",
+    "appium-uiautomator2-driver": "^4.2.3",
+    "appium-xcuitest-driver": "^9.2.1",
     "babel-eslint": "10.1.0",
     "chai": "4.5.0",
     "chai-as-promised": "^7.1.1",
@@ -301,6 +302,9 @@
         },
         "preBuildWDAPath": {
           "type": "string"
+        },
+        "enableAuthentication": {
+          "type": "boolean"
         }
       },
       "title": "Appium device farm plugin",

@@ -53,8 +53,7 @@ function createRouter(pluginArgs: IPluginArgs) {
     console.error('Error creating initial admin user:', err);
   });
 
-  // Mount the auth router
-  resigsterAuthenticationRoutes(apiRouter);
+  resigsterAuthenticationRoutes(apiRouter, pluginArgs);
 
   return router;
 }

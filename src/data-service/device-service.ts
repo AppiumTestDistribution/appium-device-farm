@@ -5,7 +5,7 @@ import log from '../logger';
 import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
-import { Device, DeviceTags } from '@prisma/client';
+import { Device, DeviceTags, TeamDevice } from '@prisma/client';
 import { prisma } from '../prisma';
 import getUuid from 'uuid-by-string';
 
@@ -160,10 +160,7 @@ export async function getAllDevices(filterOptions?: { userId?: string }): Promis
   return devices;
 }
 
-export async function filterDeviceForUser(
-  userId: string,
-  filteredDevices: IDevice[],
-): Promise<IDevice[]> {
+export async function getTeamDevicesForUser(userId: string): Promise<TeamDevice[]> {
   const userTeams = await prisma.teamMember.findMany({
     where: {
       userId: userId,
@@ -179,12 +176,17 @@ export async function filterDeviceForUser(
         in: userTeams.map((ut) => ut.team.id),
       },
     },
-    include: {
-      device: true,
-    },
   });
 
-  const devicesWithAccess = teamDevices.map((td) => td.device.id);
+  return teamDevices;
+}
+
+export async function filterDeviceForUser(
+  userId: string,
+  filteredDevices: IDevice[],
+): Promise<IDevice[]> {
+  const teamDevices = await getTeamDevicesForUser(userId);
+  const devicesWithAccess = teamDevices.map((td) => td.deviceId);
   return filteredDevices.filter((d) => devicesWithAccess.includes(d.id || generateDeviceId(d)));
 }
 

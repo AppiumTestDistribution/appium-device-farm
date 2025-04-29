@@ -254,9 +254,8 @@ async function handleTestExecutionMetaData(req: Request, res: Response) {
 }
 
 function register(router: Router, pluginArgs: IPluginArgs) {
-  router.get('/device', authMiddleware, getDevices);
-  router.get('/saved_devices', authMiddleware, adminOnly, getSavedDevices);
-  router.get('/device/:platform', authMiddleware, getDeviceByPlatform);
+  router.get('/device', authMiddleware(pluginArgs), getDevices);
+  router.get('/device/:platform', authMiddleware(pluginArgs), getDeviceByPlatform);
   router.post('/register', registerNode);
   router.post('/updateDeviceInfo', updateDeviceInfo);
   router.post('/block', blockDevice);

@@ -1,22 +1,25 @@
 import { Router } from 'express';
 import { deviceAllocationController } from '../controllers/device-allocation.controller';
 import { authMiddleware, adminOnly } from '../middleware/auth.middleware';
+import { IPluginArgs } from '../../interfaces/IPluginArgs';
 
-const router = Router();
-// Device allocation routes (admin only)
+export function getDeviceAllocationsRoutes(pluginArgs: IPluginArgs) {
+  const router = Router();
+  // Device allocation routes (admin only)
 
-router.get(
-  '/all',
-  authMiddleware,
-  adminOnly,
-  deviceAllocationController.getAllDevices.bind(deviceAllocationController),
-);
+  router.get(
+    '/all',
+    authMiddleware(pluginArgs),
+    adminOnly,
+    deviceAllocationController.getAllDevices.bind(deviceAllocationController),
+  );
 
-// Get device allocations for team
-router.get(
-  '/team/:teamId',
-  authMiddleware,
-  deviceAllocationController.getDeviceAllocationsForTeam.bind(deviceAllocationController),
-);
+  // Get device allocations for team
+  router.get(
+    '/team/:teamId',
+    authMiddleware(pluginArgs),
+    deviceAllocationController.getDeviceAllocationsForTeam.bind(deviceAllocationController),
+  );
 
-export default router;
+  return router;
+}
