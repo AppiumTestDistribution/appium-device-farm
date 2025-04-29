@@ -49,3 +49,13 @@ export async function getUserFromCapabilities(capabilities: Record<string, any>)
     throw new Error('Credentials not found. Please provide username and password');
   }
 }
+
+export async function sanitizeSessionCapabilities(sessionResponse: Record<string, any>) {
+  ['df:jwt', 'df:username', 'df:password'].forEach((key) => {
+    delete sessionResponse[key];
+    if (sessionResponse['desired']) {
+      delete sessionResponse['desired'][key];
+    }
+  });
+  return sessionResponse;
+}
