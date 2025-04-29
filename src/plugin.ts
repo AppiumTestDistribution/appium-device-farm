@@ -69,6 +69,7 @@ import { BeforeSessionCreatedEvent } from './events/before-session-create-event'
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
+import { sanitizeSessionCapabilities } from './utils/auth';
 
 const commandsQueueGuard = new AsyncLock();
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
@@ -389,6 +390,7 @@ class DevicePlugin extends BasePlugin {
     if (this.isCreateSessionResponseInternal(session)) {
       log.debug(`${pendingSessionId} 📱 Session response is CreateSessionResponseInternal`);
 
+      sanitizeSessionCapabilities(session.value[1]);
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
