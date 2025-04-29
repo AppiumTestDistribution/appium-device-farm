@@ -1,3 +1,9 @@
+## [9.8.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.7...v9.8.8) (2025-04-29)
+
+### Bug Fixes
+
+* android streaming and double click issue ([#1663](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1663)) ([a3c88a0](https://github.com/AppiumTestDistribution/appium-device-farm/commit/a3c88a0e55ffe588257f2ecccd2e391726870c39))
+
 ## [9.8.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.6...v9.8.7) (2025-04-22)
 
 ### Bug Fixes
