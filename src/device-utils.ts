@@ -24,6 +24,7 @@ import {
   blockDevice,
   getAllDevices,
   getDevice,
+  getTeamDevicesForUser,
   removeDevice,
   setSimulatorState,
   unblockDevice,
@@ -43,6 +44,7 @@ import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
 import getPort from 'get-port';
 import { sessionRequestMap } from './proxy/wd-command-proxy';
+import { getUserFromCapabilities } from './utils/auth';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -99,6 +101,21 @@ export async function allocateDeviceForSession(
   debugLog(`firstMatch: ${JSON.stringify(firstMatch)}`);
   const deviceFarmCapabilities = getDeviceFarmCapabilities(capability);
   const filters = getDeviceFiltersFromCapability(firstMatch, deviceFarmCapabilities, pluginArgs);
+
+  if (pluginArgs.enableAuthentication) {
+    try {
+      const user = await getUserFromCapabilities(firstMatch);
+      if (user.role !== 'admin') {
+        const devices = await getTeamDevicesForUser(user.id);
+        if (!devices.length) {
+          throw new Error(`User ${user.username} does not have aceess to any devices`);
+        }
+        filters['userId'] = user.id;
+      }
+    } catch (error: any) {
+      throw new Error('User Authentication Failed. Reason: ' + error.message);
+    }
+  }
 
   debugLog(`Device allocation request for filter: ${JSON.stringify(filters)}`);
   const timeout =

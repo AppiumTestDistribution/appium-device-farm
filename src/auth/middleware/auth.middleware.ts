@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import log from '../../logger';
+import { userService } from '../services/user.service';
+import { IPluginArgs } from '../../interfaces/IPluginArgs';
 
 // JWT secret key - should be in environment variables in production
 const JWT_SECRET = process.env.JWT_SECRET || 'device-farm-secret-key';
@@ -17,36 +19,63 @@ export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 
+export const getUserFromToken = async (token: string) => {
+  const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+  const user = await userService.getUserById(decoded.userId);
+  return user;
+};
+
 /**
  * Authentication middleware to verify JWT tokens
  */
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // Get token from Authorization header
-  const authHeader = req.headers.authorization;
+export const authMiddleware = (pluginArgs: IPluginArgs) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (!pluginArgs.enableAuthentication) {
+      const user = await userService.getDefaultUser();
+      if (!user) {
+        return res.status(401).json({ message: 'No default user found' });
+      }
+      (req as AuthenticatedRequest).user = {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+      };
+      return next();
+    }
+    const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ message: 'No authorization token provided' });
-  }
+    if (!authHeader) {
+      return res.status(401).json({ message: 'No authorization token provided' });
+    }
 
-  // Extract token (remove "Bearer " prefix)
-  const token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ message: 'Invalid authorization format' });
-  }
+    if (!token) {
+      return res.status(401).json({ message: 'Invalid authorization format' });
+    }
 
-  try {
-    // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    try {
+      const user = await getUserFromToken(token);
 
-    // Add user info to request object
-    (req as AuthenticatedRequest).user = decoded;
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
 
-    next();
-  } catch (error) {
-    log.error(`Authentication error: ${error}`);
-    return res.status(401).json({ message: 'Invalid or expired token' });
-  }
+      if (!user.isActive) {
+        return res.status(401).json({ message: 'User is not active' });
+      }
+      (req as AuthenticatedRequest).user = {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+      };
+
+      next();
+    } catch (error) {
+      log.error(`Authentication error: ${error}`);
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+  };
 };
 
 /**
@@ -83,3 +112,5 @@ export const adminOnly = (req: Request, res: Response, next: NextFunction) => {
 
   next();
 };
+
+export { JWT_SECRET };

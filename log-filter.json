@@ -1,6 +1,22 @@
 [
   {
-    "pattern": "password",
+    "pattern": "\"df:jwt\":\\s*\"([^\"\n]+)\"",
+    "flags": "i"
+  },
+  {
+    "pattern": "\"df:username\":\\s*\"([^\"\n]+)\"",
+    "flags": "i"
+  },
+  {
+    "pattern": "\"df:password\":\\s*\"([^\"\n]+)\"",
+    "flags": "i"
+  },
+  {
+    "pattern": "\"username\":\\s*\"([^\"\n]+)\"",
+    "flags": "i"
+  },
+  {
+    "pattern": "\"password\":\\s*\"([^\"\n]+)\"",
     "flags": "i"
   }
 ]

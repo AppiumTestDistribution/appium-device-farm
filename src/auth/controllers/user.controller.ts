@@ -83,16 +83,16 @@ export class UserController {
        */
       if (
         (currentUser?.role !== 'admin' && id !== currentUser?.userId) ||
-        (id == currentUser?.userId && !role)
+        (id == currentUser?.userId && !!role)
       ) {
         return res.status(401).json({ message: 'You do not have permission to update the role' });
       }
 
       await userService.updateUser(id, { firstname, lastname, role, password });
-      return res.status(200).json({ message: 'User deleted successfully' });
+      return res.status(200).json({ message: 'User details updated successfully' });
     } catch (error: any) {
-      log.error(`Error deleting user: ${error}`);
-      return res.status(400).json({ message: error.message || 'Error deleting user' });
+      log.error(`Error updating user: ${error}`);
+      return res.status(400).json({ message: error.message || 'Error updating user' });
     }
   }
 }

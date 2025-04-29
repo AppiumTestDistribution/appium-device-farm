@@ -94,6 +94,39 @@ export class AuthController {
       return res.status(400).json({ message: error.message || 'Error changing password' });
     }
   }
-}
 
+  async activateUser(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      if (userId === req.user?.userId) {
+        return res.status(400).json({ message: 'Cannot activate yourself' });
+      }
+
+      await userService.activateUser(userId);
+
+      return res.status(200).json({ message: 'User activated successfully' });
+    } catch (error: any) {
+      log.error(`Error activating user: ${error}`);
+      return res.status(400).json({ message: error.message || 'Error activating user' });
+    }
+  }
+
+  async deactivateUser(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      if (userId === req.user?.userId) {
+        return res.status(400).json({ message: 'Cannot deactivate yourself' });
+      }
+
+      await userService.deactivateUser(userId);
+
+      return res.status(200).json({ message: 'User deactivated successfully' });
+    } catch (error: any) {
+      log.error(`Error activating user: ${error}`);
+      return res.status(400).json({ message: error.message || 'Error activating user' });
+    }
+  }
+}
 export const authController = new AuthController();
