@@ -86,7 +86,6 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(Promise.resolve(false));
     realDevice.onSecondCall().returns(Promise.resolve(true));
     sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(Promise.resolve(0));
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
@@ -175,7 +174,6 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, <any>'getFreePort').returns(54321);
-    sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'simulated' }, []);
     expect(devices).to.deep.equal([
       {
@@ -232,7 +230,6 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, <any>'getFreePort').returns(54322);
-    sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
     expect(devices).to.deep.equal([
       {
@@ -291,7 +288,6 @@ describe('Android Device Manager', function () {
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, <any>'getFreePort').returns(54322);
-    sandbox.stub(DeviceUtils, <any>'getUtilizationTime').returns(0);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
     expect(devices).to.deep.equal([
       {

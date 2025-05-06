@@ -2,19 +2,52 @@ import { ATDRepository } from './db';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import log from '../logger';
-import { setUtilizationTime } from '../device-utils';
 import semver from 'semver';
 import debugLog from '../debugLog';
 import { Device, DeviceTags, TeamDevice } from '@prisma/client';
 import { prisma } from '../prisma';
 import getUuid from 'uuid-by-string';
+import { DevicePlugin } from '../plugin';
 
-export function generateDeviceId(device: IDevice) {
-  if (device.realDevice || device.platform === 'ios') {
+export function generateDeviceId(device: {
+  platform: string;
+  realDevice?: boolean;
+  real?: boolean;
+  nodeId?: string;
+  udid: string;
+}) {
+  if (device.realDevice || device.real || device.platform === 'ios') {
     return getUuid(device.udid);
   } else {
     return getUuid(`${device.nodeId}-${device.udid}`);
   }
+}
+
+export async function setUtilizationTime(id: string, utilizationTime: number) {
+  await prisma.device.update({
+    where: { id },
+    data: {
+      usage: utilizationTime,
+    },
+  });
+}
+
+export async function removeDevicesForNodes(nodeIds: string[]) {
+  (await ATDRepository.DeviceModel)
+    .chain()
+    .find({ nodeId: { $in: nodeIds } })
+    .remove();
+
+  await prisma.device.updateMany({
+    where: {
+      nodeId: {
+        in: nodeIds,
+      },
+    },
+    data: {
+      isActive: false,
+    },
+  });
 }
 
 export async function removeDevice(devices: { udid: string; host: string }[]) {
@@ -48,6 +81,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
           host: device.host,
           platform: device.platform,
           version: device.sdk,
+          nodeId: device.nodeId,
           real: device.realDevice,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -55,9 +89,11 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
         }) as Device,
     );
 
-  await prisma.device.createMany({
-    data: devicesToAdd,
-  });
+  if (DevicePlugin.IS_HUB) {
+    await prisma.device.createMany({
+      data: devicesToAdd,
+    });
+  }
 
   const addedDevices = devices.map(async function (
     device: IDevice & { $loki?: number; meta?: object },
@@ -110,7 +146,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
     `All devices: ${JSON.stringify((await ATDRepository.DeviceModel).chain().find().data())}`,
   );
 
-  await updateDeviceTags();
+  await updateDeviceDetails();
   return result;
 }
 
@@ -137,17 +173,18 @@ export async function setSimulatorState(devices: Array<IDevice>) {
   }
 }
 
-export async function updateDeviceTags() {
+export async function updateDeviceDetails() {
   /**
    * Update the Latest Simulator state in DB
    */
-  const deviceTagList: Array<DeviceTags> = await prisma.deviceTags.findMany();
-  for await (const tagData of deviceTagList) {
+  const deviceTagList: Array<Device> = await prisma.device.findMany();
+  for await (const device of deviceTagList) {
     (await ATDRepository.DeviceModel)
       .chain()
-      .find({ udid: tagData.udid, host: tagData.host })
+      .find({ id: generateDeviceId(device) })
       .update(function (d: IDevice) {
-        d.tags = tagData.tags?.split(',').filter(Boolean) || [];
+        d.tags = device.tags?.split(',').filter(Boolean) || [];
+        d.totalUtilizationTimeMilliSec = device.usage;
       });
   }
 }
@@ -429,6 +466,8 @@ export async function unblockDeviceMatchingFilter(filter: object) {
     devices = deviceModel.chain().find(filter).data();
   }
 
+  log.info(devices);
+
   if (devices !== undefined) {
     debugLog(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
@@ -442,7 +481,9 @@ export async function unblockDeviceMatchingFilter(filter: object) {
           utilization = 0;
         }
         const totalUtilization = device.totalUtilizationTimeMilliSec + utilization;
-        await setUtilizationTime(device.udid, totalUtilization);
+        if (DevicePlugin.IS_HUB) {
+          await setUtilizationTime(generateDeviceId(device), totalUtilization);
+        }
         deviceModel.findAndUpdate(
           (data: IDevice) => {
             return data.udid === device.udid && data.host === device.host;

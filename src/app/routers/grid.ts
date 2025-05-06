@@ -63,7 +63,7 @@ async function getDeviceByPlatform(request: Request, response: Response) {
   return response.status(200).send(devices);
 }
 
-async function registerNode(request: Request, response: Response) {
+async function registerDevice(request: Request, response: Response) {
   const requestBody = request.body;
   const { type } = request.query;
   if (type === 'add') {
@@ -256,7 +256,7 @@ async function handleTestExecutionMetaData(req: Request, res: Response) {
 function register(router: Router, pluginArgs: IPluginArgs) {
   router.get('/device', authMiddleware(pluginArgs), getDevices);
   router.get('/device/:platform', authMiddleware(pluginArgs), getDeviceByPlatform);
-  router.post('/register', registerNode);
+  router.post('/register', registerDevice);
   router.post('/updateDeviceInfo', updateDeviceInfo);
   router.post('/block', blockDevice);
   router.post('/unblock', unBlockDevice);

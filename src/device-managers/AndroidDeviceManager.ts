@@ -6,7 +6,6 @@ import _ from 'lodash';
 import { fs } from '@appium/support';
 import ChromeDriverManager from './ChromeDriverManager';
 import { Container } from 'typedi';
-import { getUtilizationTime } from '../device-utils';
 import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
@@ -157,7 +156,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
     hostPort: number,
   ): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
-    const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
     let deviceInfo;
     //await this.streamAndroid(adbInstance, device, systemPort);
 
@@ -215,7 +213,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       platform: 'android',
       deviceType: realDevice ? 'real' : 'emulator',
       host,
-      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      totalUtilizationTimeMilliSec: 0,
       sessionStartTime: 0,
       chromeDriverPath,
       userBlocked: false,

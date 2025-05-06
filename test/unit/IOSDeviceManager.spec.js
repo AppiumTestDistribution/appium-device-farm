@@ -35,7 +35,6 @@ describe('IOS Device Manager', () => {
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(Helper, 'isMac').returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getSimulators').returns([
@@ -126,7 +125,6 @@ describe('IOS Device Manager', () => {
     sandbox.stub(iosDeviceManager, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
       .returns(deviceMock.filter((device) => device.platform === 'iOS'));
@@ -167,7 +165,6 @@ describe('IOS Device Manager', () => {
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
       .returns(deviceMock.filter((device) => device.platform === 'iOS'));
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await iosDeviceManager.getDevices({ iosDeviceType: 'simulated' }, []);
     // all devices are simulators
     devices.forEach((device) => {
@@ -182,7 +179,6 @@ describe('IOS Device Manager', () => {
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox.stub(iosDevices, 'getSimulators').returns([
       {
         name: 'iPad Air (3rd generation)',
@@ -234,7 +230,6 @@ describe('IOS Device Manager', () => {
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox.stub(iosDevices, 'getSimulators').returns([
       {
         name: 'iPad Air (3rd generation)',
@@ -265,7 +260,6 @@ describe('IOS Device Manager', () => {
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     sandbox.stub(iosDevices, 'getSimulators').returns([
       {
         name: 'iPad Air (3rd generation)',

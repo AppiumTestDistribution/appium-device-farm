@@ -48,6 +48,7 @@ CREATE TABLE "Device" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "udid" TEXT NOT NULL,
     "host" TEXT NOT NULL,
+    "node_id" TEXT NOT NULL,
     "platform" TEXT NOT NULL,
     "version" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -56,7 +57,8 @@ CREATE TABLE "Device" (
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "usage" INTEGER NOT NULL DEFAULT 0,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL
+    "updated_at" DATETIME NOT NULL,
+    CONSTRAINT "Device_node_id_fkey" FOREIGN KEY ("node_id") REFERENCES "Node" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -69,6 +71,20 @@ CREATE TABLE "ApiToken" (
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL,
     CONSTRAINT "ApiToken_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Node" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "host" TEXT NOT NULL,
+    "tags" TEXT,
+    "os" TEXT NOT NULL,
+    "jwt_secret_token" TEXT NOT NULL,
+    "is_hub" BOOLEAN NOT NULL DEFAULT false,
+    "is_online" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL
 );
 
 -- CreateIndex
