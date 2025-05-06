@@ -1,8 +1,11 @@
 import generateApiKey from 'generate-api-key';
-import { getUserFromToken } from '../auth/middleware/auth.middleware';
+import { getUserFromToken, JWT_SECRET, JWT_EXPIRES_IN } from '../auth/middleware/auth.middleware';
 import { userService } from '../auth/services/user.service';
 import { apiTokenService, ApiTokenService } from '../auth/services/api-token.service';
 import debugLog from '../debugLog';
+import { prisma } from '../prisma';
+import { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 const KEY_POOL = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ1234567890';
 
@@ -28,23 +31,30 @@ export function generateSecretKey() {
   return secretKey;
 }
 
+export async function authenticateUserWithAccessKey(accessKey: string, secretToken: string) {
+  const user = await userService.getUserByAccessKey(accessKey);
+  if (user && !user.isActive) {
+    throw new Error('User is not active');
+  }
+  if (user && user.id) {
+    const token = await apiTokenService.isTokenValid(user.id, secretToken);
+    if (token) {
+      return user;
+    }
+  }
+  throw new Error('Invalid credentials');
+}
+
 export async function getUserFromCapabilities(capabilities: Record<string, any>) {
   debugLog(`Capabilities: ${JSON.stringify(capabilities['df:jwt'])}`);
   if (capabilities['df:jwt']) {
     const token = capabilities['df:jwt'];
     return await getUserFromToken(token);
   } else if (capabilities['df:username'] && capabilities['df:password']) {
-    const user = await userService.getUserByAccessKey(capabilities['df:username']);
-    if (user && !user.isActive) {
-      throw new Error('User is not active');
-    }
-    if (user && user.id) {
-      const token = await apiTokenService.isTokenValid(user.id, capabilities['df:password']);
-      if (token) {
-        return user;
-      }
-    }
-    throw new Error('Invalid credentials');
+    return await authenticateUserWithAccessKey(
+      capabilities['df:username'],
+      capabilities['df:password'],
+    );
   } else {
     throw new Error('Credentials not found. Please provide username and password');
   }
@@ -58,4 +68,20 @@ export async function sanitizeSessionCapabilities(sessionResponse: Record<string
     }
   });
   return sessionResponse;
+}
+
+export async function generateTokenForNode(nodeId: string, userId: string) {
+  const node = await prisma.node.findFirst({
+    where: {
+      id: nodeId,
+    },
+  });
+  if (node && node.jwtSecretToken) {
+    return jwt.sign({ userId }, node.jwtSecretToken, { expiresIn: JWT_EXPIRES_IN } as SignOptions);
+  }
+  return '';
+}
+
+export async function verifyJwt(token: string) {
+  return jwt.verify(token, JWT_SECRET);
 }

@@ -80,6 +80,11 @@ export interface IPluginArgs {
 
   //authentication
   enableAuthentication?: boolean;
+  accessKey?: string;
+  token?: string;
+
+  //node
+  nodeName?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

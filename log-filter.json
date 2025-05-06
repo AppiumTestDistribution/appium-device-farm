@@ -1,22 +1,37 @@
 [
   {
     "pattern": "\"df:jwt\":\\s*\"([^\"\n]+)\"",
-    "flags": "i"
+    "flags": "i",
+    "replacer": "**JWT**"
   },
   {
     "pattern": "\"df:username\":\\s*\"([^\"\n]+)\"",
-    "flags": "i"
+    "flags": "i",
+    "replacer": "**USERNAME**"
   },
   {
     "pattern": "\"df:password\":\\s*\"([^\"\n]+)\"",
-    "flags": "i"
+    "flags": "i",
+    "replacer": "**PASSWORD**"
   },
   {
     "pattern": "\"username\":\\s*\"([^\"\n]+)\"",
-    "flags": "i"
+    "flags": "i",
+    "replacer": "**USERNAME**"
   },
   {
     "pattern": "\"password\":\\s*\"([^\"\n]+)\"",
-    "flags": "i"
+    "flags": "i",
+    "replacer": "**PASSWORD**"
+  },
+  {
+    "pattern": "\"accesskey\":\\s*\"([^\"\n]+)\"",
+    "flags": "i",
+    "replacer": "**ACCESS_KEY**"
+  },
+  {
+    "pattern": "\"token\":\\s*\"([^\"\n]+)\"",
+    "flags": "i",
+    "replacer": "**TOKEN**"
   }
 ]

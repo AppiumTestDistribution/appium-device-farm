@@ -146,6 +146,7 @@ model Device {
   id              String   @id
   udid            String   @map("udid")
   host            String   @map("host")
+  nodeId          String   @map("node_id")
   platform        String   @map("platform") // ios, android
   version         String   @map("version")
   name            String   @map("name")
@@ -156,7 +157,7 @@ model Device {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   teamDevices     TeamDevice[] @relation("DeviceToTeamDevice")
-
+  node            Node     @relation("NodeToDevice", fields: [nodeId], references: [id], onDelete: Cascade)
   @@unique([udid, host])
 }
 
@@ -172,4 +173,18 @@ model ApiToken {
   user            User     @relation("UserToApiToken", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, name])
+}
+
+model Node {
+  id              String   @id
+  name            String   @map("name")
+  host            String   @map("host")
+  tags            String?  @map("tags")
+  os              String   @map("os")
+  jwtSecretToken  String   @map("jwt_secret_token")
+  isHub           Boolean  @default(false) @map("is_hub")
+  isOnline        Boolean  @default(true) @map("is_online")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  devices         Device[] @relation("NodeToDevice")
 }

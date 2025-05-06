@@ -1,15 +1,12 @@
 import { prisma } from '../../prisma';
 import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { JwtPayload } from '../middleware/auth.middleware';
+import { JWT_EXPIRES_IN, JWT_SECRET, JwtPayload } from '../middleware/auth.middleware';
 import log from '../../logger';
 import { User } from '@prisma/client';
 import { generateAccessKey } from '../../utils/auth';
 
-// JWT secret key - should be in environment variables in production
-const JWT_SECRET = process.env.JWT_SECRET || 'device-farm-secret-key';
-// JWT expiration time
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+
 // Salt rounds for bcrypt
 const SALT_ROUNDS = 10;
 

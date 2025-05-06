@@ -44,7 +44,9 @@ import { v4 as uuidv4 } from 'uuid';
 import debugLog from './debugLog';
 import getPort from 'get-port';
 import { sessionRequestMap } from './proxy/wd-command-proxy';
-import { getUserFromCapabilities } from './utils/auth';
+import { getUserFromCapabilities, verifyJwt } from './utils/auth';
+import { NodeService } from './data-service/node-service';
+import { DevicePlugin } from './plugin';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -104,13 +106,18 @@ export async function allocateDeviceForSession(
 
   if (pluginArgs.enableAuthentication) {
     try {
-      const user = await getUserFromCapabilities(firstMatch);
-      if (user.role !== 'admin') {
-        const devices = await getTeamDevicesForUser(user.id);
-        if (!devices.length) {
-          throw new Error(`User ${user.username} does not have aceess to any devices`);
+      /** If on node, we need to verify the jwt token */
+      if (!DevicePlugin.IS_HUB) {
+        await verifyJwt(firstMatch['df:jwt']);
+      } else {
+        const user = await getUserFromCapabilities(firstMatch);
+        if (user.role !== 'admin') {
+          const devices = await getTeamDevicesForUser(user.id);
+          if (!devices.length) {
+            throw new Error(`User ${user.username} does not have aceess to any devices`);
+          }
+          filters['userId'] = user.id;
         }
-        filters['userId'] = user.id;
       }
     } catch (error: any) {
       throw new Error('User Authentication Failed. Reason: ' + error.message);
@@ -252,27 +259,6 @@ async function getStorage() {
     await initializeStorage();
   }
   return Container.get('LocalStorage') as LocalStorage;
-}
-
-/**
- * Gets utlization time for a device from storage
- * Returns 0 if the device has not been used an thus utilization time has not been saved
- * @param udid
- * @returns number
- */
-export async function getUtilizationTime(udid: string) {
-  try {
-    const value = (await getStorage()).getItem(udid);
-    if (value !== undefined && value && !isNaN(await value)) {
-      return value;
-    } else {
-      //log.error(`Custom Exception: Utilizaiton time in cache is corrupted. Value = '${value}'.`);
-    }
-  } catch (err) {
-    log.error(`Failed to fetch Utilization Time \n ${err}`);
-  }
-
-  return 0;
 }
 
 /**
@@ -538,6 +524,8 @@ export async function setupCronUpdateDeviceList(
   host: string,
   hubArgument: string,
   intervalMs: number,
+  pluginArgs: IPluginArgs,
+  cliArgs: any,
 ) {
   if (cronTimerToUpdateDevices) {
     clearInterval(cronTimerToUpdateDevices);
@@ -546,9 +534,20 @@ export async function setupCronUpdateDeviceList(
     `This node will send device list update to the hub (${hubArgument}) every ${intervalMs} ms`,
   );
 
-  cronTimerToUpdateDevices = setInterval(async () => {
-    await updateDeviceList(host, hubArgument);
-  }, intervalMs);
+  const fn = async () => {
+    const isHubRunning = hubArgument && (await isDeviceFarmRunning(hubArgument));
+    if (isHubRunning) {
+      await NodeService.register(
+        false,
+        pluginArgs.nodeName || '',
+        `http://${host}:${cliArgs.port}`,
+        DevicePlugin.NODE_ID,
+      );
+      await updateDeviceList(host, hubArgument);
+    }
+  };
+  await fn();
+  cronTimerToUpdateDevices = setInterval(fn, intervalMs);
 }
 
 export async function cleanPendingSessions(timeoutMs: number) {

@@ -305,6 +305,15 @@
         },
         "enableAuthentication": {
           "type": "boolean"
+        },
+        "accessKey": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "nodeName": {
+          "type": "string"
         }
       },
       "title": "Appium device farm plugin",
