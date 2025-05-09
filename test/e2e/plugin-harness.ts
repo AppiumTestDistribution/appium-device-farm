@@ -53,7 +53,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
     enableGoIos,
   } = opts;
 
-  let server: AppiumServer;
+  let server: AppiumServer | undefined = undefined;
 
   async function goIosPath() {
     const appium_path = path.dirname(require.resolve('appium'));
