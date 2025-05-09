@@ -269,4 +269,4 @@ These commands will:
 3. Reinstall any required dependencies
 
 !!! warning "Data Loss Warning"
-    The reset command will clear all existing data including users, teams, and device assignments. Make sure to backup any important data before running these commands. 
+    The reset command will clear all existing data including users, teams, and device assignments. Make sure to backup any important data before running these commands.
