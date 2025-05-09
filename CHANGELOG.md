@@ -1,3 +1,9 @@
+## [10.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.0...v10.0.1) (2025-05-09)
+
+### Bug Fixes
+
+* update documentations for authentication module ([#1673](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1673)) ([4e35bed](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4e35bed81e007032882f48dde402c705b27e2180))
+
 ## [10.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.8...v10.0.0) (2025-05-09)
 
 ### ⚠ BREAKING CHANGES
