@@ -63,8 +63,10 @@ The device farm supports two user roles:
 - Access all features
 - Generate and manage API tokens
 
-<div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/users.png" alt="User Management" style="width: 60%; max-width: 700px;">
+</div>
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/teams.png" alt="Team Management" style="width: 60%; max-width: 700px;">
 </div>
 
@@ -103,8 +105,10 @@ appium --use-plugin=device-farm --plugin-device-farm-hub=<hub-url> \
 
 The access key will be displayed above the API tokens table. Use both the access key and token when registering nodes.
 
-<div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token.png" alt="API Token Management" style="width: 60%; max-width: 700px;">
+</div>
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token-generate.png" alt="Generate API Token" style="width: 60%; max-width: 700px;">
 </div>
 
@@ -131,8 +135,10 @@ Admin users can:
 - Exclude devices from the pool
 - Assign devices to teams
 
-<div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management.png" alt="Device Management" style="width: 60%; max-width: 700px;">
+</div>
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management-2.png" alt="Device Management Details" style="width: 60%; max-width: 700px;">
 </div>
 
@@ -152,8 +158,10 @@ Device information is persisted in the database, including:
 - Admins can override team assignments
 - Maintenance flags prevent device access during maintenance
 
-<div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-device.png" alt="Manage Team Devices" style="width: 60%; max-width: 700px;">
+</div>
+<div style="display: flex; justify-content: center; margin: 20px 0;">
     <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-user-1.png" alt="Manage Team Users 1" style="width: 60%; max-width: 700px;">
 </div>
 
