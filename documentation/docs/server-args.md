@@ -6,6 +6,9 @@ These arguments are set when you launch the Appium server with device-farm plugi
 
 | Argument                                                     | Required | Description                                                                                                                                                                                                                                                     | Default  | Options                                                                                                                                                  |
 |--------------------------------------------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--plugin-device-farm-enable-authentication`                 | No       | Enables authentication for the device farm. When enabled, all endpoints will be secured and require valid credentials.                                                                                                                                           | `false`  | `true/false`                                                                                                                                            |
+| `--plugin-device-farm-access-key`                           | No       | Access key for node authentication when connecting to a hub with authentication enabled. Required when hub has authentication enabled.                                                                                                                           | None     | String value                                                                                                                                            |
+| `--plugin-device-farm-token`                                | No       | API token for node authentication when connecting to a hub with authentication enabled. Required when hub has authentication enabled.                                                                                                                            | None     | String value                                                                                                                                            |
 | `--plugin-device-farm-platform`                              | Yes      | Platform to run tests against for parallel execution                                                                                                                                                                                                            | None     | `both`,`ios`,`android`                                                                                                                                   |
 | `--plugin-device-farm-ios-device-type`                       | No       | Types of ios devices to include                                                                                                                                                                                                                                 | `both`   | `both`,`simulated`,`real`, For example: If you want to run only against iOS simulator then specify --plugin-device-farm-ios-device-type=simulated        |
 | `--plugin-device-farm-android-device-type`                   | No       | Types of android devices to include                                                                                                                                                                                                                             | `both`   | `both`,`simulated`,`real`, For example: If you want to run only against android emulator then specify --plugin-device-farm-android-device-type=simulated |
@@ -39,6 +42,22 @@ These arguments are set when you launch the Appium server with device-farm plugi
 | env             | Mapping of emulator [environment variables](https://developer.android.com/studio/command-line/variables).                                                                                                                                                                  |
 
 Above cli arguments can also be set from config.json file Refer [here](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/sample-config.json)
+
+### Authentication Configuration
+
+When enabling authentication, you can set default admin credentials using environment variables:
+
+```bash
+export DEFAULT_ADMIN_USERNAME=your_admin_username
+export DEFAULT_ADMIN_PASSWORD=your_admin_password
+```
+
+If not set, the default credentials are:
+- Username: `admin`
+- Password: `admin`
+
+!!! warning "Security Note"
+    It's highly recommended to change the default credentials after your first login.
 
 ### Proxy configuration for axios
 
