@@ -7,12 +7,11 @@ import { asyncForEach, getFreePort } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
-import { getUtilizationTime } from '../device-utils';
 import fs from 'fs-extra';
 import Devices from './cloud/Devices';
 import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';
-import { addNewDevice, removeDevice } from '../data-service/device-service';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
@@ -227,11 +226,17 @@ export default class IOSDeviceManager implements IDeviceManager {
     }
     const wdaLocalPort = await getFreePort();
     const mjpegServerPort = await getFreePort();
-    const totalUtilizationTimeMilliSec = await getUtilizationTime(udid);
+    const totalUtilizationTimeMilliSec = 0;
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const { ProductType } = await getDeviceInfo(udid);
     const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     return Object.assign({
+      id: generateDeviceId({
+        udid: udid,
+        realDevice: true,
+        nodeId: this.nodeId,
+        platform: 'ios',
+      } as any),
       wdaLocalPort,
       mjpegServerPort,
       udid,
@@ -301,11 +306,17 @@ export default class IOSDeviceManager implements IDeviceManager {
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
       const wdaLocalPort = await getFreePort();
       const mjpegServerPort = await getFreePort();
-      const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
+      const totalUtilizationTimeMilliSec = 0;
       const modelInfo = this.findKeyByValue(productModel) || { Width: '', Height: '' };
       returnedSimulators.push(
         Object.assign({
           ...device,
+          id: generateDeviceId({
+            udid: device.udid,
+            realDevice: false,
+            nodeId: this.nodeId,
+            platform: 'ios',
+          } as any),
           wdaLocalPort,
           mjpegServerPort,
           busy: false,

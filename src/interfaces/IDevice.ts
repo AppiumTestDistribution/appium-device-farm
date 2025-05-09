@@ -1,6 +1,7 @@
 import { Platform } from '../types/Platform';
 
 export interface IDevice {
+  id: string;
   systemPort: number;
   host: string;
   proxyPort?: number;

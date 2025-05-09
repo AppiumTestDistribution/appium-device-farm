@@ -72,7 +72,6 @@ describe.skip('Remote IOS', () => {
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(Helper, 'getFreePort').returns(54093);
-    sandbox.stub(DeviceUtils, 'getUtilizationTime').returns(0);
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     const expected = [
       {

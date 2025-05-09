@@ -9,6 +9,8 @@ import { config } from '../config';
 import _ from 'lodash';
 
 import GridRouter from './routers/grid';
+import { resigsterAuthenticationRoutes } from '../auth/routers';
+import { userService } from '../auth/services/user.service';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
 
 let dashboardPluginUrl: any = null;
@@ -30,33 +32,6 @@ function getPublicDirectory() {
     : path.join(__dirname, '..', '..', 'public');
 }
 
-/**
- * Middleware to check if the appium-dashboard plugin is installed
- * If the plugin is runnig, then we should enable the react app to
- * open the dashboard link upon clicking the device card in the UI.
- */
-
-//TODO: Remove the middleware after integrating with dashbaod
-apiRouter.use(async (req, res, next) => {
-  await ASYNC_LOCK.acquire('dashboard-plugin-check', async () => {
-    if (dashboardPluginUrl == null) {
-      const pingurl = `${req.protocol}://${req.get('host')}/dashboard/api/ping`;
-      try {
-        const response: any = await axios.get(pingurl);
-        if (response.data['pong']) {
-          dashboardPluginUrl = `${req.protocol}://${req.get('host')}/dashboard`;
-        } else {
-          dashboardPluginUrl = '';
-        }
-      } catch (err) {
-        dashboardPluginUrl = '';
-      }
-    }
-  });
-  (req as any)['dashboard-plugin-url'] = dashboardPluginUrl;
-  return next();
-});
-
 apiRouter.get('/cliArgs', async (req, res) => {
   res.json(await getCLIArgs());
 });
@@ -72,6 +47,14 @@ router.use(staticFilesRouter);
 
 function createRouter(pluginArgs: IPluginArgs) {
   GridRouter.register(apiRouter, pluginArgs);
+
+  // Initialize admin user if needed
+  userService.createInitialAdminIfNeeded().catch((err) => {
+    console.error('Error creating initial admin user:', err);
+  });
+
+  resigsterAuthenticationRoutes(apiRouter, pluginArgs);
+
   return router;
 }
 
