@@ -187,9 +187,6 @@ export async function allocateDeviceForSession(
     await blockDevice(device.udid, device.host);
     log.info(`📱 Blocking device ${device.udid} at host ${device.host} for new session`);
 
-    // FIXME: convert this into a return value
-    await updateCapabilityForDevice(capability, device, { liveVideo });
-
     // update newCommandTimeout for the device.
     // This is required so it won't get unblocked by prematurely.
     let newCommandTimeout = firstMatch['appium:newCommandTimeout'];
@@ -197,6 +194,12 @@ export async function allocateDeviceForSession(
       newCommandTimeout = pluginArgs.newCommandTimeoutSec;
     }
     await updatedAllocatedDevice(device, { newCommandTimeout });
+
+    // FIXME: convert this into a return value
+    await updateCapabilityForDevice(capability, device, {
+      liveVideo,
+      newCommandTimeout: newCommandTimeout,
+    });
 
     return device;
   } else {
@@ -213,13 +216,22 @@ export async function allocateDeviceForSession(
 export async function updateCapabilityForDevice(
   capability: any,
   device: IDevice,
-  options: { liveVideo: boolean },
+  options: { liveVideo: boolean; newCommandTimeout?: number },
 ) {
   const mergedCapabilites = Object.assign(
     {},
     capability.alwaysMatch,
     capability.firstMatch[0] || {},
   );
+
+  if (!mergedCapabilites['appium:newCommandTimeout'] && options.newCommandTimeout) {
+    try {
+      capability.firstMatch[0]['appium:newCommandTimeout'] = options.newCommandTimeout;
+    } catch (err) {
+      capability.alwaysMatch['appium:newCommandTimeout'] = options.newCommandTimeout;
+    }
+  }
+
   if (!device.hasOwnProperty('cloud')) {
     if (mergedCapabilites['appium:automationName']?.toLowerCase() === 'flutterintegration') {
       capability.firstMatch[0]['appium:flutterSystemPort'] = await getPort();
