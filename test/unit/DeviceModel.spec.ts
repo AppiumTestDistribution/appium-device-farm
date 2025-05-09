@@ -39,7 +39,7 @@ describe('Model Test', async () => {
       .find({ udid: 'emulator-5570' })
       .data();
     expect(findDevice.length).to.be.equal(1);
-    await removeDevice([{ udid: 'emulator-5570', host: '127.0.0.1' }]);
+    await removeDevice(findDevice);
     const updatedDeviceList = (await ATDRepository.DeviceModel)
       .chain()
       .find({ udid: 'emulator-5570' })

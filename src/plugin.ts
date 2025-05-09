@@ -42,7 +42,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
+import {
+  hasCloudArgument,
+  isDeviceFarmRunning,
+  loadExternalModules,
+  nodeUrl,
+  stripAppiumPrefixes,
+} from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -69,8 +75,18 @@ import { BeforeSessionCreatedEvent } from './events/before-session-create-event'
 import SessionType from './enums/SessionType';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
+import {
+  generateTokenForNode,
+  getUserFromCapabilities,
+  sanitizeSessionCapabilities,
+} from './utils/auth';
+import { NodeService } from './data-service/node-service';
+import { DeviceFarmApiClient } from './api-client';
+import { NodeHealthMonitor } from './utils/node-heath-monitor';
 
 const commandsQueueGuard = new AsyncLock();
+const NODE_HEALTH_MONITOR_INTERVAL = 1000 * 30; // 30 seconds
+
 const DEVICE_MANAGER_LOCK_NAME = 'DeviceManager';
 let platform: any;
 let androidDeviceType: any;
@@ -87,6 +103,7 @@ class DevicePlugin extends BasePlugin {
   public static adbInstance: any;
   public static serverUrl: string;
   public static serverArgs: Record<string, any>;
+  public static apiClient: DeviceFarmApiClient;
 
   constructor(pluginName: string, cliArgs: any) {
     super(pluginName, cliArgs);
@@ -169,7 +186,9 @@ class DevicePlugin extends BasePlugin {
     if (pluginArgs.bindHostOrIp === undefined) {
       pluginArgs.bindHostOrIp = ip.address();
     }
+
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);
+
     await initializeStorage();
     (await ATDRepository.DeviceModel).removeDataOnly();
     platform = pluginArgs.platform;
@@ -214,14 +233,43 @@ class DevicePlugin extends BasePlugin {
 
     if (hubArgument !== undefined) {
       log.info(`📣📣📣 I'm a node and my hub is ${hubArgument}`);
+      DevicePlugin.apiClient = new DeviceFarmApiClient(
+        pluginArgs.accessKey!,
+        pluginArgs.token!,
+        hubArgument,
+      );
+
+      const isHubRunning = await isDeviceFarmRunning(hubArgument);
+      if (!isHubRunning) {
+        throw new Error(
+          `🛜 Unable to connect with hub in ${hubArgument}. Make the appium server is up and running.`,
+        );
+      }
+
+      try {
+        await DevicePlugin.apiClient.authenticate();
+      } catch (err) {
+        throw new Error(
+          '🔐 Authentication error. Invalid accessKey or token. Kindly pass accesskey and token using --plugin-device-farm-access-key and --plugin-device-farm-token arguments',
+        );
+      }
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(
         pluginArgs.bindHostOrIp,
         hubArgument,
         pluginArgs.sendNodeDevicesToHubIntervalMs,
+        pluginArgs,
+        cliArgs,
       );
     } else {
       DevicePlugin.serverUrl = `http://${pluginArgs.bindHostOrIp}:${cliArgs.port}`;
+      await NodeService.register(
+        true,
+        pluginArgs.nodeName || '',
+        DevicePlugin.serverUrl,
+        DevicePlugin.NODE_ID,
+      );
+      await NodeHealthMonitor.getInstance().start(NODE_HEALTH_MONITOR_INTERVAL);
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
@@ -344,7 +392,7 @@ class DevicePlugin extends BasePlugin {
     if (isRemoteOrCloudSession) {
       log.debug(`📱${pendingSessionId} --- Forwarding session request to ${device.host}`);
       caps['pendingSessionId'] = pendingSessionId;
-      session = await this.forwardSessionRequest(device, caps);
+      session = await this.forwardSessionRequest(device, caps, mergedCapabilites);
       debugLog(`📱${pendingSessionId} --- Forwarded session response: ${JSON.stringify(session)}`);
     } else {
       log.debug('📱 Creating session on the same node');
@@ -389,6 +437,7 @@ class DevicePlugin extends BasePlugin {
     if (this.isCreateSessionResponseInternal(session)) {
       log.debug(`${pendingSessionId} 📱 Session response is CreateSessionResponseInternal`);
 
+      sanitizeSessionCapabilities(session.value[1]);
       const sessionId = (session as CreateSessionResponseInternal).value[0];
       const sessionResponse = (session as CreateSessionResponseInternal).value[1];
       const deviceFarmCapabilities = getDeviceFarmCapabilities(caps);
@@ -491,10 +540,10 @@ class DevicePlugin extends BasePlugin {
   private async forwardSessionRequest(
     device: IDevice,
     caps: ISessionCapability,
+    mergedCapabilites: Record<string, string>,
   ): Promise<CreateSessionResponseInternal | Error> {
     const remoteUrl = `${nodeUrl(device, DevicePlugin.nodeBasePath)}/session`;
     const capabilitiesToCreateSession = { capabilities: caps };
-
     if (device.hasOwnProperty('cloud') && device.cloud.toLowerCase() === Cloud.LAMBDATEST) {
       if (
         capabilitiesToCreateSession.capabilities.alwaysMatch &&
@@ -514,6 +563,23 @@ class DevicePlugin extends BasePlugin {
         //@ts-ignore
         delete capabilitiesToCreateSession.capabilities.firstMatch;
       }
+    } else {
+      let jwt = '';
+      if (this.pluginArgs.enableAuthentication) {
+        const user = await getUserFromCapabilities(mergedCapabilites);
+        jwt = await generateTokenForNode(device.nodeId!, user?.id!);
+      }
+      if (capabilitiesToCreateSession.capabilities.alwaysMatch) {
+        capabilitiesToCreateSession.capabilities.alwaysMatch['df:udid'] = device.udid;
+        if (jwt) {
+          capabilitiesToCreateSession.capabilities.alwaysMatch['df:jwt'] = jwt;
+        }
+      } else {
+        capabilitiesToCreateSession.capabilities.firstMatch[0]['df:udid'] = device.udid;
+        if (jwt) {
+          capabilitiesToCreateSession.capabilities.firstMatch[0]['df:jwt'] = jwt;
+        }
+      }
     }
 
     log.info(
@@ -526,12 +592,12 @@ class DevicePlugin extends BasePlugin {
       timeout: this.pluginArgs.remoteConnectionTimeout,
       httpAgent: new http.Agent({
         keepAlive: true,
-        keepAliveMsecs: 60000,
+        keepAliveMsecs: 120000,
       }),
       httpsAgent: new https.Agent({
         rejectUnauthorized: false,
         keepAlive: true,
-        keepAliveMsecs: 60000,
+        keepAliveMsecs: 120000,
       }),
       headers: {
         'Content-Type': 'application/json',

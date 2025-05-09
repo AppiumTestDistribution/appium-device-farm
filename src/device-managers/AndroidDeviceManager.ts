@@ -6,18 +6,18 @@ import _ from 'lodash';
 import { fs } from '@appium/support';
 import ChromeDriverManager from './ChromeDriverManager';
 import { Container } from 'typedi';
-import { getUtilizationTime } from '../device-utils';
 import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
 import { AbortController } from 'node-abort-controller';
 import asyncWait from 'async-wait-until';
 import NodeDevices from './NodeDevices';
-import { addNewDevice, removeDevice } from '../data-service/device-service';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
 import Devices from './cloud/Devices';
 import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
 import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
 import { sleep, waitForCondition } from 'asyncbox';
+import { DevicePlugin } from '../plugin';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -157,7 +157,6 @@ export default class AndroidDeviceManager implements IDeviceManager {
     hostPort: number,
   ): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
-    const totalUtilizationTimeMilliSec = await getUtilizationTime(device.udid);
     let deviceInfo;
     //await this.streamAndroid(adbInstance, device, systemPort);
 
@@ -197,6 +196,12 @@ export default class AndroidDeviceManager implements IDeviceManager {
       host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
     return {
+      id: generateDeviceId({
+        udid: device.udid,
+        realDevice: realDevice,
+        nodeId: this.nodeId,
+        platform: 'android',
+      } as any),
       adbRemoteHost: adbInstance.adbHost,
       adbPort: adbInstance.adbPort,
       systemPort,
@@ -209,7 +214,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
       platform: 'android',
       deviceType: realDevice ? 'real' : 'emulator',
       host,
-      totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
+      totalUtilizationTimeMilliSec: 0,
       sessionStartTime: 0,
       chromeDriverPath,
       userBlocked: false,
@@ -469,6 +474,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       udid: device['id'],
       host: pluginArgs.bindHostOrIp,
       state: device.type,
+      real: true,
+      nodeId: DevicePlugin.NODE_ID,
+      platform: 'android',
     };
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
@@ -476,7 +484,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
 
     // node also need a copy of devices, otherwise it cannot serve requests
-    await removeDevice([clonedDevice]);
+    await removeDevice([clonedDevice] as any[]);
     this.abort(clonedDevice.udid);
   }
 

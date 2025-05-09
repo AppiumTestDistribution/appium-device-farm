@@ -92,3 +92,105 @@ model DeviceTags {
 
   @@unique([host, udid])
 }
+
+model User {
+  id           String       @id @default(uuid())
+  firstname    String
+  lastname     String
+  username     String       @unique @map("username")
+  password     String       @map("password")
+  role         String       @default("user") @map("role") // "admin" or "user"
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  accessKey    String       @unique @map("access_key")
+  teamMembers  TeamMember[] @relation("UserToTeamMember")
+  apiTokens    ApiToken[]   @relation("UserToApiToken")
+  nodes        Node[]   @relation("UserToNode")
+}
+
+model Team {
+  id                String             @id @default(uuid())
+  name              String             @unique @map("name")
+  description       String?            @map("description")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  teamMembers       TeamMember[]       @relation("TeamToTeamMember")
+  teamDevices       TeamDevice[]       @relation("TeamToTeamDevice")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation("UserToTeamMember", fields: [userId], references: [id], onDelete: Cascade)
+  teamId    String   @map("team_id")
+  team      Team     @relation("TeamToTeamMember", fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, teamId])
+}
+
+model TeamDevice {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  teamId    String   @map("team_id")
+  team      Team     @relation("TeamToTeamDevice", fields: [teamId], references: [id], onDelete: Cascade)
+  device    Device   @relation("DeviceToTeamDevice", fields: [deviceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([deviceId, teamId])
+}
+
+model Device {
+  id              String   @id
+  udid            String   @map("udid")
+  host            String   @map("host")
+  nodeId          String   @map("node_id")
+  platform        String   @map("platform") // ios, android
+  version         String   @map("version")
+  name            String   @map("name")
+  tags            String?  @map("tags")
+  real            Boolean  @default(false) @map("real")
+  isActive        Boolean  @default(true) @map("is_active")
+  isFlagged        Boolean  @default(false) @map("is_flagged")
+  flaggedReason   String?   @map("flagged_reason")
+  usage           Int      @default(0) @map("usage")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  teamDevices     TeamDevice[] @relation("DeviceToTeamDevice")
+  node            Node     @relation("NodeToDevice", fields: [nodeId], references: [id], onDelete: Cascade)
+  @@unique([udid, host])
+}
+
+
+model ApiToken {
+  id              String   @id
+  name            String   @map("name")
+  userId          String   @map("user_id")
+  token           String
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  user            User     @relation("UserToApiToken", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+model Node {
+  id              String   @id
+  name            String   @map("name")
+  host            String   @map("host")
+  tags            String?  @map("tags")
+  os              String   @map("os")
+  jwtSecretToken  String   @map("jwt_secret_token")
+  isHub           Boolean  @default(false) @map("is_hub")
+  isOnline        Boolean  @default(true) @map("is_online")
+  addedBy         String?   @map("added_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  devices         Device[] @relation("NodeToDevice")
+
+  addedByUser     User?     @relation("UserToNode", fields: [addedBy], references: [id], onDelete: Cascade)
+}
