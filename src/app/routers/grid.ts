@@ -98,24 +98,28 @@ async function updateDeviceInfo(request: Request, response: Response) {
 }
 
 async function blockDevice(request: Request, response: Response) {
-  const requestBody = request.body;
-  const device = await getDevice(requestBody);
+  const { udid, host } = request.body;
+  const device = await getDevice({ udid: [udid], filterByHost: host });
   if (!_.isNil(device)) {
     await userBlockDevice(device.udid, device.host);
   }
+  if (device?.nodeId != DevicePlugin.NODE_ID) {
+    await axios.post(`${device?.host}/device-farm/api/block`, { udid, host });
+  }
+
   response.status(200).send({
     success: true,
   });
 }
 
 async function unBlockDevice(request: Request, response: Response) {
-  const requestBody = request.body;
-  const device = await getDevice(requestBody);
+  const { udid, host } = request.body;
+  const device = await getDevice({ udid: [udid], filterByHost: host });
   if (!_.isNil(device)) {
     await userUnblockDevice(device.udid, device.host);
   }
   if (device?.nodeId != DevicePlugin.NODE_ID) {
-    await axios.post(`${device?.host}/device-farm/api/unblock`, requestBody);
+    await axios.post(`${device?.host}/device-farm/api/unblock`, { udid, host });
   }
   response.status(200).send({
     success: true,

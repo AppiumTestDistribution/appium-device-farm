@@ -50,7 +50,20 @@ export async function removeDevicesForNodes(nodeIds: string[]) {
   });
 }
 
-export async function removeDevice(devices: { udid: string; host: string }[]) {
+export async function removeDevice(devices: IDevice[]) {
+  const deviceIds = devices.map((d) => generateDeviceId(d));
+
+  await prisma.device.updateMany({
+    where: {
+      id: {
+        in: deviceIds,
+      },
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
   for await (const device of devices) {
     log.info(`Removing device ${device.udid} from host ${device.host} from device list.`);
     (await ATDRepository.DeviceModel)
@@ -64,7 +77,6 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
   /**
    * If the newly identified devices are not in the database, then add them to the database
    */
-
   const savedDevices = await prisma.device.findMany();
   const devicesToAdd = devices
     .map((d) => {
@@ -86,14 +98,31 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
           createdAt: new Date(),
           updatedAt: new Date(),
           tags: null,
+          isActive: true,
         }) as Device,
     );
 
-  if (DevicePlugin.IS_HUB) {
-    await prisma.device.createMany({
-      data: devicesToAdd,
-    });
-  }
+  const alreadyAddedDevices = devices
+    .map((d) => {
+      d.id = d.id ?? generateDeviceId(d);
+      return d;
+    })
+    .filter((device) => savedDevices.some((savedDevice) => savedDevice.id === device.id));
+
+  await prisma.device.updateMany({
+    where: {
+      id: {
+        in: alreadyAddedDevices.map((d) => generateDeviceId(d)),
+      },
+    },
+    data: {
+      isActive: true,
+    },
+  });
+
+  await prisma.device.createMany({
+    data: devicesToAdd,
+  });
 
   const addedDevices = devices.map(async function (
     device: IDevice & { $loki?: number; meta?: object },
@@ -183,6 +212,7 @@ export async function updateDeviceDetails() {
       .chain()
       .find({ id: generateDeviceId(device) })
       .update(function (d: IDevice) {
+        d.name = device.name ?? d.name;
         d.tags = device.tags?.split(',').filter(Boolean) || [];
         d.totalUtilizationTimeMilliSec = device.usage;
       });
@@ -212,6 +242,12 @@ export async function getTeamDevicesForUser(userId: string): Promise<TeamDevice[
       teamId: {
         in: userTeams.map((ut) => ut.team.id),
       },
+      device: {
+        isFlagged: false,
+      },
+    },
+    include: {
+      device: true,
     },
   });
 
@@ -358,13 +394,18 @@ export async function getDevices(filterOptions: IDeviceFilterOptions): Promise<I
   debugLog(`filter: ${JSON.stringify(filter)}`);
   debugLog(`results: ${JSON.stringify(matchingDevices)}`);
   if (filterOptions.userId) {
-    const filteredDevices = filterDeviceForUser(filterOptions.userId, matchingDevices);
+    const filteredDevices = await filterDeviceForUser(filterOptions.userId, matchingDevices);
     debugLog(
       `filtered devices for user ${filterOptions.userId}: ${JSON.stringify(filteredDevices)}`,
     );
-    return filteredDevices;
+    // Sort devices by total utilization time in ascending order (least used first)
+    return filteredDevices.sort(
+      (d1, d2) => d1.totalUtilizationTimeMilliSec - d2.totalUtilizationTimeMilliSec,
+    );
   }
-  return matchingDevices;
+  return matchingDevices.sort(
+    (d1, d2) => d1.totalUtilizationTimeMilliSec - d2.totalUtilizationTimeMilliSec,
+  );
 }
 
 /**

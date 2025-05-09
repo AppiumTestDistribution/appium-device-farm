@@ -106,6 +106,7 @@ model User {
   accessKey    String       @unique @map("access_key")
   teamMembers  TeamMember[] @relation("UserToTeamMember")
   apiTokens    ApiToken[]   @relation("UserToApiToken")
+  nodes        Node[]   @relation("UserToNode")
 }
 
 model Team {
@@ -153,6 +154,8 @@ model Device {
   tags            String?  @map("tags")
   real            Boolean  @default(false) @map("real")
   isActive        Boolean  @default(true) @map("is_active")
+  isFlagged        Boolean  @default(false) @map("is_flagged")
+  flaggedReason   String?   @map("flagged_reason")
   usage           Int      @default(0) @map("usage")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -184,7 +187,10 @@ model Node {
   jwtSecretToken  String   @map("jwt_secret_token")
   isHub           Boolean  @default(false) @map("is_hub")
   isOnline        Boolean  @default(true) @map("is_online")
+  addedBy         String?   @map("added_by")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   devices         Device[] @relation("NodeToDevice")
+
+  addedByUser     User?     @relation("UserToNode", fields: [addedBy], references: [id], onDelete: Cascade)
 }

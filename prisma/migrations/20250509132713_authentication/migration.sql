@@ -55,6 +55,8 @@ CREATE TABLE "Device" (
     "tags" TEXT,
     "real" BOOLEAN NOT NULL DEFAULT false,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "is_flagged" BOOLEAN NOT NULL DEFAULT false,
+    "flagged_reason" TEXT,
     "usage" INTEGER NOT NULL DEFAULT 0,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL,
@@ -83,8 +85,10 @@ CREATE TABLE "Node" (
     "jwt_secret_token" TEXT NOT NULL,
     "is_hub" BOOLEAN NOT NULL DEFAULT false,
     "is_online" BOOLEAN NOT NULL DEFAULT true,
+    "added_by" TEXT,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL
+    "updated_at" DATETIME NOT NULL,
+    CONSTRAINT "Node_added_by_fkey" FOREIGN KEY ("added_by") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex

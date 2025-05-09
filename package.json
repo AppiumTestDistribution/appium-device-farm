@@ -30,6 +30,7 @@
     "build-web-and-plugin": "npx tsc -b && npm run buildAndCopyWeb && npm run copy-files",
     "copy-files": "(cp -R src/public lib || exit 0)",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
+    "bundleStreamApk": "sh move-stream.sh",
     "prepublishOnly": "npx tsc && npm run buildAndCopyWeb && npm run copy-files && npm run bundle",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier-check": "prettier 'src/**/*.ts' --check --verbose",

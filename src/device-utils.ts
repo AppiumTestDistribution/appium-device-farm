@@ -454,7 +454,7 @@ export async function removeStaleDevices(currentHost: string) {
     .map((item) => item.value.host);
   // stale devices are devices that's not alive
   const staleDevices = nodeDevices.filter((device) => !allAliveHosts.includes(device.host));
-  await removeDevice(staleDevices.map((device) => ({ udid: device.udid, host: device.host })));
+  await removeDevice(staleDevices);
   if (staleDevices.length > 0) {
     log.debug(
       `Removing device with udid(s): ${staleDevices
@@ -464,7 +464,7 @@ export async function removeStaleDevices(currentHost: string) {
   }
 
   // remove devices with no host
-  await removeDevice(devicesWithNoHost.map((device) => ({ udid: device.udid, host: device.host })));
+  await removeDevice(devicesWithNoHost);
   if (devicesWithNoHost.length > 0) {
     log.debug(
       `Removing device with udid(s): ${devicesWithNoHost

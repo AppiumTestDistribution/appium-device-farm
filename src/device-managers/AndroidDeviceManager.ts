@@ -17,6 +17,7 @@ import { IDevice } from '../interfaces/IDevice';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
 import { sleep, waitForCondition } from 'asyncbox';
+import { DevicePlugin } from '../plugin';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -473,6 +474,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       udid: device['id'],
       host: pluginArgs.bindHostOrIp,
       state: device.type,
+      real: true,
+      nodeId: DevicePlugin.NODE_ID,
+      platform: 'android',
     };
     if (pluginArgs.hub != undefined) {
       const nodeDevices = new NodeDevices(pluginArgs.hub);
@@ -480,7 +484,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
 
     // node also need a copy of devices, otherwise it cannot serve requests
-    await removeDevice([clonedDevice]);
+    await removeDevice([clonedDevice] as any[]);
     this.abort(clonedDevice.udid);
   }
 

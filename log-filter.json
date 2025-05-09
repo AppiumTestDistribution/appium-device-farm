@@ -5,12 +5,12 @@
     "replacer": "**JWT**"
   },
   {
-    "pattern": "\"df:username\":\\s*\"([^\"\n]+)\"",
+    "pattern": "\"df:accesskey\":\\s*\"([^\"\n]+)\"",
     "flags": "i",
-    "replacer": "**USERNAME**"
+    "replacer": "**ACCESS_KEY**"
   },
   {
-    "pattern": "\"df:password\":\\s*\"([^\"\n]+)\"",
+    "pattern": "\"df:token\":\\s*\"([^\"\n]+)\"",
     "flags": "i",
     "replacer": "**PASSWORD**"
   },

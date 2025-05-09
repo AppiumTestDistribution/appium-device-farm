@@ -42,7 +42,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { AxiosError } from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { HttpProxyAgent } from 'http-proxy-agent';
-import { hasCloudArgument, loadExternalModules, nodeUrl, stripAppiumPrefixes } from './helpers';
+import {
+  hasCloudArgument,
+  isDeviceFarmRunning,
+  loadExternalModules,
+  nodeUrl,
+  stripAppiumPrefixes,
+} from './helpers';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -232,6 +238,13 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.token!,
         hubArgument,
       );
+
+      const isHubRunning = await isDeviceFarmRunning(hubArgument);
+      if (!isHubRunning) {
+        throw new Error(
+          `🛜 Unable to connect with hub in ${hubArgument}. Make the appium server is up and running.`,
+        );
+      }
 
       try {
         await DevicePlugin.apiClient.authenticate();

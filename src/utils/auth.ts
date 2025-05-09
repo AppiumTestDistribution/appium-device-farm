@@ -50,10 +50,10 @@ export async function getUserFromCapabilities(capabilities: Record<string, any>)
   if (capabilities['df:jwt']) {
     const token = capabilities['df:jwt'];
     return await getUserFromToken(token);
-  } else if (capabilities['df:username'] && capabilities['df:password']) {
+  } else if (capabilities['df:accesskey'] && capabilities['df:token']) {
     return await authenticateUserWithAccessKey(
-      capabilities['df:username'],
-      capabilities['df:password'],
+      capabilities['df:accesskey'],
+      capabilities['df:token'],
     );
   } else {
     throw new Error('Credentials not found. Please provide username and password');
@@ -61,7 +61,7 @@ export async function getUserFromCapabilities(capabilities: Record<string, any>)
 }
 
 export async function sanitizeSessionCapabilities(sessionResponse: Record<string, any>) {
-  ['df:jwt', 'df:username', 'df:password'].forEach((key) => {
+  ['df:jwt', 'df:accesskey', 'df:token'].forEach((key) => {
     delete sessionResponse[key];
     if (sessionResponse['desired']) {
       delete sessionResponse['desired'][key];

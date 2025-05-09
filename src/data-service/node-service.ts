@@ -4,6 +4,7 @@ import os from 'os';
 import { prisma } from '../prisma';
 import { JWT_SECRET } from '../auth/middleware/auth.middleware';
 import { DevicePlugin } from '../plugin';
+import { removeDevicesForNodes } from './device-service';
 
 export class NodeService {
   static async register(isHub: boolean, nodeName: string, host: string, nodeId: string) {
@@ -15,17 +16,17 @@ export class NodeService {
       jwtSecretToken: JWT_SECRET,
       isOnline: true,
       tags: '',
+      isHub,
     };
 
-    if (isHub) {
-      nodeDetails.isHub = true;
-      await NodeService.addNode(nodeId, nodeDetails as any);
-    } else {
+    await NodeService.addNode(nodeId, nodeDetails as any);
+    if (!isHub) {
+      delete nodeDetails.isHub;
       await DevicePlugin.apiClient.registerNode(nodeDetails);
     }
   }
 
-  static async addNode(nodeId: string, node: Node) {
+  static async addNode(nodeId: string, node: Node, userId?: string) {
     const isNodeExists = await prisma.node.findFirst({
       where: {
         id: nodeId,
@@ -40,6 +41,7 @@ export class NodeService {
       jwtSecretToken: node.jwtSecretToken,
       isOnline: true,
       isHub: node.isHub,
+      addedBy: userId,
     };
     if (isNodeExists) {
       await prisma.node.update({
@@ -48,6 +50,8 @@ export class NodeService {
           id: nodeId,
         },
       });
+
+      await removeDevicesForNodes([nodeId]);
     } else {
       await prisma.node.create({
         data: {
@@ -69,6 +73,13 @@ export class NodeService {
         isOnline: true,
         tags: true,
         jwtSecretToken: !secure,
+        addedByUser: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+          },
+        },
       },
     });
   }
