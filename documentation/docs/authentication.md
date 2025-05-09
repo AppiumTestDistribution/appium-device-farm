@@ -1,13 +1,13 @@
 # Authentication and Device Management
 
-This section covers the authentication and device management features of Appium Device Farm. These features help secure your device farm and provide better control over device access and management.
+This section covers the authentication and device management features of Appium Device Farm. These features help secure your device farm and provide better control over device access and management. This feature is available with version 10.0.0 and above.
 
 ## Enabling Authentication
 
 To enable authentication in your device farm, you need to pass the `--plugin-device-farm-enable-authentication` flag while starting the Appium server:
 
 ```bash
-appium --plugin-device-farm-enable-authentication
+appium --use-plugin=device-farm --plugin-device-farm-enable-authentication
 ```
 
 When authentication is enabled:
@@ -83,7 +83,7 @@ The device farm supports two user roles:
 When connecting a node to an authenticated hub, you need to provide authentication credentials:
 
 ```bash
-appium --plugin-device-farm-hub=<hub-url> \
+appium --use-plugin=device-farm --plugin-device-farm-hub=<hub-url> \
        --plugin-device-farm-access-key=<access-key> \
        --plugin-device-farm-token=<token>
 ```
@@ -236,7 +236,7 @@ To prevent sensitive information from being logged, you can use Appium's log fil
 Then, when starting the Appium server (both hub and node), pass the log filter configuration:
 
 ```bash
-appium --log-filter=/path/to/log-filter.json
+appium --use-plugin=device-farm --log-filter=/path/to/log-filter.json
 ```
 
 This configuration will:
@@ -251,3 +251,22 @@ This configuration will:
 
 !!! note "Log Filter Location"
     Store the log filter configuration file in a secure location and ensure it's included in your deployment process for both hub and node instances. 
+
+## Troubleshooting
+
+### Upgrade and Installation Issues
+
+If you encounter any errors while upgrading the device farm from version 9.x to 10.x or experience issues with Prisma installation, execute the following commands to reset and reinitialize the device farm:
+
+```bash
+appium plugin run device-farm reset
+appium plugin run device-farm setup
+```
+
+These commands will:
+1. Reset the device farm configuration and database
+2. Reinitialize the device farm with fresh settings
+3. Reinstall any required dependencies
+
+!!! warning "Data Loss Warning"
+    The reset command will clear all existing data including users, teams, and device assignments. Make sure to backup any important data before running these commands. 
