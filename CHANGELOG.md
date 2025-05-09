@@ -1,3 +1,17 @@
+## [10.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.8...v10.0.0) (2025-05-09)
+
+### ⚠ BREAKING CHANGES
+
+* Following changes are added
+- Added authentication module with user and team management
+- Enhanced automation runs with access key authentication
+- Improved device and server management capabilities
+- Database schema changes that may result in loss of existing data
+
+### Features
+
+* use newCommandTimeoutSec for manual device control ([#1672](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1672)) ([7149941](https://github.com/AppiumTestDistribution/appium-device-farm/commit/71499417b2ef9c6229b8b493a0984a0ddff26799))
+
 ## [9.8.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.7...v9.8.8) (2025-04-29)
 
 ### Bug Fixes
