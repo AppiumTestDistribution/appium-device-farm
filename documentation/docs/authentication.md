@@ -49,7 +49,7 @@ If not set, the default credentials are:
     It's highly recommended to change the default credentials after your first login.
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/reset-password.png" alt="Reset Password" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/reset-password.png" alt="Reset Password" style="width: 70%; max-width: 700px;">
 </div>
 
 ## User Roles
@@ -64,10 +64,10 @@ The device farm supports two user roles:
 - Generate and manage API tokens
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/users.png" alt="User Management" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/users.png" alt="User Management" style="width: 0%; max-width: 700px;">
 </div>
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/teams.png" alt="Team Management" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/teams.png" alt="Team Management" style="width: 70%; max-width: 700px;">
 </div>
 
 ### User
@@ -106,10 +106,10 @@ appium --use-plugin=device-farm --plugin-device-farm-hub=<hub-url> \
 The access key will be displayed above the API tokens table. Use both the access key and token when registering nodes.
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token.png" alt="API Token Management" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token.png" alt="API Token Management" style="width: 70%; max-width: 700px;">
 </div>
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token-generate.png" alt="Generate API Token" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/api-token-generate.png" alt="Generate API Token" style="width: 70%; max-width: 700px;">
 </div>
 
 ## Automation Authentication
@@ -136,10 +136,10 @@ Admin users can:
 - Assign devices to teams
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management.png" alt="Device Management" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management.png" alt="Device Management" style="width: 70%; max-width: 700px;">
 </div>
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management-2.png" alt="Device Management Details" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/device-management-2.png" alt="Device Management Details" style="width: 70%; max-width: 700px;">
 </div>
 
 ### Device Persistence
@@ -159,10 +159,10 @@ Device information is persisted in the database, including:
 - Maintenance flags prevent device access during maintenance
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-device.png" alt="Manage Team Devices" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-device.png" alt="Manage Team Devices" style="width: 70%; max-width: 700px;">
 </div>
 <div style="display: flex; justify-content: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-user-1.png" alt="Manage Team Users 1" style="width: 60%; max-width: 700px;">
+    <img src="https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/docs-authentication/documentation/docs/assets/images/authentication/manage-team-user-1.png" alt="Manage Team Users 1" style="width: 70%; max-width: 700px;">
 </div>
 
 <div style="display: flex; justify-content: center; margin: 20px 0;">
@@ -172,22 +172,20 @@ Device information is persisted in the database, including:
 ## Best Practices
 
 1. **Security**
-   - Change default credentials immediately
-   - Use strong passwords
-   - Regularly rotate API tokens
-   - Set appropriate token expiration dates
-
-2. **Device Management**
-   - Use meaningful device names
-   - Tag devices appropriately
-   - Flag devices for maintenance when needed
-   - Regularly review team assignments
-
-3. **Node Configuration**
-   - Store node credentials securely
-   - Use environment variables for sensitive data
-   - Monitor node connection status
-   - Implement proper error handling for authentication failures
+2. Change default credentials immediately
+3. Use strong passwords
+4. Regularly rotate API tokens
+5. Set appropriate token expiration dates
+6. **Device Management**
+7. Use meaningful device names
+8. Tag devices appropriately
+9. Flag devices for maintenance when needed
+10. Regularly review team assignments
+11. **Node Configuration**
+12. Store node credentials securely
+13. Use environment variables for sensitive data
+14. Monitor node connection status
+15. Implement proper error handling for authentication failures
 
 ## Securing Logs
 
