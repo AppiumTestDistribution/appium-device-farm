@@ -50,8 +50,6 @@ export class NodeService {
           id: nodeId,
         },
       });
-
-      await removeDevicesForNodes([nodeId]);
     } else {
       await prisma.node.create({
         data: {

@@ -145,6 +145,7 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       .chain()
       .find({ udid: device.udid, host: device.host })
       .data();
+
     if (isDeviceAlreadyPresent.length === 0) {
       delete device['$loki'];
       delete device['meta'];
@@ -507,8 +508,6 @@ export async function unblockDeviceMatchingFilter(filter: object) {
     devices = deviceModel.chain().find(filter).data();
   }
 
-  log.info(devices);
-
   if (devices !== undefined) {
     debugLog(`Found ${devices.length} devices to unblock with filter ${JSON.stringify(filter)}`);
 
@@ -539,6 +538,7 @@ export async function unblockDeviceMatchingFilter(filter: object) {
             device.sessionStartTime = 0;
             device.totalUtilizationTimeMilliSec = totalUtilization;
             device.newCommandTimeout = undefined;
+            device.activeUser = undefined;
           },
         );
 

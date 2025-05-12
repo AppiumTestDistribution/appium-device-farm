@@ -444,6 +444,7 @@ class DevicePlugin extends BasePlugin {
       log.info(
         `📱 ${pendingSessionId} ----- Device UDID ${device.udid} blocked for session ${sessionId}`,
       );
+      const user = DevicePlugin.IS_HUB ? await getUserFromCapabilities(mergedCapabilites) : null;
       await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
@@ -451,11 +452,21 @@ class DevicePlugin extends BasePlugin {
         sessionStartTime: new Date().getTime(),
         sessionResponse: sessionResponse,
         mjpegServerPort: sessionResponse.mjpegServerPort,
+        activeUser: user
+          ? {
+              id: user.id,
+              firstname: user.firstname,
+              lastname: user.lastname,
+            }
+          : undefined,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
       }
-      if (!mergedCapabilites['df:skipReport']) {
+
+      const isManualSession = mergedCapabilites['df:skipReport'];
+
+      if (!isManualSession) {
         await EventBus.fire(
           new SessionCreatedEvent({
             sessionId,

@@ -6,6 +6,7 @@ import debugLog from '../debugLog';
 import { prisma } from '../prisma';
 import { SignOptions } from 'jsonwebtoken';
 import jwt from 'jsonwebtoken';
+import { User } from '@prisma/client';
 
 const KEY_POOL = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ1234567890';
 
@@ -45,7 +46,9 @@ export async function authenticateUserWithAccessKey(accessKey: string, secretTok
   throw new Error('Invalid credentials');
 }
 
-export async function getUserFromCapabilities(capabilities: Record<string, any>) {
+export async function getUserFromCapabilities(
+  capabilities: Record<string, any>,
+): Promise<Omit<User, 'password'>> {
   debugLog(`Capabilities: ${JSON.stringify(capabilities['df:jwt'])}`);
   if (capabilities['df:jwt']) {
     const token = capabilities['df:jwt'];

@@ -43,4 +43,9 @@ export interface IDevice {
   webDriverAgentUrl?: string;
   webDriverAgentHost?: string;
   sessionResponse?: Record<string, any>;
+  activeUser?: {
+    id: string;
+    firstname: string;
+    lastname: string;
+  };
 }
