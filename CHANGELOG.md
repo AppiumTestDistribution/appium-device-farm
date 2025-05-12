@@ -1,3 +1,9 @@
+## [10.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.2...v10.0.3) (2025-05-12)
+
+### Bug Fixes
+
+* ignore user check while session creation when auth is disabled ([#1676](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1676)) ([6b4a38b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/6b4a38b944f3880e9d06ca76a88aa60b179f597d))
+
 ## [10.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.1...v10.0.2) (2025-05-12)
 
 ### Bug Fixes
