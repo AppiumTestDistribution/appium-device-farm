@@ -4,7 +4,7 @@ import os from 'os';
 import { prisma } from '../prisma';
 import { JWT_SECRET } from '../auth/middleware/auth.middleware';
 import { DevicePlugin } from '../plugin';
-import { removeDevicesForNodes } from './device-service';
+import log from '../logger';
 
 export class NodeService {
   static async register(isHub: boolean, nodeName: string, host: string, nodeId: string) {
@@ -41,9 +41,11 @@ export class NodeService {
       jwtSecretToken: node.jwtSecretToken,
       isOnline: true,
       isHub: node.isHub,
-      addedBy: userId,
+      addedBy: userId ?? null,
     };
+
     if (isNodeExists) {
+      log.info('Node already exists. So updating..');
       await prisma.node.update({
         data,
         where: {
@@ -51,6 +53,7 @@ export class NodeService {
         },
       });
     } else {
+      log.info('Node not exists. So creating..');
       await prisma.node.create({
         data: {
           ...data,
