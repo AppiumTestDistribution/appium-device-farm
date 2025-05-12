@@ -116,10 +116,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
           );
           if (existingDevice) {
             log.info(`Android Device details for ${device.udid} already available`);
-            availableDevices.push({
-              ...existingDevice,
-              busy: false,
-            });
+            availableDevices.push(existingDevice);
           } else {
             log.info(`Android Device details for ${device.udid} not available. So querying now.`);
             // device may have changed the status since the last time we queried
