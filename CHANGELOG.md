@@ -1,3 +1,9 @@
+## [10.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.1...v10.0.2) (2025-05-12)
+
+### Bug Fixes
+
+* display active user on device card ([#1675](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1675)) ([89f0eb2](https://github.com/AppiumTestDistribution/appium-device-farm/commit/89f0eb2a6c1cd917cc12a56f21bd298d5c313353))
+
 ## [10.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.0...v10.0.1) (2025-05-09)
 
 ### Bug Fixes
