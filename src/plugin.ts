@@ -444,7 +444,10 @@ class DevicePlugin extends BasePlugin {
       log.info(
         `📱 ${pendingSessionId} ----- Device UDID ${device.udid} blocked for session ${sessionId}`,
       );
-      const user = DevicePlugin.IS_HUB ? await getUserFromCapabilities(mergedCapabilites) : null;
+      const user =
+        DevicePlugin.IS_HUB && this.pluginArgs.enableAuthentication
+          ? await getUserFromCapabilities(mergedCapabilites)
+          : null;
       await updatedAllocatedDevice(device, {
         busy: true,
         session_id: sessionId,
