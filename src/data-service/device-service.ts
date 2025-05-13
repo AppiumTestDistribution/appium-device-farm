@@ -83,7 +83,10 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       d.id = d.id ?? generateDeviceId(d);
       return d;
     })
-    .filter((device) => !savedDevices.some((savedDevice) => savedDevice.id === device.id))
+    .filter(
+      (device) =>
+        !device.cloud && !savedDevices.some((savedDevice) => savedDevice.id === device.id),
+    )
     .map(
       (device) =>
         ({
@@ -187,10 +190,13 @@ export async function setSimulatorState(devices: Array<IDevice>) {
   for await (const device of devices) {
     const allDevices = (await ATDRepository.DeviceModel).chain().find().data();
     if (allDevices.length != 0 && device.deviceType === 'simulator') {
-      const { state } = allDevices.find((d: IDevice) => d.udid === device.udid);
-      if (state !== device.state) {
+      const currentDevice = allDevices.find((d: IDevice) => d.udid === device.udid);
+      if (!currentDevice) {
+        break;
+      }
+      if (currentDevice.state !== device.state) {
         log.info(
-          `Updating Simulator status from ${state} to ${device.state} for device ${device.udid}`,
+          `Updating Simulator status from ${currentDevice.state} to ${device.state} for device ${device.udid}`,
         );
         (await ATDRepository.DeviceModel)
           .chain()
