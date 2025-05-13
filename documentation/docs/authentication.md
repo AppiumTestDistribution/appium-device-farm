@@ -235,6 +235,11 @@ To prevent sensitive information from being logged, you can use Appium's log fil
     "pattern": "\"token\":\\s*\"([^\"\n]+)\"",
     "flags": "i",
     "replacer": "**TOKEN**"
+  },
+  {
+    "pattern": "\"jwtSecretToken\":\\s*\"([^\"\n]+)\"",
+    "flags": "i",
+    "replacer": "**TOKEN**"
   }
 ]
 ```

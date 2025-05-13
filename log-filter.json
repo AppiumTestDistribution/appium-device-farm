@@ -33,5 +33,10 @@
     "pattern": "\"token\":\\s*\"([^\"\n]+)\"",
     "flags": "i",
     "replacer": "**TOKEN**"
+  },
+  {
+    "pattern": "\"jwtSecretToken\":\\s*\"([^\"\n]+)\"",
+    "flags": "i",
+    "replacer": "**TOKEN**"
   }
 ]
