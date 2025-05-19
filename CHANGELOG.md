@@ -1,3 +1,9 @@
+## [10.0.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.3...v10.0.4) (2025-05-19)
+
+### Bug Fixes
+
+* remove node-pty dependency ([#1692](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1692)) ([32ca76a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/32ca76aae8f399fc626962fe130ee3929293ac33))
+
 ## [10.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.2...v10.0.3) (2025-05-12)
 
 ### Bug Fixes
