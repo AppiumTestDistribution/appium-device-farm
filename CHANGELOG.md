@@ -1,3 +1,9 @@
+## [10.0.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.4...v10.0.5) (2025-06-15)
+
+### Bug Fixes
+
+* update IOSDeviceType.ts for iPhone 16e ([#1716](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1716)) ([2416557](https://github.com/AppiumTestDistribution/appium-device-farm/commit/24165570f6a349cc083d03b558d2390f43df8e46))
+
 ## [10.0.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.3...v10.0.4) (2025-05-19)
 
 ### Bug Fixes
