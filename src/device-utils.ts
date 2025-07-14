@@ -58,7 +58,9 @@ export const getDeviceTypeFromApp = (app: string): 'real' | 'simulator' | undefi
   if (!app) {
     return;
   }
-  return app.endsWith('.app') || app.endsWith('.zip') ? 'simulator' : 'real';
+  /* Remove query parameters from app path */
+  const cleanAppPath = app.replace(/\?.*$/, '').toLowerCase();
+  return cleanAppPath.endsWith('.app') || cleanAppPath.endsWith('.zip') ? 'simulator' : 'real';
 };
 
 export function isAndroid(pluginArgs: IPluginArgs): boolean {
