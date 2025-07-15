@@ -1,3 +1,9 @@
+## [10.0.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.5...v10.0.6) (2025-07-15)
+
+### Bug Fixes
+
+* **getDeviceTypeFromApp:** strip query params and properly detect .app/.zip/.ipa builds ([#1738](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1738)) ([5c20f36](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5c20f36ff1401d6bd1387ba022696d91327f4894))
+
 ## [10.0.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.4...v10.0.5) (2025-06-15)
 
 ### Bug Fixes
