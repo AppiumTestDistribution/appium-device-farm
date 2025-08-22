@@ -16,6 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@appium/docutils": "^1.0.7"
+    "@appium/docutils": "^2.0.1"
   }
 }
