@@ -1,3 +1,9 @@
+## [10.0.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.6...v10.0.7) (2025-08-22)
+
+### Bug Fixes
+
+* skip default log capture for manual session ([#1774](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1774)) ([f2ce60c](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f2ce60c21a25976903d1aff96aff7472b773c8c5))
+
 ## [10.0.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.5...v10.0.6) (2025-07-15)
 
 ### Bug Fixes
