@@ -248,7 +248,6 @@ async function zipPayloadDirectory(
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
           
           if (cliOptions.platform === 'both') {
-            // Hem iOS hem tvOS için dosya oluştur
             const platforms = ['ios', 'tvos'];
             const results = [];
             
@@ -277,7 +276,7 @@ async function zipPayloadDirectory(
             
             task.title = `Successfully signed WebDriverAgent files for both platforms: ${results.join(', ')}`;
           } else {
-            // Tek platform için dosya oluştur
+            // Single platform file creation
             const wdaFileName = cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
             const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
 
