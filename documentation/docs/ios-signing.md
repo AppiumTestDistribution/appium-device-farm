@@ -62,7 +62,11 @@ To re-sign the IPA, open the `iOS Resigner app` that you previously downloaded. 
 
 ![Ios resign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step10-ios-resign-1.png)
 
-After entering all the details, click "Start" and select a folder to save the resigned IPA file. Ensure you save it with the name `wda-resign.ipa` and click "Save."
+After entering all the details, click "Start" and select a folder to save the resigned IPA file. 
+
+**For iOS devices:** Ensure you save it with the name `wda-resign.ipa` and click "Save."
+
+**For tvOS devices:** Ensure you save it with the name `wda-resign_tvos.ipa` and click "Save."
 
 ![ios wda sign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step11-ios-resign-save.png)
 
@@ -76,7 +80,15 @@ Once the WebDriver agent is successfully re-signed, it needs to be uploaded to t
 
 ![df app upload](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step12-df-uplaod-app.png)
 
-Choose the resigned IPA named `wda-resign.ipa` and click "Upload." You should see a success popup indicating the file upload was successful. That's it! You are now ready to use real iOS devices with the device farm.
+**For iOS devices:** Choose the resigned IPA named `wda-resign.ipa` and click "Upload."
+
+**For tvOS devices:** Choose the resigned IPA named `wda-resign_tvos.ipa` and click "Upload."
+
+The system will automatically select the appropriate WDA file based on the device platform:
+- iOS devices (iPhone, iPad) → `wda-resign.ipa`
+- tvOS devices (Apple TV) → `wda-resign_tvos.ipa`
+
+You should see a success popup indicating the file upload was successful. That's it! You are now ready to use real iOS and tvOS devices with the device farm.
 
 ![df upload success](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step13-df-uplaod-done.png)
 
