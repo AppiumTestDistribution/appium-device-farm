@@ -95,8 +95,9 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort();
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
+    const wdaFileName = freeDevice.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
     const wdaInfo = await prisma.appInformation.findFirst({
-      where: { fileName: 'wda-resign.ipa' },
+      where: { fileName: wdaFileName },
     });
     if (wdaInfo && !process.env.GO_IOS) {
       caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
