@@ -45,6 +45,7 @@ type Context = ListrContext & CliOptions;
 interface CliOptions {
   mobileProvisioningFile?: string;
   wdaProjectPath?: string;
+  platform?: string;
 }
 
 const getOptions = async () => {
@@ -57,11 +58,18 @@ const getOptions = async () => {
       desc: 'Path to webdriver agent xcode project',
       type: 'string',
     },
+    'platform': {
+      desc: 'Platform type: ios or tvos (default: ios)',
+      type: 'string',
+      choices: ['ios', 'tvos'],
+      default: 'ios',
+    },
   }).argv;
 
   return {
     mobileProvisioningFile: argv.mobileProvisioningFile,
     wdaProjectPath: argv.wdaProjectPath,
+    platform: argv.platform,
   };
 };
 
@@ -238,7 +246,9 @@ async function zipPayloadDirectory(
         title: 'Signing WebDriverAgent ipa',
         task: async (context, task) => {
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
-          const ipaPath = `${wdaBuildPath}/wda-resign.ipa`;
+          // Platform'a göre dosya adı seçimi
+          const wdaFileName = cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
+          const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
 
           let appleOptions: any;
           if (freeBundleID) {
@@ -255,7 +265,7 @@ async function zipPayloadDirectory(
           }
           const as = new Applesign(appleOptions);
           await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
-          task.title = `Successfully signed WebDriverAgent file  ${ipaPath}`;
+          task.title = `Successfully signed WebDriverAgent file for ${cliOptions.platform}: ${ipaPath}`;
         },
       },
     ],
