@@ -246,7 +246,6 @@ async function zipPayloadDirectory(
         title: 'Signing WebDriverAgent ipa',
         task: async (context, task) => {
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
-          // Platform'a göre dosya adı seçimi
           const wdaFileName = cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
           const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
 
