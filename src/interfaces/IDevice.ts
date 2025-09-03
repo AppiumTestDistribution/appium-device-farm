@@ -1,6 +1,7 @@
 import { Platform } from '../types/Platform';
 
 export interface IDevice {
+  id: string;
   systemPort: number;
   host: string;
   proxyPort?: number;
@@ -42,4 +43,9 @@ export interface IDevice {
   webDriverAgentUrl?: string;
   webDriverAgentHost?: string;
   sessionResponse?: Record<string, any>;
+  activeUser?: {
+    id: string;
+    firstname: string;
+    lastname: string;
+  };
 }

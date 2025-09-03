@@ -43,6 +43,7 @@ extra_css:
 nav:
   - index.md
   - setup.md
+  - authentication.md
   - troubleshooting.md
   - cloud.md
   - remote-execution.md
