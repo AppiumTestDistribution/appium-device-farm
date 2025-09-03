@@ -21,6 +21,15 @@ With Appium Device-farm, teams can:
 5. Monitor and manage test sessions through a user-friendly dashboard, providing real-time visibility into ongoing tests and detailed logs for easy debugging and troubleshooting.
 6. Record and replay test runs, enabling teams to review test executions, reproduce issues, and ensure thorough testing coverage.
 
+> [!IMPORTANT]
+> ## 🚨 Breaking Changes - Version 10.0.0 and Above
+> 
+> Starting from version 10.0.0, we have introduced several breaking changes:
+> - Added authentication module with user and team management
+> - Enhanced automation runs with access key authentication
+> - Improved device and server management capabilities
+> - Database schema changes that may result in loss of existing data
+
 # 🎯 Testimonials
 
 ## 🏢 Enterprise Team Experience

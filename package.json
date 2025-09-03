@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "9.8.5",
+  "version": "10.0.7",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices.",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "build-web-and-plugin": "npx tsc -b && npm run buildAndCopyWeb && npm run copy-files",
     "copy-files": "(cp -R src/public lib || exit 0)",
     "buildAndCopyWeb": "sh buildAndCopyWeb.sh",
+    "bundleStreamApk": "sh move-stream.sh",
     "prepublishOnly": "npx tsc && npm run buildAndCopyWeb && npm run copy-files && npm run bundle",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "prettier-check": "prettier 'src/**/*.ts' --check --verbose",
@@ -42,7 +43,8 @@
     "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --plugin-device-farm-platform=android --plugin-device-farm-max-sessions=8",
     "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
-    "postinstall": "npm run run-db-migration"
+    "postinstall": "npm run run-db-migration",
+    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444"
   },
   "repository": {
     "type": "git",
@@ -60,10 +62,6 @@
     {
       "name": "Sudharsan Selvaraj",
       "email": "sudharsanselvaraj.c@gmail.com"
-    },
-    {
-      "name": "Anand Bagmar",
-      "email": "abagmar@gmail.com"
     }
   ],
   "license": "ISC",
@@ -90,6 +88,7 @@
     "async-wait-until": "^2.0.12",
     "asyncbox": "^3.0.0",
     "axios": "^1.6.7",
+    "bcrypt": "^5.1.1",
     "bluebird": "^3.7.2",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -98,6 +97,7 @@
     "express": "^4.17.3",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
+    "generate-api-key": "^1.0.2",
     "get-port": "^5.1.1",
     "http-proxy-agent": "7.0.2",
     "http-proxy-middleware": "^3.0.0-beta.1",
@@ -106,7 +106,9 @@
     "ios-mobileprovision-finder": "^1.1.0",
     "ip": "^1.1.8",
     "jsonschema": "1.4.1",
+    "jsonwebtoken": "^9.0.2",
     "listr": "^0.14.3",
+    "local-cors-proxy": "^1.1.0",
     "lodash": "4.17.21",
     "lokijs": "^1.5.12",
     "lru-cache": "^10.2.2",
@@ -131,6 +133,7 @@
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
+    "uuid-by-string": "^4.0.0",
     "ws": "^8.17.0",
     "yargs": "^17.7.2"
   },
@@ -149,6 +152,7 @@
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^14.0.1",
     "@types/async-lock": "1.4.2",
+    "@types/bcrypt": "^5.0.2",
     "@types/bluebird": "^3.5.42",
     "@types/chai": "4.3.19",
     "@types/chai-as-promised": "^7.1.8",
@@ -157,6 +161,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/ip": "^1.1.2",
     "@types/js-yaml": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/listr": "^0.14.9",
     "@types/lodash": "4.17.7",
     "@types/lokijs": "1.5.14",
@@ -174,8 +179,8 @@
     "@wdio/types": "^8.24.2",
     "appium": "^2.17.1",
     "appium-flutter-integration-driver": "^1.1.3",
-    "appium-uiautomator2-driver": "^4.1.5",
-    "appium-xcuitest-driver": "^7.35.1",
+    "appium-uiautomator2-driver": "^4.2.3",
+    "appium-xcuitest-driver": "^9.2.1",
     "babel-eslint": "10.1.0",
     "chai": "4.5.0",
     "chai-as-promised": "^7.1.1",
@@ -197,7 +202,7 @@
     "sinon": "17.0.1",
     "sinon-chai": "^3.7.0",
     "ts-node": "10.9.2",
-    "typescript": "5.5.4",
+    "typescript": "^5.5.4",
     "wait-on": "^7.2.0",
     "webdriverio": "^8.20.4",
     "webpack-cli": "^5.1.4",
@@ -293,6 +298,18 @@
           "type": "string"
         },
         "preBuildWDAPath": {
+          "type": "string"
+        },
+        "enableAuthentication": {
+          "type": "boolean"
+        },
+        "accessKey": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "nodeName": {
           "type": "string"
         }
       },

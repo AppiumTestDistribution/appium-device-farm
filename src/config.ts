@@ -20,21 +20,21 @@ function getDeviceFarmHome() {
 }
 
 
-function getServerMetadata() {
-  const metaFile = path.join(getDeviceFarmHome(), "metadata.json");
+export function getServerMetadata() {
+  const metaFile = path.join(getDeviceFarmHome(), 'metadata.json');
   let defaultMetadata = {
-    id: uuid()
-  }
-  if(fs.existsSync(metaFile)) {
-    const metadata = JSON.parse(fs.readFileSync(metaFile, "utf-8"));
-    if(!metadata || !metadata.id) {
+    id: uuid(),
+  };
+  if (fs.existsSync(metaFile)) {
+    const metadata = JSON.parse(fs.readFileSync(metaFile, 'utf-8'));
+    if (!metadata || !metadata.id) {
       fs.writeFileSync(metaFile, JSON.stringify(Object.assign(defaultMetadata, metadata)));
       return {
         ...defaultMetadata,
-        ...metadata
-      }
+        ...metadata,
+      };
     }
-    return metadata
+    return metadata;
   } else {
     fs.writeFileSync(metaFile, JSON.stringify(defaultMetadata));
   }
@@ -47,5 +47,5 @@ export const config: Config = {
   sessionAssetsPath: path.join(deviceFarmHome, 'assets', 'sessions'),
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
   appsPath: path.join(deviceFarmHome, 'assets'),
-  serverMetadata : getServerMetadata()
+  serverMetadata: { id: '' },
 };

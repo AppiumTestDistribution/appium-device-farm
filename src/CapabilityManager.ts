@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { IDevice } from './interfaces/IDevice';
 import { prisma } from './prisma';
 import { DevicePlugin } from './plugin';
+import log from './logger';
+import { updatedAllocatedDevice } from './data-service/device-service';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -12,7 +14,7 @@ export enum DEVICE_FARM_CAPABILITIES {
   VIDEO_RESOLUTION = 'videoResolution',
   VIDEO_TIME_LIMIT = 'videoTimeLimit',
   LIVE_VIDEO = 'liveVideo',
-  SCREENSHOT_ON_FAILURE = "screenshotOnFailure",
+  SCREENSHOT_ON_FAILURE = 'screenshotOnFailure',
   SCREENSHOT_ON_ALL = 'screenshotOnAll',
   DEVICE_FARM_OPTIONS = 'df:options',
   DEVICE_TIMEOUT = 'deviceAvailabilityTimeout',
@@ -78,21 +80,12 @@ export async function androidCapabilities(
 
 export async function iOSCapabilities(
   caps: ISessionCapability,
-  freeDevice: {
-    webDriverAgentUrl?: any;
-    udid: any;
-    name: string;
-    realDevice: boolean;
-    sdk: string;
-    mjpegServerPort?: number;
-    wdaLocalPort?: number;
-    derivedDataPath?: string;
-    wdaBundleId?: string;
-    webDriverAgentHost?: string;
-  },
+  freeDevice: IDevice,
   options: { liveVideo: boolean },
 ) {
-  freeDevice.mjpegServerPort = options.liveVideo ? await getPort() : undefined;
+  if (!process.env.GO_IOS) {
+    freeDevice.mjpegServerPort = options.liveVideo ? await getPort() : undefined;
+  }
 
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
@@ -109,7 +102,8 @@ export async function iOSCapabilities(
       caps.firstMatch[0]['appium:usePreinstalledWDA'] = true;
       caps.firstMatch[0]['appium:updatedWDABundleId'] = wdaInfo.appBundleId;
       caps.firstMatch[0]['appium:updatedWDABundleIdSuffix'] = '';
-    } else if (wdaInfo && process.env.GO_IOS) {
+    } else if (wdaInfo && process.env.GO_IOS && !caps.alwaysMatch?.['appium:webDriverAgentUrl']) {
+      log.info('Setting webDriverAgentUrl for real device');
       caps.firstMatch[0]['appium:webDriverAgentUrl'] =
         freeDevice.webDriverAgentUrl = `${freeDevice.webDriverAgentHost}:${freeDevice.wdaLocalPort}`;
       delete caps.firstMatch[0]['appium:wdaLocalPort'];
@@ -130,6 +124,11 @@ export async function iOSCapabilities(
     deleteMatch.push('appium:mjpegServerPort');
   }
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
+  await updatedAllocatedDevice(freeDevice, {
+    wdaLocalPort: freeDevice.wdaLocalPort,
+    mjpegServerPort: freeDevice.mjpegServerPort,
+    webDriverAgentUrl: freeDevice.webDriverAgentUrl,
+  });
 }
 
 export function getDeviceFarmCapabilities(caps: ISessionCapability) {

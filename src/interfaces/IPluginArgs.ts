@@ -77,6 +77,14 @@ export interface IPluginArgs {
   removeDevicesFromDatabaseBeforeRunningThePlugin?: boolean;
   bootedSimulators?: boolean;
   remoteConnectionTimeout?: number;
+
+  //authentication
+  enableAuthentication?: boolean;
+  accessKey?: string;
+  token?: string;
+
+  //node
+  nodeName?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

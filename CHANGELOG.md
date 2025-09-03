@@ -1,3 +1,77 @@
+## [10.0.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.6...v10.0.7) (2025-08-22)
+
+### Bug Fixes
+
+* skip default log capture for manual session ([#1774](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1774)) ([f2ce60c](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f2ce60c21a25976903d1aff96aff7472b773c8c5))
+
+## [10.0.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.5...v10.0.6) (2025-07-15)
+
+### Bug Fixes
+
+* **getDeviceTypeFromApp:** strip query params and properly detect .app/.zip/.ipa builds ([#1738](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1738)) ([5c20f36](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5c20f36ff1401d6bd1387ba022696d91327f4894))
+
+## [10.0.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.4...v10.0.5) (2025-06-15)
+
+### Bug Fixes
+
+* update IOSDeviceType.ts for iPhone 16e ([#1716](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1716)) ([2416557](https://github.com/AppiumTestDistribution/appium-device-farm/commit/24165570f6a349cc083d03b558d2390f43df8e46))
+
+## [10.0.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.3...v10.0.4) (2025-05-19)
+
+### Bug Fixes
+
+* remove node-pty dependency ([#1692](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1692)) ([32ca76a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/32ca76aae8f399fc626962fe130ee3929293ac33))
+
+## [10.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.2...v10.0.3) (2025-05-12)
+
+### Bug Fixes
+
+* ignore user check while session creation when auth is disabled ([#1676](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1676)) ([6b4a38b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/6b4a38b944f3880e9d06ca76a88aa60b179f597d))
+
+## [10.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.1...v10.0.2) (2025-05-12)
+
+### Bug Fixes
+
+* display active user on device card ([#1675](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1675)) ([89f0eb2](https://github.com/AppiumTestDistribution/appium-device-farm/commit/89f0eb2a6c1cd917cc12a56f21bd298d5c313353))
+
+## [10.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.0...v10.0.1) (2025-05-09)
+
+### Bug Fixes
+
+* update documentations for authentication module ([#1673](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1673)) ([4e35bed](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4e35bed81e007032882f48dde402c705b27e2180))
+
+## [10.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.8...v10.0.0) (2025-05-09)
+
+### ⚠ BREAKING CHANGES
+
+* Following changes are added
+- Added authentication module with user and team management
+- Enhanced automation runs with access key authentication
+- Improved device and server management capabilities
+- Database schema changes that may result in loss of existing data
+
+### Features
+
+* use newCommandTimeoutSec for manual device control ([#1672](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1672)) ([7149941](https://github.com/AppiumTestDistribution/appium-device-farm/commit/71499417b2ef9c6229b8b493a0984a0ddff26799))
+
+## [9.8.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.7...v9.8.8) (2025-04-29)
+
+### Bug Fixes
+
+* android streaming and double click issue ([#1663](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1663)) ([a3c88a0](https://github.com/AppiumTestDistribution/appium-device-farm/commit/a3c88a0e55ffe588257f2ecccd2e391726870c39))
+
+## [9.8.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.6...v9.8.7) (2025-04-22)
+
+### Bug Fixes
+
+* iOS resigning script ([#1655](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1655)) ([3f565b4](https://github.com/AppiumTestDistribution/appium-device-farm/commit/3f565b450a5b1271d91c30aace9d697e5c585aca))
+
+## [9.8.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.5...v9.8.6) (2025-04-21)
+
+### Bug Fixes
+
+* Running device-farm in non mac ([#1653](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1653)) ([8e7beca](https://github.com/AppiumTestDistribution/appium-device-farm/commit/8e7becae3047fbb161935ca294beb795e5f759a3))
+
 ## [9.8.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v9.8.4...v9.8.5) (2025-03-31)
 
 ### Bug Fixes
