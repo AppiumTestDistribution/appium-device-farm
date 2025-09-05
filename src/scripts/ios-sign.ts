@@ -45,6 +45,7 @@ type Context = ListrContext & CliOptions;
 interface CliOptions {
   mobileProvisioningFile?: string;
   wdaProjectPath?: string;
+  platform?: string;
 }
 
 const getOptions = async () => {
@@ -57,11 +58,18 @@ const getOptions = async () => {
       desc: 'Path to webdriver agent xcode project',
       type: 'string',
     },
+    'platform': {
+      desc: 'Platform type: ios, tvos, or both (default: ios)',
+      type: 'string',
+      choices: ['ios', 'tvos', 'both'],
+      default: 'ios',
+    },
   }).argv;
 
   return {
     mobileProvisioningFile: argv.mobileProvisioningFile,
     wdaProjectPath: argv.wdaProjectPath,
+    platform: argv.platform,
   };
 };
 
@@ -238,24 +246,57 @@ async function zipPayloadDirectory(
         title: 'Signing WebDriverAgent ipa',
         task: async (context, task) => {
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
-          const ipaPath = `${wdaBuildPath}/wda-resign.ipa`;
-
-          let appleOptions: any;
-          if (freeBundleID) {
-            appleOptions = {
-              mobileprovision: mobileProvisioningFile,
-              outfile: ipaPath,
-              bundleId: freeBundleID.name.replace(/^\s+|\s+$/g, ''),
-            };
+          
+          if (cliOptions.platform === 'both') {
+            const platforms = ['ios', 'tvos'];
+            const results = [];
+            
+            for (const platform of platforms) {
+              const wdaFileName = platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
+              const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
+              
+              let appleOptions: any;
+              if (freeBundleID) {
+                appleOptions = {
+                  mobileprovision: mobileProvisioningFile,
+                  outfile: ipaPath,
+                  bundleId: freeBundleID.name.replace(/^\s+|\s+$/g, ''),
+                };
+              } else {
+                appleOptions = {
+                  mobileprovision: mobileProvisioningFile,
+                  outfile: ipaPath,
+                };
+              }
+              
+              const as = new Applesign(appleOptions);
+              await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
+              results.push(`${platform}: ${ipaPath}`);
+            }
+            
+            task.title = `Successfully signed WebDriverAgent files for both platforms: ${results.join(', ')}`;
           } else {
-            appleOptions = {
-              mobileprovision: mobileProvisioningFile,
-              outfile: ipaPath,
-            };
+            // Single platform file creation
+            const wdaFileName = cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
+            const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
+
+            let appleOptions: any;
+            if (freeBundleID) {
+              appleOptions = {
+                mobileprovision: mobileProvisioningFile,
+                outfile: ipaPath,
+                bundleId: freeBundleID.name.replace(/^\s+|\s+$/g, ''),
+              };
+            } else {
+              appleOptions = {
+                mobileprovision: mobileProvisioningFile,
+                outfile: ipaPath,
+              };
+            }
+            const as = new Applesign(appleOptions);
+            await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
+            task.title = `Successfully signed WebDriverAgent file for ${cliOptions.platform}: ${ipaPath}`;
           }
-          const as = new Applesign(appleOptions);
-          await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
-          task.title = `Successfully signed WebDriverAgent file  ${ipaPath}`;
         },
       },
     ],

@@ -1,5 +1,6 @@
 import Simctl from 'node-simctl';
-import { flatten, isEmpty } from 'lodash';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { flatten, isEmpty } = require('lodash');
 import { utilities as IOSUtils } from 'appium-ios-device';
 import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
@@ -7,7 +8,8 @@ import { asyncForEach, getFreePort } from '../helpers';
 import log from '../logger';
 import os from 'os';
 import path from 'path';
-import fs from 'fs-extra';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs-extra');
 import Devices from './cloud/Devices';
 import NodeDevices from './NodeDevices';
 import { IosTracker } from './iOSTracker';

@@ -45,12 +45,20 @@ User can block/unblock devices from Dashboard manually. These devices will not b
 Once automation picks the device user cannot manually unblock, it's responsible for the automation script.
 
 ## Manual Control of Devices for iOS real device
-Resign the WDA provided here: [WDA](). Upload the resigned WDA to the server from the UI. Make sure the WDA uploaded should be named as `wda-resign.ipa`.
+Resign the WDA provided here: [WDA](). Upload the resigned WDA to the server from the UI. 
+
+**For iOS devices:** Make sure the WDA uploaded should be named as `wda-resign.ipa`.
+
+**For tvOS devices:** Make sure the WDA uploaded should be named as `wda-resign_tvos.ipa`.
+
+The system will automatically select the appropriate WDA file based on the device platform:
+- iOS devices (iPhone, iPad) → `wda-resign.ipa`
+- tvOS devices (Apple TV) → `wda-resign_tvos.ipa`
 
 Follow the instructions [here](https://github.com/DanTheMan827/ios-app-signer) to resign the WDA.
 
 Verify: Install the resigned WDA on the device and check if the WDA is working fine. Use the command 
-`ios install --path=/pathto/wda-resign.ipa`
+`ios install --path=/pathto/wda-resign.ipa` (for iOS) or `ios install --path=/pathto/wda-resign_tvos.ipa` (for tvOS)
 ## Dashboard
 
 To reflect the test status on dashboard. 
