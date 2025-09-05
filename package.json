@@ -319,7 +319,10 @@
     "scripts": {
       "setup": "lib/src/scripts/setup-db.js",
       "prepare-wda": "lib/src/scripts/ios-sign.js",
-      "reset": "lib/src/scripts/clear-assets.js"
+      "reset": "lib/src/scripts/clear-assets.js",
+      "reset-preserve-users": "lib/src/scripts/reset-preserve-users.js",
+      "reset-preserve-teams": "lib/src/scripts/reset-preserve-teams.js",
+      "reset-sessions-only": "lib/src/scripts/reset-sessions-only.js"
     }
   },
   "engines": {
