@@ -159,12 +159,19 @@ describe('IOS Device Manager', () => {
       4723,
       uuidv4(),
     );
+    sandbox.stub(Helper, 'isMac').returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(IOSDeviceManager, 'getProductModel').returns('iPhone12,8');
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
+    const iosDevicesWithRealDeviceFlag = deviceMock
+      .filter((device) => device.platform === 'iOS')
+      .map((device) => ({ ...device, realDevice: false }));
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
-      .returns(deviceMock.filter((device) => device.platform === 'iOS'));
+      .returns(iosDevicesWithRealDeviceFlag);
+    sandbox
+      .stub(iosDeviceManager, 'fetchLocalSimulators')
+      .returns(iosDevicesWithRealDeviceFlag);
     const devices = await iosDeviceManager.getDevices({ iosDeviceType: 'simulated' }, []);
     // all devices are simulators
     devices.forEach((device) => {
