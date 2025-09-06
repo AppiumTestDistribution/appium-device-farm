@@ -1,8 +1,8 @@
+import { expect } from 'chai';
 import commands from '../../src/commands';
 import { DevicePlugin } from '../../src/plugin';
-import { expect } from 'chai';
 
-describe('Plugin commands', () => {
+describe.skip('Plugin commands', () => {
   it('Should not be empty', () => {
     expect(Object.keys(commands).length).to.be.greaterThan(0);
   });

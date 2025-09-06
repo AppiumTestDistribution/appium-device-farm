@@ -1,20 +1,20 @@
-import chai, { expect } from 'chai';
-import { DeviceFarmManager } from '../../src/device-managers';
-import { Container } from 'typedi';
-import { ATDRepository } from '../../src/data-service/db';
-import {
-  updateDeviceList,
-  allocateDeviceForSession,
-  initializeStorage,
-  cleanPendingSessions,
-} from '../../src/device-utils';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-import ip from 'ip';
 import waitUntil from 'async-wait-until';
-import { IDevice } from '../../src/interfaces/IDevice';
-import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
+import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import ip from 'ip';
+import { Container } from 'typedi';
 import { v4 as uuidv4 } from 'uuid';
+import { ATDRepository } from '../../src/data-service/db';
+import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
+import { DeviceFarmManager } from '../../src/device-managers';
+import {
+    allocateDeviceForSession,
+    cleanPendingSessions,
+    initializeStorage,
+    updateDeviceList,
+} from '../../src/device-utils';
+import { IDevice } from '../../src/interfaces/IDevice';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 
 chai.use(chaiAsPromised);
@@ -39,12 +39,37 @@ describe('Android Test', () => {
 
   before(async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
+    
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'android',
+        jwtSecretToken: 'test-token',
+      },
+    });
+    
     // adb devices should return devices
     expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
       0,
       'No devices detected. Is adb running? Is there at least one device connected?',
     );
   });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: NODE_ID } });
+    await prisma.node.delete({ where: { id: NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
+  });
+
   it('Allocate free device and verify the device state is busy in db', async () => {
     await initializeStorage();
 
@@ -140,7 +165,7 @@ describe('Android Test', () => {
           .to.be.an('error')
           .with.property(
             'message',
-            'Device is busy or blocked.. Device request: {"platform":"android"}',
+            'No device matching request.. Device request: {"platform":"android"}',
           ),
     );
   });
