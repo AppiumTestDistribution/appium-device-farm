@@ -383,7 +383,7 @@ describe('Device Utils', () => {
       { id: 'dev-utils-mock-4', udid: 'device4', busy: true, host: 'unknown', nodeId: NODE_ID, sdk: '1.0' },
     ];
 
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock as any);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
@@ -426,7 +426,7 @@ describe('Device Utils', () => {
       },
     ];
 
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock as any);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
@@ -442,7 +442,7 @@ describe('Device Utils', () => {
   it('Block and unblock device', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
     // mock setUtilizationTime
-    sandbox.stub(DeviceUtils, <any>'setUtilizationTime').callsFake(sinon.fake());
+    sandbox.stub(DeviceUtils, 'setUtilizationTime' as any).callsFake(sinon.fake());
 
     const unbusyDevices = devices.map((device) => ({
       ...device,

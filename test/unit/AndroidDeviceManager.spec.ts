@@ -174,12 +174,12 @@ describe('Android Device Manager', function () {
         screenHeight: '600',
       }),
     );
-    const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
+    const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion' as any);
     sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
-    sandbox.stub(androidDevices, <any>'getDeviceName').returns('sdk_phone_x86');
-    const realDevice = sandbox.stub(androidDevices, <any>'isRealDevice');
+    sandbox.stub(androidDevices, 'getDeviceName' as any).returns('sdk_phone_x86');
+    const realDevice = sandbox.stub(androidDevices, 'isRealDevice' as any);
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort' as any).returns(54321);
@@ -233,22 +233,22 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-5554', state: 'device' },
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
-    sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, 'getConnectedDevices' as any).returns(deviceList);
     sandbox.stub(androidDevices, 'getDeviceSize').returns(
       Promise.resolve({
         screenWidth: '350',
         screenHeight: '600',
       }),
     );
-    const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
-    sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
+    const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion' as any);
+    sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
-    sandbox.stub(androidDevices, <any>'getDeviceName').returns('Nexus 6');
-    const realDevice = sandbox.stub(androidDevices, <any>'isRealDevice');
+    sandbox.stub(androidDevices, 'getDeviceName' as any).returns('Nexus 6');
+    const realDevice = sandbox.stub(androidDevices, 'isRealDevice' as any);
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
-    sandbox.stub(Helper, <any>'getFreePort').returns(54322);
+    sandbox.stub(Helper, 'getFreePort' as any).returns(54322);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
     const expectedDevices = [
       {
@@ -301,22 +301,22 @@ describe('Android Device Manager', function () {
       { udid: 'emulator-5554', state: 'device' },
       { udid: 'YOGAA1BBB4124', state: 'device' },
     ]);
-    sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
+    sandbox.stub(androidDevices, 'getConnectedDevices' as any).returns(deviceList);
     sandbox.stub(androidDevices, 'getDeviceSize').returns(
       Promise.resolve({
         screenWidth: '350',
         screenHeight: '600',
       }),
     );
-    const getDeviceVersion = sandbox.stub(androidDevices, <any>'getDeviceVersion');
-    sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
+    const getDeviceVersion = sandbox.stub(androidDevices, 'getDeviceVersion' as any);
+    sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
     getDeviceVersion.onFirstCall().returns('9');
     getDeviceVersion.onSecondCall().returns('13');
-    sandbox.stub(androidDevices, <any>'getDeviceName').returns('Nexus 6');
-    const realDevice = sandbox.stub(androidDevices, <any>'isRealDevice');
+    sandbox.stub(androidDevices, 'getDeviceName' as any).returns('Nexus 6');
+    const realDevice = sandbox.stub(androidDevices, 'isRealDevice' as any);
     realDevice.onFirstCall().returns(false);
     realDevice.onSecondCall().returns(true);
-    sandbox.stub(Helper, <any>'getFreePort').returns(54322);
+    sandbox.stub(Helper, 'getFreePort' as any).returns(54322);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
     const expectedDevices = [
       {
@@ -377,8 +377,8 @@ describe('Android Device Manager', function () {
       }
     };
 
-    sandbox.stub(androidDevices, <any>'getConnectedDevices').returns(deviceList);
-    sandbox.stub(androidDevices, <any>'getChromeVersion').returns('/var/path/chromedriver');
+    sandbox.stub(androidDevices, 'getConnectedDevices' as any).returns(deviceList);
+    sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
     
     // Make device info methods fail for emulator-9999 but succeed for emulator-7777
     const mockDeviceSize = (...args: any[]) => {
@@ -417,9 +417,9 @@ describe('Android Device Manager', function () {
     };
     
     sandbox.stub(androidDevices, 'getDeviceSize').callsFake(mockDeviceSize);
-    sandbox.stub(androidDevices, <any>'getDeviceVersion').callsFake(mockDeviceVersion);
-    sandbox.stub(androidDevices, <any>'getDeviceName').callsFake(mockDeviceName);
-    sandbox.stub(androidDevices, <any>'isRealDevice').callsFake(mockIsRealDevice);
+    sandbox.stub(androidDevices, 'getDeviceVersion' as any).callsFake(mockDeviceVersion);
+    sandbox.stub(androidDevices, 'getDeviceName' as any).callsFake(mockDeviceName);
+    sandbox.stub(androidDevices, 'isRealDevice' as any).callsFake(mockIsRealDevice);
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
