@@ -1,16 +1,13 @@
 /* eslint-disable no-prototype-builtins */
-import 'reflect-metadata';
-import commands from './commands/index';
 import BasePlugin from '@appium/base-plugin';
-import { createRouter } from './app';
-import { IDevice } from './interfaces/IDevice';
-import {
-  CreateSessionResponseInternal,
-  ISessionCapability,
-  W3CNewSessionResponse,
-  W3CNewSessionResponseError,
-} from './interfaces/ISessionCapability';
 import AsyncLock from 'async-lock';
+import axios, { AxiosError } from 'axios';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import 'reflect-metadata';
+import { Container } from 'typedi';
+import { createRouter } from './app';
+import commands from './commands/index';
 import {
   getDevice,
   setSimulatorState,
@@ -22,6 +19,8 @@ import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
+import { DeviceFarmManager } from './device-managers';
+import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import {
   allocateDeviceForSession,
   deviceType,
@@ -35,13 +34,6 @@ import {
   setupCronUpdateDeviceList,
   updateDeviceList,
 } from './device-utils';
-import { DeviceFarmManager } from './device-managers';
-import { Container } from 'typedi';
-import log from './logger';
-import { v4 as uuidv4 } from 'uuid';
-import axios, { AxiosError } from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { HttpProxyAgent } from 'http-proxy-agent';
 import {
   hasCloudArgument,
   isDeviceFarmRunning,
@@ -49,39 +41,46 @@ import {
   nodeUrl,
   stripAppiumPrefixes,
 } from './helpers';
+import { IDevice } from './interfaces/IDevice';
+import {
+  CreateSessionResponseInternal,
+  ISessionCapability,
+  W3CNewSessionResponse,
+  W3CNewSessionResponseError,
+} from './interfaces/ISessionCapability';
+import log from './logger';
 import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
-import ChromeDriverManager from './device-managers/ChromeDriverManager';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { addCLIArgs } from './data-service/pluginArgs';
-import Cloud from './enums/Cloud';
-import { ADB } from 'appium-adb';
-import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
-import NodeDevices from './device-managers/NodeDevices';
-import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { PluginConfig, ServerArgs } from '@appium/types';
-import { getDeviceFarmCapabilities } from './CapabilityManager';
-import ip from 'ip';
-import _ from 'lodash';
-import { ATDRepository } from './data-service/db';
-import EventBus from './notifier/event-bus';
-import { config, config as pluginConfig } from './config';
-import { SessionCreatedEvent } from './events/session-created-event';
-import debugLog from './debugLog';
+import { ADB } from 'appium-adb';
 import http from 'http';
 import * as https from 'https';
-import { DEVICE_CONNECTIONS_FACTORY } from './iProxy';
-import { BeforeSessionCreatedEvent } from './events/before-session-create-event';
+import ip from 'ip';
+import _ from 'lodash';
+import { DeviceFarmApiClient } from './api-client';
+import { getDeviceFarmCapabilities } from './CapabilityManager';
+import { config, config as pluginConfig } from './config';
+import { ATDRepository } from './data-service/db';
+import { NodeService } from './data-service/node-service';
+import { addCLIArgs } from './data-service/pluginArgs';
+import debugLog from './debugLog';
+import NodeDevices from './device-managers/NodeDevices';
+import Cloud from './enums/Cloud';
 import SessionType from './enums/SessionType';
-import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
 import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
+import { BeforeSessionCreatedEvent } from './events/before-session-create-event';
+import { SessionCreatedEvent } from './events/session-created-event';
+import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
+import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
+import { DEVICE_CONNECTIONS_FACTORY } from './iProxy';
+import EventBus from './notifier/event-bus';
 import {
   generateTokenForNode,
   getUserFromCapabilities,
   sanitizeSessionCapabilities,
 } from './utils/auth';
-import { NodeService } from './data-service/node-service';
-import { DeviceFarmApiClient } from './api-client';
 import { NodeHealthMonitor } from './utils/node-heath-monitor';
 import { enhancedADBManager } from './utils/enhanced-adb-manager';
 
