@@ -1,10 +1,10 @@
-import { cleanPendingSessions, getDeviceFiltersFromCapability } from '../../src/device-utils';
 import { expect } from 'chai';
-import { addCLIArgs } from '../../src/data-service/pluginArgs';
-import { serverCliArgs } from '../integration/cliArgs';
-import { ATDRepository } from '../../src/data-service/db';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { getDeviceFarmCapabilities } from '../../src/CapabilityManager';
+import { ATDRepository } from '../../src/data-service/db';
+import { addCLIArgs } from '../../src/data-service/pluginArgs';
+import { cleanPendingSessions, getDeviceFiltersFromCapability } from '../../src/device-utils';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { serverCliArgs } from '../integration/cliArgs';
 
 const pluginArgs = DefaultPluginArgs;
 
@@ -35,7 +35,7 @@ describe('Device filter tests', () => {
       platformVersion: '14.0',
       name: 'iPhone',
       deviceType: 'real',
-      udid: '21112-1111-1111-111',
+      udid: ['21112-1111-1111-111'],
       minSDK: undefined,
       maxSDK: undefined,
       filterByHost: undefined,

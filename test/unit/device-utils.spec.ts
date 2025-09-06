@@ -1,17 +1,18 @@
-import sinon from 'sinon';
-import * as DeviceUtils from '../../src/device-utils';
-import * as DeviceService from '../../src/data-service/device-service';
 import chai from 'chai';
-import sinonChai from 'sinon-chai';
-import { ATDRepository } from '../../src/data-service/db';
 import ip from 'ip';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import { Container } from 'typedi';
+import { v4 as uuidv4 } from 'uuid';
+import { ATDRepository } from '../../src/data-service/db';
+import * as DeviceService from '../../src/data-service/device-service';
 import { addNewDevice } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
-import { Container } from 'typedi';
+import * as DeviceUtils from '../../src/device-utils';
 import { allocateDeviceForSession } from '../../src/device-utils';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { IDevice } from '../../src/interfaces/IDevice';
-import { v4 as uuidv4 } from 'uuid';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { prisma } from '../../src/prisma';
 import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 
 chai.should();
@@ -24,7 +25,44 @@ const REQUEST_ID = uuidv4();
 sessionRequestMap.set(REQUEST_ID, {} as any);
 
 describe('Device Utils', () => {
+  before(async () => {
+    // Insert a Node record for foreign key constraint in both LokiJS and Prisma
+    const nodeModel = (await ATDRepository.db).getCollection('nodes') || (await ATDRepository.db).addCollection('nodes');
+    nodeModel.insert({
+      id: NODE_ID,
+      name: 'Test Node',
+      host: 'localhost',
+      os: 'linux',
+      jwtSecretToken: 'secret',
+      isHub: false,
+      isOnline: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Also create the node in Prisma database for foreign key constraint
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'linux',
+        jwtSecretToken: 'secret',
+        isHub: false,
+        isOnline: true,
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up Prisma database
+    await prisma.device.deleteMany({});
+    await prisma.node.deleteMany({});
+  });
   const hub1Device = {
+    id: 'dev-utils-1',
     systemPort: 56205,
     sdk: '10',
     realDevice: true,
@@ -40,8 +78,10 @@ describe('Device Utils', () => {
     sessionStartTime: 1667113345897,
     offline: false,
     lastCmdExecutedAt: 1667113356356,
+    nodeId: NODE_ID,
   };
   const hub2Device = {
+    id: 'dev-utils-2',
     systemPort: 56205,
     sdk: '10',
     realDevice: true,
@@ -57,8 +97,10 @@ describe('Device Utils', () => {
     sessionStartTime: 1667113345897,
     offline: false,
     lastCmdExecutedAt: 1667113356356,
+    nodeId: NODE_ID,
   };
   const localDeviceiOS = {
+    id: 'dev-utils-3',
     name: 'iPhone SE (3rd generation)',
     udid: '14C1078F-74C1-4672-BDB7-B65FC85FBFB4',
     state: 'Shutdown',
@@ -72,10 +114,12 @@ describe('Device Utils', () => {
     totalUtilizationTimeMilliSec: 0,
     sessionStartTime: 0,
     offline: false,
+    nodeId: NODE_ID,
   };
 
   // device with no host
   const noHostDevice = {
+    id: 'dev-utils-4',
     systemPort: 56205,
     sdk: '10',
     realDevice: true,
@@ -90,6 +134,8 @@ describe('Device Utils', () => {
     offline: false,
     lastCmdExecutedAt: 1667113356356,
     userBlocked: false,
+    nodeId: NODE_ID,
+    host: 'unknown',
   };
 
   const devices = [hub1Device, hub2Device, localDeviceiOS, noHostDevice] as unknown as IDevice[];
@@ -151,7 +197,7 @@ describe('Device Utils', () => {
           .to.be.an('error')
           .with.property(
             'message',
-            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","filterByHost":"http://192.168.0.226:4723"}',
+            'No device matching request.. Device request: {"platform":"android","udid":["emulator-5555"],"filterByHost":"http://192.168.0.226:4723"}',
           ),
     );
   });
@@ -218,7 +264,7 @@ describe('Device Utils', () => {
           .to.be.an('error')
           .with.property(
             'message',
-            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555","tags":["team1","teamAutomation"]}',
+            'No device matching request.. Device request: {"platform":"android","udid":["emulator-5555"],"tags":["team1","teamAutomation"]}',
           ),
     );
   });
@@ -305,7 +351,7 @@ describe('Device Utils', () => {
           .to.be.an('error')
           .with.property(
             'message',
-            'Device is busy or blocked.. Device request: {"platform":"android","udid":"emulator-5555"}',
+            'No device matching request.. Device request: {"platform":"android","udid":["emulator-5555"]}',
           ),
     );
   });
@@ -314,24 +360,30 @@ describe('Device Utils', () => {
     // Mock the dependencies and setup the test data
     const getAllDevicesMock = () => [
       {
+        id: 'dev-utils-mock-1',
         udid: 'device1',
         busy: true,
         host: ip.address(),
         lastCmdExecutedAt:
           new Date().getTime() - (DefaultPluginArgs.newCommandTimeoutSec + 5) * 1000,
+        nodeId: NODE_ID,
+        sdk: '1.0',
       },
       {
+        id: 'dev-utils-mock-2',
         udid: 'device2',
         busy: true,
         host: ip.address(),
         lastCmdExecutedAt: new Date().getTime() - 30000,
         newCommandTimeout: 20000 / 1000,
+        nodeId: NODE_ID,
+        sdk: '1.0',
       },
-      { udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
-      { udid: 'device4', busy: true, host: ip.address() },
+      { id: 'dev-utils-mock-3', udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime(), nodeId: NODE_ID, sdk: '1.0' },
+      { id: 'dev-utils-mock-4', udid: 'device4', busy: true, host: 'unknown', nodeId: NODE_ID, sdk: '1.0' },
     ];
 
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock as any);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
@@ -350,25 +402,31 @@ describe('Device Utils', () => {
     // spec: we have devices from different hosts, all of them are busy and one of them is not used for more than the timeout
     const getAllDevicesMock = () => [
       {
+        id: 'dev-utils-mock-5',
         udid: 'device1',
         busy: true,
         host: 'http://anotherhost:4723',
         lastCmdExecutedAt: new Date().getTime() - 30000,
         newCommandTimeout: 20000 / 1000,
+        nodeId: NODE_ID,
+        sdk: '1.0',
       },
-      { udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime() },
+      { id: 'dev-utils-mock-6', udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime(), nodeId: NODE_ID, sdk: '1.0' },
       // user blocked device
       {
+        id: 'dev-utils-mock-7',
         udid: 'device3',
         busy: true,
         host: ip.address(),
         userBlocked: true,
         lastCmdExecutedAt: new Date().getTime() - 30000,
         newCommandTimeout: 20000 / 1000,
+        nodeId: NODE_ID,
+        sdk: '1.0',
       },
     ];
 
-    sandbox.stub(DeviceService, 'getAllDevices').callsFake(<any>getAllDevicesMock);
+    sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock as any);
 
     const unblockDeviceMock = sandbox.stub(DeviceService, 'unblockDevice').callsFake(sinon.fake());
 
@@ -384,7 +442,7 @@ describe('Device Utils', () => {
   it('Block and unblock device', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
     // mock setUtilizationTime
-    sandbox.stub(DeviceUtils, <any>'setUtilizationTime').callsFake(sinon.fake());
+    sandbox.stub(DeviceUtils, 'setUtilizationTime' as any).callsFake(sinon.fake());
 
     const unbusyDevices = devices.map((device) => ({
       ...device,
