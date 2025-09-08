@@ -21,7 +21,12 @@ export function getTeamsRoutes(pluginArgs: IPluginArgs) {
     adminOnly,
     teamController.updateTeam.bind(teamController),
   );
-  router.delete('/:id', authMiddleware, adminOnly, teamController.deleteTeam.bind(teamController));
+  router.delete(
+    '/:id',
+    authMiddleware(pluginArgs),
+    adminOnly,
+    teamController.deleteTeam.bind(teamController),
+  );
 
   // Team membership routes
   router.post(
