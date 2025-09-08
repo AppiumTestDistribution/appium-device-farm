@@ -379,51 +379,7 @@ describe('Android Device Manager', function () {
 
     sandbox.stub(androidDevices, 'getConnectedDevices' as any).returns(deviceList);
     sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
-<<<<<<< HEAD
     sandbox.stub(adb, 'adbExec').callsFake(mockAdbExec);
-=======
-    
-    // Make device info methods fail for emulator-9999 but succeed for emulator-7777
-    const mockDeviceSize = (...args: any[]) => {
-      const [adbInstance, udid] = args;
-      if (udid === 'emulator-9999') {
-        return Promise.reject(new Error('Adb timeout'));
-      }
-      return Promise.resolve({
-        screenWidth: '350',
-        screenHeight: '600',
-      });
-    };
-    
-    const mockDeviceVersion = (...args: any[]) => {
-      const [adbInstance, udid] = args;
-      if (udid === 'emulator-9999') {
-        return Promise.reject(new Error('Adb timeout'));
-      }
-      return Promise.resolve('10');
-    };
-    
-    const mockDeviceName = (...args: any[]) => {
-      const [adbInstance, udid, isRealDevice] = args;
-      if (udid === 'emulator-9999') {
-        return Promise.reject(new Error('Adb timeout'));
-      }
-      return Promise.resolve('Test Device');
-    };
-    
-    const mockIsRealDevice = (...args: any[]) => {
-      const [adbInstance, udid] = args;
-      if (udid === 'emulator-9999') {
-        return Promise.reject(new Error('Adb timeout'));
-      }
-      return Promise.resolve(false);
-    };
-    
-    sandbox.stub(androidDevices, 'getDeviceSize').callsFake(mockDeviceSize);
-    sandbox.stub(androidDevices, 'getDeviceVersion' as any).callsFake(mockDeviceVersion);
-    sandbox.stub(androidDevices, 'getDeviceName' as any).callsFake(mockDeviceName);
-    sandbox.stub(androidDevices, 'isRealDevice' as any).callsFake(mockIsRealDevice);
->>>>>>> ed8ffe7 (Fix  old angle bracket syntax)
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
