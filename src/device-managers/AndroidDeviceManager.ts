@@ -18,6 +18,7 @@ import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
 import { sleep, waitForCondition } from 'asyncbox';
 import { DevicePlugin } from '../plugin';
+import { enhancedADBManager } from '../utils/enhanced-adb-manager';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -226,7 +227,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
   private async getAdb(): Promise<any> {
     try {
       if (!this.adb) {
-        this.adb = await ADB.createADB({ adbExecTimeout: 60000 });
+        // Use the singleton ADB manager instead of creating new instances
+        this.adb = await enhancedADBManager.getLocalADB();
         const client = Adb.createClient();
         this.tracker = await client.trackDevices();
         const originalADBTracking = this.createLocalAdbTracker(client, this.tracker, this.adb);
@@ -359,11 +361,8 @@ export default class AndroidDeviceManager implements IDeviceManager {
         const adbRemoteValue = value.split(':');
         const adbHost = adbRemoteValue[0];
         const adbPort = adbRemoteValue[1] || 5037;
-        const cloneAdb = originalADB.clone({
-          remoteAdbHost: adbHost,
-          adbPort,
-        });
-        deviceList.set(cloneAdb, await cloneAdb.getConnectedDevices());
+        const remoteADB = await enhancedADBManager.getRemoteADB(adbHost, adbPort);
+        deviceList.set(remoteADB, await remoteADB.getConnectedDevices());
         const remoteAdb = Adb.createClient({
           host: adbHost,
           port: adbPort,
