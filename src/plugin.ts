@@ -83,6 +83,7 @@ import {
 import { NodeService } from './data-service/node-service';
 import { DeviceFarmApiClient } from './api-client';
 import { NodeHealthMonitor } from './utils/node-heath-monitor';
+import { enhancedADBManager } from './utils/enhanced-adb-manager';
 
 const commandsQueueGuard = new AsyncLock();
 const NODE_HEALTH_MONITOR_INTERVAL = 1000 * 30; // 30 seconds
@@ -166,7 +167,9 @@ class DevicePlugin extends BasePlugin {
         pluginArgs.platform.toLowerCase() == 'both') &&
       !pluginArgs.cloud
     ) {
-      DevicePlugin.adbInstance = await ADB.createADB({ adbExecTimeout: 60000 });
+      DevicePlugin.adbInstance = await enhancedADBManager.initializeLocalADB({
+        adbExecTimeout: 60000,
+      });
     }
     externalModule.onPluginLoaded(
       cliArgs,
@@ -207,7 +210,7 @@ class DevicePlugin extends BasePlugin {
     externalModule.updateServer(expressApp, httpServer);
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
-      const adb = await ADB.createADB({ adbExecTimeout: 60000 });
+      const adb = await enhancedADBManager.getLocalADB();
       const array = pluginArgs.emulators || [];
       const promiseArray = array.map(async (arr: any) => {
         await Promise.all([await adb.launchAVD(arr.avdName, arr)]);
