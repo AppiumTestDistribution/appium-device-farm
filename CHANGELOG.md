@@ -1,3 +1,9 @@
+## [10.1.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.11...v10.1.0) (2025-09-08)
+
+### Features
+
+* support tvOS WDA file selection based on device platform ([#1781](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1781)) ([00a6868](https://github.com/AppiumTestDistribution/appium-device-farm/commit/00a686888bbdb6275c91b44dfbda56cb09c731d6))
+
 ## [10.0.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.10...v10.0.11) (2025-09-08)
 
 ### Bug Fixes
