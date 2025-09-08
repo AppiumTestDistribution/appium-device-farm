@@ -248,12 +248,15 @@ class DevicePlugin extends BasePlugin {
         );
       }
 
-      try {
-        await DevicePlugin.apiClient.authenticate();
-      } catch (err) {
-        throw new Error(
-          '🔐 Authentication error. Invalid accessKey or token. Kindly pass accesskey and token using --plugin-device-farm-access-key and --plugin-device-farm-token arguments',
-        );
+      // Only authenticate if authentication is enabled
+      if (pluginArgs.enableAuthentication) {
+        try {
+          await DevicePlugin.apiClient.authenticate();
+        } catch (err) {
+          throw new Error(
+            '🔐 Authentication error. Invalid accessKey or token. Kindly pass accesskey and token using --plugin-device-farm-access-key and --plugin-device-farm-token arguments',
+          );
+        }
       }
       // hub may have been restarted, so let's send device list regularly
       await setupCronUpdateDeviceList(
