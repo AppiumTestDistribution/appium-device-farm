@@ -1,17 +1,17 @@
 import { expect } from 'chai';
-import { DeviceFarmManager } from '../../../src/device-managers';
-import { Container } from 'typedi';
 import ip from 'ip';
+import { Container } from 'typedi';
+import { DeviceFarmManager } from '../../../src/device-managers';
 
-import {
-  updateDeviceList,
-  allocateDeviceForSession,
-  initializeStorage,
-} from '../../../src/device-utils';
-import { ATDRepository } from '../../../src/data-service/db';
-import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
-import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { v4 as uuidv4 } from 'uuid';
+import { ATDRepository } from '../../../src/data-service/db';
+import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
+import {
+    allocateDeviceForSession,
+    initializeStorage,
+    updateDeviceList,
+} from '../../../src/device-utils';
+import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
@@ -24,6 +24,31 @@ const REQUEST_ID = uuidv4();
 sessionRequestMap.set(REQUEST_ID, {} as any);
 
 describe('IOS Test', () => {
+  before(async () => {
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'ios',
+        jwtSecretToken: 'test-token',
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: NODE_ID } });
+    await prisma.node.delete({ where: { id: NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
+  });
+
   beforeEach('Release devices', async () => {
     // unblock all otherwise it will stuck on max session count
     await unblockDeviceMatchingFilter({});

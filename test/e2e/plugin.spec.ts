@@ -1,33 +1,61 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
+import { pluginE2EHarness } from '@appium/plugin-test-support';
+import axios from 'axios';
+import { expect } from 'chai';
+import ip from 'ip';
+import { ATDRepository } from '../../src/data-service/db';
 import NodeDevices from '../../src/device-managers/NodeDevices';
+import { IDevice } from '../../src/interfaces/IDevice';
+import {
+  ensureAppiumHome,
+  ensureHubConfig,
+  ensureNodeConfig,
+  HUB_APPIUM_PORT,
+  NODE_APPIUM_PORT,
+  PLUGIN_PATH
+} from './e2ehelper';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai'),
   // eslint-disable-next-line no-unused-vars
   should = chai.should();
-import { expect } from 'chai';
-import axios from 'axios';
-import {
-  HUB_APPIUM_PORT,
-  NODE_APPIUM_PORT,
-  PLUGIN_PATH,
-  ensureAppiumHome,
-  ensureHubConfig,
-  ensureNodeConfig,
-} from './e2ehelper';
-import { pluginE2EHarness } from '@appium/plugin-test-support';
-import ip from 'ip';
-import { IDevice } from '../../src/interfaces/IDevice';
-import { ATDRepository } from '../../src/data-service/db';
 
 describe('Basic Plugin Test', () => {
   // dump hub config into a file
-  const hub_config_file = ensureHubConfig('none');
+  const hub_config_file = ensureHubConfig();
   // dump node config into a file
   const node_config_file = ensureNodeConfig();
 
   // setup appium home
   const APPIUM_HOME = ensureAppiumHome();
+
+  // Setup and cleanup for test database
+  before(async () => {
+    // Create the test node that will be used in the tests
+    const { prisma } = await import('../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: 'test-node-id' },
+      update: {},
+      create: {
+        id: 'test-node-id',
+        name: 'Test Node',
+        host: 'http://127.2.1.41:4723',
+        os: 'test',
+        jwtSecretToken: 'test-secret',
+        isHub: false,
+        isOnline: true,
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: 'test-node-id' } });
+    await prisma.node.delete({ where: { id: 'test-node-id' } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
+  });
 
   // run hub
   pluginE2EHarness({
@@ -41,11 +69,28 @@ describe('Basic Plugin Test', () => {
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
     driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverSpec: 'appium-uiautomator2-driver@4.0.0',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME!,
   });
+
+    pluginE2EHarness({
+      before: global.before,
+      after: global.after,
+      serverArgs: {
+        subcommand: 'server',
+        configFile: node_config_file,
+      },
+      pluginName: 'device-farm',
+      port: NODE_APPIUM_PORT,
+      driverSource: 'npm',
+      driverName: 'uiautomator2',
+      driverSpec: 'appium-uiautomator2-driver@4.0.0',
+      pluginSource: 'local',
+      pluginSpec: PLUGIN_PATH,
+      appiumHome: APPIUM_HOME!,
+    });
 
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
@@ -59,6 +104,7 @@ describe('Basic Plugin Test', () => {
 
   it('Add Android devices from node to hub', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
+    
     const nodeAndroidDevice = [
       {
         adbRemoteHost: null,
@@ -75,6 +121,7 @@ describe('Basic Plugin Test', () => {
         host: 'http://127.2.1.41:4723',
         totalUtilizationTimeMilliSec: 7023014,
         sessionStartTime: 0,
+        nodeId: 'test-node-id',
       } as unknown as IDevice,
     ];
     const nodeDevices = new NodeDevices(hub_url);

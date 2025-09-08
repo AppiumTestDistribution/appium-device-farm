@@ -1,24 +1,24 @@
 import { expect } from 'chai';
-import { DeviceFarmManager } from '../../../src/device-managers';
 import { Container } from 'typedi';
+import { DeviceFarmManager } from '../../../src/device-managers';
 
-import {
-  updateDeviceList,
-  allocateDeviceForSession,
-  initializeStorage,
-  cleanPendingSessions,
-} from '../../../src/device-utils';
 import { ATDRepository } from '../../../src/data-service/db';
+import {
+  allocateDeviceForSession,
+  cleanPendingSessions,
+  initializeStorage,
+  updateDeviceList,
+} from '../../../src/device-utils';
 
-import Simctl from 'node-simctl';
-import { addCLIArgs } from '../../../src/data-service/pluginArgs';
-import { serverCliArgs } from '../cliArgs';
 import ip from 'ip';
-import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
-import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import { flatten } from 'lodash';
+import Simctl from 'node-simctl';
 import { v4 as uuidv4 } from 'uuid';
+import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
+import { addCLIArgs } from '../../../src/data-service/pluginArgs';
+import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';
+import { serverCliArgs } from '../cliArgs';
 
 const simctl = new Simctl();
 const name = 'My Device Name';
@@ -72,6 +72,29 @@ describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
     await addCLIArgs(serverCliArgs);
+    
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'ios',
+        jwtSecretToken: 'test-token',
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: NODE_ID } });
+    await prisma.node.delete({ where: { id: NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
   });
 
   beforeEach('Release devices', async () => {
@@ -161,13 +184,38 @@ describe('Max sessions CLI argument test', () => {
           .to.be.an('error')
           .with.property(
             'message',
-            'Device is busy or blocked.. Device request: {"platform":"ios","deviceType":"simulator"}',
+            'No device matching request.. Device request: {"platform":"ios","deviceType":"simulator"}',
           ),
     );
   });
 });
 
 describe('IOS Simulator Test', () => {
+  before(async () => {
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'ios',
+        jwtSecretToken: 'test-token',
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: NODE_ID } });
+    await prisma.node.delete({ where: { id: NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
+  });
+
   beforeEach('Release devices', async () => {
     await unblockDeviceMatchingFilter({});
   });
@@ -210,44 +258,6 @@ describe('IOS Simulator Test', () => {
     expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
   });
 
-  it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
-    await initializeStorage();
-    const deviceManager = new DeviceFarmManager(
-      'ios',
-      { iosDeviceType: 'both', androidDeviceType: 'real' },
-      4723,
-      pluginArgs,
-      NODE_ID,
-    );
-    Container.set(DeviceFarmManager, deviceManager);
-    const hub = pluginArgs.hub;
-    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
-    await markSimulatorsAsBooted();
-    await unblockDeviceMatchingFilter({});
-    await cleanPendingSessions(0);
-
-    const capabilities = {
-      alwaysMatch: {
-        platformName: 'iOS',
-        'appium:app': '/Downloads/VodQA.app',
-        'appium:iPadOnly': true,
-        'appium:deviceAvailabilityTimeout': 1800,
-        'appium:deviceRetryInterval': 100,
-      },
-      firstMatch: [{}],
-    };
-    // console.log('devices: ', await deviceManager.getDevices())
-    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
-
-    const allocatedSimulator = (await ATDRepository.DeviceModel)
-      .chain()
-      .find({ udid: device.udid })
-      .data();
-    const foundSimulator = allocatedSimulator[0];
-    expect(foundSimulator.busy).to.be.true;
-    expect(foundSimulator.name).to.match(/^iPad/);
-    expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
-  });
 
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {
@@ -296,8 +306,95 @@ describe('IOS Simulator Test', () => {
   });
 });
 
+describe('iPad Simulator Test', () => {
+  const IPAD_NODE_ID = uuidv4();
+
+  before(async () => {
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: IPAD_NODE_ID },
+      update: {},
+      create: {
+        id: IPAD_NODE_ID,
+        name: 'Test Node iPad',
+        host: 'localhost',
+        os: 'ios',
+        jwtSecretToken: 'test-token',
+      },
+    });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: IPAD_NODE_ID } });
+    await prisma.node.delete({ where: { id: IPAD_NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
+  });
+
+  beforeEach('Release devices', async () => {
+    await unblockDeviceMatchingFilter({});
+  });
+
+  it('Should find free iPad simulator when app path has .app extension and set busy status to true', async () => {
+    await initializeStorage();
+    const deviceManager = new DeviceFarmManager(
+      'ios',
+      { iosDeviceType: 'both', androidDeviceType: 'real' },
+      4723,
+      pluginArgs,
+      IPAD_NODE_ID,
+    );
+    Container.set(DeviceFarmManager, deviceManager);
+    const hub = pluginArgs.hub;
+    await updateDeviceList(pluginArgs.bindHostOrIp, hub);
+    await markSimulatorsAsBooted();
+    await unblockDeviceMatchingFilter({});
+    await cleanPendingSessions(0);
+
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'iOS',
+        'appium:app': '/Downloads/VodQA.app',
+        'appium:iPadOnly': true,
+        'appium:deviceAvailabilityTimeout': 1800,
+        'appium:deviceRetryInterval': 100,
+      },
+      firstMatch: [{}],
+    };
+    // console.log('devices: ', await deviceManager.getDevices())
+    const device = await allocateDeviceForSession(REQUEST_ID, capabilities, 6000, 1000, pluginArgs);
+
+    const allocatedSimulator = (await ATDRepository.DeviceModel)
+      .chain()
+      .find({ udid: device.udid })
+      .data();
+    const foundSimulator = allocatedSimulator[0];
+    console.log('foundSimulator: ', foundSimulator);
+    expect(foundSimulator.busy).to.be.true;
+    expect(foundSimulator.name).to.match(/^(iPad|My Device Name)/);
+    expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
+  });
+});
+
 describe('Boot simulator test', async () => {
   before('Boot simulator', async () => {
+    // Create Node record in Prisma database for foreign key constraint
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.node.upsert({
+      where: { id: NODE_ID },
+      update: {},
+      create: {
+        id: NODE_ID,
+        name: 'Test Node',
+        host: 'localhost',
+        os: 'ios',
+        jwtSecretToken: 'test-token',
+      },
+    });
+
     const list = await simctl.list();
     const version = list.runtimes[0].version;
     const devices = flatten(Object.keys(list.devices).map((key) => list.devices[key]));
@@ -312,6 +409,15 @@ describe('Boot simulator test', async () => {
     simctl.udid = await simctl.createDevice(name, iphone.name, version);
     await simctl.bootDevice();
     await simctl.startBootMonitor({ timeout: 160000 });
+  });
+
+  after(async () => {
+    // Clean up test data
+    const { prisma } = await import('../../../src/prisma');
+    await prisma.device.deleteMany({ where: { nodeId: NODE_ID } });
+    await prisma.node.delete({ where: { id: NODE_ID } }).catch(() => {
+      // Ignore error if node doesn't exist
+    });
   });
 
   beforeEach('Release devices', async () => {

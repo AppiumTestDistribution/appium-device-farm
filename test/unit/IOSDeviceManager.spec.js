@@ -1,13 +1,12 @@
-import sinon from 'sinon';
+import * as IOSUtils from 'appium-ios-device/build/lib/utilities';
 import { expect } from 'chai';
+import ip from 'ip';
+import sinon from 'sinon';
+import { v4 as uuidv4 } from 'uuid';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
-import * as DeviceUtils from '../../src/device-utils';
-import { deviceMock } from './fixtures/devices';
-import ip from 'ip';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-import { v4 as uuidv4 } from 'uuid';
-import * as IOSUtils from 'appium-ios-device/build/lib/utilities';
+import { deviceMock } from './fixtures/devices';
 var sandbox = sinon.createSandbox();
 
 const cliArgs = {
@@ -58,6 +57,7 @@ describe('IOS Device Manager', () => {
     const devices = await iosDevices.getDevices({ iosDeviceType: 'both' }, []);
     expect(devices).to.deep.equal([
       {
+        id: "7d04d589-fd5d-5172-b7ad-5f87f2de36aa",
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
         name: 'Sai’s iPhone',
@@ -159,12 +159,19 @@ describe('IOS Device Manager', () => {
       4723,
       uuidv4(),
     );
+    sandbox.stub(Helper, 'isMac').returns(true);
     sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(IOSDeviceManager, 'getProductModel').returns('iPhone12,8');
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
+    const iosDevicesWithRealDeviceFlag = deviceMock
+      .filter((device) => device.platform === 'iOS')
+      .map((device) => ({ ...device, realDevice: false }));
     sandbox
       .stub(iosDeviceManager, 'getLocalSims')
-      .returns(deviceMock.filter((device) => device.platform === 'iOS'));
+      .returns(iosDevicesWithRealDeviceFlag);
+    sandbox
+      .stub(iosDeviceManager, 'fetchLocalSimulators')
+      .returns(iosDevicesWithRealDeviceFlag);
     const devices = await iosDeviceManager.getDevices({ iosDeviceType: 'simulated' }, []);
     // all devices are simulators
     devices.forEach((device) => {
@@ -192,6 +199,7 @@ describe('IOS Device Manager', () => {
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
+        id: "7d04d589-fd5d-5172-b7ad-5f87f2de36aa",
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
         name: 'Sai’s iPhone',
@@ -276,6 +284,7 @@ describe('IOS Device Manager', () => {
     });
     expect(devices).to.deep.equal([
       {
+        id: '7d04d589-fd5d-5172-b7ad-5f87f2de36aa',
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
         name: 'Sai’s iPhone',
