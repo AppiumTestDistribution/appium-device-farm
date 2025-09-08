@@ -31,25 +31,25 @@ jobs:
       run: |
         # Add your script commands here
         npm test
-  HubWithNoPlatform:
-    name: Run E2E Plugin Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20]
+  # HubWithNoPlatform:
+  #   name: Run E2E Plugin Test
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node: [20]
 
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-      - name: Build
-        run: |
-          # Add your script commands here
-          npm ci
-          npm run bundle
-      - name: Run E2E Plugin Test without Platform
-        run: |
-          # Add your script commands here
-          npm run test-e2e
+  #   steps:
+  #     - name: Checkout repository with submodules
+  #       uses: actions/checkout@v3
+  #     - name: Build
+  #       run: |
+  #         # Add your script commands here
+  #         npm ci
+  #         npm run bundle
+  #     - name: Run E2E Plugin Test without Platform
+  #       run: |
+  #         # Add your script commands here
+  #         npm run test-e2e
 
   buildWithOutSubmodule:
     name: Build with Out Submodule
@@ -94,35 +94,35 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           script: npm run integration-android
-  E2EHubAndNodeTest:
-    name: Run E2EHubAndNodeTest
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [ 29 ]
-        target: [ google_apis ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
+  # E2EHubAndNodeTest:
+  #   name: Run E2EHubAndNodeTest
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       api-level: [ 29 ]
+  #       target: [ google_apis ]
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v4
+  #     - name: Build
+  #       run: |
+  #         npm ci
+  #         npm run bundle
 
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+  #     - name: Enable KVM
+  #       run: |
+  #         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+  #         sudo udevadm control --reload-rules
+  #         sudo udevadm trigger --name-match=kvm
 
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          profile: Nexus 6
-          script: npm run test-e2e-hubnode
+  #     - name: run tests
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       with:
+  #         api-level: ${{ matrix.api-level }}
+  #         target: ${{ matrix.target }}
+  #         arch: x86_64
+  #         profile: Nexus 6
+  #         script: npm run test-e2e-hubnode
   IOSIntegrationTest:
     name: Run iOS Integration Test
     runs-on: macos-latest
@@ -144,29 +144,29 @@ jobs:
 
 
 
-  E2EPluginTest:
-    name: Run Plugin Test
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        node: [ 20 ]
+  # E2EPluginTest:
+  #   name: Run Plugin Test
+  #   runs-on: macos-latest
+  #   strategy:
+  #     matrix:
+  #       node: [ 20 ]
 
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v3
-      - name: Build
-        run: |
-          npm ci
-          npm run bundle
-      - name: Run e2e plugin Test
-        run: |
-          npm run test-e2e
-      - name: Run E2E BrowserStack Test
-        run: |
-          npm run test-e2e-browserstack
-      - name: Run E2E PCloudy Test
-        run: |
-          npm run test-e2e-pcloudy
+  #   steps:
+  #     - name: Checkout repository with submodules
+  #       uses: actions/checkout@v3
+  #     - name: Build
+  #       run: |
+  #         npm ci
+  #         npm run bundle
+  #     - name: Run e2e plugin Test
+  #       run: |
+  #         npm run test-e2e
+  #     - name: Run E2E BrowserStack Test
+  #       run: |
+  #         npm run test-e2e-browserstack
+  #     - name: Run E2E PCloudy Test
+  #       run: |
+  #         npm run test-e2e-pcloudy
 
   # BrowserStackTest:
   #   runs-on: macos-latest

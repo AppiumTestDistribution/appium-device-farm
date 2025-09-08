@@ -122,7 +122,9 @@ export class EnhancedADBManager {
     // Implement LRU cache for remote ADB instances
     if (this.remoteADBCache.size >= this.maxRemoteInstances) {
       const firstKey = this.remoteADBCache.keys().next().value;
-      await this._cleanupRemoteADB(firstKey);
+      if (firstKey) {
+        await this._cleanupRemoteADB(firstKey);
+      }
     }
 
     try {
@@ -154,7 +156,9 @@ export class EnhancedADBManager {
     // Implement LRU cache for device-specific ADB instances
     if (this.deviceSpecificADBs.size >= this.maxDeviceSpecificInstances) {
       const firstKey = this.deviceSpecificADBs.keys().next().value;
-      await this._cleanupDeviceSpecificADB(firstKey);
+      if (firstKey) {
+        await this._cleanupDeviceSpecificADB(firstKey);
+      }
     }
 
     try {

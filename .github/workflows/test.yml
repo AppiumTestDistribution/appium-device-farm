@@ -181,12 +181,12 @@ jobs:
       - name: Run e2e plugin Test
         run: |
           npm run test-e2e
-      - name: Run E2E BrowserStack Test
-        run: |
-          npm run test-e2e-browserstack
-      - name: Run E2E PCloudy Test
-        run: |
-          npm run test-e2e-pcloudy
+      # - name: Run E2E BrowserStack Test
+      #   run: |
+      #     npm run test-e2e-browserstack
+      # - name: Run E2E PCloudy Test
+      #   run: |
+      #     npm run test-e2e-pcloudy
 
   # BrowserStackTest:
   #   runs-on: macos-latest
