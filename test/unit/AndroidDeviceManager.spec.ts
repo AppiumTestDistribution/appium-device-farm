@@ -1,16 +1,15 @@
-import sinon from 'sinon';
+import { DeviceWithPath } from '@devicefarmer/adbkit';
 import chai, { expect } from 'chai';
-import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
-import * as Helper from '../../src/helpers';
-import * as DeviceUtils from '../../src/device-utils';
-import { getAdbOriginal } from './GetAdbOriginal';
+import chaiAsPromised from 'chai-as-promised';
 import ip from 'ip';
 import _ from 'lodash';
-import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
-import { ATDRepository } from '../../src/data-service/db';
-import { DeviceWithPath } from '@devicefarmer/adbkit';
-import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
+import { ATDRepository } from '../../src/data-service/db';
+import AndroidDeviceManager from '../../src/device-managers/AndroidDeviceManager';
+import * as Helper from '../../src/helpers';
+import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
+import { getAdbOriginal } from './GetAdbOriginal';
 
 chai.use(chaiAsPromised);
 
@@ -96,7 +95,7 @@ describe('Android Device Manager', function () {
 
     console.log('devices', devices);
 
-    expect(devices).to.deep.equal([
+    const expectedDevices = [
       {
         busy: false,
         adbRemoteHost: null,
@@ -143,7 +142,17 @@ describe('Android Device Manager', function () {
         userBlocked: false,
         offline: false,
       },
-    ]);
+    ];
+
+    // Verify that devices have valid UUIDs for id field
+    devices.forEach((device) => {
+      expect(device.id).to.be.a('string');
+      expect(device.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    // Compare devices excluding the id field
+    const devicesWithoutId = devices.map(({ id, ...device }) => device);
+    expect(devicesWithoutId).to.deep.equal(expectedDevices);
   });
 
   it('Android Device List to have added state - Only emulators', async () => {
@@ -175,7 +184,7 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort' as any).returns(54321);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'simulated' }, []);
-    expect(devices).to.deep.equal([
+    const expectedDevices = [
       {
         busy: false,
         adbPort: 5037,
@@ -199,7 +208,17 @@ describe('Android Device Manager', function () {
         userBlocked: false,
         offline: false,
       },
-    ]);
+    ];
+
+    // Verify that devices have valid UUIDs for id field
+    devices.forEach((device) => {
+      expect(device.id).to.be.a('string');
+      expect(device.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    // Compare devices excluding the id field
+    const devicesWithoutId = devices.map(({ id, ...device }) => device);
+    expect(devicesWithoutId).to.deep.equal(expectedDevices);
   });
 
   it('Android Device List to have added state - Only real devices', async () => {
@@ -231,7 +250,7 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort' as any).returns(54322);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
-    expect(devices).to.deep.equal([
+    const expectedDevices = [
       {
         busy: false,
         name: 'Nexus 6',
@@ -255,7 +274,17 @@ describe('Android Device Manager', function () {
         userBlocked: false,
         offline: false,
       },
-    ]);
+    ];
+
+    // Verify that devices have valid UUIDs for id field
+    devices.forEach((device) => {
+      expect(device.id).to.be.a('string');
+      expect(device.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    // Compare devices excluding the id field
+    const devicesWithoutId = devices.map(({ id, ...device }) => device);
+    expect(devicesWithoutId).to.deep.equal(expectedDevices);
   });
   it('Android Device List to have host as remoteMachineProxyIP if provided', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
@@ -289,7 +318,7 @@ describe('Android Device Manager', function () {
     realDevice.onSecondCall().returns(true);
     sandbox.stub(Helper, 'getFreePort' as any).returns(54322);
     const devices = await androidDevices.getDevices({ androidDeviceType: 'real' }, []);
-    expect(devices).to.deep.equal([
+    const expectedDevices = [
       {
         busy: false,
         name: 'Nexus 6',
@@ -313,10 +342,20 @@ describe('Android Device Manager', function () {
         userBlocked: false,
         offline: false,
       },
-    ]);
+    ];
+
+    // Verify that devices have valid UUIDs for id field
+    devices.forEach((device) => {
+      expect(device.id).to.be.a('string');
+      expect(device.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    // Compare devices excluding the id field
+    const devicesWithoutId = devices.map(({ id, ...device }) => device);
+    expect(devicesWithoutId).to.deep.equal(expectedDevices);
   });
 
-  it("Should handle error when adb doesn't respond", async () => {
+  it('Should handle error when adb doesnt respond', async () => {
     // mock getDeviceProperty
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, { platform: 'android' }),

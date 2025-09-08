@@ -1,24 +1,18 @@
 /* eslint-disable no-prototype-builtins */
-import {
-  cachePath,
-  checkIfPathIsAbsolute,
-  isAppiumRunningAt,
-  isDeviceFarmRunning,
-  isMac,
-} from './helpers';
-import { Platform } from './types/Platform';
+import waitUntil from 'async-wait-until';
+import fs from 'fs';
+import getPort from 'get-port';
+import _ from 'lodash';
+import { LocalStorage } from 'node-persist';
+import { Container } from 'typedi';
+import { v4 as uuidv4 } from 'uuid';
 import {
   androidCapabilities,
   DEVICE_FARM_CAPABILITIES,
   getDeviceFarmCapabilities,
   iOSCapabilities,
 } from './CapabilityManager';
-import waitUntil from 'async-wait-until';
-import { ISessionCapability } from './interfaces/ISessionCapability';
-import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
-import { IDevice } from './interfaces/IDevice';
-import { Container } from 'typedi';
-import { DeviceFarmManager } from './device-managers';
+import { ATDRepository } from './data-service/db';
 import {
   addNewDevice,
   blockDevice,
@@ -30,23 +24,29 @@ import {
   unblockDevice,
   updatedAllocatedDevice,
 } from './data-service/device-service';
-import log from './logger';
-import DevicePlatform from './enums/Platform';
-import _ from 'lodash';
-import fs from 'fs';
-import { LocalStorage } from 'node-persist';
+import { NodeService } from './data-service/node-service';
+import debugLog from './debugLog';
+import { DeviceFarmManager } from './device-managers';
 import CapabilityManager from './device-managers/cloud/CapabilityManager';
 import IOSDeviceManager from './device-managers/IOSDeviceManager';
 import NodeDevices from './device-managers/NodeDevices';
+import DevicePlatform from './enums/Platform';
+import {
+  cachePath,
+  checkIfPathIsAbsolute,
+  isAppiumRunningAt,
+  isDeviceFarmRunning,
+  isMac,
+} from './helpers';
+import { IDevice } from './interfaces/IDevice';
+import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { IPluginArgs } from './interfaces/IPluginArgs';
-import { ATDRepository } from './data-service/db';
-import { v4 as uuidv4 } from 'uuid';
-import debugLog from './debugLog';
-import getPort from 'get-port';
-import { sessionRequestMap } from './proxy/wd-command-proxy';
-import { getUserFromCapabilities, verifyJwt } from './utils/auth';
-import { NodeService } from './data-service/node-service';
+import { ISessionCapability } from './interfaces/ISessionCapability';
+import log from './logger';
 import { DevicePlugin } from './plugin';
+import { sessionRequestMap } from './proxy/wd-command-proxy';
+import { Platform } from './types/Platform';
+import { getUserFromCapabilities, verifyJwt } from './utils/auth';
 
 let timer: any;
 let cronTimerToReleaseBlockedDevices: any;
@@ -329,6 +329,14 @@ export function getDeviceFiltersFromCapability(
   } else if (deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.iPHONEONLY]) {
     name = 'iPhone';
   }
+  // Ensure udid is always an array or undefined for consistent filtering
+  let udidArray: string[] | undefined = undefined;
+  if (udids?.length) {
+    udidArray = udids;
+  } else if (capability['appium:udid']) {
+    udidArray = [capability['appium:udid']];
+  }
+
   let caps = {
     platform,
     platformVersion: capability['appium:platformVersion']
@@ -336,7 +344,7 @@ export function getDeviceFiltersFromCapability(
       : undefined,
     name,
     deviceType,
-    udid: udids?.length ? udids : capability['appium:udid'],
+    udid: udidArray,
     busy: false,
     userBlocked: false,
     filterByHost: deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.FILTER_BY_HOST],
