@@ -82,7 +82,7 @@ describe('E2E Hub and Node', () => {
     host: node_config.bindHostOrIp,
     driverSource: 'npm',
     driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverSpec: 'appium-uiautomator2-driver@4.0.0',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME_NODE!,
