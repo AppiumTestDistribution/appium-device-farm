@@ -1,0 +1,131 @@
+# Use the official Appium base image
+FROM --platform=$BUILDPLATFORM appium/appium:v2.19.0-p4 AS builder
+
+ARG TARGETARCH
+
+# Set environment variables
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_HOME=$ANDROID_SDK_ROOT
+ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator
+
+# Install system dependencies
+USER root
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    unzip \
+    openjdk-17-jdk \
+    qemu-kvm \
+    libvirt-daemon-system \
+    libvirt-clients \
+    bridge-utils \
+    cpu-checker \
+    libc6-dev \
+    libpulse0 \
+    libasound2t64 \
+    libasound2-plugins \
+    alsa-utils \
+    pulseaudio \
+    socat \
+    x11-xserver-utils \
+    xvfb \
+    libgl1-mesa-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+RUN echo "export JAVA_HOME=$(find /usr/lib/jvm -name 'java-17-openjdk-*' -type d | head -n 1)" >> /etc/profile.d/jdk_home.sh
+ENV JAVA_HOME_SET_COMMAND="source /etc/profile.d/jdk_home.sh"
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# Install Android SDK
+RUN mkdir -p $ANDROID_SDK_ROOT
+WORKDIR $ANDROID_SDK_ROOT
+
+# Download and install Android command line tools
+RUN COMMANDLINE_TOOLS_ZIP="commandlinetools-linux-9477386_latest.zip" && \
+    wget -q https://dl.google.com/android/repository/$COMMANDLINE_TOOLS_ZIP && \
+    unzip -q $COMMANDLINE_TOOLS_ZIP -d temp_unzip_dir && \
+    mkdir -p cmdline-tools/latest && \
+    mv temp_unzip_dir/cmdline-tools/* cmdline-tools/latest/ && \
+    rm -rf temp_unzip_dir $COMMANDLINE_TOOLS_ZIP
+
+# Accept Android SDK licenses and install necessary packages
+RUN . /etc/profile.d/jdk_home.sh && yes | sdkmanager --licenses
+RUN . /etc/profile.d/jdk_home.sh && sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+RUN . /etc/profile.d/jdk_home.sh && \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        SDK_IMAGE_ABI="x86_64"; \
+        AVD_ABI="x86_64"; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        SDK_IMAGE_ABI="arm64-v8a"; \
+        AVD_ABI="arm64-v8a"; \
+    else \
+        echo "Unsupported TARGETARCH: $TARGETARCH" && exit 1; \
+    fi && \
+    sdkmanager "emulator" "system-images;android-34;google_apis;$SDK_IMAGE_ABI" && \
+    echo "no" | avdmanager create avd \
+        --force \
+        --name "test_emulator" \
+        --package "system-images;android-34;google_apis;$SDK_IMAGE_ABI" \
+        --tag "google_apis" \
+        --abi "$AVD_ABI"
+
+# Final stage
+FROM --platform=$BUILDPLATFORM appium/appium:v2.19.0-p4
+
+# Set environment variables
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_HOME=$ANDROID_SDK_ROOT
+ENV PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+USER root
+RUN apt-get update && apt-get install -y \
+    git \
+    qemu-kvm \
+    libvirt-daemon-system \
+    libvirt-clients \
+    bridge-utils \
+    cpu-checker \
+    libc6-dev \
+    libpulse0 \
+    libasound2t64 \
+    libasound2-plugins \
+    alsa-utils \
+    pulseaudio \
+    socat \
+    x11-xserver-utils \
+    xvfb \
+    libgl1-mesa-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+COPY --from=builder $ANDROID_SDK_ROOT $ANDROID_SDK_ROOT
+
+RUN groupadd -r appium && useradd --no-log-init -r -g appium -m -d /home/appium -s /bin/bash appium
+RUN chown -R appium:appium $ANDROID_SDK_ROOT
+
+# Install Node.js dependencies
+RUN npm install -g mjpeg-consumer && npm cache clean --force
+
+# Install Appium drivers and plugins
+RUN appium driver install --source=npm appium-uiautomator2-driver@4.2.9 && npm cache clean --force
+RUN appium plugin install --source=npm appium-device-farm && npm cache clean --force
+
+# Set environment variables for ports
+ENV APPIUM_PORT=4723
+ENV APPIUM_PATH=/wd/hub
+ENV DISPLAY=:99
+
+# Expose ports
+EXPOSE $APPIUM_PORT 5554 5555 7000
+
+# Copy startup scripts
+COPY start-appium.sh /start-appium.sh
+COPY start-emulator.sh /start-emulator.sh
+RUN chmod +x /start-appium.sh /start-emulator.sh
+
+# Switch back to appium user
+USER appium
+
+CMD ["/start-appium.sh"]
