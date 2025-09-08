@@ -19,6 +19,8 @@ describe('ADBManager', () => {
     sandbox.restore();
     // Reset the singleton instance for each test
     (ADBManager as any).instance = undefined;
+    // Also reset the exported adbManager by creating a new instance
+    (require('../../src/utils/adb-manager') as any).adbManager = ADBManager.getInstance();
   });
 
   describe('Singleton Pattern', () => {
@@ -195,12 +197,15 @@ describe('ADBManager', () => {
 
     it('should handle device operations when ADB is not initialized', async () => {
       const manager = ADBManager.getInstance();
+      const error = new Error('ADB creation failed');
+
+      (ADB.createADB as sinon.SinonStub).rejects(error);
 
       try {
         await manager.getADBForDevice('test-device');
         expect.fail('Should have thrown an error');
       } catch (e) {
-        expect((e as Error).message).to.include('ADB instance not available');
+        expect((e as Error).message).to.include('ADB initialization failed');
       }
     });
   });

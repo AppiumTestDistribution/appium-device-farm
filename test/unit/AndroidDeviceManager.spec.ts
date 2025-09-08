@@ -379,7 +379,7 @@ describe('Android Device Manager', function () {
 
     sandbox.stub(androidDevices, 'getConnectedDevices' as any).returns(deviceList);
     sandbox.stub(androidDevices, 'getChromeVersion' as any).returns('/var/path/chromedriver');
-    sandbox.stub(adb, ' as anyadbExec').callsFake(mockAdbExec);
+    sandbox.stub(adb, 'adbExec').callsFake(mockAdbExec);
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 

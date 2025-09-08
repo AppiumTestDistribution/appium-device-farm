@@ -155,23 +155,51 @@ export default class AndroidDeviceManager implements IDeviceManager {
     hostPort: number,
   ): Promise<IDevice | undefined> {
     const systemPort = await getFreePort();
-    let deviceInfo;
     //await this.streamAndroid(adbInstance, device, systemPort);
 
+    // Handle each device property individually to avoid failing the entire device
+    // if one property times out
+    let sdk: string | undefined;
+    let realDevice: boolean | undefined;
+    let chromeDriverPath: string | undefined;
+    let deviceSize: any;
+
     try {
-      deviceInfo = await Promise.all([
-        this.getDeviceVersion(adbInstance, device.udid),
-        this.isRealDevice(adbInstance, device.udid),
-        this.getChromeVersion(adbInstance, device.udid, pluginArgs),
-        this.getDeviceSize(adbInstance, device.udid),
-      ]);
+      sdk = await this.getDeviceVersion(adbInstance, device.udid);
     } catch (error) {
-      log.info(`Error while getting device info for ${device.udid}. Error: ${error}`);
+      log.info(`Error while getting device version for ${device.udid}. Error: ${error}`);
+    }
+
+    try {
+      realDevice = await this.isRealDevice(adbInstance, device.udid);
+    } catch (error) {
+      log.info(`Error while checking if device is real for ${device.udid}. Error: ${error}`);
+    }
+
+    try {
+      chromeDriverPath = await this.getChromeVersion(adbInstance, device.udid, pluginArgs);
+    } catch (error) {
+      log.info(`Error while getting chrome version for ${device.udid}. Error: ${error}`);
+    }
+
+    try {
+      deviceSize = await this.getDeviceSize(adbInstance, device.udid);
+    } catch (error) {
+      log.info(`Error while getting device size for ${device.udid}. Error: ${error}`);
+    }
+
+    // If critical information is missing, skip this device
+    if (_.isNil(sdk) || _.isNil(realDevice)) {
+      log.info(`Cannot get critical device info for ${device.udid}. Skipping`);
       return undefined;
     }
 
-    const [sdk, realDevice, chromeDriverPath, deviceSize] = deviceInfo;
-    const name = await this.getDeviceName(adbInstance, device.udid, realDevice);
+    let name: string | undefined;
+    try {
+      name = await this.getDeviceName(adbInstance, device.udid, realDevice);
+    } catch (error) {
+      log.info(`Error while getting device name for ${device.udid}. Error: ${error}`);
+    }
 
     // if cliArgs contains skipChromeDownload, then chromeDriverPath will be undefined
     if (!pluginArgs.skipChromeDownload && chromeDriverPath === undefined) {
