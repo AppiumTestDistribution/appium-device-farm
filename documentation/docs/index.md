@@ -10,7 +10,7 @@ hide:
   <img src="assets/images/DeviceFarm-Logo.jpg" class="center" width="200"/>
 </div>
 
-This is an Appium plugin designed to manage and create driver session on connected android devices and iOS Simulators.
+This is an Appium plugin designed to manage and create driver sessions on connected Android devices, iOS simulators, and tvOS devices.
 
 :octicons-heart-fill-24:{ .heart } **Why Appium Device Farm?**
 
@@ -20,13 +20,13 @@ This is an Appium plugin designed to manage and create driver session on connect
 
 	---
 
-	Streamline your testing workflow for efficiency with our solution, which simplifies the setup and oversight of driver sessions on both iOS simulators and Android devices
+	Streamline your testing workflow for efficiency with our solution, which simplifies the setup and oversight of driver sessions on iOS simulators, tvOS devices, and Android devices
 
 -   :status-automated:{ .device } __Automated Device Recognition__
 
 	---
 
-	Enjoy a hassle-free testing experience as our system automatically detects connected Android and iOS devices—both simulators and real hardware—prior to session initiation.
+	Enjoy a hassle-free testing experience as our system automatically detects connected Android, iOS, and tvOS devices—both simulators and real hardware—prior to session initiation.
 
 -   :status-sync:{ .device } __Proactive Device Pool Management__
 

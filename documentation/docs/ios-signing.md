@@ -1,10 +1,10 @@
 ---
-title: WebdriverAgent Signing with Xcode
+title: WebdriverAgent Signing with Xcode for iOS and tvOS
 hide:
   - navigation
 ---
 
-The Appium device farm now allows you to manage devices real IOS devices on non-Mac systems, including Raspberry Pi. To optimize its functionality, you need to re-sign the WebDriver agent with your provisioning profile and upload it to the device farm. The device farm will handle all the internal configuration. Below are the steps needed to sign the WebDriver agent.
+The Appium device farm now allows you to manage real iOS and tvOS devices on non-Mac systems, including Raspberry Pi. To optimize its functionality, you need to re-sign the WebDriver agent with your provisioning profile and upload it to the device farm. The device farm will handle all the internal configuration. Below are the steps needed to sign the WebDriver agent for both iOS and tvOS platforms.
 
 ## Prerequisite
 
@@ -73,6 +73,36 @@ After entering all the details, click "Start" and select a folder to save the re
 This will create a new file in the output directory.
 
 ![ios wda sign](https://raw.githubusercontent.com/AppiumTestDistribution/appium-device-farm/main/documentation/docs/assets/images/wda-signing/step14-wda-resign-completed.png)
+
+## Preparing WDA for tvOS Devices
+
+For tvOS devices (Apple TV), you need to create a separate resigned IPA file. The process is similar to iOS, but with some important differences:
+
+### Key Requirements for tvOS WDA:
+
+1. **Bundle ID**: tvOS apps require a different bundle identifier format. Make sure your provisioning profile includes tvOS support.
+
+2. **Provisioning Profile**: Your provisioning profile must explicitly support tvOS devices. When creating the provisioning profile in Xcode, ensure you select tvOS as a supported platform.
+
+3. **File Naming**: The resigned IPA must be named exactly `wda-resign_tvos.ipa` for the device farm to recognize it as a tvOS WebDriverAgent.
+
+### Steps for tvOS WDA Preparation:
+
+1. Follow the same provisioning profile creation steps as outlined above, but ensure tvOS is selected as a supported platform.
+
+2. Use the same WDA.ipa file from the [Appium Device Farm GitHub repository](https://github.com/AppiumTestDistribution/appium-device-farm/raw/main/WDA.ipa).
+
+3. In the iOS Resigner app:
+   - Select the WDA.ipa file as input
+   - Choose your Apple account from the Signing Certificate dropdown
+   - Select the tvOS-compatible provisioning profile
+   - **Important**: Save the output file as `wda-resign_tvos.ipa`
+
+4. Upload the `wda-resign_tvos.ipa` file to the device farm using the Apps section in the dashboard.
+
+The device farm will automatically detect and use the appropriate WDA file based on the connected device type:
+- iOS devices (iPhone, iPad) → `wda-resign.ipa`
+- tvOS devices (Apple TV) → `wda-resign_tvos.ipa`
 
 ## Uploading signed WDA in device farm
 

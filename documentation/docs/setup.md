@@ -44,13 +44,22 @@ User can block/unblock devices from Dashboard manually. These devices will not b
 
 Once automation picks the device user cannot manually unblock, it's responsible for the automation script.
 
-## Manual Control of Devices for iOS real device
+## Manual Control of Devices for iOS and tvOS real devices
+
+### For iOS Devices (iPhone, iPad)
 Resign the WDA provided here: [WDA](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/WDA.ipa). Upload the resigned WDA to the server from the UI. Make sure the WDA uploaded should be named as `wda-resign.ipa`.
 
 Follow the instructions [here](https://github.com/DanTheMan827/ios-app-signer) to resign the WDA.
 
 Verify: Install the resigned WDA on the device and check if the WDA is working fine. Use the command 
 `ios install --path=/pathto/wda-resign.ipa`
+
+### For tvOS Devices (Apple TV)
+For tvOS devices, you need to create a separate resigned WDA file. Use the same WDA.ipa file from the [Appium Device Farm GitHub repository](https://github.com/AppiumTestDistribution/appium-device-farm/blob/main/WDA.ipa).
+
+**Important**: When resigning for tvOS, ensure you save the output file as `wda-resign_tvos.ipa`. The device farm will automatically detect and use the appropriate WDA file based on the device platform.
+
+Follow the detailed instructions in the [iOS Signing Documentation](/ios-signing) for complete setup including provisioning profile creation and tvOS-specific requirements.
 ## Dashboard
 
 To reflect the test status on dashboard. 
