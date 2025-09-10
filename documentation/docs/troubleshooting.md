@@ -17,7 +17,7 @@ hide:
 1. run `appium plugin run device-farm reset`
 2. The above command will delete all the existing data from database and resets the device farm to the original state
 
-## IOS
+## iOS and tvOS
 
 1. How do I improve the iOS session startup for real device?
 
@@ -37,9 +37,16 @@ hide:
 2. How do I improve the iOS session startup for Simulators?
    - Provide server argument during the appium server start. `preBuildWDAPath` with the path to the WDA build for Simulators.
 
+3. How do I improve the tvOS session startup for real device?
+
+   - Resign the WDA provided here: [How to resign webdriver agent](/ios-signing) and save it as `wda-resign_tvos.ipa`
+   - Use the same capabilities as iOS devices
+   - Make sure the Apple TV device is unblocked and enabled developer mode
+   - Ensure your provisioning profile supports tvOS platform
+
 ## 📺 Streaming Settings
 
-The **Streaming Settings** section allows you to customize the streaming performance and quality of the IOS simulator and real device screen within the Appium Device-farm dashboard. This is particularly useful when accessing devices from remote machines for real-time control, ensuring the best balance between performance and visual clarity.
+The **Streaming Settings** section allows you to customize the streaming performance and quality of the iOS simulator, tvOS devices, and real device screens within the Appium Device-farm dashboard. This is particularly useful when accessing devices from remote machines for real-time control, ensuring the best balance between performance and visual clarity.
 
 ### 🔧 Settings Descriptions:
 
