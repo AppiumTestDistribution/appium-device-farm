@@ -1,3 +1,9 @@
+## [10.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.0...v10.1.1) (2025-09-10)
+
+### Bug Fixes
+
+* add better websocket error handling ([#1797](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1797)) ([ed0f16b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ed0f16b609f6112886d723059cc64c595fe2fb7b))
+
 ## [10.1.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.0.11...v10.1.0) (2025-09-08)
 
 ### Features
