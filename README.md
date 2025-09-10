@@ -10,11 +10,11 @@
 
 [![Build Status](https://dev.azure.com/saikrishna321/ATD/_apis/build/status/AppiumTestDistribution.appium-device-farm?branchName=main)](https://dev.azure.com/saikrishna321/ATD/_build/latest?definitionId=11&branchName=main) [![npm version](https://badge.fury.io/js/appium-device-farm.svg)](https://badge.fury.io/js/appium-device-farm)
 
-Appium Device-farm is a powerful plugin designed specifically to manage and streamline the creation of driver sessions for connected devices, including Android and iOS real devices, emulators, and simulators. This plugin extends the capabilities of Appium, making it easier for developers and testers to automate testing processes across a wide range of device types, ensuring that applications function smoothly in diverse environments.
+Appium Device-farm is a powerful plugin designed specifically to manage and streamline the creation of driver sessions for connected devices, including Android, iOS, and tvOS real devices, emulators, and simulators. This plugin extends the capabilities of Appium, making it easier for developers and testers to automate testing processes across a wide range of device types, ensuring that applications function smoothly in diverse environments.
 
 With Appium Device-farm, teams can:
 
-1. Remotely manage sessions for physical Android and iOS devices, emulators, and simulators, allowing for extensive cross-platform testing without the need for manual device handling.
+1. Remotely manage sessions for physical Android, iOS, and tvOS devices, emulators, and simulators, allowing for extensive cross-platform testing without the need for manual device handling.
 2. Automate test execution across multiple devices simultaneously, reducing the time and effort required to perform comprehensive application testing.
 3. Scale testing efforts to cover a broad array of device and OS combinations, ensuring that apps perform consistently across different hardware and software configurations.
 4. Integrate seamlessly with CI/CD pipelines to automate testing as part of continuous integration workflows, catching bugs and issues early in the development cycle.
@@ -120,6 +120,50 @@ The support and resources provided by the Appium device farm team were invaluabl
 
 The [Documentation](https://devicefarm.org/) is hosted separately at
 [Device Farm](https://devicefarm.org/)
+
+## 🍎 tvOS Support
+
+Appium Device-farm now supports Apple TV (tvOS) devices for comprehensive testing across Apple's ecosystem. To set up tvOS testing:
+
+### Prerequisites for tvOS Testing
+
+1. **Apple TV Device**: A physical Apple TV device with developer mode enabled
+2. **Mac with Xcode**: Required for signing the WebDriverAgent
+3. **Apple Developer Account**: For creating provisioning profiles
+4. **iOS Resigner App**: Download from [iOS Resigner GitHub](https://github.com/DanTheMan827/ios-app-signer/releases)
+
+### Setting up tvOS WebDriverAgent
+
+1. **Download WDA**: Get the WDA.ipa file from the [Appium Device Farm repository](https://github.com/AppiumTestDistribution/appium-device-farm/raw/main/WDA.ipa)
+
+2. **Create Provisioning Profile**: 
+   - Open Xcode and create a new project
+   - Ensure tvOS is selected as a supported platform
+   - Generate a provisioning profile that includes tvOS support
+
+3. **Resign WDA for tvOS**:
+   - Use the iOS Resigner app to resign the WDA.ipa
+   - **Important**: Save the output file as `wda-resign_tvos.ipa`
+   - Upload the resigned file to the device farm dashboard
+
+4. **Automatic Detection**: The device farm automatically detects and uses the appropriate WDA file:
+   - iOS devices (iPhone, iPad) → `wda-resign.ipa`
+   - tvOS devices (Apple TV) → `wda-resign_tvos.ipa`
+
+For detailed step-by-step instructions, see the [iOS Signing Documentation](https://devicefarm.org/ios-signing/).
+
+### tvOS Capabilities
+
+When creating sessions for tvOS devices, use the following capability:
+
+```json
+{
+  "appium:platformName": "tvOS",
+  "appium:platformVersion": "16.1.1"
+}
+```
+
+The device farm will automatically allocate tvOS devices and use the appropriate WebDriverAgent based on the platform specification.
 
 ## Contributing & Development
 
