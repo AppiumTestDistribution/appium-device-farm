@@ -94,7 +94,7 @@
     "crypto": "^1.0.1",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
-    "express": "^4.17.3",
+    "express": "^4.17.3 || ^5.0.0",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
     "generate-api-key": "^1.0.2",

@@ -225,6 +225,7 @@ For detailed configuration options, see the [Configuration Guide](https://device
 - Updated peer dependencies to support both Appium 2.11.3+ and 3.0.0+
 - Enhanced @appium/base-plugin compatibility (2.3.5+ || 3.0.0+)
 - Updated @appium/types compatibility (0.x || 1.0.0+)
+- **Express v5 compatibility** - Updated middleware and routes for Express v5
 - **No breaking changes** - existing configurations continue to work
 
 #### 🔧 Previous Updates

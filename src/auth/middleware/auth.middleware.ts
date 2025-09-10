@@ -34,6 +34,7 @@ export const getUserFromToken = async (token: string) => {
 
 /**
  * Authentication middleware to verify JWT tokens
+ * Updated for Express v5 compatibility - async errors are automatically handled
  */
 export const authMiddleware = (pluginArgs: IPluginArgs) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -55,46 +56,43 @@ export const authMiddleware = (pluginArgs: IPluginArgs) => {
       return res.status(401).json({ message: 'No authorization token provided' });
     }
 
-    try {
-      const authType = authHeader.split(' ')[0];
-      const token = authHeader.split(' ')[1];
-      console.log(token);
-      if (!authType || !token) {
-        return res.status(401).json({ message: 'Invalid authorization format' });
-      }
-
-      let user;
-      if (authType.toLowerCase() === 'basic') {
-        const [username, password] = Buffer.from(token, 'base64').toString().split(':');
-        user = await authenticateUserWithAccessKey(username, password);
-      } else {
-        user = await getUserFromToken(token);
-      }
-
-      if (!user) {
-        return res.status(401).json({ message: 'Invalid token' });
-      }
-
-      if (!user.isActive) {
-        return res.status(401).json({ message: 'User is not active' });
-      }
-      (req as AuthenticatedRequest).user = {
-        userId: user.id,
-        username: user.username,
-        role: user.role,
-      };
-
-      next();
-    } catch (error) {
-      log.error(`Authentication error: ${error}`);
-      return res.status(401).json({ message: 'Invalid or expired token' });
+    // Express v5 automatically handles async errors, so we can remove try-catch
+    const authType = authHeader.split(' ')[0];
+    const token = authHeader.split(' ')[1];
+    console.log(token);
+    if (!authType || !token) {
+      return res.status(401).json({ message: 'Invalid authorization format' });
     }
+
+    let user;
+    if (authType.toLowerCase() === 'basic') {
+      const [username, password] = Buffer.from(token, 'base64').toString().split(':');
+      user = await authenticateUserWithAccessKey(username, password);
+    } else {
+      user = await getUserFromToken(token);
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({ message: 'User is not active' });
+    }
+    (req as AuthenticatedRequest).user = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    };
+
+    next();
   };
 };
 
 /**
  * Role-based authorization middleware
  * @param roles Array of allowed roles
+ * Updated for Express v5 compatibility
  */
 export const authorizeRoles = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -113,6 +111,7 @@ export const authorizeRoles = (roles: string[]) => {
 
 /**
  * Admin-only authorization middleware
+ * Updated for Express v5 compatibility
  */
 export const adminOnly = (req: Request, res: Response, next: NextFunction) => {
   const authReq = req as AuthenticatedRequest;
