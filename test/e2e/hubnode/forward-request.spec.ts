@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 // we are using custom plugin harness as we want to run two instance of device-farm simultaneously
-import { pluginE2EHarness } from '../plugin-harness';
+import axios from 'axios';
+import * as chai from 'chai';
+import { default as chaiAsPromised } from 'chai-as-promised';
 import { remote } from 'webdriverio';
 import {
   HUB_APPIUM_PORT,
@@ -9,12 +11,9 @@ import {
   ensureAppiumHome,
   ensureHubConfig,
   ensureNodeConfig,
+  hub_config, node_config,
 } from '../e2ehelper';
-import { Options } from '@wdio/types';
-import axios from 'axios';
-import { default as chaiAsPromised } from 'chai-as-promised';
-import * as chai from 'chai';
-import { hub_config, node_config } from '../e2ehelper';
+import { pluginE2EHarness } from '../plugin-harness';
 chai.use(chaiAsPromised);
 
 let driver: any;
@@ -67,7 +66,7 @@ describe('E2E Forward Request', () => {
     port: HUB_APPIUM_PORT,
     driverSource: 'npm',
     driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverSpec: 'appium-uiautomator2-driver@4.0.0',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME!,
@@ -83,7 +82,7 @@ describe('E2E Forward Request', () => {
     host: node_config.bindHostOrIp,
     driverSource: 'npm',
     driverName: 'uiautomator2',
-    driverSpec: 'appium-uiautomator2-driver',
+    driverSpec: 'appium-uiautomator2-driver@4.0.0',
     pluginSource: 'local',
     pluginSpec: PLUGIN_PATH,
     appiumHome: APPIUM_HOME_NODE!,

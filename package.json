@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "10.0.7",
+  "version": "10.1.1",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices.",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -319,7 +319,10 @@
     "scripts": {
       "setup": "lib/src/scripts/setup-db.js",
       "prepare-wda": "lib/src/scripts/ios-sign.js",
-      "reset": "lib/src/scripts/clear-assets.js"
+      "reset": "lib/src/scripts/clear-assets.js",
+      "reset-preserve-users": "lib/src/scripts/reset-preserve-users.js",
+      "reset-preserve-teams": "lib/src/scripts/reset-preserve-teams.js",
+      "reset-sessions-only": "lib/src/scripts/reset-sessions-only.js"
     }
   },
   "engines": {

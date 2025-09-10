@@ -1,7 +1,7 @@
 import fs from 'fs';
-import path from 'path';
-import os from 'os';
 import ip from 'ip';
+import os from 'os';
+import path from 'path';
 import { DefaultPluginArgs, IPluginArgs } from '../../src/interfaces/IPluginArgs';
 
 const ifaces = os.networkInterfaces();
@@ -92,7 +92,6 @@ export function ensureHubConfig(
       port: HUB_APPIUM_PORT,
       plugin: {
         'device-farm': Object.assign(
-          node_config,
           {
             platform,
             androidDeviceType,
