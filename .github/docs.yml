@@ -15,12 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node_version: 20
-      - run: npm ci
-        run: npm run build
+      - run: npm install
+        run: cd documentation && npm install &&  npm run install-docs-deps && npm run build:docs
       - name: Deploy to Cloudflare Pages
         uses: andykenward/github-actions-cloudflare-pages@v3.0.0
         id: pages
@@ -28,6 +32,6 @@ jobs:
           cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           cloudflare-project-name: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: dist
+          directory: documentation/site
           github-token: ${{ secrets.PAT_TOKEN }}
           github-environment: ${{ secrets.CLOUDFLARE_PROJECT_NAME }} ${{ (github.ref == 'refs/heads/main' && '(Production)') || '(Preview)' }}
