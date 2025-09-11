@@ -227,6 +227,7 @@ For detailed configuration options, see the [Configuration Guide](https://device
 - Updated @appium/types compatibility (0.x || 1.0.0+)
 - **Express v5 compatibility** - Updated middleware and routes for Express v5
 - **Driver compatibility** - Updated uiautomator2-driver (4.2.3+ || 5.0.0+) and xcuitest-driver (9.2.1+ || 10.0.0+)
+- **Session management** - Plugin uses internal session tracking (no dependency on Appium's /sessions endpoint)
 - **No breaking changes** - existing configurations continue to work
 
 #### 🔧 Previous Updates
