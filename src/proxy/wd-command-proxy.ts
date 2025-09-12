@@ -136,9 +136,9 @@ export function registerProxyMiddlware(
   middlewares: ExpressMiddleware[],
 ) {
   log.info('Registering proxy middleware');
-  const index = expressApp._router.stack.findIndex((s: any) => s.route);
+  const index = expressApp.router.stack.findIndex((s: any) => s.route);
   expressApp.use('/', handler(cliArgs, middlewares));
-  expressApp._router.stack.splice(index, 0, expressApp._router.stack.pop());
+  expressApp.router.stack.splice(index, 0, expressApp.router.stack.pop());
 }
 
 export function wrapRequestWithMiddleware(options: {
