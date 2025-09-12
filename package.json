@@ -163,7 +163,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/listr": "^0.14.9",
-    "@types/lodash": "4.17.7",
+    "@types/lodash": "^4.17.7",
     "@types/lokijs": "1.5.14",
     "@types/mocha": "9.1.1",
     "@types/multer": "^1.4.11",
