@@ -89,7 +89,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   }
 
   private getDevicePlatformName(name: string, productType?: string, width?: string, height?: string, deviceInfo?: IDeviceInfo) {
-    const nameLower = name.toLowerCase();
+    const nameLower = name?.toLowerCase() || '';
     const productTypeLower = productType?.toLowerCase() || '';
     
     // First check ProductType for definitive identification (most reliable)
@@ -410,7 +410,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           mjpegServerPort,
           busy: false,
           realDevice: false,
-          platform: this.getDevicePlatformName(device.name, productModel, modelInfo.Width, modelInfo.Height, null),
+          platform: this.getDevicePlatformName(device.name, productModel, modelInfo.Width, modelInfo.Height, undefined),
           deviceType: 'simulator',
           host: `http://${this.pluginArgs.bindHostOrIp}:${this.hostPort}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
