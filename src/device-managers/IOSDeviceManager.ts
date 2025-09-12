@@ -20,6 +20,14 @@ import { IOSDeviceInfoMap } from './IOSDeviceType';
 import { exec } from 'child_process';
 import semver from 'semver';
 
+interface IDeviceInfo {
+  ProductType?: string;
+  ProductName?: string;
+  DeviceClass?: string;
+  DeviceName?: string;
+  [key: string]: any; // For other properties that might exist
+}
+
 export default class IOSDeviceManager implements IDeviceManager {
   constructor(
     private pluginArgs: IPluginArgs,
@@ -80,7 +88,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     return await IOSUtils.getDeviceName(udid);
   }
 
-  private getDevicePlatformName(name: string, productType?: string, width?: string, height?: string, deviceInfo?: any) {
+  private getDevicePlatformName(name: string, productType?: string, width?: string, height?: string, deviceInfo?: IDeviceInfo) {
     const nameLower = name.toLowerCase();
     const productTypeLower = productType?.toLowerCase() || '';
     
@@ -106,8 +114,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     // Then check for Apple TV devices by name (more specific patterns)
     // Only consider it tvOS if it's clearly an Apple TV device
     if (nameLower.includes('apple tv') || 
-        (nameLower.startsWith('tv') && !nameLower.includes('iphone') && !nameLower.includes('ipad') && !nameLower.includes('ipod')) ||
-        (nameLower.includes('tv') && !nameLower.includes('iphone') && !nameLower.includes('ipad') && !nameLower.includes('ipod'))) {
+        (nameLower.startsWith('tv') && !nameLower.includes('iphone') && !nameLower.includes('ipad') && !nameLower.includes('ipod'))) {
       return 'tvos';
     }
     
@@ -309,7 +316,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = 0;
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const deviceInfo = await getDeviceInfo(udid);
-    const { ProductType, ProductName, DeviceClass, DeviceColor, DeviceName } = deviceInfo;
+    const { ProductType, ProductName, DeviceClass, DeviceName } = deviceInfo;
     const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     const platform = this.getDevicePlatformName(name, ProductType, modelInfo.Width, modelInfo.Height, deviceInfo);
     return Object.assign({
