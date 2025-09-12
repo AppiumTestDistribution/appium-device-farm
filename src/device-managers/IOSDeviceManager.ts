@@ -80,8 +80,86 @@ export default class IOSDeviceManager implements IDeviceManager {
     return await IOSUtils.getDeviceName(udid);
   }
 
-  private getDevicePlatformName(name: string) {
-    return name.toLowerCase().includes('tv') ? 'tvos' : 'ios';
+  private getDevicePlatformName(name: string, productType?: string, width?: string, height?: string, deviceInfo?: any) {
+    const nameLower = name.toLowerCase();
+    const productTypeLower = productType?.toLowerCase() || '';
+    
+    // First check ProductType for definitive identification (most reliable)
+    if (productTypeLower.includes('appletv')) {
+      return 'tvos';
+    }
+    
+    if (productTypeLower.includes('iphone') || 
+        productTypeLower.includes('ipad') || 
+        productTypeLower.includes('ipod')) {
+      return 'ios';
+    }
+    
+    // If ProductType is not definitive, check device name patterns
+    // Check for iOS devices by name first (higher priority)
+    if (nameLower.includes('iphone') || 
+        nameLower.includes('ipad') || 
+        nameLower.includes('ipod')) {
+      return 'ios';
+    }
+    
+    // Then check for Apple TV devices by name (more specific patterns)
+    // Only consider it tvOS if it's clearly an Apple TV device
+    if (nameLower.includes('apple tv') || 
+        (nameLower.startsWith('tv') && !nameLower.includes('iphone') && !nameLower.includes('ipad') && !nameLower.includes('ipod')) ||
+        (nameLower.includes('tv') && !nameLower.includes('iphone') && !nameLower.includes('ipad') && !nameLower.includes('ipod'))) {
+      return 'tvos';
+    }
+    
+    // For unknown devices (like "Appium"), try to determine based on device characteristics
+    // Use ideviceinfo data for more accurate detection
+    if (deviceInfo) {
+      const { ProductName, DeviceClass, DeviceName } = deviceInfo;
+      
+      // Check ProductName for Apple TV indicators
+      if (ProductName && ProductName.toLowerCase().includes('apple tv')) {
+        return 'tvos';
+      }
+      
+      // Check DeviceClass for Apple TV indicators
+      if (DeviceClass && DeviceClass.toLowerCase().includes('tv')) {
+        return 'tvos';
+      }
+      
+      // Check DeviceName for Apple TV indicators
+      if (DeviceName && DeviceName.toLowerCase().includes('apple tv')) {
+        return 'tvos';
+      }
+    }
+    
+    // Fallback to aspect ratio detection if ideviceinfo doesn't provide clear info
+    if (width && height) {
+      const widthNum = parseInt(width);
+      const heightNum = parseInt(height);
+      
+      if (widthNum > 0 && heightNum > 0) {
+        const aspectRatio = widthNum / heightNum;
+        
+        // Apple TV devices typically have 16:9 aspect ratio (1.78)
+        // Common Apple TV resolutions: 1920x1080 (1.78), 3840x2160 (1.78)
+        // iOS devices have different aspect ratios:
+        // - iPhone: ~0.46 (portrait), ~2.17 (landscape)
+        // - iPad: ~0.75 (portrait), ~1.33 (landscape)
+        
+        // 16:9 aspect ratio is exactly 1.777... (16/9)
+        // Allow very small tolerance for rounding errors only
+        if (aspectRatio >= 1.776 && aspectRatio <= 1.778) {
+          // Very close to exact 16:9 aspect ratio suggests Apple TV
+          return 'tvos';
+        } else {
+          // Any other aspect ratio suggests iOS device
+          return 'ios';
+        }
+      }
+    }
+    
+    // If we still can't determine, default to iOS for backward compatibility
+    return 'ios';
   }
 
   /**
@@ -230,14 +308,16 @@ export default class IOSDeviceManager implements IDeviceManager {
     const mjpegServerPort = await getFreePort();
     const totalUtilizationTimeMilliSec = 0;
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
-    const { ProductType } = await getDeviceInfo(udid);
+    const deviceInfo = await getDeviceInfo(udid);
+    const { ProductType, ProductName, DeviceClass, DeviceColor, DeviceName } = deviceInfo;
     const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
+    const platform = this.getDevicePlatformName(name, ProductType, modelInfo.Width, modelInfo.Height, deviceInfo);
     return Object.assign({
       id: generateDeviceId({
         udid: udid,
         realDevice: true,
         nodeId: this.nodeId,
-        platform: 'ios',
+        platform: platform,
       } as any),
       wdaLocalPort,
       mjpegServerPort,
@@ -247,7 +327,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       busy: false,
       realDevice: true,
       deviceType: 'real',
-      platform: this.getDevicePlatformName(name),
+      platform: platform,
       host,
       wdaBundleId: '',
       productModel: ProductType,
@@ -323,7 +403,7 @@ export default class IOSDeviceManager implements IDeviceManager {
           mjpegServerPort,
           busy: false,
           realDevice: false,
-          platform: this.getDevicePlatformName(device.name),
+          platform: this.getDevicePlatformName(device.name, productModel, modelInfo.Width, modelInfo.Height, null),
           deviceType: 'simulator',
           host: `http://${this.pluginArgs.bindHostOrIp}:${this.hostPort}`,
           totalUtilizationTimeMilliSec: totalUtilizationTimeMilliSec,
