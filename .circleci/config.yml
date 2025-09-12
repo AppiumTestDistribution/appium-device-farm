@@ -12,11 +12,11 @@ jobs:
       - run:
           name: Node Version
           command: |
-            nvm install v16.18.1 && nvm alias default 16.18.1
+            nvm install v20.19.0 && nvm alias default 20.19.0
       - run:
           name: Run iOS Test
           command: |
-            nvm install v16.18.1 && nvm alias default 16.18.1
+            nvm install v20.19.0 && nvm alias default 20.19.0
             node -v 
             npm ci
             npm run integration-ios
