@@ -1,3 +1,9 @@
+## [10.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.1...v10.1.2) (2025-09-15)
+
+### Bug Fixes
+
+* improve tvOS device detection for Apple TV devices ([#1808](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1808)) ([1e6cec1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1e6cec1442fd4e9c118db21852e72fe4da22ba9a))
+
 ## [10.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.0...v10.1.1) (2025-09-10)
 
 ### Bug Fixes
