@@ -1,3 +1,9 @@
+## [10.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.2...v10.2.0) (2025-09-16)
+
+### Features
+
+* [#1803](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1803) ([#1817](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1817)) ([1a0d0e1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1a0d0e1cff4ba2a5b6238d357bffab33b1055f5a))
+
 ## [10.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.1...v10.1.2) (2025-09-15)
 
 ### Bug Fixes
