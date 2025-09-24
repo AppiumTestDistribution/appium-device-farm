@@ -1,3 +1,15 @@
+## [11.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.2.0...v11.0.0) (2025-09-24)
+
+### ⚠ BREAKING CHANGES
+
+* Following changes are added
+- Updated dependencies to support appium 3
+- Updated peer dependency to use appium 3
+
+### Features
+
+* add support for appium3 ([#1807](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1807)) ([c3af576](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c3af57685d69b9dd634288cc62474c8e9c1c3e2f))
+
 ## [10.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.2...v10.2.0) (2025-09-16)
 
 ### Features
