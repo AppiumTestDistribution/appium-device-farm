@@ -1,7 +1,7 @@
 # .circleci/config.yml
 version: 2.1
 orbs:
-  macos: circleci/macos@2.5.2
+  macos: circleci/macos@2.5.4
 
 jobs:
   iOS:
