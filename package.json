@@ -103,7 +103,7 @@
     "inquirer": "^10.1.8",
     "ios-mobileprovision-finder": "^1.1.0",
     "ip": "^1.1.8",
-    "jsonschema": "1.4.1",
+    "jsonschema": "1.5.0",
     "jsonwebtoken": "^9.0.2",
     "listr": "^0.14.3",
     "local-cors-proxy": "^1.1.0",
