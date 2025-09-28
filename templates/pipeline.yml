@@ -5,5 +5,5 @@ steps:
        done
        git submodule sync
        git submodule update --init --recursive
-       npm ci
+       npm install --no-package-lock
        npm run bundle

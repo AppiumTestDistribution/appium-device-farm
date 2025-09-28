@@ -7,9 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ATDRepository } from '../../../src/data-service/db';
 import { unblockDeviceMatchingFilter } from '../../../src/data-service/device-service';
 import {
-    allocateDeviceForSession,
-    initializeStorage,
-    updateDeviceList,
+  allocateDeviceForSession,
+  initializeStorage,
+  updateDeviceList,
 } from '../../../src/device-utils';
 import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';

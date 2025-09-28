@@ -11,7 +11,8 @@ import {
   ensureAppiumHome,
   ensureHubConfig,
   ensureNodeConfig,
-  hub_config, node_config,
+  hub_config,
+  node_config,
 } from '../e2ehelper';
 import { pluginE2EHarness } from '../plugin-harness';
 chai.use(chaiAsPromised);
