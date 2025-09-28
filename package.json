@@ -127,7 +127,7 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^6.6.7",
     "semver": "^7.5.4",
-    "sharp": "^0.33.5",
+    "sharp": "^0.34.0",
     "tcp-port-used": "^1.0.2",
     "typedi": "^0.10.0",
     "uuid": "^8.3.2",
