@@ -2,8 +2,10 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { ATDRepository } from '../../src/data-service/db';
 import {
-  addNewDevice, getAllDevices, removeDevice,
-  setSimulatorState
+  addNewDevice,
+  getAllDevices,
+  removeDevice,
+  setSimulatorState,
 } from '../../src/data-service/device-service';
 import { IDevice } from '../../src/interfaces/IDevice';
 import { prisma } from '../../src/prisma';
@@ -13,7 +15,9 @@ var sandbox = sinon.createSandbox();
 describe('Model Test', async () => {
   before('Add device collection', async () => {
     // Insert a Node record for foreign key constraint in both LokiJS and Prisma
-    const nodeModel = (await ATDRepository.db).getCollection('nodes') || (await ATDRepository.db).addCollection('nodes');
+    const nodeModel =
+      (await ATDRepository.db).getCollection('nodes') ||
+      (await ATDRepository.db).addCollection('nodes');
     nodeModel.insert({
       id: 'test-node-id',
       name: 'Test Node',

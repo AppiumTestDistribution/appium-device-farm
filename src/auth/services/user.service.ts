@@ -6,7 +6,6 @@ import log from '../../logger';
 import { User } from '@prisma/client';
 import { generateAccessKey } from '../../utils/auth';
 
-
 // Salt rounds for bcrypt
 const SALT_ROUNDS = 10;
 

@@ -31,6 +31,9 @@ jobs:
       run: |
         # Add your script commands here
         npm test
+    - name: Run lint
+      run: |
+        npm run prettier-check
   # HubWithNoPlatform:
   #   name: Run E2E Plugin Test
   #   runs-on: ubuntu-latest

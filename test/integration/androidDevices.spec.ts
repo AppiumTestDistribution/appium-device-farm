@@ -8,10 +8,10 @@ import { ATDRepository } from '../../src/data-service/db';
 import { unblockDeviceMatchingFilter } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
 import {
-    allocateDeviceForSession,
-    cleanPendingSessions,
-    initializeStorage,
-    updateDeviceList,
+  allocateDeviceForSession,
+  cleanPendingSessions,
+  initializeStorage,
+  updateDeviceList,
 } from '../../src/device-utils';
 import { IDevice } from '../../src/interfaces/IDevice';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
@@ -39,7 +39,7 @@ describe('Android Test', () => {
 
   before(async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
-    
+
     // Create Node record in Prisma database for foreign key constraint
     const { prisma } = await import('../../src/prisma');
     await prisma.node.upsert({
@@ -53,7 +53,7 @@ describe('Android Test', () => {
         jwtSecretToken: 'test-token',
       },
     });
-    
+
     // adb devices should return devices
     expect(deviceManager.getDevices()).to.eventually.have.length.greaterThan(
       0,

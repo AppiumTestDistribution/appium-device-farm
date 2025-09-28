@@ -27,7 +27,9 @@ sessionRequestMap.set(REQUEST_ID, {} as any);
 describe('Device Utils', () => {
   before(async () => {
     // Insert a Node record for foreign key constraint in both LokiJS and Prisma
-    const nodeModel = (await ATDRepository.db).getCollection('nodes') || (await ATDRepository.db).addCollection('nodes');
+    const nodeModel =
+      (await ATDRepository.db).getCollection('nodes') ||
+      (await ATDRepository.db).addCollection('nodes');
     nodeModel.insert({
       id: NODE_ID,
       name: 'Test Node',
@@ -379,8 +381,23 @@ describe('Device Utils', () => {
         nodeId: NODE_ID,
         sdk: '1.0',
       },
-      { id: 'dev-utils-mock-3', udid: 'device3', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime(), nodeId: NODE_ID, sdk: '1.0' },
-      { id: 'dev-utils-mock-4', udid: 'device4', busy: true, host: 'unknown', nodeId: NODE_ID, sdk: '1.0' },
+      {
+        id: 'dev-utils-mock-3',
+        udid: 'device3',
+        busy: true,
+        host: ip.address(),
+        lastCmdExecutedAt: new Date().getTime(),
+        nodeId: NODE_ID,
+        sdk: '1.0',
+      },
+      {
+        id: 'dev-utils-mock-4',
+        udid: 'device4',
+        busy: true,
+        host: 'unknown',
+        nodeId: NODE_ID,
+        sdk: '1.0',
+      },
     ];
 
     sandbox.stub(DeviceService, 'getAllDevices').callsFake(getAllDevicesMock as any);
@@ -411,7 +428,15 @@ describe('Device Utils', () => {
         nodeId: NODE_ID,
         sdk: '1.0',
       },
-      { id: 'dev-utils-mock-6', udid: 'device2', busy: true, host: ip.address(), lastCmdExecutedAt: new Date().getTime(), nodeId: NODE_ID, sdk: '1.0' },
+      {
+        id: 'dev-utils-mock-6',
+        udid: 'device2',
+        busy: true,
+        host: ip.address(),
+        lastCmdExecutedAt: new Date().getTime(),
+        nodeId: NODE_ID,
+        sdk: '1.0',
+      },
       // user blocked device
       {
         id: 'dev-utils-mock-7',

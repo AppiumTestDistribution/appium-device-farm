@@ -12,7 +12,7 @@ import {
   ensureNodeConfig,
   HUB_APPIUM_PORT,
   NODE_APPIUM_PORT,
-  PLUGIN_PATH
+  PLUGIN_PATH,
 } from './e2ehelper';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -75,22 +75,22 @@ describe('Basic Plugin Test', () => {
     appiumHome: APPIUM_HOME!,
   });
 
-    pluginE2EHarness({
-      before: global.before,
-      after: global.after,
-      serverArgs: {
-        subcommand: 'server',
-        configFile: node_config_file,
-      },
-      pluginName: 'device-farm',
-      port: NODE_APPIUM_PORT,
-      driverSource: 'npm',
-      driverName: 'uiautomator2',
-      driverSpec: 'appium-uiautomator2-driver@4.0.0',
-      pluginSource: 'local',
-      pluginSpec: PLUGIN_PATH,
-      appiumHome: APPIUM_HOME!,
-    });
+  pluginE2EHarness({
+    before: global.before,
+    after: global.after,
+    serverArgs: {
+      subcommand: 'server',
+      configFile: node_config_file,
+    },
+    pluginName: 'device-farm',
+    port: NODE_APPIUM_PORT,
+    driverSource: 'npm',
+    driverName: 'uiautomator2',
+    driverSpec: 'appium-uiautomator2-driver@4.0.0',
+    pluginSource: 'local',
+    pluginSpec: PLUGIN_PATH,
+    appiumHome: APPIUM_HOME!,
+  });
 
   const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
 
@@ -104,7 +104,7 @@ describe('Basic Plugin Test', () => {
 
   it('Add Android devices from node to hub', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
-    
+
     const nodeAndroidDevice = [
       {
         adbRemoteHost: null,
