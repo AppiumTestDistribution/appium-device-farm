@@ -24,7 +24,8 @@ describe('EnhancedADBManager', () => {
     // Reset the singleton instance for each test
     await EnhancedADBManager.getInstance().reset();
     // Also reset the exported enhancedADBManager by creating a new instance
-    (require('../../src/utils/enhanced-adb-manager') as any).enhancedADBManager = EnhancedADBManager.getInstance();
+    (require('../../src/utils/enhanced-adb-manager') as any).enhancedADBManager =
+      EnhancedADBManager.getInstance();
   });
 
   describe('Singleton Pattern', () => {

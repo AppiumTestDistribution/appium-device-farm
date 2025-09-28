@@ -6,5 +6,5 @@ export type Config = {
   appsPath: string;
   serverMetadata: {
     id: string;
-  }
+  };
 };

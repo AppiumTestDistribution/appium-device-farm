@@ -118,7 +118,7 @@
 ##         versionSpec: '16.x'
 ##
 ##     - script: |
-##         npm ci
+##         npm install --no-package-lock
 ##         export APPIUM_HOME=/tmp/device-farm
 ##         ./node_modules/.bin/appium plugin install --source=local .
 ##         nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=device-farm -pa /wd/hub --config=./serverConfig/sauce-config.json &

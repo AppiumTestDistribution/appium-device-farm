@@ -1,17 +1,17 @@
 import { exec } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import fs from 'fs';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Applesign from 'applesign';
 import archiver from 'archiver';
-import yargs from 'yargs/yargs';
-import { hideBin } from 'yargs/helpers';
-import Listr, { ListrContext } from 'listr';
 import { provision } from 'ios-mobileprovision-finder';
+import Listr, { ListrContext } from 'listr';
 import os from 'os';
 import { Observable, Subscriber } from 'rxjs';
+import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs/yargs';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { select } from '@inquirer/prompts';
@@ -20,7 +20,7 @@ const execAsync = util.promisify(exec);
 const WDA_BUILD_PATH = '/appium_wda_ios/Build/Products/Debug-iphoneos';
 let bundleIdName: { uuid: string; name: string }[] | null = null;
 let freeBundleID: { uuid: string; name: string } | null = null;
-
+let isFreeAccount: boolean = false;
 async function getXcodeMajorVersion(): Promise<number> {
   const { stdout } = await execAsync('xcodebuild -version');
   const match = stdout.match(/Xcode (\d+)\./);
@@ -46,6 +46,7 @@ interface CliOptions {
   mobileProvisioningFile?: string;
   wdaProjectPath?: string;
   platform?: string;
+  bundleId?: string;
 }
 
 const getOptions = async () => {
@@ -58,7 +59,7 @@ const getOptions = async () => {
       desc: 'Path to webdriver agent xcode project',
       type: 'string',
     },
-    'platform': {
+    platform: {
       desc: 'Platform type: ios, tvos, or both (default: ios)',
       type: 'string',
       choices: ['ios', 'tvos', 'both'],
@@ -107,7 +108,7 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
       })),
     });
 
-    const isFreeAccount = await select({
+    isFreeAccount = await select({
       message: 'Is this a free or enterprise account provisioning profile?',
       choices: [
         { value: true, name: 'Free Account' },
@@ -118,6 +119,7 @@ const getMobileProvisioningFile = async (mobileProvisioningFile?: string) => {
       bundleIdName = provisioningFiles.map((file) => {
         return { uuid: file.UUID, name: `${file.Name.split(':')[1] || file.Name}` };
       });
+      isFreeAccount = true;
     }
     freeBundleID =
       bundleIdName?.find((d: any) => {
@@ -145,10 +147,13 @@ const getWdaProject = async (wdaProjectPath?: string) => {
 };
 
 /* Task definintions */
-async function buildWebDriverAgent(projectDir: string, logger: any) {
+async function buildWebDriverAgent(projectDir: string, logger: any, bundleId?: string) {
   try {
-    const buildCommand =
+    let buildCommand =
       'xcodebuild clean build-for-testing -project WebDriverAgent.xcodeproj -derivedDataPath appium_wda_ios -scheme WebDriverAgentRunner -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO';
+    if (isFreeAccount) {
+      buildCommand += ` PRODUCT_BUNDLE_IDENTIFIER=${bundleId?.replace(/^\s+|\s+$/g, '')}`;
+    }
     logger(buildCommand);
     await execAsync(buildCommand, { cwd: projectDir, maxBuffer: undefined });
     return `${projectDir}/${WDA_BUILD_PATH}/WebDriverAgentRunner-Runner.app`;
@@ -221,6 +226,21 @@ async function zipPayloadDirectory(
               fs.rmSync(`${context.wdaAppPath}/Frameworks/${f}`, { recursive: true }),
             );
 
+            const infoPlistPath = path.join(context.wdaAppPath, 'Info.plist');
+            const bundleId = freeBundleID?.name.replace(/^\s+|\s+$/g, '') || '';
+
+            // Read Info.plist
+            let infoPlistContent = fs.readFileSync(infoPlistPath, 'utf8');
+
+            // Replace CFBundleIdentifier
+            infoPlistContent = infoPlistContent.replace(
+              /<key>CFBundleIdentifier<\/key>\n\s*<string>(.*?)<\/string>/,
+              `<key>CFBundleIdentifier<\/key>\n<string>${bundleId}<\/string>`,
+            );
+
+            // Write Info.plist
+            fs.writeFileSync(infoPlistPath, infoPlistContent, 'utf8');
+
             observer.next('Creating Payload directory');
             execAsync(`mkdir -p ${payloadDirectory}`)
               .then(() => {
@@ -246,15 +266,15 @@ async function zipPayloadDirectory(
         title: 'Signing WebDriverAgent ipa',
         task: async (context, task) => {
           const wdaBuildPath = path.join(context.wdaProjectPath, WDA_BUILD_PATH);
-          
+
           if (cliOptions.platform === 'both') {
             const platforms = ['ios', 'tvos'];
             const results = [];
-            
+
             for (const platform of platforms) {
               const wdaFileName = platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
               const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
-              
+
               let appleOptions: any;
               if (freeBundleID) {
                 appleOptions = {
@@ -268,16 +288,17 @@ async function zipPayloadDirectory(
                   outfile: ipaPath,
                 };
               }
-              
+
               const as = new Applesign(appleOptions);
               await as.signIPA(path.join(wdaBuildPath, 'wda-resign.zip'));
               results.push(`${platform}: ${ipaPath}`);
             }
-            
+
             task.title = `Successfully signed WebDriverAgent files for both platforms: ${results.join(', ')}`;
           } else {
             // Single platform file creation
-            const wdaFileName = cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
+            const wdaFileName =
+              cliOptions.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
             const ipaPath = `${wdaBuildPath}/${wdaFileName}`;
 
             let appleOptions: any;

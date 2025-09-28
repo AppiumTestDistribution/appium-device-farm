@@ -72,7 +72,7 @@ describe('Max sessions CLI argument test', () => {
   before('Add Args', async () => {
     (await ATDRepository.DeviceModel).removeDataOnly();
     await addCLIArgs(serverCliArgs);
-    
+
     // Create Node record in Prisma database for foreign key constraint
     const { prisma } = await import('../../../src/prisma');
     await prisma.node.upsert({
@@ -257,7 +257,6 @@ describe('IOS Simulator Test', () => {
     expect(foundSimulator.name).to.match(/^iPhone/);
     expect(foundSimulator.wdaLocalPort).to.match(/[0-9]/);
   });
-
 
   it('Should find free Apple TV simulator and set busy status to true', async function () {
     if (process.env.CI) {

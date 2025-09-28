@@ -140,7 +140,6 @@
   },
   "devDependencies": {
     "@appium/docutils": "^0.4.11",
-    "@appium/fake-driver": "^5.2.10",
     "@appium/plugin-test-support": "^1.0.0",
     "@babel/core": "7.28.4",
     "@babel/plugin-proposal-class-properties": "7.18.6",
@@ -176,8 +175,8 @@
     "@typescript-eslint/parser": "5.62.0",
     "@wdio/types": "^8.24.2",
     "appium": "^3.0.0",
-    "appium-uiautomator2-driver": "^5.0.0",
-    "appium-xcuitest-driver": "^10.0.0",
+    "appium-uiautomator2-driver": "^5.0.3",
+    "appium-xcuitest-driver": "^10.1.2",
     "babel-eslint": "10.1.0",
     "chai": "4.5.0",
     "chai-as-promised": "^7.1.1",
