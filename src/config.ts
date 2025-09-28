@@ -1,24 +1,23 @@
 import * as os from 'os';
 import * as path from 'path';
-import * as fs from "fs";
+import * as fs from 'fs';
 import { Config } from './types/Config';
-import {v4 as uuid} from "uuid"
+import { v4 as uuid } from 'uuid';
 
 const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
 const deviceFarmHome = getDeviceFarmHome();
 
 function getDeviceFarmHome() {
   let deviceFarmHome = basePath;
-  if(process.env.DEVICE_FARM_HOME) {
+  if (process.env.DEVICE_FARM_HOME) {
     deviceFarmHome = process.env.DEVICE_FARM_HOME;
-  } 
-  if(!fs.existsSync(deviceFarmHome)) {
+  }
+  if (!fs.existsSync(deviceFarmHome)) {
     fs.mkdirSync(deviceFarmHome, { recursive: true });
   }
-  console.info("Using Metadata Path: ", deviceFarmHome);
+  console.info('Using Metadata Path: ', deviceFarmHome);
   return deviceFarmHome;
 }
-
 
 export function getServerMetadata() {
   const metaFile = path.join(getDeviceFarmHome(), 'metadata.json');
