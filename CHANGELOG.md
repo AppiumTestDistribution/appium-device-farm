@@ -1,3 +1,9 @@
+## [11.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.0...v11.0.1) (2025-09-28)
+
+### Bug Fixes
+
+* linting and ios-resign ([#1848](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1848)) ([0c4337e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/0c4337e1b1cf503059ba354675216189fa164afb))
+
 ## [11.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.2.0...v11.0.0) (2025-09-24)
 
 ### ⚠ BREAKING CHANGES
