@@ -25,12 +25,15 @@ jobs:
     - name: Run script
       run: |
         # Add your script commands here
-        npm ci
+        npm install --no-package-lock
         npm run bundle
     - name: Run Unit Test
       run: |
         # Add your script commands here
         npm test
+    - name: Run lint
+      run: |
+        npm run prettier-check
   # HubWithNoPlatform:
   #   name: Run E2E Plugin Test
   #   runs-on: ubuntu-latest
@@ -44,7 +47,7 @@ jobs:
   #     - name: Build
   #       run: |
   #         # Add your script commands here
-  #         npm ci
+  #         npm install --no-package-lock
   #         npm run bundle
   #     - name: Run E2E Plugin Test without Platform
   #       run: |
@@ -63,7 +66,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Run script
         run: |
-          npm ci
+          npm install --no-package-lock
           npm run bundle
   AndroidIntegrationTest:
     name: Run Android Integration Test
@@ -77,7 +80,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Build
         run: |
-         npm ci
+         npm install --no-package-lock
          npm run bundle
 
       - name: Enable KVM
@@ -106,7 +109,7 @@ jobs:
   #       uses: actions/checkout@v4
   #     - name: Build
   #       run: |
-  #         npm ci
+  #         npm install --no-package-lock
   #         npm run bundle
 
   #     - name: Enable KVM
@@ -135,7 +138,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Build
         run: |
-          npm ci
+          npm install --no-package-lock
           npm run bundle
       - name: Run iOS Integration Test
         run: |
@@ -156,7 +159,7 @@ jobs:
   #       uses: actions/checkout@v3
   #     - name: Build
   #       run: |
-  #         npm ci
+  #         npm install --no-package-lock
   #         npm run bundle
   #     - name: Run e2e plugin Test
   #       run: |
@@ -179,7 +182,7 @@ jobs:
   #       uses: actions/checkout@v3
   #     - name: Build
   #       run: |
-  #         npm ci
+  #         npm install --no-package-lock
   #         npm run bundle
   #     - name: Run BrowserStack Test
   #       run: |
@@ -202,7 +205,7 @@ jobs:
   #       uses: android-actions/setup-android@v2.0.10
   #     - name: Build
   #       run: |
-  #         npm ci
+  #         npm install --no-package-lock
   #         npm run bundle
   #     - name: Run BrowserStack Test
   #       run: |
@@ -218,7 +221,7 @@ jobs:
   #      uses: actions/checkout@v3
   #    - name: Build
   #      run: |
-  #       npm ci
+  #       npm install --no-package-lock
   #       npm run bundle
   #    - name: Run LT Test
   #      run: |

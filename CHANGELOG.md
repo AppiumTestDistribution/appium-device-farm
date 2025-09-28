@@ -1,3 +1,33 @@
+## [11.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.0...v11.0.1) (2025-09-28)
+
+### Bug Fixes
+
+* linting and ios-resign ([#1848](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1848)) ([0c4337e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/0c4337e1b1cf503059ba354675216189fa164afb))
+
+## [11.0.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.2.0...v11.0.0) (2025-09-24)
+
+### ⚠ BREAKING CHANGES
+
+* Following changes are added
+- Updated dependencies to support appium 3
+- Updated peer dependency to use appium 3
+
+### Features
+
+* add support for appium3 ([#1807](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1807)) ([c3af576](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c3af57685d69b9dd634288cc62474c8e9c1c3e2f))
+
+## [10.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.2...v10.2.0) (2025-09-16)
+
+### Features
+
+* [#1803](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1803) ([#1817](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1817)) ([1a0d0e1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1a0d0e1cff4ba2a5b6238d357bffab33b1055f5a))
+
+## [10.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.1...v10.1.2) (2025-09-15)
+
+### Bug Fixes
+
+* improve tvOS device detection for Apple TV devices ([#1808](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1808)) ([1e6cec1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/1e6cec1442fd4e9c118db21852e72fe4da22ba9a))
+
 ## [10.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v10.1.0...v10.1.1) (2025-09-10)
 
 ### Bug Fixes

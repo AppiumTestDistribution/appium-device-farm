@@ -10,7 +10,9 @@ export default class CapabilityManager {
   }
 
   getCapability() {
-    const capsToUpdate = this.capabilities.firstMatch? this.capabilities.firstMatch[0] : this.capabilities.alwaysMatch;
+    const capsToUpdate = this.capabilities.firstMatch
+      ? this.capabilities.firstMatch[0]
+      : this.capabilities.alwaysMatch;
     const entries = Object.entries(this.freeDevice.capability);
     entries.map(([key, val]) => {
       capsToUpdate[`appium:${key}`] = val;
