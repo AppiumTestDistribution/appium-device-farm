@@ -140,7 +140,7 @@
   },
   "devDependencies": {
     "@appium/docutils": "^0.4.11",
-    "@appium/fake-driver": "^5.2.10",
+    "@appium/fake-driver": "^6.0.0",
     "@appium/plugin-test-support": "^1.0.0",
     "@babel/core": "7.28.4",
     "@babel/plugin-proposal-class-properties": "7.18.6",
