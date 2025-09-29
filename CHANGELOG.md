@@ -1,3 +1,9 @@
+## [11.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.2...v11.0.3) (2025-09-29)
+
+### Bug Fixes
+
+* wda ipa for tvos ([#1855](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1855)) ([783e245](https://github.com/AppiumTestDistribution/appium-device-farm/commit/783e2456ae2843fc01244a748b17bc93788a5923))
+
 ## [11.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.1...v11.0.2) (2025-09-29)
 
 ### Bug Fixes
