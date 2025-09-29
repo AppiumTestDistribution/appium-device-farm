@@ -1,3 +1,9 @@
+## [11.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.1...v11.0.2) (2025-09-29)
+
+### Bug Fixes
+
+* remote hub for ios and apple tv for manual interaction ([#1854](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1854)) ([f8aa20a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f8aa20ad838e577cda7bcea36e22bb0e3868215a))
+
 ## [11.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.0...v11.0.1) (2025-09-28)
 
 ### Bug Fixes
