@@ -258,7 +258,18 @@ export default class IOSDeviceManager implements IDeviceManager {
         log.debug(`Getting device info for ${udid}`);
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
         const goIOS = process.env.GO_IOS;
-        if (goIOS && semver.satisfies(deviceInfo.sdk, '>=17.0.0')) {
+        log.info(`Go IOS: ${goIOS}`);
+        const sdkRaw = deviceInfo.sdk?.toString();
+        const sdkNormalized = sdkRaw ? sdkRaw.trim().toLowerCase().replace(/x/g, '0') : undefined;
+        const sdkCoerced = semver.coerce(sdkNormalized ?? sdkRaw)?.version;
+        const isAtLeast17 = sdkCoerced ? semver.satisfies(sdkCoerced, '>=17.0.0') : false;
+        log.info(`Device SDK: ${sdkRaw}`);
+        if (sdkNormalized && sdkNormalized !== sdkRaw) {
+          log.info(`Normalized SDK: ${sdkNormalized}`);
+        }
+        log.info(`Coerced SDK: ${sdkCoerced ?? 'invalid'}`);
+        log.info(`Semver satisfies (>=17.0.0): ${isAtLeast17}`);
+        if (goIOS && isAtLeast17) {
           //Check for version above 17+ and presence for Go IOS
           try {
             log.info('Running go-ios agent');
@@ -327,7 +338,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     const totalUtilizationTimeMilliSec = 0;
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const deviceInfo = await getDeviceInfo(udid);
-    const { ProductType, ProductName, DeviceClass, DeviceName } = deviceInfo;
+    const { ProductType } = deviceInfo;
     const modelInfo = this.findKeyByValue(ProductType) || { Width: '', Height: '' };
     const platform = this.getDevicePlatformName(
       name,
