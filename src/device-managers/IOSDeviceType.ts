@@ -616,4 +616,86 @@ export const IOSDeviceInfoMap: any = {
     Height: '1194',
     Model: 'iPad Air 11-inch (M2) Wi-Fi',
   },
+  // iOS 26 Devices - iPhone 17 Series
+  'iPhone18,1': {
+    Width: '402',
+    Height: '874',
+    Model: 'iPhone 17',
+  },
+  'iPhone18,2': {
+    Width: '440',
+    Height: '956',
+    Model: 'iPhone 17 Plus',
+  },
+  'iPhone18,3': {
+    Width: '402',
+    Height: '874',
+    Model: 'iPhone 17 Pro',
+  },
+  'iPhone18,4': {
+    Width: '440',
+    Height: '956',
+    Model: 'iPhone 17 Pro Max',
+  },
+  'iPhone18,5': {
+    Width: '375',
+    Height: '667',
+    Model: 'iPhone SE (4th gen)',
+  },
+  'iPhone18,6': {
+    Width: '393',
+    Height: '852',
+    Model: 'iPhone 17 Air',
+  },
+  // Future iPad Models (iOS 26)
+  'iPad17,1': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad (12th Gen)',
+  },
+  'iPad17,2': {
+    Width: '820',
+    Height: '1180',
+    Model: 'iPad (12th Gen)',
+  },
+  'iPad17,3': {
+    Width: '744',
+    Height: '1133',
+    Model: 'iPad Mini 8',
+  },
+  'iPad17,4': {
+    Width: '744',
+    Height: '1133',
+    Model: 'iPad Mini 8',
+  },
+  'iPad17,5': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Air 12-inch (M3)',
+  },
+  'iPad17,6': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Air 12-inch (M3) Wi-Fi + Cellular',
+  },
+  'iPad17,7': {
+    Width: '1024',
+    Height: '1366',
+    Model: 'iPad Pro 13-inch (M5)',
+  },
+  'iPad17,8': {
+    Width: '1024',
+    Height: '1366',
+    Model: 'iPad Pro 13-inch (M5) Wi-Fi + Cellular',
+  },
+  'iPad17,9': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Pro 11-inch (M5)',
+  },
+  'iPad17,10': {
+    Width: '834',
+    Height: '1194',
+    Model: 'iPad Pro 11-inch (M5) Wi-Fi + Cellular',
+  },
 };

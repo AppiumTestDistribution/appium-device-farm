@@ -1,3 +1,21 @@
+## [11.0.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.3...v11.0.4) (2025-09-30)
+
+### Bug Fixes
+
+* Bug fixes ([#1859](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1859)) ([c90905a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c90905a3f7f6b499aeef552a429529b517fa6518))
+
+## [11.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.2...v11.0.3) (2025-09-29)
+
+### Bug Fixes
+
+* wda ipa for tvos ([#1855](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1855)) ([783e245](https://github.com/AppiumTestDistribution/appium-device-farm/commit/783e2456ae2843fc01244a748b17bc93788a5923))
+
+## [11.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.1...v11.0.2) (2025-09-29)
+
+### Bug Fixes
+
+* remote hub for ios and apple tv for manual interaction ([#1854](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1854)) ([f8aa20a](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f8aa20ad838e577cda7bcea36e22bb0e3868215a))
+
 ## [11.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.0...v11.0.1) (2025-09-28)
 
 ### Bug Fixes
