@@ -1,3 +1,9 @@
+## [11.0.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.5...v11.0.6) (2025-10-02)
+
+### Bug Fixes
+
+* issues with live streaming and build logs ([#1864](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1864)) ([6462eb2](https://github.com/AppiumTestDistribution/appium-device-farm/commit/6462eb2fd458eb8f29d2b7287a44838ca9e8fd25))
+
 ## [11.0.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.4...v11.0.5) (2025-10-02)
 
 ### Miscellaneous Chores
