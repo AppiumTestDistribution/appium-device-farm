@@ -1,3 +1,9 @@
+## [11.0.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.4...v11.0.5) (2025-10-02)
+
+### Miscellaneous Chores
+
+* removed the return condition from the function in findAppPath ([#1863](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1863)) ([82ed042](https://github.com/AppiumTestDistribution/appium-device-farm/commit/82ed0426c02926758158adddd75bc6d0e42cf42f))
+
 ## [11.0.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.3...v11.0.4) (2025-09-30)
 
 ### Bug Fixes
