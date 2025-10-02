@@ -1,3 +1,9 @@
+## [11.0.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.6...v11.0.7) (2025-10-02)
+
+### Bug Fixes
+
+* show block and unblock in the dashboard for admin users only ([#1866](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1866)) ([6a81af4](https://github.com/AppiumTestDistribution/appium-device-farm/commit/6a81af4e36418b7dbc8a674c5d317ff6882b54cd))
+
 ## [11.0.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.5...v11.0.6) (2025-10-02)
 
 ### Bug Fixes
