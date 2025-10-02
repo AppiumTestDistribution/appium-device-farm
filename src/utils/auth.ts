@@ -63,7 +63,7 @@ export async function getUserFromCapabilities(
   }
 }
 
-export async function sanitizeSessionCapabilities(sessionResponse: Record<string, any>) {
+export function sanitizeSessionCapabilities(sessionResponse: Record<string, any>) {
   ['df:jwt', 'df:accesskey', 'df:token'].forEach((key) => {
     delete sessionResponse[key];
     if (sessionResponse['desired']) {
