@@ -1,3 +1,9 @@
+## [11.0.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.7...v11.0.8) (2025-10-06)
+
+### Bug Fixes
+
+* show cursor for ios manual control ([#1871](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1871)) ([d4e52c3](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d4e52c3e53fc9ab2c852053ed7843b4abef5d162))
+
 ## [11.0.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.6...v11.0.7) (2025-10-02)
 
 ### Bug Fixes
