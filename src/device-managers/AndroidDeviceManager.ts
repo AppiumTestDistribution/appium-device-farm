@@ -657,25 +657,17 @@ export default class AndroidDeviceManager implements IDeviceManager {
     }
     return sdkRoot;
   }
-  private getDeviceName = async (
-    adbInstance: any,
-    udid: string,
-    isRealDevice: boolean,
-  ): Promise<string | undefined> => {
-    const props = isRealDevice
-      ? ['ro.vendor.oplus.market.name', 'ro.display.series', 'ro.product.name']
-      : ['ro.kernel.qemu.avd_name', 'ro.boot.qemu.avd_name'];
+   private getDeviceName = async (
+      adbInstance: any,
+      udid: string,
+      isRealDevice: boolean,
+    ): Promise<string | undefined> => {
+      const props = isRealDevice
+        ? ['ro.vendor.oplus.market.name', 'ro.display.series', 'ro.product.name']
+        : ['ro.kernel.qemu.avd_name', 'ro.boot.qemu.avd_name'];
 
-    let deviceName;
+      let deviceName;
 
-    for (const prop of props) {
-      deviceName = await this.getDeviceProperty(adbInstance, udid, prop);
-      if (deviceName && deviceName.trim() !== '') {
-        break;
-      }
-    }
-    if (!deviceName || (deviceName && deviceName.trim() === '')) {
-      // If the device name is null or empty, try to get it from the Bluetooth manager.
       deviceName = await (
         await adbInstance
       ).adbExec([
@@ -690,8 +682,23 @@ export default class AndroidDeviceManager implements IDeviceManager {
         '|',
         'cut',
         '-c9-',
+        '|',
+        'head',
+        '-n',
+        '1',
       ]);
-    }
-    return deviceName;
-  };
-}
+
+
+      if (!deviceName || (deviceName && deviceName.trim() === '')) {
+        // If the device name is null or empty, try to get it from the product name.
+        for (const prop of props) {
+          deviceName = await this.getDeviceProperty(adbInstance, udid, prop);
+          if (deviceName && deviceName.trim() !== '') {
+            break;
+          }
+        }
+      }
+
+      return deviceName;
+    };
+  }
