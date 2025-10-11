@@ -52,19 +52,31 @@ async function findAppPath(caps: any) {
 export async function androidCapabilities(
   caps: ISessionCapability,
   freeDevice: IDevice,
-  options: { liveVideo: boolean },
+  options: { liveVideo: boolean; systemPortRange?: string; mjpegServerPortRange?: string },
 ) {
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:systemPort'] = await getPort();
+  caps.firstMatch[0]['appium:systemPort'] = await getPort({
+    port: getPort.makeRange(
+      parseInt(options.systemPortRange?.split('-')[0] || '10000'),
+      parseInt(options.systemPortRange?.split('-')[1] || '12000'),
+    ),
+  });
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
   caps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo ? await getPort() : undefined;
+    caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
+      ? await getPort({
+          port: getPort.makeRange(
+            parseInt(options.mjpegServerPortRange?.split('-')[0] || '13000'),
+            parseInt(options.mjpegServerPortRange?.split('-')[1] || '14000'),
+          ),
+        })
+      : undefined;
   }
   if (!options.liveVideo) {
     deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
@@ -80,10 +92,21 @@ export async function androidCapabilities(
 export async function iOSCapabilities(
   caps: ISessionCapability,
   freeDevice: IDevice,
-  options: { liveVideo: boolean },
+  options: {
+    liveVideo: boolean;
+    wdaLocalPortRange?: string;
+    mjpegServerPortRange?: string;
+  },
 ) {
   if (!process.env.GO_IOS) {
-    freeDevice.mjpegServerPort = options.liveVideo ? await getPort() : undefined;
+    freeDevice.mjpegServerPort = options.liveVideo
+      ? await getPort({
+          port: getPort.makeRange(
+            parseInt(options.mjpegServerPortRange?.split('-')[0] || '13000'),
+            parseInt(options.mjpegServerPortRange?.split('-')[1] || '14000'),
+          ),
+        })
+      : undefined;
   }
 
   caps.firstMatch[0] = caps.firstMatch[0] || {};
@@ -92,7 +115,12 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort();
+  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort({
+    port: getPort.makeRange(
+      parseInt(options.wdaLocalPortRange?.split('-')[0] || '15000'),
+      parseInt(options.wdaLocalPortRange?.split('-')[1] || '16000'),
+    ),
+  });
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaFileName = freeDevice.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
     const wdaInfo = await prisma.appInformation.findFirst({

@@ -85,6 +85,9 @@ export interface IPluginArgs {
 
   //node
   nodeName?: string;
+  systemPortRange?: string;
+  wdaLocalPortRange?: string;
+  mjpegServerPortRange?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

@@ -53,7 +53,10 @@ describe('Android Device Manager', function () {
 
   it('Android Device List to have added state', async () => {
     const androidDevices = new AndroidDeviceManager(
-      Object.assign({}, DefaultPluginArgs, { platform: 'android' }),
+      Object.assign({}, DefaultPluginArgs, {
+        platform: 'android',
+        systemPortRange: '8200-8210',
+      }),
       4723,
       uuidv4(),
     );
@@ -84,7 +87,7 @@ describe('Android Device Manager', function () {
     const realDevice = sandbox.stub(androidDevices, 'isRealDevice' as any);
     realDevice.onFirstCall().returns(Promise.resolve(false));
     realDevice.onSecondCall().returns(Promise.resolve(true));
-    sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
+    const getFreePortStub = sandbox.stub(Helper, 'getFreePort').returns(Promise.resolve(54321));
 
     const devices = await androidDevices.getDevices({ androidDeviceType: 'both' }, []);
 
@@ -153,6 +156,7 @@ describe('Android Device Manager', function () {
     // Compare devices excluding the id field
     const devicesWithoutId = devices.map(({ id, ...device }) => device);
     expect(devicesWithoutId).to.deep.equal(expectedDevices);
+    expect(getFreePortStub).to.have.been.calledWith('8200-8210');
   });
 
   it('Android Device List to have added state - Only emulators', async () => {

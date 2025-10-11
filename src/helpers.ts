@@ -69,7 +69,11 @@ export function checkIfPathIsAbsolute(configPath: string) {
   return path.isAbsolute(configPath);
 }
 
-export async function getFreePort() {
+export async function getFreePort(portRange?: string) {
+  if (portRange) {
+    const [min, max] = portRange.split('-').map(Number);
+    return await getPort({ port: getPort.makeRange(min, max) });
+  }
   return await getPort();
 }
 
