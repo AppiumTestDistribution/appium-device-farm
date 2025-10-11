@@ -333,8 +333,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     } else {
       host = `http://${pluginArgs.bindHostOrIp}:${hostPort}`;
     }
-    const wdaLocalPort = await getFreePort();
-    const mjpegServerPort = await getFreePort();
+    const wdaLocalPort = await getFreePort(pluginArgs.wdaLocalPortRange);
+    const mjpegServerPort = await getFreePort(pluginArgs.mjpegServerPortRange);
     const totalUtilizationTimeMilliSec = 0;
     const [sdk, name] = await Promise.all([this.getOSVersion(udid), this.getDeviceName(udid)]);
     const deviceInfo = await getDeviceInfo(udid);
@@ -421,8 +421,8 @@ export default class IOSDeviceManager implements IDeviceManager {
     const deviceTypes = await list.devicetypes;
     for await (const device of buildSimulators) {
       const productModel = IOSDeviceManager.getProductModel(deviceTypes, device);
-      const wdaLocalPort = await getFreePort();
-      const mjpegServerPort = await getFreePort();
+      const wdaLocalPort = await getFreePort(this.pluginArgs.wdaLocalPortRange);
+      const mjpegServerPort = await getFreePort(this.pluginArgs.mjpegServerPortRange);
       const totalUtilizationTimeMilliSec = 0;
       const modelInfo = this.findKeyByValue(productModel) || { Width: '', Height: '' };
       returnedSimulators.push(

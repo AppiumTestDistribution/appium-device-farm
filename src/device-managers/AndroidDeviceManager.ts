@@ -154,7 +154,7 @@ export default class AndroidDeviceManager implements IDeviceManager {
     pluginArgs: IPluginArgs,
     hostPort: number,
   ): Promise<IDevice | undefined> {
-    const systemPort = await getFreePort();
+    const systemPort = await getFreePort(pluginArgs.systemPortRange);
     //await this.streamAndroid(adbInstance, device, systemPort);
 
     // Handle each device property individually to avoid failing the entire device
