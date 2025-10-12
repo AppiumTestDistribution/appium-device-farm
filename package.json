@@ -308,13 +308,7 @@
         "nodeName": {
           "type": "string"
         },
-        "systemPortRange": {
-          "type": "string"
-        },
-        "wdaLocalPortRange": {
-          "type": "string"
-        },
-        "mjpegServerPortRange": {
+        "portRange": {
           "type": "string"
         }
       },

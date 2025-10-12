@@ -6,6 +6,7 @@ import { prisma } from './prisma';
 import { DevicePlugin } from './plugin';
 import log from './logger';
 import { updatedAllocatedDevice } from './data-service/device-service';
+import { getFreePort } from './helpers';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -57,12 +58,7 @@ export async function androidCapabilities(
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
-  caps.firstMatch[0]['appium:systemPort'] = await getPort({
-    port: getPort.makeRange(
-      parseInt(options.portRange?.split('-')[0] || '10000'),
-      parseInt(options.portRange?.split('-')[1] || '12000'),
-    ),
-  });
+  caps.firstMatch[0]['appium:systemPort'] = await getFreePort(options.portRange);
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
   caps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
@@ -70,12 +66,7 @@ export async function androidCapabilities(
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
   if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
     caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
-      ? await getPort({
-          port: getPort.makeRange(
-            parseInt(options.portRange?.split('-')[0] || '13000'),
-            parseInt(options.portRange?.split('-')[1] || '14000'),
-          ),
-        })
+      ? await getFreePort(options.portRange)
       : undefined;
   }
   if (!options.liveVideo) {
@@ -99,12 +90,7 @@ export async function iOSCapabilities(
 ) {
   if (!process.env.GO_IOS) {
     freeDevice.mjpegServerPort = options.liveVideo
-      ? await getPort({
-          port: getPort.makeRange(
-            parseInt(options.portRange?.split('-')[0] || '13000'),
-            parseInt(options.portRange?.split('-')[1] || '14000'),
-          ),
-        })
+      ? await getFreePort(options.portRange)
       : undefined;
   }
 
@@ -114,12 +100,9 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
-  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort({
-    port: getPort.makeRange(
-      parseInt(options.portRange?.split('-')[0] || '14000'),
-      parseInt(options.portRange?.split('-')[1] || '15000'),
-    ),
-  });
+  caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getFreePort(
+    options.portRange,
+  );
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaFileName = freeDevice.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
     const wdaInfo = await prisma.appInformation.findFirst({
