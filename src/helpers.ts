@@ -71,8 +71,12 @@ export function checkIfPathIsAbsolute(configPath: string) {
 
 export async function getFreePort(portRange?: string) {
   if (portRange) {
-    const [min, max] = portRange.split('-').map(Number);
-    return await getPort({ port: getPort.makeRange(min, max) });
+    const range = portRange.split('-').map(Number);
+    if (range.length !== 2 || isNaN(range[0]) || isNaN(range[1])) {
+      log.warn(`Invalid port range format: "${portRange}". Falling back to any free port.`);
+    } else {
+      return await getPort({ port: getPort.makeRange(range[0], range[1]) });
+    }
   }
   return await getPort();
 }

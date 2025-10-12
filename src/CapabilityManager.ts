@@ -52,15 +52,15 @@ async function findAppPath(caps: any) {
 export async function androidCapabilities(
   caps: ISessionCapability,
   freeDevice: IDevice,
-  options: { liveVideo: boolean; systemPortRange?: string; mjpegServerPortRange?: string },
+  options: { liveVideo: boolean; portRange?: string },
 ) {
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getPort({
     port: getPort.makeRange(
-      parseInt(options.systemPortRange?.split('-')[0] || '10000'),
-      parseInt(options.systemPortRange?.split('-')[1] || '12000'),
+      parseInt(options.portRange?.split('-')[0] || '10000'),
+      parseInt(options.portRange?.split('-')[1] || '12000'),
     ),
   });
   caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
@@ -72,8 +72,8 @@ export async function androidCapabilities(
     caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
       ? await getPort({
           port: getPort.makeRange(
-            parseInt(options.mjpegServerPortRange?.split('-')[0] || '13000'),
-            parseInt(options.mjpegServerPortRange?.split('-')[1] || '14000'),
+            parseInt(options.portRange?.split('-')[0] || '13000'),
+            parseInt(options.portRange?.split('-')[1] || '14000'),
           ),
         })
       : undefined;
@@ -94,16 +94,15 @@ export async function iOSCapabilities(
   freeDevice: IDevice,
   options: {
     liveVideo: boolean;
-    wdaLocalPortRange?: string;
-    mjpegServerPortRange?: string;
+    portRange?: string;
   },
 ) {
   if (!process.env.GO_IOS) {
     freeDevice.mjpegServerPort = options.liveVideo
       ? await getPort({
           port: getPort.makeRange(
-            parseInt(options.mjpegServerPortRange?.split('-')[0] || '13000'),
-            parseInt(options.mjpegServerPortRange?.split('-')[1] || '14000'),
+            parseInt(options.portRange?.split('-')[0] || '13000'),
+            parseInt(options.portRange?.split('-')[1] || '14000'),
           ),
         })
       : undefined;
@@ -117,8 +116,8 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getPort({
     port: getPort.makeRange(
-      parseInt(options.wdaLocalPortRange?.split('-')[0] || '15000'),
-      parseInt(options.wdaLocalPortRange?.split('-')[1] || '16000'),
+      parseInt(options.portRange?.split('-')[0] || '14000'),
+      parseInt(options.portRange?.split('-')[1] || '15000'),
     ),
   });
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {

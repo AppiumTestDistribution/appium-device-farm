@@ -31,8 +31,7 @@ describe('IOS Device Manager', () => {
   it('IOS Device List to have added state', async () => {
     const iosDevices = new IOSDeviceManager(
       Object.assign({}, pluginArgs, {
-        wdaLocalPortRange: '8100-8110',
-        mjpegServerPortRange: '9100-9110',
+        portRange: '8100-8110',
       }),
       4723,
       uuidv4(),
@@ -103,7 +102,6 @@ describe('IOS Device Manager', () => {
       },
     ]);
     expect(getFreePortStub).to.have.been.calledWith('8100-8110');
-    expect(getFreePortStub).to.have.been.calledWith('9100-9110');
   });
 
   it('Should consider only simulators that is given by user and all real devices', async () => {

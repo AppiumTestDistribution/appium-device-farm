@@ -55,7 +55,7 @@ describe('Android Device Manager', function () {
     const androidDevices = new AndroidDeviceManager(
       Object.assign({}, DefaultPluginArgs, {
         platform: 'android',
-        systemPortRange: '8200-8210',
+        portRange: '8200-8210',
       }),
       4723,
       uuidv4(),
