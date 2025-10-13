@@ -1,3 +1,9 @@
+## [11.1.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.8...v11.1.0) (2025-10-13)
+
+### Features
+
+* Added support to set portrange for systemPort,mjpegServer,wdaLocalPort ([#1885](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1885)) ([67c3add](https://github.com/AppiumTestDistribution/appium-device-farm/commit/67c3addb8e38a19f4f2bbb6792e2694c9d4cc593))
+
 ## [11.0.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.7...v11.0.8) (2025-10-06)
 
 ### Bug Fixes
