@@ -307,6 +307,9 @@
         },
         "nodeName": {
           "type": "string"
+        },
+        "portRange": {
+          "type": "string"
         }
       },
       "title": "Appium device farm plugin",

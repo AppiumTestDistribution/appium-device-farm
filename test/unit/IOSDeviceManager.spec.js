@@ -29,11 +29,17 @@ describe('IOS Device Manager', () => {
     sandbox.restore();
   });
   it('IOS Device List to have added state', async () => {
-    const iosDevices = new IOSDeviceManager(pluginArgs, 4723, uuidv4());
+    const iosDevices = new IOSDeviceManager(
+      Object.assign({}, pluginArgs, {
+        portRange: '8100-8110',
+      }),
+      4723,
+      uuidv4(),
+    );
     sandbox.stub(iosDevices, 'getConnectedDevices').returns(['00001111-00115D822222002E']);
     sandbox.stub(iosDevices, 'getOSVersion').returns('14.1.1');
     sandbox.stub(Helper, 'isMac').returns(true);
-    sandbox.stub(Helper, 'getFreePort').returns(54093);
+    const getFreePortStub = sandbox.stub(Helper, 'getFreePort').returns(54093);
     sandbox.stub(iosDevices, 'getDeviceName').returns('Sai’s iPhone');
     sandbox.stub(IOSUtils, 'getDeviceInfo').returns({ ProductType: 'iPhone12,8' });
     sandbox.stub(iosDevices, 'getSimulators').returns([
@@ -57,7 +63,7 @@ describe('IOS Device Manager', () => {
     const devices = await iosDevices.getDevices({ iosDeviceType: 'both' }, []);
     expect(devices).to.deep.equal([
       {
-        id: "7d04d589-fd5d-5172-b7ad-5f87f2de36aa",
+        id: '7d04d589-fd5d-5172-b7ad-5f87f2de36aa',
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
         name: 'Sai’s iPhone',
@@ -95,6 +101,7 @@ describe('IOS Device Manager', () => {
         host: `http://${ip.address()}:4723`,
       },
     ]);
+    expect(getFreePortStub).to.have.been.calledWith('8100-8110');
   });
 
   it('Should consider only simulators that is given by user and all real devices', async () => {
@@ -199,7 +206,7 @@ describe('IOS Device Manager', () => {
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
     expect(devices).to.deep.equal([
       {
-        id: "7d04d589-fd5d-5172-b7ad-5f87f2de36aa",
+        id: '7d04d589-fd5d-5172-b7ad-5f87f2de36aa',
         udid: '00001111-00115D822222002E',
         sdk: '14.1.1',
         name: 'Sai’s iPhone',
@@ -349,10 +356,10 @@ describe('IOS Device Manager', () => {
           'Apple TV 4K',
           'Apple TV (2nd generation)',
           'TV Simulator',
-          'tvOS Device'
+          'tvOS Device',
         ];
 
-        testCases.forEach(name => {
+        testCases.forEach((name) => {
           const result = iosDeviceManager.getDevicePlatformName(name);
           expect(result).to.equal('tvos', `Failed for name: ${name}`);
         });
@@ -363,37 +370,28 @@ describe('IOS Device Manager', () => {
           'iPhone 15 Pro',
           'iPhone 14',
           'iPhone SE',
-          'iPhone Simulator'
+          'iPhone Simulator',
         ];
 
-        testCases.forEach(name => {
+        testCases.forEach((name) => {
           const result = iosDeviceManager.getDevicePlatformName(name);
           expect(result).to.equal('ios', `Failed for name: ${name}`);
         });
       });
 
       it('should return ios for iPad name patterns', () => {
-        const testCases = [
-          'iPad Pro',
-          'iPad Air',
-          'iPad mini',
-          'iPad Simulator'
-        ];
+        const testCases = ['iPad Pro', 'iPad Air', 'iPad mini', 'iPad Simulator'];
 
-        testCases.forEach(name => {
+        testCases.forEach((name) => {
           const result = iosDeviceManager.getDevicePlatformName(name);
           expect(result).to.equal('ios', `Failed for name: ${name}`);
         });
       });
 
       it('should return ios for iPod name patterns', () => {
-        const testCases = [
-          'iPod Touch',
-          'iPod nano',
-          'iPod Simulator'
-        ];
+        const testCases = ['iPod Touch', 'iPod nano', 'iPod Simulator'];
 
-        testCases.forEach(name => {
+        testCases.forEach((name) => {
           const result = iosDeviceManager.getDevicePlatformName(name);
           expect(result).to.equal('ios', `Failed for name: ${name}`);
         });
@@ -439,9 +437,15 @@ describe('IOS Device Manager', () => {
         const deviceInfo = {
           ProductName: 'Apple TV HD',
           DeviceClass: 'Unknown',
-          DeviceName: 'Unknown'
+          DeviceName: 'Unknown',
         };
-        const result = iosDeviceManager.getDevicePlatformName('Appium', null, null, null, deviceInfo);
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Appium',
+          null,
+          null,
+          null,
+          deviceInfo,
+        );
         expect(result).to.equal('tvos');
       });
 
@@ -449,9 +453,15 @@ describe('IOS Device Manager', () => {
         const deviceInfo = {
           ProductName: 'Unknown',
           DeviceClass: 'AppleTV',
-          DeviceName: 'Unknown'
+          DeviceName: 'Unknown',
         };
-        const result = iosDeviceManager.getDevicePlatformName('Test Device', null, null, null, deviceInfo);
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Test Device',
+          null,
+          null,
+          null,
+          deviceInfo,
+        );
         expect(result).to.equal('tvos');
       });
 
@@ -459,9 +469,15 @@ describe('IOS Device Manager', () => {
         const deviceInfo = {
           ProductName: 'Unknown',
           DeviceClass: 'Unknown',
-          DeviceName: 'Apple TV 4K'
+          DeviceName: 'Apple TV 4K',
         };
-        const result = iosDeviceManager.getDevicePlatformName('Custom Device', null, null, null, deviceInfo);
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Custom Device',
+          null,
+          null,
+          null,
+          deviceInfo,
+        );
         expect(result).to.equal('tvos');
       });
 
@@ -469,9 +485,15 @@ describe('IOS Device Manager', () => {
         const deviceInfo = {
           ProductName: 'iPhone 15 Pro',
           DeviceClass: 'iPhone',
-          DeviceName: 'iPhone 15 Pro'
+          DeviceName: 'iPhone 15 Pro',
         };
-        const result = iosDeviceManager.getDevicePlatformName('Appium', null, null, null, deviceInfo);
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Appium',
+          null,
+          null,
+          null,
+          deviceInfo,
+        );
         expect(result).to.equal('ios');
       });
     });
@@ -532,22 +554,42 @@ describe('IOS Device Manager', () => {
 
     describe('Real-world scenarios', () => {
       it('should handle the original issue: Home Theater (2) with AppleTV5,3', () => {
-        const result = iosDeviceManager.getDevicePlatformName('Home Theater (2)', 'AppleTV5,3', '1920', '1080');
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Home Theater (2)',
+          'AppleTV5,3',
+          '1920',
+          '1080',
+        );
         expect(result).to.equal('tvos');
       });
 
       it('should handle Apple TV 4K (2nd generation)', () => {
-        const result = iosDeviceManager.getDevicePlatformName('Apple TV 4K (2nd generation)', 'AppleTV11,1', '3840', '2160');
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Apple TV 4K (2nd generation)',
+          'AppleTV11,1',
+          '3840',
+          '2160',
+        );
         expect(result).to.equal('tvos');
       });
 
       it('should handle iPhone 15 Pro Max', () => {
-        const result = iosDeviceManager.getDevicePlatformName('iPhone 15 Pro Max', 'iPhone16,2', '1320', '2868');
+        const result = iosDeviceManager.getDevicePlatformName(
+          'iPhone 15 Pro Max',
+          'iPhone16,2',
+          '1320',
+          '2868',
+        );
         expect(result).to.equal('ios');
       });
 
       it('should handle iPad Pro 12.9-inch', () => {
-        const result = iosDeviceManager.getDevicePlatformName('iPad Pro 12.9-inch', 'iPad14,1', '2732', '2048');
+        const result = iosDeviceManager.getDevicePlatformName(
+          'iPad Pro 12.9-inch',
+          'iPad14,1',
+          '2732',
+          '2048',
+        );
         expect(result).to.equal('ios');
       });
 
@@ -555,16 +597,27 @@ describe('IOS Device Manager', () => {
         const deviceInfo = {
           ProductName: 'Apple TV HD',
           DeviceClass: 'AppleTV',
-          DeviceName: 'Apple TV HD'
+          DeviceName: 'Apple TV HD',
         };
-        const result = iosDeviceManager.getDevicePlatformName('Appium', null, '1920', '1080', deviceInfo);
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Appium',
+          null,
+          '1920',
+          '1080',
+          deviceInfo,
+        );
         expect(result).to.equal('tvos');
       });
     });
 
     describe('Error handling', () => {
       it('should handle invalid width/height gracefully', () => {
-        const result = iosDeviceManager.getDevicePlatformName('Test Device', null, 'invalid', 'invalid');
+        const result = iosDeviceManager.getDevicePlatformName(
+          'Test Device',
+          null,
+          'invalid',
+          'invalid',
+        );
         expect(result).to.equal('ios');
       });
 

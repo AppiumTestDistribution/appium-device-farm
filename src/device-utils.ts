@@ -201,6 +201,7 @@ export async function allocateDeviceForSession(
     await updateCapabilityForDevice(capability, device, {
       liveVideo,
       newCommandTimeout: newCommandTimeout,
+      portRange: pluginArgs.portRange,
     });
 
     return device;
@@ -218,7 +219,11 @@ export async function allocateDeviceForSession(
 export async function updateCapabilityForDevice(
   capability: any,
   device: IDevice,
-  options: { liveVideo: boolean; newCommandTimeout?: number },
+  options: {
+    liveVideo: boolean;
+    newCommandTimeout?: number;
+    portRange?: string;
+  },
 ) {
   const mergedCapabilites = Object.assign(
     {},
