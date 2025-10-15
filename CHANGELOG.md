@@ -1,3 +1,9 @@
+## [11.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.0...v11.1.1) (2025-10-15)
+
+### Miscellaneous Chores
+
+* correct typo in registerAuthenticationRoutes method name ([#1897](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1897)) ([d0dff05](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d0dff054d4127fdaf1e510bca58cb52776f63aa5)), closes [Fixes#1896](https://github.com/AppiumTestDistribution/Fixes/issues/1896) [#1896](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1896)
+
 ## [11.1.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.8...v11.1.0) (2025-10-13)
 
 ### Features
