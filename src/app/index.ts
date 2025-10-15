@@ -9,7 +9,7 @@ import { config } from '../config';
 import _ from 'lodash';
 
 import GridRouter from './routers/grid';
-import { resigsterAuthenticationRoutes } from '../auth/routers';
+import { registerAuthenticationRoutes } from '../auth/routers';
 import { userService } from '../auth/services/user.service';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
 

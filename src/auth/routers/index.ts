@@ -6,7 +6,7 @@ import { getUsersRoutes } from './users.router';
 import { getApiTokensRoutes } from './api-tokens.router';
 import { IPluginArgs } from '../../interfaces/IPluginArgs';
 
-export function resigsterAuthenticationRoutes(router: Router, pluginArgs: IPluginArgs) {
+export function registerAuthenticationRoutes(router: Router, pluginArgs: IPluginArgs) {
   router.use('/auth', getAuthRoutes(pluginArgs));
   router.use('/users', getUsersRoutes(pluginArgs));
   router.use('/teams', getTeamsRoutes(pluginArgs));
