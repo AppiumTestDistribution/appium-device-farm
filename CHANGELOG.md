@@ -1,3 +1,9 @@
+## [11.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.1...v11.1.2) (2025-10-28)
+
+### Bug Fixes
+
+* fix [#1909](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1909) [#1895](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1895) starting session when go-ios is provided ([#1915](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1915)) ([c446851](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c44685102015ae23ad68e14fe7105df0976bdb9d))
+
 ## [11.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.0...v11.1.1) (2025-10-15)
 
 ### Miscellaneous Chores
