@@ -137,10 +137,17 @@ export async function startTunnel(
 
   try {
     log.info('Running go-ios agent');
-    const startTunnelCmd = `GO_IOS_AGENT_PORT=${goIOSAgentPort} ${goIOS} tunnel start --userspace --udid=${udid}`;
+    const startTunnelCmd = `${goIOS} tunnel start --userspace --udid=${udid}`;
     log.info(`Starting go-ios tunnel: ${startTunnelCmd}`);
 
-    exec(startTunnelCmd, (error, stdout, stderr) => {
+    const options = {
+      env: {
+        ...process.env,
+        GO_IOS_AGENT_PORT: goIOSAgentPort.toString(),
+      },
+    };
+
+    exec(startTunnelCmd, options, (error, stdout, stderr) => {
       if (error) {
         log.error(`Error starting go-ios tunnel: ${error.message}`);
         return;
