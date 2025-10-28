@@ -42,6 +42,7 @@ export interface IDevice {
   tags: Array<string>;
   webDriverAgentUrl?: string;
   webDriverAgentHost?: string;
+  goIOSAgentPort?: number;
   sessionResponse?: Record<string, any>;
   activeUser?: {
     id: string;

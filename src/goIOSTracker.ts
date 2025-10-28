@@ -1,4 +1,6 @@
+import { exec } from 'child_process';
 import _ from 'lodash';
+import semver from 'semver';
 import { EventEmitter } from 'stream';
 import { SubProcess } from 'teen_process';
 import { cachePath } from './helpers';
@@ -84,5 +86,75 @@ export default class GoIosTracker extends EventEmitter {
         this.emit('detached', id);
       }
     });
+  }
+}
+
+/**
+ * Start a go-ios tunnel for a device
+ * @param udid - The device UDID
+ * @param sdk - The device SDK version
+ * @param goIOSAgentPort - The port to use for the go-ios agent (optional)
+ */
+export async function startTunnel(
+  udid: string,
+  sdk?: string,
+  goIOSAgentPort?: number,
+): Promise<void> {
+  const goIOS = process.env.GO_IOS;
+  log.info(`Go IOS: ${goIOS}`);
+
+  // Check if GO_IOS is configured
+  if (!goIOS) {
+    log.info('GO_IOS environment variable not set, skipping tunnel setup');
+    return;
+  }
+
+  // Check if goIOSAgentPort is provided
+  if (!goIOSAgentPort) {
+    log.info('Go IOS Agent Port not provided, skipping tunnel setup');
+    return;
+  }
+
+  // SDK version checking
+  const sdkRaw = sdk?.toString();
+  const sdkNormalized = sdkRaw ? sdkRaw.trim().toLowerCase().replace(/x/g, '0') : undefined;
+  const sdkCoerced = semver.coerce(sdkNormalized ?? sdkRaw)?.version;
+  const isAtLeast17 = sdkCoerced ? semver.satisfies(sdkCoerced, '>=17.0.0') : false;
+
+  log.info(`Device SDK: ${sdkRaw}`);
+  if (sdkNormalized && sdkNormalized !== sdkRaw) {
+    log.info(`Normalized SDK: ${sdkNormalized}`);
+  }
+  log.info(`Coerced SDK: ${sdkCoerced ?? 'invalid'}`);
+  log.info(`Semver satisfies (>=17.0.0): ${isAtLeast17}`);
+  log.info(`Go IOS Agent Port: ${goIOSAgentPort} for device ${udid}`);
+
+  // Check for version above 17+ and presence for Go IOS
+  if (!isAtLeast17) {
+    log.info(`Device SDK version ${sdkRaw} is below 17.0.0, skipping go-ios tunnel setup`);
+    return;
+  }
+
+  try {
+    log.info('Running go-ios agent');
+    const startTunnelCmd = `GO_IOS_AGENT_PORT=${goIOSAgentPort} ${goIOS} tunnel start --userspace --udid=${udid}`;
+    log.info(`Starting go-ios tunnel: ${startTunnelCmd}`);
+
+    exec(startTunnelCmd, (error, stdout, stderr) => {
+      if (error) {
+        log.error(`Error starting go-ios tunnel: ${error.message}`);
+        return;
+      }
+      if (stdout) {
+        log.info(`go-ios tunnel stdout: ${stdout}`);
+      }
+      if (stderr) {
+        log.warn(`go-ios tunnel stderr: ${stderr}`);
+      }
+      log.info('go-ios tunnel established successfully');
+    });
+  } catch (err) {
+    log.error(`Failed to establish go-ios tunnel: ${err}`);
+    throw err;
   }
 }
