@@ -267,7 +267,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     iosTracker.on('attached', async (udid: string) => {
       log.info(`Attached iOS device ${udid}`);
       const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
-      if(deviceAttached.goIOSAgentPort != undefined) {
+      if (deviceAttached.goIOSAgentPort != undefined) {
         await startTunnel(udid, deviceAttached.sdk, deviceAttached.goIOSAgentPort);
       }
       const deviceTracked: IDevice = {
@@ -323,11 +323,11 @@ export default class IOSDeviceManager implements IDeviceManager {
       modelInfo.Height,
       deviceInfo,
     );
-    
+
     // Generate goIOSAgentPort if GO_IOS environment variable is set
     const goIOS = process.env.GO_IOS;
     const goIOSAgentPort = goIOS ? await getFreePort(pluginArgs.portRange) : undefined;
-    
+
     return Object.assign({
       id: generateDeviceId({
         udid: udid,
