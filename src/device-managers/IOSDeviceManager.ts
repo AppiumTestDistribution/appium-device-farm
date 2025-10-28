@@ -1,25 +1,23 @@
-import Simctl from 'node-simctl';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { flatten, isEmpty } = require('lodash');
 import { utilities as IOSUtils } from 'appium-ios-device';
-import { IDevice } from '../interfaces/IDevice';
-import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort } from '../helpers';
-import log from '../logger';
+import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
+import Simctl from 'node-simctl';
 import os from 'os';
 import path from 'path';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
+import { startTunnel } from '../goIOSTracker';
+import { asyncForEach, getFreePort } from '../helpers';
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
+import log from '../logger';
+import Devices from './cloud/Devices';
+import { IOSDeviceInfoMap } from './IOSDeviceType';
+import { IosTracker } from './iOSTracker';
+import NodeDevices from './NodeDevices';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { flatten, isEmpty } = require('lodash');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs-extra');
-import Devices from './cloud/Devices';
-import NodeDevices from './NodeDevices';
-import { IosTracker } from './iOSTracker';
-import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
-import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
-import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
-import { IOSDeviceInfoMap } from './IOSDeviceType';
-import { exec } from 'child_process';
-import semver from 'semver';
-
 interface IDeviceInfo {
   ProductType?: string;
   ProductName?: string;
@@ -245,6 +243,7 @@ export default class IOSDeviceManager implements IDeviceManager {
   ): Promise<IDevice[]> {
     const devices = await this.getConnectedDevices();
     const deviceState: IDevice[] = [];
+    this.trackIOSDevices(pluginArgs);
     await asyncForEach(devices, async (udid: string) => {
       const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
       if (existingDevice) {
@@ -257,44 +256,20 @@ export default class IOSDeviceManager implements IDeviceManager {
       } else {
         log.debug(`Getting device info for ${udid}`);
         const deviceInfo = await this.getDeviceInfo(udid, pluginArgs, hostPort);
-        const goIOS = process.env.GO_IOS;
-        log.info(`Go IOS: ${goIOS}`);
-        const sdkRaw = deviceInfo.sdk?.toString();
-        const sdkNormalized = sdkRaw ? sdkRaw.trim().toLowerCase().replace(/x/g, '0') : undefined;
-        const sdkCoerced = semver.coerce(sdkNormalized ?? sdkRaw)?.version;
-        const isAtLeast17 = sdkCoerced ? semver.satisfies(sdkCoerced, '>=17.0.0') : false;
-        log.info(`Device SDK: ${sdkRaw}`);
-        if (sdkNormalized && sdkNormalized !== sdkRaw) {
-          log.info(`Normalized SDK: ${sdkNormalized}`);
-        }
-        log.info(`Coerced SDK: ${sdkCoerced ?? 'invalid'}`);
-        log.info(`Semver satisfies (>=17.0.0): ${isAtLeast17}`);
-        if (goIOS && isAtLeast17) {
-          //Check for version above 17+ and presence for Go IOS
-          try {
-            log.info('Running go-ios agent');
-            const startTunnel = `${goIOS} tunnel start --userspace --udid=${udid}`;
-            exec(startTunnel, (error, stdout, stderr) => {
-              console.log(`stdout: ${stdout}`);
-              console.error(`stderr: ${stderr}`);
-            });
-          } catch (err) {
-            log.error(err);
-          }
-        }
         deviceState.push(deviceInfo);
       }
     });
-    // might as well track devices
-    await this.trackIOSDevices(pluginArgs);
-
     return deviceState;
   }
 
-  async trackIOSDevices(pluginArgs: IPluginArgs) {
+  trackIOSDevices(pluginArgs: IPluginArgs) {
     const iosTracker = IosTracker.getInstance();
     iosTracker.on('attached', async (udid: string) => {
+      log.info(`Attached iOS device ${udid}`);
       const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
+      if(deviceAttached.goIOSAgentPort != undefined) {
+        await startTunnel(udid, deviceAttached.sdk, deviceAttached.goIOSAgentPort);
+      }
       const deviceTracked: IDevice = {
         ...deviceAttached,
         nodeId: this.nodeId,
@@ -327,6 +302,7 @@ export default class IOSDeviceManager implements IDeviceManager {
     pluginArgs: IPluginArgs,
     hostPort: number,
   ): Promise<IDevice> {
+    log.info(`Getting device info for ${udid}`);
     let host;
     if (pluginArgs.remoteMachineProxyIP) {
       host = pluginArgs.remoteMachineProxyIP;
@@ -347,6 +323,11 @@ export default class IOSDeviceManager implements IDeviceManager {
       modelInfo.Height,
       deviceInfo,
     );
+    
+    // Generate goIOSAgentPort if GO_IOS environment variable is set
+    const goIOS = process.env.GO_IOS;
+    const goIOSAgentPort = goIOS ? await getFreePort(pluginArgs.portRange) : undefined;
+    
     return Object.assign({
       id: generateDeviceId({
         udid: udid,
@@ -373,6 +354,7 @@ export default class IOSDeviceManager implements IDeviceManager {
       tags: [],
       webDriverAgentHost: `http://${pluginArgs.bindHostOrIp}`,
       webDriverAgentUrl: `http://${pluginArgs.bindHostOrIp}:${wdaLocalPort}`,
+      ...(goIOSAgentPort && { goIOSAgentPort }),
     });
   }
 
