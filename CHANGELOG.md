@@ -1,3 +1,9 @@
+## [11.1.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.2...v11.1.3) (2025-10-28)
+
+### Bug Fixes
+
+* Fix setting env for go-ios in windows ([#1917](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1917)) ([68f959d](https://github.com/AppiumTestDistribution/appium-device-farm/commit/68f959d93226898d550b810ac94e1fb27bdd20d5))
+
 ## [11.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.1...v11.1.2) (2025-10-28)
 
 ### Bug Fixes
