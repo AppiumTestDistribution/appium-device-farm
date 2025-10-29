@@ -53,14 +53,13 @@ import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-prox
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { PluginConfig, ServerArgs } from '@appium/types';
-import { ADB } from 'appium-adb';
 import http from 'http';
 import * as https from 'https';
 import ip from 'ip';
 import _ from 'lodash';
 import { DeviceFarmApiClient } from './api-client';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
-import { config, config as pluginConfig } from './config';
+import { config, loadFreePort, config as pluginConfig } from './config';
 import { ATDRepository } from './data-service/db';
 import { NodeService } from './data-service/node-service';
 import { addCLIArgs } from './data-service/pluginArgs';
@@ -81,8 +80,8 @@ import {
   getUserFromCapabilities,
   sanitizeSessionCapabilities,
 } from './utils/auth';
-import { NodeHealthMonitor } from './utils/node-heath-monitor';
 import { enhancedADBManager } from './utils/enhanced-adb-manager';
+import { NodeHealthMonitor } from './utils/node-heath-monitor';
 
 const commandsQueueGuard = new AsyncLock();
 const NODE_HEALTH_MONITOR_INTERVAL = 1000 * 30; // 30 seconds
@@ -145,6 +144,7 @@ class DevicePlugin extends BasePlugin {
     httpServer: any,
     cliArgs: ServerArgs,
   ): Promise<void> {
+    await loadFreePort();
     DevicePlugin.httpServer = httpServer;
 
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
