@@ -146,8 +146,14 @@ async function injectSampleData(options: SampleDataOptions = {}) {
             buildId: build.id,
             name: `Session ${j + 1} for Today Build ${i + 1}`,
             status: 'passed',
-            desiredCapabilities: JSON.stringify({ platformName: 'Android', deviceName: `Pixel T${j + 1}` }),
-            sessionCapabilities: JSON.stringify({ platformName: 'Android', deviceName: `Pixel T${j + 1}` }),
+            desiredCapabilities: JSON.stringify({
+              platformName: 'Android',
+              deviceName: `Pixel T${j + 1}`,
+            }),
+            sessionCapabilities: JSON.stringify({
+              platformName: 'Android',
+              deviceName: `Pixel T${j + 1}`,
+            }),
             nodeId: 'test-node-today',
             hasLiveVideo: true,
             deviceUdid: `test-udid-today-${build.id}-${j}`,
@@ -184,7 +190,9 @@ async function injectSampleData(options: SampleDataOptions = {}) {
     const yesterdayBase = new Date(now);
     yesterdayBase.setDate(yesterdayBase.getDate() - 1);
     yesterdayBase.setHours(12, 0, 0, 0); // noon yesterday
-    log.info(`Creating ${yesterdayBuilds} build(s) for yesterday (${yesterdayBase.toISOString()})...`);
+    log.info(
+      `Creating ${yesterdayBuilds} build(s) for yesterday (${yesterdayBase.toISOString()})...`,
+    );
     for (let i = 0; i < yesterdayBuilds; i++) {
       const build = await prisma.build.create({
         data: {
@@ -203,8 +211,14 @@ async function injectSampleData(options: SampleDataOptions = {}) {
             buildId: build.id,
             name: `Session ${j + 1} for Yesterday Build ${i + 1}`,
             status: j % 2 === 0 ? 'passed' : 'failed',
-            desiredCapabilities: JSON.stringify({ platformName: 'iOS', deviceName: `iPhone Y${j + 1}` }),
-            sessionCapabilities: JSON.stringify({ platformName: 'iOS', deviceName: `iPhone Y${j + 1}` }),
+            desiredCapabilities: JSON.stringify({
+              platformName: 'iOS',
+              deviceName: `iPhone Y${j + 1}`,
+            }),
+            sessionCapabilities: JSON.stringify({
+              platformName: 'iOS',
+              deviceName: `iPhone Y${j + 1}`,
+            }),
             nodeId: 'test-node-yday',
             hasLiveVideo: false,
             deviceUdid: `test-udid-yday-${build.id}-${j}`,
@@ -242,7 +256,9 @@ async function injectSampleData(options: SampleDataOptions = {}) {
     twoDayOldDate.setDate(twoDayOldDate.getDate() - 2);
     twoDayOldDate.setHours(12, 0, 0, 0); // Set to noon on that day (after start of day, so should be kept)
 
-    log.info(`Creating ${twoDayOldBuilds} builds exactly 2 days old (${twoDayOldDate.toISOString()})...`);
+    log.info(
+      `Creating ${twoDayOldBuilds} builds exactly 2 days old (${twoDayOldDate.toISOString()})...`,
+    );
     for (let i = 0; i < twoDayOldBuilds; i++) {
       const build = await prisma.build.create({
         data: {
@@ -405,7 +421,8 @@ async function injectSampleData(options: SampleDataOptions = {}) {
               started_at: sessionStartTime,
               finished_at: session.status === 'running' ? null : sessionEndTime,
               start_event_doc: JSON.stringify({ test: 'start' }),
-              finished_event_doc: session.status === 'running' ? null : JSON.stringify({ test: 'end' }),
+              finished_event_doc:
+                session.status === 'running' ? null : JSON.stringify({ test: 'end' }),
               file: `test-${session.id}-${k}.js`,
             },
           });
@@ -472,4 +489,3 @@ if (require.main === module) {
 }
 
 export { injectSampleData };
-
