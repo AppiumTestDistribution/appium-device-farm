@@ -1,3 +1,9 @@
+## [11.1.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.3...v11.1.4) (2025-10-29)
+
+### Bug Fixes
+
+* Fix go_ios run for windows ([#1919](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1919)) ([d6d5c02](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d6d5c02ca74268fcf0efeac1dd25996091e47a6a))
+
 ## [11.1.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.2...v11.1.3) (2025-10-28)
 
 ### Bug Fixes
