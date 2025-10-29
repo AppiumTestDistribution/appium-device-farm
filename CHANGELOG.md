@@ -1,3 +1,9 @@
+## [11.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.5...v11.2.0) (2025-10-29)
+
+### Features
+
+* Added support to delete builds on rententionDays ([#1922](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1922)) ([a986350](https://github.com/AppiumTestDistribution/appium-device-farm/commit/a986350690a797bd3469bec5954845d9f0b9018a))
+
 ## [11.1.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.4...v11.1.5) (2025-10-29)
 
 ### Bug Fixes
