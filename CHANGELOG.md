@@ -1,3 +1,9 @@
+## [11.1.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.4...v11.1.5) (2025-10-29)
+
+### Bug Fixes
+
+* update config to load freeport during plugin initialization ([#1921](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1921)) ([180265f](https://github.com/AppiumTestDistribution/appium-device-farm/commit/180265fe421a9c36700abb8b39045199ce3ec82e))
+
 ## [11.1.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.3...v11.1.4) (2025-10-29)
 
 ### Bug Fixes
