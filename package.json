@@ -44,7 +44,8 @@
     "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration",
-    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444"
+    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444",
+    "db:inject-sample-data": "ts-node src/scripts/inject-sample-data.ts"
   },
   "repository": {
     "type": "git",
@@ -89,6 +90,7 @@
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "bluebird": "^3.7.2",
+    "commander": "^12.1.0",
     "cors": "^2.8.5",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
