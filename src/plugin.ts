@@ -59,7 +59,8 @@ import ip from 'ip';
 import _ from 'lodash';
 import { DeviceFarmApiClient } from './api-client';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
-import { config, loadFreePort, config as pluginConfig } from './config';
+import { config, config as pluginConfig } from './config';
+import { getFreePort } from './helpers';
 import { ATDRepository } from './data-service/db';
 import { NodeService } from './data-service/node-service';
 import { addCLIArgs } from './data-service/pluginArgs';
@@ -144,7 +145,7 @@ class DevicePlugin extends BasePlugin {
     httpServer: any,
     cliArgs: ServerArgs,
   ): Promise<void> {
-    await loadFreePort();
+    config.goIOSTunnelInfoPort = await getFreePort();
     DevicePlugin.httpServer = httpServer;
 
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
