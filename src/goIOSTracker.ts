@@ -1,8 +1,8 @@
 import { exec } from 'child_process';
 import _ from 'lodash';
-import semver from 'semver';
 import { EventEmitter } from 'stream';
 import { SubProcess } from 'teen_process';
+import { config } from './config';
 import { cachePath } from './helpers';
 import log from './logger';
 export default class GoIosTracker extends EventEmitter {
@@ -95,59 +95,16 @@ export default class GoIosTracker extends EventEmitter {
  * @param sdk - The device SDK version
  * @param goIOSAgentPort - The port to use for the go-ios agent (optional)
  */
-export async function startTunnel(
-  udid: string,
-  sdk?: string,
-  goIOSAgentPort?: number,
-): Promise<void> {
+export async function startTunnel(): Promise<void> {
   const goIOS = process.env.GO_IOS;
   log.info(`Go IOS: ${goIOS}`);
 
-  // Check if GO_IOS is configured
-  if (!goIOS) {
-    log.info('GO_IOS environment variable not set, skipping tunnel setup');
-    return;
-  }
-
-  // Check if goIOSAgentPort is provided
-  if (!goIOSAgentPort) {
-    log.info('Go IOS Agent Port not provided, skipping tunnel setup');
-    return;
-  }
-
-  // SDK version checking
-  const sdkRaw = sdk?.toString();
-  const sdkNormalized = sdkRaw ? sdkRaw.trim().toLowerCase().replace(/x/g, '0') : undefined;
-  const sdkCoerced = semver.coerce(sdkNormalized ?? sdkRaw)?.version;
-  const isAtLeast17 = sdkCoerced ? semver.satisfies(sdkCoerced, '>=17.0.0') : false;
-
-  log.info(`Device SDK: ${sdkRaw}`);
-  if (sdkNormalized && sdkNormalized !== sdkRaw) {
-    log.info(`Normalized SDK: ${sdkNormalized}`);
-  }
-  log.info(`Coerced SDK: ${sdkCoerced ?? 'invalid'}`);
-  log.info(`Semver satisfies (>=17.0.0): ${isAtLeast17}`);
-  log.info(`Go IOS Agent Port: ${goIOSAgentPort} for device ${udid}`);
-
-  // Check for version above 17+ and presence for Go IOS
-  if (!isAtLeast17) {
-    log.info(`Device SDK version ${sdkRaw} is below 17.0.0, skipping go-ios tunnel setup`);
-    return;
-  }
-
   try {
     log.info('Running go-ios agent');
-    const startTunnelCmd = `${goIOS} tunnel start --userspace --udid=${udid}`;
+    const startTunnelCmd = `${goIOS} tunnel start --userspace --tunnel-info-port=${config.goIOSTunnelInfoPort}`;
     log.info(`Starting go-ios tunnel: ${startTunnelCmd}`);
 
-    const options = {
-      env: {
-        ...process.env,
-        GO_IOS_AGENT_PORT: goIOSAgentPort.toString(),
-      },
-    };
-
-    exec(startTunnelCmd, options, (error, stdout, stderr) => {
+    exec(startTunnelCmd, (error, stdout, stderr) => {
       if (error) {
         log.error(`Error starting go-ios tunnel: ${error.message}`);
         return;

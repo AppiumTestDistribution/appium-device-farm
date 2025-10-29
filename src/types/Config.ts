@@ -7,4 +7,5 @@ export type Config = {
   serverMetadata: {
     id: string;
   };
+  goIOSTunnelInfoPort: number;
 };

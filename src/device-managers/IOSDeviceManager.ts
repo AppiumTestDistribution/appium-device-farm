@@ -244,6 +244,9 @@ export default class IOSDeviceManager implements IDeviceManager {
     const devices = await this.getConnectedDevices();
     const deviceState: IDevice[] = [];
     this.trackIOSDevices(pluginArgs);
+    if (process.env.GO_IOS) {
+      await startTunnel();
+    }
     await asyncForEach(devices, async (udid: string) => {
       const existingDevice = existingDeviceDetails.find((device) => device.udid === udid);
       if (existingDevice) {
@@ -267,9 +270,6 @@ export default class IOSDeviceManager implements IDeviceManager {
     iosTracker.on('attached', async (udid: string) => {
       log.info(`Attached iOS device ${udid}`);
       const deviceAttached = await this.getDeviceInfo(udid, pluginArgs, this.hostPort);
-      if (deviceAttached.goIOSAgentPort != undefined) {
-        await startTunnel(udid, deviceAttached.sdk, deviceAttached.goIOSAgentPort);
-      }
       const deviceTracked: IDevice = {
         ...deviceAttached,
         nodeId: this.nodeId,
