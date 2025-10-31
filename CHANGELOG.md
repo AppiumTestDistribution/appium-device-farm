@@ -1,3 +1,9 @@
+## [11.2.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.0...v11.2.1) (2025-10-31)
+
+### Bug Fixes
+
+* clean up session details as well ([#1923](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1923)) ([39051c2](https://github.com/AppiumTestDistribution/appium-device-farm/commit/39051c2cdeacf9b934181b94824174d902e0aa5e))
+
 ## [11.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.5...v11.2.0) (2025-10-29)
 
 ### Features
