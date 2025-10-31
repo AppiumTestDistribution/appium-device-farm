@@ -1,5 +1,8 @@
 import log from '../logger';
 import { prisma } from '../prisma';
+import fs from 'fs';
+import path from 'path';
+import { config } from '../config';
 
 interface SampleDataOptions {
   oldBuilds?: number; // Builds older than 30 days
@@ -27,6 +30,13 @@ async function injectSampleData(options: SampleDataOptions = {}) {
   try {
     await prisma.$connect();
     log.info('Starting sample data injection...');
+
+    // Ensure session assets root exists for creating per-session directories
+    try {
+      fs.mkdirSync(config.sessionAssetsPath, { recursive: true });
+    } catch (e) {
+      log.warn(`Unable to ensure session assets root at ${config.sessionAssetsPath}: ${e}`);
+    }
 
     const now = new Date();
     const oldBuildDate = new Date(now);
@@ -81,6 +91,13 @@ async function injectSampleData(options: SampleDataOptions = {}) {
           },
         });
         injectedData.sessions.push(session.id);
+        // Create corresponding session directory under cache
+        try {
+          const sessionDir = path.join(config.sessionAssetsPath, session.id);
+          fs.mkdirSync(sessionDir, { recursive: true });
+        } catch (e) {
+          log.warn(`Failed to create session directory for ${session.id}: ${e}`);
+        }
 
         // Create session logs
         for (let k = 0; k < sessionLogsPerSession; k++) {
@@ -166,6 +183,12 @@ async function injectSampleData(options: SampleDataOptions = {}) {
           },
         });
         injectedData.sessions.push(session.id);
+        try {
+          const sessionDir = path.join(config.sessionAssetsPath, session.id);
+          fs.mkdirSync(sessionDir, { recursive: true });
+        } catch (e) {
+          log.warn(`Failed to create session directory for ${session.id}: ${e}`);
+        }
         for (let k = 0; k < sessionLogsPerSession; k++) {
           await prisma.sessionLog.create({
             data: {
@@ -231,6 +254,12 @@ async function injectSampleData(options: SampleDataOptions = {}) {
           },
         });
         injectedData.sessions.push(session.id);
+        try {
+          const sessionDir = path.join(config.sessionAssetsPath, session.id);
+          fs.mkdirSync(sessionDir, { recursive: true });
+        } catch (e) {
+          log.warn(`Failed to create session directory for ${session.id}: ${e}`);
+        }
         for (let k = 0; k < sessionLogsPerSession; k++) {
           await prisma.sessionLog.create({
             data: {
@@ -299,6 +328,12 @@ async function injectSampleData(options: SampleDataOptions = {}) {
           },
         });
         injectedData.sessions.push(session.id);
+        try {
+          const sessionDir = path.join(config.sessionAssetsPath, session.id);
+          fs.mkdirSync(sessionDir, { recursive: true });
+        } catch (e) {
+          log.warn(`Failed to create session directory for ${session.id}: ${e}`);
+        }
 
         // Create session logs
         for (let k = 0; k < sessionLogsPerSession; k++) {
@@ -387,6 +422,12 @@ async function injectSampleData(options: SampleDataOptions = {}) {
           },
         });
         injectedData.sessions.push(session.id);
+        try {
+          const sessionDir = path.join(config.sessionAssetsPath, session.id);
+          fs.mkdirSync(sessionDir, { recursive: true });
+        } catch (e) {
+          log.warn(`Failed to create session directory for ${session.id}: ${e}`);
+        }
 
         // Create session logs
         for (let k = 0; k < sessionLogsPerSession; k++) {
