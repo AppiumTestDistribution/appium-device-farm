@@ -1,6 +1,8 @@
+import { exec } from 'child_process';
 import _ from 'lodash';
 import { EventEmitter } from 'stream';
 import { SubProcess } from 'teen_process';
+import { config } from './config';
 import { cachePath } from './helpers';
 import log from './logger';
 export default class GoIosTracker extends EventEmitter {
@@ -84,5 +86,39 @@ export default class GoIosTracker extends EventEmitter {
         this.emit('detached', id);
       }
     });
+  }
+}
+
+/**
+ * Start a go-ios tunnel for a device
+ * @param udid - The device UDID
+ * @param sdk - The device SDK version
+ * @param goIOSAgentPort - The port to use for the go-ios agent (optional)
+ */
+export async function startTunnel(): Promise<void> {
+  const goIOS = process.env.GO_IOS;
+  log.info(`Go IOS: ${goIOS}`);
+
+  try {
+    log.info('Running go-ios agent');
+    const startTunnelCmd = `${goIOS} tunnel start --userspace --tunnel-info-port=${config.goIOSTunnelInfoPort}`;
+    log.info(`Starting go-ios tunnel: ${startTunnelCmd}`);
+
+    exec(startTunnelCmd, (error, stdout, stderr) => {
+      if (error) {
+        log.error(`Error starting go-ios tunnel: ${error.message}`);
+        return;
+      }
+      if (stdout) {
+        log.info(`go-ios tunnel stdout: ${stdout}`);
+      }
+      if (stderr) {
+        log.warn(`go-ios tunnel stderr: ${stderr}`);
+      }
+      log.info('go-ios tunnel established successfully');
+    });
+  } catch (err) {
+    log.error(`Failed to establish go-ios tunnel: ${err}`);
+    throw err;
   }
 }

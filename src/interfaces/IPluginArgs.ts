@@ -85,6 +85,7 @@ export interface IPluginArgs {
 
   //node
   nodeName?: string;
+  portRange?: string;
 }
 
 export const DefaultPluginArgs: IPluginArgs = {

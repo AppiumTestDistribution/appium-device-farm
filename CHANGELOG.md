@@ -1,3 +1,51 @@
+## [11.2.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.0...v11.2.1) (2025-10-31)
+
+### Bug Fixes
+
+* clean up session details as well ([#1923](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1923)) ([39051c2](https://github.com/AppiumTestDistribution/appium-device-farm/commit/39051c2cdeacf9b934181b94824174d902e0aa5e))
+
+## [11.2.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.5...v11.2.0) (2025-10-29)
+
+### Features
+
+* Added support to delete builds on rententionDays ([#1922](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1922)) ([a986350](https://github.com/AppiumTestDistribution/appium-device-farm/commit/a986350690a797bd3469bec5954845d9f0b9018a))
+
+## [11.1.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.4...v11.1.5) (2025-10-29)
+
+### Bug Fixes
+
+* update config to load freeport during plugin initialization ([#1921](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1921)) ([180265f](https://github.com/AppiumTestDistribution/appium-device-farm/commit/180265fe421a9c36700abb8b39045199ce3ec82e))
+
+## [11.1.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.3...v11.1.4) (2025-10-29)
+
+### Bug Fixes
+
+* Fix go_ios run for windows ([#1919](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1919)) ([d6d5c02](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d6d5c02ca74268fcf0efeac1dd25996091e47a6a))
+
+## [11.1.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.2...v11.1.3) (2025-10-28)
+
+### Bug Fixes
+
+* Fix setting env for go-ios in windows ([#1917](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1917)) ([68f959d](https://github.com/AppiumTestDistribution/appium-device-farm/commit/68f959d93226898d550b810ac94e1fb27bdd20d5))
+
+## [11.1.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.1...v11.1.2) (2025-10-28)
+
+### Bug Fixes
+
+* fix [#1909](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1909) [#1895](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1895) starting session when go-ios is provided ([#1915](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1915)) ([c446851](https://github.com/AppiumTestDistribution/appium-device-farm/commit/c44685102015ae23ad68e14fe7105df0976bdb9d))
+
+## [11.1.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.1.0...v11.1.1) (2025-10-15)
+
+### Miscellaneous Chores
+
+* correct typo in registerAuthenticationRoutes method name ([#1897](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1897)) ([d0dff05](https://github.com/AppiumTestDistribution/appium-device-farm/commit/d0dff054d4127fdaf1e510bca58cb52776f63aa5)), closes [Fixes#1896](https://github.com/AppiumTestDistribution/Fixes/issues/1896) [#1896](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1896)
+
+## [11.1.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.8...v11.1.0) (2025-10-13)
+
+### Features
+
+* Added support to set portrange for systemPort,mjpegServer,wdaLocalPort ([#1885](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1885)) ([67c3add](https://github.com/AppiumTestDistribution/appium-device-farm/commit/67c3addb8e38a19f4f2bbb6792e2694c9d4cc593))
+
 ## [11.0.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.0.7...v11.0.8) (2025-10-06)
 
 ### Bug Fixes

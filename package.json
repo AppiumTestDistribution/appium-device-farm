@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "11.0.8",
+  "version": "11.2.1",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices.",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -44,7 +44,8 @@
     "run-db-migration": "path-exists lib/src/scripts/initialize-database.js && node lib/src/scripts/initialize-database.js || ts-node src/scripts/initialize-database.ts",
     "generate-migration": "ts-node src/scripts/generate-database-migration.ts",
     "postinstall": "npm run run-db-migration",
-    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444"
+    "proxy": "lcp --proxyUrl http://127.0.0.1:4723 --port 4444",
+    "db:inject-sample-data": "ts-node src/scripts/inject-sample-data.ts"
   },
   "repository": {
     "type": "git",
@@ -89,6 +90,7 @@
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "bluebird": "^3.7.2",
+    "commander": "^12.1.0",
     "cors": "^2.8.5",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
@@ -123,7 +125,7 @@
     "portscanner": "^2.2.0",
     "prisma": "^5.15.0",
     "q": "^1.5.1",
-    "ramda": "^0.31.0",
+    "ramda": "^0.32.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^6.6.7",
     "semver": "^7.5.4",
@@ -193,7 +195,7 @@
     "lint-staged": "15.5.2",
     "mocha": "9.2.2",
     "prettier": "^3.0.3",
-    "ramda": "0.31.3",
+    "ramda": "0.32.0",
     "remove-files-webpack-plugin": "^1.5.0",
     "sinon": "17.0.1",
     "sinon-chai": "^3.7.0",
@@ -306,6 +308,9 @@
           "type": "string"
         },
         "nodeName": {
+          "type": "string"
+        },
+        "portRange": {
           "type": "string"
         }
       },

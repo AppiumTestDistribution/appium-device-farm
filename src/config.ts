@@ -1,8 +1,8 @@
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as fs from 'fs';
-import { Config } from './types/Config';
 import { v4 as uuid } from 'uuid';
+import { Config } from './types/Config';
 
 const basePath = path.join(os.homedir(), '.cache', 'appium-device-farm');
 const deviceFarmHome = getDeviceFarmHome();
@@ -47,4 +47,5 @@ export const config: Config = {
   takeScreenshotsFor: ['click', 'setUrl', 'setValue', 'performActions'],
   appsPath: path.join(deviceFarmHome, 'assets'),
   serverMetadata: { id: '' },
+  goIOSTunnelInfoPort: 0,
 };
