@@ -1,3 +1,9 @@
+## [11.2.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.1...v11.2.2) (2025-11-03)
+
+### Bug Fixes
+
+* make port management better ([#1926](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1926)) ([2b0030e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/2b0030ea8bd0b3e9ad8907e8f02b6b7e21dcb0d3))
+
 ## [11.2.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.0...v11.2.1) (2025-10-31)
 
 ### Bug Fixes
