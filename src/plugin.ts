@@ -60,7 +60,7 @@ import _ from 'lodash';
 import { DeviceFarmApiClient } from './api-client';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import { config, config as pluginConfig } from './config';
-import { getFreePort } from './helpers';
+import { getFreePort, releasePorts } from './helpers';
 import { ATDRepository } from './data-service/db';
 import { NodeService } from './data-service/node-service';
 import { addCLIArgs } from './data-service/pluginArgs';
@@ -716,6 +716,58 @@ class DevicePlugin extends BasePlugin {
         log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
       }
     }
+
+    // Collect all ports used by the device and release them
+    const portsToRelease: (number | undefined | null)[] = [];
+
+    // Ports from device object
+    if (device) {
+      // iOS ports
+      if (device.wdaLocalPort) portsToRelease.push(device.wdaLocalPort);
+      if (device.mjpegServerPort) portsToRelease.push(device.mjpegServerPort);
+      if (device.goIOSAgentPort) portsToRelease.push(device.goIOSAgentPort);
+
+      // Android ports (stored on device if available)
+      if (device.systemPort) portsToRelease.push(device.systemPort);
+
+      // Ports from sessionResponse capabilities (Android and iOS)
+      // sessionResponse contains the capabilities returned from Appium
+      if (device.sessionResponse) {
+        const sessionResponse = device.sessionResponse;
+        // Check for ports with appium: prefix
+        const capabilities = sessionResponse.capabilities || sessionResponse;
+
+        // Android ports
+        const systemPort = capabilities['appium:systemPort'] || capabilities.systemPort;
+        const chromeDriverPort =
+          capabilities['appium:chromeDriverPort'] || capabilities.chromeDriverPort;
+        const flutterSystemPort =
+          capabilities['appium:flutterSystemPort'] || capabilities.flutterSystemPort;
+
+        // iOS ports
+        const wdaLocalPort = capabilities['appium:wdaLocalPort'] || capabilities.wdaLocalPort;
+
+        // Common ports
+        const mjpegServerPort =
+          capabilities['appium:mjpegServerPort'] || capabilities.mjpegServerPort;
+
+        if (systemPort) portsToRelease.push(systemPort);
+        if (chromeDriverPort) portsToRelease.push(chromeDriverPort);
+        if (flutterSystemPort) portsToRelease.push(flutterSystemPort);
+        if (wdaLocalPort) portsToRelease.push(wdaLocalPort);
+        if (mjpegServerPort) portsToRelease.push(mjpegServerPort);
+      }
+    }
+
+    // Release all collected ports
+    const validPorts = portsToRelease.filter((p) => p !== null && p !== undefined);
+    if (validPorts.length > 0) {
+      releasePorts(validPorts);
+      log.info(
+        `📱 Released ${validPorts.length} port(s) for session ${sessionId}: ${validPorts.join(', ')}`,
+      );
+    }
+
     return res;
   }
 }

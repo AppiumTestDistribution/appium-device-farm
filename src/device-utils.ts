@@ -34,6 +34,7 @@ import DevicePlatform from './enums/Platform';
 import {
   cachePath,
   checkIfPathIsAbsolute,
+  getFreePort,
   isAppiumRunningAt,
   isDeviceFarmRunning,
   isMac,
@@ -241,7 +242,7 @@ export async function updateCapabilityForDevice(
 
   if (!device.hasOwnProperty('cloud')) {
     if (mergedCapabilites['appium:automationName']?.toLowerCase() === 'flutterintegration') {
-      capability.firstMatch[0]['appium:flutterSystemPort'] = await getPort();
+      capability.firstMatch[0]['appium:flutterSystemPort'] = await getFreePort(options.portRange);
     }
 
     if (device.platform.toLowerCase() == DevicePlatform.ANDROID) {
