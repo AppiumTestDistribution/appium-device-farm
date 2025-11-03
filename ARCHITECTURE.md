@@ -135,7 +135,9 @@ sequenceDiagram
         Hub->>Coturn: Configure WebRTC Signaling
         Hub->>Browser: Node ICE Candidates
         Hub->>Node: Browser ICE Candidates
-        Browser<-->Node: WebRTC Peer Connection<br/>(via Coturn)
+        Note over Browser,Node: WebRTC Peer Connection<br/>(via Coturn)
+        Browser->>Node: WebRTC Stream (Video/Audio)
+        Node->>Browser: WebRTC Stream (Video/Audio)
         Note over Browser,Device: Real-time Streaming & Control
         Browser->>Hub: End Session
         Hub->>Node: WebSocket: End Session
