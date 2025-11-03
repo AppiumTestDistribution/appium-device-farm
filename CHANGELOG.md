@@ -1,3 +1,9 @@
+## [11.2.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.2...v11.2.3) (2025-11-03)
+
+### Bug Fixes
+
+* Added the fix for the android Bluetooth name ([#1872](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1872)) ([2b70e22](https://github.com/AppiumTestDistribution/appium-device-farm/commit/2b70e229d8fcc05e2b125fb56bd549bc569cf7fd))
+
 ## [11.2.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.1...v11.2.2) (2025-11-03)
 
 ### Bug Fixes
