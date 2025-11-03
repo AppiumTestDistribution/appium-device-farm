@@ -59,7 +59,7 @@ export async function androidCapabilities(
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:systemPort'] = await getFreePort(options.portRange);
-  caps.firstMatch[0]['appium:chromeDriverPort'] = await getPort();
+  caps.firstMatch[0]['appium:chromeDriverPort'] = await getFreePort(options.portRange);
   caps.firstMatch[0]['appium:adbRemoteHost'] = freeDevice.adbRemoteHost;
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
