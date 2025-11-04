@@ -60,7 +60,13 @@ export class WebRTCController extends EventEmitter {
     console.log('[WebRTCController] Creating peer connection...');
 
     // Create peer connection with H.264 codec
+    // Add STUN servers for NAT traversal (required for remote connections)
     this.pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+      ],
       codecs: {
         audio: [],
         video: [

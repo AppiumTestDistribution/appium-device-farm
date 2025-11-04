@@ -9,6 +9,8 @@ const __dirname = path.dirname(__filename);
 
 // Store active controllers by stream ID
 const controllers = new Map<string, WebRTCController>();
+// Store server ICE candidates by stream ID
+const serverIceCandidatesMap = new Map<string, any[]>();
 
 export function createServer(port = 3000): Express {
   const app = express();
@@ -59,10 +61,20 @@ export function createServer(port = 3000): Express {
           bitrate: typeof bitrate === 'string' ? bitrate : defaultBitrate,
         });
 
-        // Handle ICE candidates
+        // Initialize server ICE candidates array for this stream
+        serverIceCandidatesMap.set(streamId, []);
+
+        // Handle ICE candidates from server
         controller.on('iceCandidate', (candidate) => {
-          // Store candidate for later (in production, you'd send this via WebSocket or another endpoint)
           console.log(`[Server] ICE candidate for ${streamId}:`, candidate);
+          const candidates = serverIceCandidatesMap.get(streamId) || [];
+          // Format candidate for RTCIceCandidateInit
+          candidates.push({
+            candidate: candidate.candidate,
+            sdpMLineIndex: candidate.sdpMLineIndex,
+            sdpMid: candidate.sdpMid,
+          });
+          serverIceCandidatesMap.set(streamId, candidates);
         });
 
         controller.on('error', (error) => {
@@ -88,10 +100,29 @@ export function createServer(port = 3000): Express {
         throw error;
       }
 
-      console.log(`[Server] Created WebRTC answer for stream: ${streamId}`);
-      res.json({ answer });
+      // Wait a moment for ICE candidates to be generated
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      const serverIceCandidates = serverIceCandidatesMap.get(streamId) || [];
+      console.log(`[Server] Created WebRTC answer for stream: ${streamId} (${serverIceCandidates.length} server ICE candidates)`);
+      res.json({
+        answer,
+        serverIceCandidates, // Include any server ICE candidates generated so far
+      });
     } catch (error: any) {
       console.error('[Server] Error handling offer:', error);
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+  });
+
+  // Get server ICE candidates for a stream (polling endpoint for clients)
+  app.get('/api/webrtc/ice/:streamId', async (req: Request, res: Response) => {
+    try {
+      const { streamId } = req.params;
+      const candidates = serverIceCandidatesMap.get(streamId) || [];
+      res.json({ serverIceCandidates: candidates });
+    } catch (error: any) {
+      console.error('[Server] Error getting ICE candidates:', error);
       res.status(500).json({ error: error.message || 'Internal server error' });
     }
   });
@@ -135,6 +166,7 @@ export function createServer(port = 3000): Express {
       if (controller) {
         await controller.stop();
         controllers.delete(streamId);
+        serverIceCandidatesMap.delete(streamId);
         res.json({ success: true });
       } else {
         res.status(404).json({ error: 'Stream not found' });

@@ -261,10 +261,12 @@
                 
                 streamId = generateStreamId();
                 
-                // Create RTCPeerConnection
+                // Create RTCPeerConnection with multiple STUN servers for better NAT traversal
                 pc = new RTCPeerConnection({
                     iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' }
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
                     ]
                 });
 
@@ -341,6 +343,52 @@
                 // Set remote description
                 await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
                 log('Remote description set', 'success');
+
+                // Add server ICE candidates if provided
+                if (data.serverIceCandidates && Array.isArray(data.serverIceCandidates)) {
+                    log(`Adding ${data.serverIceCandidates.length} server ICE candidates`, 'info');
+                    for (const candidate of data.serverIceCandidates) {
+                        try {
+                            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                        } catch (error) {
+                            log(`Error adding server ICE candidate: ${error.message}`, 'error');
+                        }
+                    }
+                }
+
+                // Poll for additional server ICE candidates (they may arrive after answer)
+                let pollCount = 0;
+                const maxPolls = 10; // Poll for up to 5 seconds (10 * 500ms)
+                const pollInterval = setInterval(async () => {
+                    pollCount++;
+                    if (pollCount > maxPolls) {
+                        clearInterval(pollInterval);
+                        return;
+                    }
+
+                    try {
+                        const iceResponse = await fetch(`/api/webrtc/ice/${streamId}`);
+                        if (iceResponse.ok) {
+                            const iceData = await iceResponse.json();
+                            if (iceData.serverIceCandidates && iceData.serverIceCandidates.length > 0) {
+                                const currentCount = data.serverIceCandidates?.length || 0;
+                                const newCandidates = iceData.serverIceCandidates.slice(currentCount);
+                                if (newCandidates.length > 0) {
+                                    log(`Adding ${newCandidates.length} additional server ICE candidates`, 'info');
+                                    for (const candidate of newCandidates) {
+                                        try {
+                                            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                                        } catch (error) {
+                                            // Candidate may already be added, ignore
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        // Silently fail polling
+                    }
+                }, 500);
 
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
