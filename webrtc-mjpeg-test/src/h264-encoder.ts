@@ -1,4 +1,4 @@
-import { exec, ChildProcess } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 
@@ -43,25 +43,71 @@ export class H264Encoder extends EventEmitter {
 
     // FFmpeg command to read MJPEG stream and output RTP packets
     // FFmpeg will handle MJPEG decoding, H.264 encoding, and RTP packetization
-    const command = `${ffmpeg} -i "${this.options.mjpegUrl}" \
-      -c:v libx264 \
-      -preset ${this.options.preset} \
-      -tune zerolatency \
-      -profile:v baseline \
-      -level 3.1 \
-      -pix_fmt yuv420p \
-      -r ${this.options.fps} \
-      -s ${this.options.width}x${this.options.height} \
-      -b:v ${this.options.bitrate} \
-      -maxrate ${this.options.bitrate} \
-      -bufsize ${parseInt(this.options.bitrate) * 2}k \
-      -g 10 \
-      -keyint_min 1 \
-      -f rtp rtp://127.0.0.1:${this.options.rtpPort}`;
+    const gop = Math.max(1, this.options.fps);
+    const bufK = parseInt(this.options.bitrate) * 2;
+    const targetW = this.options.width;
+    const targetH = this.options.height;
+    // Use lanczos for better quality scaling, add format conversion for better color handling
+    const scalePad = `scale=${targetW}:${targetH}:flags=lanczos:force_original_aspect_ratio=decrease,format=yuv420p,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2:black`;
 
-    console.log(`[H264Encoder] FFmpeg command: ${command}`);
+    // Determine H.264 level based on resolution for better quality
+    // Level 4.0 supports up to 2048x1024, 4.1 up to 2048x1152, 4.2 up to 4096x2176
+    let h264Level = '3.1';
+    const pixels = targetW * targetH;
+    if (pixels > 1920 * 1080) {
+      h264Level = '4.2';
+    } else if (pixels > 1280 * 720) {
+      h264Level = '4.1';
+    } else if (pixels > 720 * 480) {
+      h264Level = '4.0';
+    }
+    const args = [
+      '-fflags',
+      'nobuffer',
+      '-flags',
+      'low_delay',
+      '-analyzeduration',
+      '0',
+      '-probesize',
+      '32k',
+      '-use_wallclock_as_timestamps',
+      '1',
+      '-i',
+      this.options.mjpegUrl,
+      '-c:v',
+      'libx264',
+      '-preset',
+      this.options.preset,
+      '-tune',
+      'zerolatency',
+      '-profile:v',
+      'high', // Use high profile for better compression efficiency
+      '-level',
+      h264Level,
+      '-x264-params',
+      `scenecut=0:open_gop=0:keyint=${gop}:min-keyint=1:rc-lookahead=0:me=umh:subme=7:merange=16:trellis=1:ref=3:bframes=0:weightb=0:8x8dct=1:fast-pskip=0`,
+      '-pix_fmt',
+      'yuv420p',
+      '-r',
+      `${this.options.fps}`,
+      '-vf',
+      scalePad,
+      '-b:v',
+      this.options.bitrate,
+      '-maxrate',
+      this.options.bitrate,
+      '-bufsize',
+      `${bufK}k`,
+      '-g',
+      `${gop}`,
+      '-f',
+      'rtp',
+      `rtp://127.0.0.1:${this.options.rtpPort}`,
+    ];
 
-    this.ffmpegProcess = exec(command);
+    console.log(`[H264Encoder] FFmpeg args: ${args.join(' ')}`);
+
+    this.ffmpegProcess = spawn(ffmpeg, args);
 
     if (this.ffmpegProcess.stderr) {
       this.ffmpegProcess.stderr.on('data', (data: Buffer) => {
@@ -90,7 +136,7 @@ export class H264Encoder extends EventEmitter {
     });
 
     this.ffmpegProcess.on('error', (err) => {
-      console.error('[H264Encoder] FFmpeg exec error:', err);
+      console.error('[H264Encoder] FFmpeg spawn error:', err);
       this.isRunning = false;
       this.emit('error', err);
     });

@@ -171,6 +171,15 @@ export class WebRTCController extends EventEmitter {
           return;
         }
         this.udpSocket.bind(this.rtpPort, '127.0.0.1', () => {
+          // Increase receive buffer to reduce packet drops under load (Node 18+)
+          try {
+            const sockAny = this.udpSocket as any;
+            if (typeof sockAny.setRecvBufferSize === 'function') {
+              sockAny.setRecvBufferSize(8 * 1024 * 1024);
+            }
+          } catch (e) {
+            console.warn('[WebRTCController] Could not set UDP recv buffer size:', e);
+          }
           console.log(`[WebRTCController] UDP socket bound to 127.0.0.1:${this.rtpPort}`);
           resolve();
         });

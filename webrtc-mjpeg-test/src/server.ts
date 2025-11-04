@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 // Store active controllers by stream ID
 const controllers = new Map<string, WebRTCController>();
 
-export function createServer(port: number = 3000): Express {
+export function createServer(port = 3000): Express {
   const app = express();
 
   app.use(cors());
@@ -20,10 +20,12 @@ export function createServer(port: number = 3000): Express {
   // WebRTC signaling endpoint - handle offer
   app.post('/api/webrtc/offer', async (req: Request, res: Response) => {
     try {
-      const { streamId, mjpegUrl, offer } = req.body;
+      const { streamId, mjpegUrl, offer, width, height, fps, bitrate } = req.body;
 
       if (!streamId || !mjpegUrl || !offer) {
-        return res.status(400).json({ error: 'Missing required fields: streamId, mjpegUrl, offer' });
+        return res
+          .status(400)
+          .json({ error: 'Missing required fields: streamId, mjpegUrl, offer' });
       }
 
       console.log(`[Server] Received WebRTC offer for stream: ${streamId}`);
@@ -32,12 +34,29 @@ export function createServer(port: number = 3000): Express {
       let controller = controllers.get(streamId);
       if (!controller) {
         console.log(`[Server] Creating new WebRTC controller for: ${mjpegUrl}`);
+        // Calculate bitrate based on resolution for better quality
+        const defaultWidth = typeof width === 'number' ? width : 1280;
+        const defaultHeight = typeof height === 'number' ? height : 720;
+        const defaultFps = typeof fps === 'number' ? fps : 10;
+        const pixels = defaultWidth * defaultHeight;
+        // Higher bitrate for higher resolutions (roughly 0.5-1.5 bits per pixel)
+        let defaultBitrate = '500k';
+        if (pixels > 1920 * 1080) {
+          defaultBitrate = '2500k'; // 4K or higher
+        } else if (pixels > 1280 * 720) {
+          defaultBitrate = '1200k'; // 1080p
+        } else if (pixels > 640 * 480) {
+          defaultBitrate = '800k'; // 720p
+        } else {
+          defaultBitrate = '500k'; // Lower resolutions
+        }
+
         controller = new WebRTCController({
           mjpegUrl,
-          width: 1280,
-          height: 720,
-          fps: 10,
-          bitrate: '500k',
+          width: defaultWidth,
+          height: defaultHeight,
+          fps: defaultFps,
+          bitrate: typeof bitrate === 'string' ? bitrate : defaultBitrate,
         });
 
         // Handle ICE candidates
@@ -89,7 +108,7 @@ export function createServer(port: number = 3000): Express {
       console.log(`[Server] Received ICE candidate from client for stream ${streamId}:`, {
         candidate: candidate.candidate?.substring(0, 80),
         sdpMLineIndex: candidate.sdpMLineIndex,
-        sdpMid: candidate.sdpMid
+        sdpMid: candidate.sdpMid,
       });
 
       const controller = controllers.get(streamId);
@@ -138,4 +157,3 @@ export function createServer(port: number = 3000): Express {
 
   return app;
 }
-
