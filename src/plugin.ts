@@ -705,17 +705,6 @@ class DevicePlugin extends BasePlugin {
     const device = await getDevice({
       session_id: sessionId,
     });
-    await unblockDeviceMatchingFilter({ session_id: sessionId });
-    log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
-    const res = await next();
-    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
-    if (device?.platform === 'ios' && device.realDevice) {
-      try {
-        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
-      } catch (err) {
-        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
-      }
-    }
 
     // Collect all ports used by the device and release them
     const portsToRelease: (number | undefined | null)[] = [];
@@ -729,6 +718,7 @@ class DevicePlugin extends BasePlugin {
 
       // Android ports (stored on device if available)
       if (device.systemPort) portsToRelease.push(device.systemPort);
+      if (device.adbPort) portsToRelease.push(device.adbPort);
 
       // Ports from sessionResponse capabilities (Android and iOS)
       // sessionResponse contains the capabilities returned from Appium
@@ -756,6 +746,18 @@ class DevicePlugin extends BasePlugin {
         if (flutterSystemPort) portsToRelease.push(flutterSystemPort);
         if (wdaLocalPort) portsToRelease.push(wdaLocalPort);
         if (mjpegServerPort) portsToRelease.push(mjpegServerPort);
+      }
+    }
+
+    await unblockDeviceMatchingFilter({ session_id: sessionId });
+    log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
+    const res = await next();
+    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
+    if (device?.platform === 'ios' && device.realDevice) {
+      try {
+        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+      } catch (err) {
+        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
       }
     }
 
