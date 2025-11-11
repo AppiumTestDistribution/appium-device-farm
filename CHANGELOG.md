@@ -1,3 +1,9 @@
+## [11.2.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.3...v11.2.4) (2025-11-11)
+
+### Bug Fixes
+
+* improve port releasing logic ([#1933](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1933)) ([f96d526](https://github.com/AppiumTestDistribution/appium-device-farm/commit/f96d526ed7806d3096d88b406f93e34d17c9a266))
+
 ## [11.2.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.2...v11.2.3) (2025-11-03)
 
 ### Bug Fixes
