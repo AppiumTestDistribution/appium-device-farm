@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
 import getPort from 'get-port';
+import AsyncLock from 'async-lock';
 import { IDevice } from './interfaces/IDevice';
 import _ from 'lodash';
 import log from './logger';
@@ -19,6 +20,7 @@ const APPIUM_VENDOR_PREFIX = 'appium:';
 // Port manager to track allocated ports
 class PortManager {
   private allocatedPorts: Set<number> = new Set();
+  private lock: AsyncLock = new AsyncLock();
 
   /**
    * Check if a port is already allocated
@@ -28,13 +30,46 @@ class PortManager {
   }
 
   /**
-   * Allocate a port by adding it to the allocated set
+   * Thread-safe method to get and allocate a free port
+   * This ensures the entire port finding and allocation process is atomic
    */
-  allocatePort(port: number): void {
-    if (port && port > 0) {
-      this.allocatedPorts.add(port);
-      log.debug(`Port ${port} has been allocated`);
-    }
+  async getAndAllocateFreePort(portRange?: string): Promise<number> {
+    return this.lock.acquire('port-allocation', async () => {
+      while (true) {
+        let port: number;
+        let portOptions: number[] | undefined;
+
+        // Determine which ports to try
+        if (portRange) {
+          const range = portRange.split('-').map(Number);
+          if (range.length !== 2 || isNaN(range[0]) || isNaN(range[1]) || range[0] > range[1]) {
+            log.warn(`Invalid port range format: "${portRange}". Falling back to any free port.`);
+            portOptions = undefined;
+          } else {
+            portOptions = Array.from(getPort.makeRange(range[0], range[1]));
+            portOptions = portOptions.filter((p) => !this.allocatedPorts.has(p));
+
+            if (portOptions.length === 0) {
+              log.warn(
+                `All ports in range ${portRange} are allocated. Falling back to any free port.`,
+              );
+              portOptions = undefined;
+            }
+          }
+        }
+
+        // Get a free port from the system
+        port = portOptions ? await getPort({ port: portOptions }) : await getPort();
+
+        // Atomically allocate it (we're in the lock, so this is safe)
+        if (!this.allocatedPorts.has(port)) {
+          this.allocatedPorts.add(port);
+          log.debug(`Port ${port} has been allocated`);
+          return port;
+        }
+        // Port was allocated between getPort() and our check, try again
+      }
+    });
   }
 
   /**
@@ -117,46 +152,10 @@ export function checkIfPathIsAbsolute(configPath: string) {
 }
 
 export async function getFreePort(portRange?: string): Promise<number> {
-  let port: number;
-
-  if (portRange) {
-    const range = portRange.split('-').map(Number);
-    if (range.length !== 2 || isNaN(range[0]) || isNaN(range[1]) || range[0] > range[1]) {
-      log.warn(`Invalid port range format: "${portRange}". Falling back to any free port.`);
-      port = await getPort();
-      // Check if allocated and try again if needed
-      while (portManager.isPortAllocated(port)) {
-        port = await getPort();
-      }
-    } else {
-      // Convert iterable to array and filter out allocated ports upfront
-      const portOptions = Array.from(getPort.makeRange(range[0], range[1]));
-      const availablePorts = portOptions.filter((p: number) => !portManager.isPortAllocated(p));
-
-      if (availablePorts.length === 0) {
-        log.warn(`All ports in range ${portRange} are allocated. Falling back to any free port.`);
-        port = await getPort();
-        // Check if allocated and try again if needed
-        while (portManager.isPortAllocated(port)) {
-          port = await getPort();
-        }
-      } else {
-        // Get a free port from the available (non-allocated) ports
-        // getPort will check system usage among these available ports
-        port = await getPort({ port: availablePorts });
-      }
-    }
-  } else {
-    port = await getPort();
-    // Check if the port is already allocated, keep trying until we find one that's not
-    while (portManager.isPortAllocated(port)) {
-      port = await getPort();
-    }
-  }
-
-  // Allocate the port before returning it
-  portManager.allocatePort(port);
-  return port;
+  // Use thread-safe method to get and allocate a free port
+  // This ensures that even if multiple sessions request ports in parallel,
+  // the same port will never be allocated to multiple sessions
+  return portManager.getAndAllocateFreePort(portRange);
 }
 
 /**

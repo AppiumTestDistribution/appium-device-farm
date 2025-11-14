@@ -254,7 +254,7 @@ class DeviceConnectionsFactory {
     return isPortBusy;
   }
 
-  async releaseConnection(udid: any, port: any) {
+  async releaseConnection(udid: any, port?: any) {
     const isPortBusy = (await checkPortStatus(port, LOCALHOST)) === 'open';
     if (!udid && !port) {
       log.warn(
