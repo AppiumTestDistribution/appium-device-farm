@@ -755,7 +755,7 @@ class DevicePlugin extends BasePlugin {
     await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
     if (device?.platform === 'ios' && device.realDevice) {
       try {
-        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid, device.mjpegServerPort);
+        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid);
       } catch (err) {
         log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
       }
