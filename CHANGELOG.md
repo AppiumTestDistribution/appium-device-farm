@@ -1,3 +1,9 @@
+## [11.2.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.4...v11.2.5) (2025-11-14)
+
+### Bug Fixes
+
+* add locks to fetch free ports ([#1937](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1937)) ([2daac44](https://github.com/AppiumTestDistribution/appium-device-farm/commit/2daac44361cd04409adf5d0b2a7c3208949e5443))
+
 ## [11.2.4](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.3...v11.2.4) (2025-11-11)
 
 ### Bug Fixes
