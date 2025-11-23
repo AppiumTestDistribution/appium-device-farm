@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout repository with submodules
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
       with:
         submodules: recursive
         token: ${{ secrets.PAT_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Checkout repository with out submodule
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Run script
         run: |
           npm install --no-package-lock
@@ -82,7 +82,7 @@ jobs:
         target: [google_apis]
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -114,7 +114,7 @@ jobs:
         target: [ google_apis ]
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
@@ -170,7 +170,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
