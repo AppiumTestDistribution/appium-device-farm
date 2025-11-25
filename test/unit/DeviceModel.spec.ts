@@ -10,7 +10,7 @@ import {
 import { IDevice } from '../../src/interfaces/IDevice';
 import { prisma } from '../../src/prisma';
 import { deviceMock } from './fixtures/devices';
-var sandbox = sinon.createSandbox();
+const sandbox = sinon.createSandbox();
 
 describe('Model Test', async () => {
   before('Add device collection', async () => {
@@ -172,7 +172,7 @@ describe('Model Test', async () => {
 
   it('Should handle concurrent update to device list', async () => {
     // create bunch of devices using loop
-    let newDeviceList = [] as unknown as IDevice[];
+    const newDeviceList = [] as unknown as IDevice[];
     for (let i = 0; i < 10; i++) {
       newDeviceList.push({
         id: `dev-loop-${i}`,

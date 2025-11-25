@@ -63,7 +63,7 @@ export class NodeService {
     }
   }
 
-  static async getAllNodes(secure: boolean = true) {
+  static async getAllNodes(secure = true) {
     return prisma.node.findMany({
       select: {
         id: true,

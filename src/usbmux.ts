@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import * as net from 'net';
-import * as util from 'util';
 import { EventEmitter } from 'events';
 import * as Q from 'q';
 import * as plist from 'plist';
@@ -218,8 +218,8 @@ class UsbmuxdError extends Error {
       this.number = number;
       this.message += ', Err #' + number;
     }
-    if (number === 2) this.message += ": Device isn't connected";
-    if (number === 3) this.message += ": Port isn't available or open";
+    if (number === 2) this.message += ': Device is not connected';
+    if (number === 3) this.message += ': Port is not available or open';
     if (number === 5) this.message += ': Malformed request';
   }
 }
