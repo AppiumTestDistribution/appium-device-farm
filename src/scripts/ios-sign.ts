@@ -20,7 +20,7 @@ const execAsync = util.promisify(exec);
 const WDA_BUILD_PATH = '/appium_wda_ios/Build/Products/Debug-iphoneos';
 let bundleIdName: { uuid: string; name: string }[] | null = null;
 let freeBundleID: { uuid: string; name: string } | null = null;
-let isFreeAccount: boolean = false;
+let isFreeAccount = false;
 async function getXcodeMajorVersion(): Promise<number> {
   const { stdout } = await execAsync('xcodebuild -version');
   const match = stdout.match(/Xcode (\d+)\./);
@@ -235,7 +235,7 @@ async function zipPayloadDirectory(
             // Replace CFBundleIdentifier
             infoPlistContent = infoPlistContent.replace(
               /<key>CFBundleIdentifier<\/key>\n\s*<string>(.*?)<\/string>/,
-              `<key>CFBundleIdentifier<\/key>\n<string>${bundleId}<\/string>`,
+              `<key>CFBundleIdentifier</key>\n<string>${bundleId}</string>`,
             );
 
             // Write Info.plist

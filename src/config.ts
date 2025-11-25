@@ -21,7 +21,7 @@ function getDeviceFarmHome() {
 
 export function getServerMetadata() {
   const metaFile = path.join(getDeviceFarmHome(), 'metadata.json');
-  let defaultMetadata = {
+  const defaultMetadata = {
     id: uuid(),
   };
   if (fs.existsSync(metaFile)) {

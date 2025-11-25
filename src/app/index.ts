@@ -13,7 +13,7 @@ import { registerAuthenticationRoutes } from '../auth/routers';
 import { userService } from '../auth/services/user.service';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
 
-let dashboardPluginUrl: any = null;
+const dashboardPluginUrl: any = null;
 
 const ASYNC_LOCK = new AsyncLock();
 

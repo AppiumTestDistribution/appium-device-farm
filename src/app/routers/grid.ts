@@ -34,7 +34,7 @@ async function getSavedDevices(request: Request, response: Response) {
 async function getDevices(request: Request, response: Response) {
   const { user } = request as AuthenticatedRequest;
   const filterOptions = user?.role === 'admin' ? {} : { userId: user?.userId };
-  let devices = await getAllDevices(filterOptions as any);
+  const devices = await getAllDevices(filterOptions as any);
   const { sessionId } = request.query;
   if (sessionId) {
     return response.json(devices.find((value) => value.session_id === sessionId));

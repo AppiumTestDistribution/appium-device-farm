@@ -53,7 +53,7 @@ describe('Plugin Test', () => {
 
   it('Vertical swipe test', async () => {
     console.log(await driver.capabilities.deviceUDID);
-    let textButton = await driver.$('~Text Button');
+    const textButton = await driver.$('~Text Button');
     await textButton.waitForDisplayed({ timeout: 30000 });
     await textButton.click();
   });

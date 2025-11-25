@@ -118,8 +118,8 @@ export async function iOSCapabilities(
       delete caps.firstMatch[0]['appium:wdaLocalPort'];
     }
   }
-  if(!freeDevice.realDevice) {
-    caps.firstMatch[0]['appium:derivedDataPath'] =`${freeDevice.derivedDataPath}`;
+  if (!freeDevice.realDevice) {
+    caps.firstMatch[0]['appium:derivedDataPath'] = `${freeDevice.derivedDataPath}`;
   }
 
   const deleteMatch = [

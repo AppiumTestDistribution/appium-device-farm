@@ -587,7 +587,9 @@ class DevicePlugin extends BasePlugin {
       let jwt = '';
       if (this.pluginArgs.enableAuthentication) {
         const user = await getUserFromCapabilities(mergedCapabilites);
-        jwt = await generateTokenForNode(device.nodeId!, user?.id!);
+        if (user) {
+          jwt = await generateTokenForNode(device.nodeId!, user.id);
+        }
       }
       if (capabilitiesToCreateSession.capabilities.alwaysMatch) {
         capabilitiesToCreateSession.capabilities.alwaysMatch['df:udid'] = device.udid;
