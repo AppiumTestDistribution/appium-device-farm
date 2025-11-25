@@ -1,3 +1,9 @@
+## [11.2.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.5...v11.2.6) (2025-11-25)
+
+### Bug Fixes
+
+* Fix lint ([#1965](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1965)) ([47cde2e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/47cde2ea928b46aabe544713cbdcff5184b1ab39))
+
 ## [11.2.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.4...v11.2.5) (2025-11-14)
 
 ### Bug Fixes
