@@ -1,12 +1,11 @@
-import getPort from 'get-port';
-import { ISessionCapability } from './interfaces/ISessionCapability';
 import _ from 'lodash';
-import { IDevice } from './interfaces/IDevice';
-import { prisma } from './prisma';
-import { DevicePlugin } from './plugin';
-import log from './logger';
 import { updatedAllocatedDevice } from './data-service/device-service';
 import { getFreePort } from './helpers';
+import { IDevice } from './interfaces/IDevice';
+import { ISessionCapability } from './interfaces/ISessionCapability';
+import log from './logger';
+import { DevicePlugin } from './plugin';
+import { prisma } from './prisma';
 
 export enum DEVICE_FARM_CAPABILITIES {
   BUILD_NAME = 'build',
@@ -118,6 +117,9 @@ export async function iOSCapabilities(
         freeDevice.webDriverAgentUrl = `${freeDevice.webDriverAgentHost}:${freeDevice.wdaLocalPort}`;
       delete caps.firstMatch[0]['appium:wdaLocalPort'];
     }
+  }
+  if(!freeDevice.realDevice) {
+    caps.firstMatch[0]['appium:derivedDataPath'] =`${freeDevice.derivedDataPath}`;
   }
 
   const deleteMatch = [
