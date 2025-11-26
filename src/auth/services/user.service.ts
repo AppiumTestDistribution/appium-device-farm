@@ -33,8 +33,8 @@ export class UserService {
         throw new Error('User already exists');
       }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      // Hash password if provided (required for local users)
+      const hashedPassword = password ? await bcrypt.hash(password, SALT_ROUNDS) : null;
       const accessKey = generateAccessKey(username);
 
       // Create user
@@ -77,6 +77,16 @@ export class UserService {
       });
 
       if (!user) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Check if user is SSO user (Azure AD)
+      if (user.authProvider === 'azure_ad') {
+        throw new Error('Please use Azure AD Single Sign-On to login');
+      }
+
+      // For local users, password is required
+      if (!user.password) {
         throw new Error('Invalid credentials');
       }
 
@@ -132,6 +142,11 @@ export class UserService {
 
       if (!user) {
         throw new Error('User not found');
+      }
+
+      // Check if user has a password (SSO users don't have passwords)
+      if (!user.password) {
+        throw new Error('Cannot change password for SSO users');
       }
 
       // Verify current password
@@ -240,6 +255,74 @@ export class UserService {
       return user;
     } catch (error) {
       log.error(`Error getting user: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user by email
+   */
+  async getUserByEmail(email: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstname: true,
+          lastname: true,
+          role: true,
+          authProvider: true,
+          azureAdId: true,
+          accessKey: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      log.error(`Error getting user by email: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user by Azure AD ID
+   */
+  async getUserByAzureAdId(azureAdId: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { azureAdId },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstname: true,
+          lastname: true,
+          role: true,
+          authProvider: true,
+          azureAdId: true,
+          accessKey: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      log.error(`Error getting user by Azure AD ID: ${error}`);
       throw error;
     }
   }
