@@ -64,7 +64,9 @@ export function configurePassport() {
 
     // Deserialize user from session
     passport.deserializeUser((user: any, done) => {
-        done(null, user);
+        // Attach userId alias for compatibility with AuthenticatedRequest
+        const authUser = { ...user, userId: user.id };
+        done(null, authUser);
     });
 
     log.info('Passport configured with Azure AD OIDC strategy');

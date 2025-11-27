@@ -103,6 +103,7 @@ export class UserService {
 
       // Generate JWT token
       const payload: JwtPayload = {
+        id: user.id,
         userId: user.id,
         username: user.username,
         role: user.role,
@@ -212,6 +213,9 @@ export class UserService {
           role: true,
           accessKey: true,
           isActive: true,
+          authProvider: true,
+          email: true,
+          azureAdId: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -243,6 +247,9 @@ export class UserService {
           role: true,
           accessKey: true,
           isActive: true,
+          authProvider: true,
+          email: true,
+          azureAdId: true,
           createdAt: true,
           updatedAt: true,
         },

@@ -130,6 +130,7 @@ export class AzureAdService {
     async generateTokenForSsoUser(user: User) {
         try {
             const payload: JwtPayload = {
+                id: user.id,
                 userId: user.id,
                 username: user.username,
                 role: user.role,
