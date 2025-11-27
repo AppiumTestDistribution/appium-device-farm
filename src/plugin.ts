@@ -217,7 +217,7 @@ class DevicePlugin extends BasePlugin {
           secure: process.env.NODE_ENV === 'production',
           maxAge: 24 * 60 * 60 * 1000, // 24 hours
         },
-      })
+      }),
     );
 
     // Passport configuration
@@ -486,10 +486,10 @@ class DevicePlugin extends BasePlugin {
         mjpegServerPort: sessionResponse.mjpegServerPort,
         activeUser: user
           ? {
-            id: user.id,
-            firstname: user.firstname,
-            lastname: user.lastname,
-          }
+              id: user.id,
+              firstname: user.firstname,
+              lastname: user.lastname,
+            }
           : undefined,
       });
       if (isRemoteOrCloudSession) {
