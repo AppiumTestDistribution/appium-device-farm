@@ -198,6 +198,17 @@ npm run build:docs
 
 Navigate to site directory and open index.html to view the site locally.
 
+## Authentication
+
+Appium Device Farm supports multiple authentication methods:
+
+1. **Local Authentication**: Username and password based authentication.
+2. **Azure AD SSO**: Single Sign-On using Microsoft Azure Active Directory.
+
+### Azure AD SSO Setup
+
+To configure Azure AD SSO, please refer to the [Azure AD SSO Setup Guide](docs/AZURE_AD_SSO_SETUP.md).
+
 ## Licensing
 
 The Appium Device Farm Plugin uses a hybrid licensing model to balance open-source principles with the protection of certain proprietary components:

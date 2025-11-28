@@ -83,6 +83,13 @@ export interface IPluginArgs {
   accessKey?: string;
   token?: string;
 
+  // Azure AD SSO
+  azureAdEnabled?: boolean;
+  azureAdClientId?: string;
+  azureAdClientSecret?: string;
+  azureAdTenantId?: string;
+  azureAdRedirectUri?: string;
+
   //node
   nodeName?: string;
   portRange?: string;

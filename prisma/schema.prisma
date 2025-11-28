@@ -98,15 +98,18 @@ model User {
   firstname    String
   lastname     String
   username     String       @unique @map("username")
-  password     String       @map("password")
+  email        String?      @unique @map("email")
+  password     String?      @map("password")
   role         String       @default("user") @map("role") // "admin" or "user"
   isActive     Boolean      @default(true) @map("is_active")
+  authProvider String       @default("local") @map("auth_provider") // "local" or "azure_ad"
+  azureAdId    String?      @unique @map("azure_ad_id")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
   accessKey    String       @unique @map("access_key")
   teamMembers  TeamMember[] @relation("UserToTeamMember")
   apiTokens    ApiToken[]   @relation("UserToApiToken")
-  nodes        Node[]   @relation("UserToNode")
+  nodes        Node[]       @relation("UserToNode")
 }
 
 model Team {

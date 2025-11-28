@@ -12,14 +12,26 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // Interface for the JWT payload
 export interface JwtPayload {
-  userId: string;
+  id: string; // Unify with User.id
+  userId: string; // Keep for backward compatibility
   username: string;
   role: string;
 }
 
-// Extend Express Request interface to include user information
-export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
+import { User as PrismaUser } from '@prisma/client';
+
+// Augment Express Request to include our user types
+declare global {
+  namespace Express {
+    interface User extends PrismaUser {
+      userId: string; // Add userId for compatibility
+    }
+  }
+}
+
+// Interface for the authenticated request
+export interface AuthenticatedRequest extends Omit<Request, 'user'> {
+  user?: JwtPayload | Express.User;
 }
 
 export const getUserFromToken = async (token: string) => {
@@ -28,7 +40,7 @@ export const getUserFromToken = async (token: string) => {
   if (!exp || exp < Math.floor(Date.now() / 1000)) {
     throw new Error('Invalid or Expired JWT token');
   }
-  const user = await userService.getUserById(decoded.userId);
+  const user = await userService.getUserById(decoded.userId || decoded.id);
   return user;
 };
 
@@ -43,6 +55,7 @@ export const authMiddleware = (pluginArgs: IPluginArgs) => {
         return res.status(401).json({ message: 'No default user found' });
       }
       (req as AuthenticatedRequest).user = {
+        id: user.id,
         userId: user.id,
         username: user.username,
         role: user.role,
@@ -79,6 +92,7 @@ export const authMiddleware = (pluginArgs: IPluginArgs) => {
         return res.status(401).json({ message: 'User is not active' });
       }
       (req as AuthenticatedRequest).user = {
+        id: user.id,
         userId: user.id,
         username: user.username,
         role: user.role,
@@ -103,7 +117,7 @@ export const authorizeRoles = (roles: string[]) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    if (!roles.includes(authReq.user.role)) {
+    if (!authReq.user.role || !roles.includes(authReq.user.role)) {
       return res.status(403).json({ message: 'Insufficient permissions' });
     }
 
