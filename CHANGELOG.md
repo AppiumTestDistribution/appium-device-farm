@@ -1,3 +1,9 @@
+## [11.2.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.6...v11.2.7) (2025-11-28)
+
+### Bug Fixes
+
+* Corrected the logic for sending devices to the hub + correct text when sending iOS devices ([#1970](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1970)) ([bc8a5f8](https://github.com/AppiumTestDistribution/appium-device-farm/commit/bc8a5f8ab3c9ba6b97508e02dcef5c911695e407))
+
 ## [11.2.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.5...v11.2.6) (2025-11-25)
 
 ### Bug Fixes
