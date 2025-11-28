@@ -1,7 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 import waitUntil from 'async-wait-until';
 import fs from 'fs';
-import getPort from 'get-port';
 import _ from 'lodash';
 import { LocalStorage } from 'node-persist';
 import { Container } from 'typedi';
@@ -92,7 +91,11 @@ export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
 /**
  * For given capability, wait untill a free device is available from the database
  * and update the capability json with required device informations
+ * @param requestId
  * @param capability
+ * @param deviceTimeOutMs
+ * @param deviceQueryIntervalMs
+ * @param pluginArgs
  * @returns
  */
 export async function allocateDeviceForSession(
@@ -429,7 +432,7 @@ export async function refreshSimulatorState(pluginArgs: IPluginArgs, hostPort: n
   timer = setInterval(async () => {
     const simulators = await new IOSDeviceManager(pluginArgs, hostPort, uuidv4()).getSimulators();
     await setSimulatorState(simulators);
-  }, 10000);
+  }, pluginArgs.sendNodeDevicesToHubIntervalMs);
 }
 
 export async function setupCronCheckStaleDevices(intervalMs: number, currentHost: string) {
