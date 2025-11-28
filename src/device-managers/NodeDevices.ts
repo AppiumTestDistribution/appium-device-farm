@@ -3,7 +3,6 @@ import log from '../logger';
 import { DeviceUpdate } from '../types/DeviceUpdate';
 import { IDeviceFilterOptions } from '../interfaces/IDeviceFilterOptions';
 import { IDevice } from '../interfaces/IDevice';
-import { ATDRepository } from '../data-service/db';
 
 export default class NodeDevices {
   private host: string;
@@ -34,7 +33,10 @@ export default class NodeDevices {
   async postDevicesToHub(devices: IDevice[] | DeviceUpdate[], arg: string) {
     // DeviceWithPath -> new device
     // DeviceUpdate -> removed device
-    log.info(`Updating remote android devices ${this.host}/device-farm/api/register`);
+    const [firstDevice] = devices;
+    log.info(
+      `Updating remote ${firstDevice.platform} devices ${this.host}/device-farm/api/register`,
+    );
     try {
       const status = (
         await axios.post(`${this.host}/device-farm/api/register`, devices, {
