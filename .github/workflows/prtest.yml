@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository with submodules
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Checkout repository with out submodule
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Run script
         run: |
           npm install --no-package-lock
@@ -77,7 +77,7 @@ jobs:
         target: [google_apis]
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Build
         run: |
          npm install --no-package-lock
@@ -135,7 +135,7 @@ jobs:
 
     steps:
       - name: Checkout repository with submodules
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Build
         run: |
           npm install --no-package-lock
