@@ -272,7 +272,7 @@ class DevicePlugin extends BasePlugin {
         DevicePlugin.NODE_ID,
       );
       await NodeHealthMonitor.getInstance().start(NODE_HEALTH_MONITOR_INTERVAL);
-      await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
+      await updateDeviceList(pluginArgs.bindHostOrIp);
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
