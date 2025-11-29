@@ -366,14 +366,6 @@ export default class IOSDeviceManager implements IDeviceManager {
   public async getSimulators(): Promise<Array<IDevice>> {
     const simulators = await this.fetchLocalSimulators();
     simulators.sort((a, b) => (a.state > b.state ? 1 : -1));
-
-    // should not be here, but we need to update the hub with simulators
-    if (this.pluginArgs.hub !== undefined) {
-      log.info('Updating Hub with Simulators');
-      const nodeDevices = new NodeDevices(this.pluginArgs.hub);
-      await nodeDevices.postDevicesToHub(simulators, 'add');
-    }
-
     return simulators;
   }
 
