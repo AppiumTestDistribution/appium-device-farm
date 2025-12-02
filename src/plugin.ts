@@ -10,7 +10,6 @@ import { createRouter } from './app';
 import commands from './commands/index';
 import {
   getDevice,
-  setSimulatorState,
   unblockDevice,
   unblockDeviceMatchingFilter,
   updatedAllocatedDevice,
@@ -23,10 +22,7 @@ import { DeviceFarmManager } from './device-managers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import {
   allocateDeviceForSession,
-  deviceType,
   initializeStorage,
-  isIOS,
-  refreshSimulatorState,
   removeStaleDevices,
   setupCronCheckStaleDevices,
   setupCronCleanPendingSessions,
@@ -276,6 +272,7 @@ class DevicePlugin extends BasePlugin {
         DevicePlugin.NODE_ID,
       );
       await NodeHealthMonitor.getInstance().start(NODE_HEALTH_MONITOR_INTERVAL);
+      await updateDeviceList(pluginArgs.bindHostOrIp);
       log.info(`📣📣📣 I'm a hub and I'm listening on ${pluginArgs.bindHostOrIp}:${cliArgs.port}`);
     }
 
@@ -306,12 +303,6 @@ class DevicePlugin extends BasePlugin {
       await removeStaleDevices(pluginArgs.bindHostOrIp);
     } else {
       log.info('📣📣📣 Cloud runner sessions dont require constant device checks');
-    }
-
-    const devicesUpdates = await updateDeviceList(pluginArgs.bindHostOrIp, hubArgument);
-    if (isIOS(pluginArgs) && deviceType(pluginArgs, 'simulated')) {
-      await setSimulatorState(devicesUpdates);
-      await refreshSimulatorState(pluginArgs, cliArgs.port);
     }
     log.info(
       `📣📣📣 Device Farm Plugin will be served at 🔗 http://${pluginArgs.bindHostOrIp}:${cliArgs.port}/device-farm with id ${DevicePlugin.NODE_ID}`,
