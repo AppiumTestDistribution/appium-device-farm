@@ -145,7 +145,7 @@ async function main() {
   if (!hasSelectiveOptions) {
     console.log('No selective options provided, performing full reset...');
     if (fs.existsSync(config.cacheDir)) {
-      fs.rmdirSync(config.cacheDir, { recursive: true });
+      fs.rmSync(config.cacheDir, { recursive: true, force: true });
     }
     fs.mkdirSync(config.cacheDir, { recursive: true });
     executeCmd('npm run run-db-migration');
