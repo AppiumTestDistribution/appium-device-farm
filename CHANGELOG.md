@@ -1,3 +1,9 @@
+## [11.2.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.7...v11.2.8) (2025-12-02)
+
+### Bug Fixes
+
+* remove duplicate call to send device updates to the hub ([#1973](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1973)) ([5268627](https://github.com/AppiumTestDistribution/appium-device-farm/commit/526862790ae01442292235d0cd773235c3fbc44e))
+
 ## [11.2.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.6...v11.2.7) (2025-11-28)
 
 ### Bug Fixes
