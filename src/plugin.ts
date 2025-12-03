@@ -79,6 +79,8 @@ import {
 } from './utils/auth';
 import { enhancedADBManager } from './utils/enhanced-adb-manager';
 import { NodeHealthMonitor } from './utils/node-heath-monitor';
+import session from 'express-session';
+import { configurePassport } from './auth/middleware/passport.middleware';
 
 const commandsQueueGuard = new AsyncLock();
 const NODE_HEALTH_MONITOR_INTERVAL = 1000 * 30; // 30 seconds
@@ -200,6 +202,27 @@ class DevicePlugin extends BasePlugin {
       log.info('proxy is not required for axios');
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
+
+    // Session configuration
+    expressApp.use(
+      session({
+        secret: process.env.SESSION_SECRET || 'device-farm-secret',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        },
+      }),
+    );
+
+    // Passport configuration
+    const passport = configurePassport();
+    if (passport) {
+      expressApp.use(passport.initialize());
+      expressApp.use(passport.session());
+    }
+
     expressApp.use('/device-farm', createRouter(pluginArgs));
 
     registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
