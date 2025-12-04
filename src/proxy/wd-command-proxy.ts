@@ -136,9 +136,9 @@ export function registerProxyMiddlware(
   middlewares: ExpressMiddleware[],
 ) {
   log.info('Registering proxy middleware');
-  const index = expressApp.router.stack.findIndex((s: any) => s.route);
+  // In Express 5.x, app.router is deprecated. Middleware order is determined by registration order.
+  // Since this is called early in the plugin lifecycle, it will run before route handlers.
   expressApp.use('/', handler(cliArgs, middlewares));
-  expressApp.router.stack.splice(index, 0, expressApp.router.stack.pop());
 }
 
 export function wrapRequestWithMiddleware(options: {
