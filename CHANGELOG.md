@@ -1,3 +1,9 @@
+## [11.2.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.9...v11.2.10) (2025-12-04)
+
+### Bug Fixes
+
+* branding ([#1980](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1980)) ([ad45276](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ad45276682f0a5b489251c4345123f2dd62499b4))
+
 ## [11.2.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.8...v11.2.9) (2025-12-03)
 
 ### Bug Fixes
