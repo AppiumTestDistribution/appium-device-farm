@@ -1,3 +1,9 @@
+## [11.2.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.8...v11.2.9) (2025-12-03)
+
+### Bug Fixes
+
+* replace rmdirSync with rmSync for cacheDir ([#1977](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1977)) ([4fde1c1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4fde1c1a2eae604dccfa96c95fa08208745c8db3))
+
 ## [11.2.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.7...v11.2.8) (2025-12-02)
 
 ### Bug Fixes
