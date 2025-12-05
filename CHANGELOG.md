@@ -1,3 +1,9 @@
+## [11.2.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.10...v11.2.11) (2025-12-05)
+
+### Bug Fixes
+
+* express version for sesssion creation ([#1983](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1983)) ([fadab5e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/fadab5e46a49fd071efc3346b094c783443c7ae7))
+
 ## [11.2.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.9...v11.2.10) (2025-12-04)
 
 ### Bug Fixes
