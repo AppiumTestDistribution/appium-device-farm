@@ -200,12 +200,10 @@ class DevicePlugin extends BasePlugin {
       log.info('proxy is not required for axios');
     }
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
+    expressApp.use('/device-farm', createRouter(pluginArgs));
 
-    // Register proxy middleware before routes to ensure it runs early in the middleware chain
-    // This is necessary for intercepting session requests before they reach route handlers
     registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
 
-    expressApp.use('/device-farm', createRouter(pluginArgs));
     externalModule.updateServer(expressApp, httpServer);
     if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
       log.info('Emulators will be booted!!');
