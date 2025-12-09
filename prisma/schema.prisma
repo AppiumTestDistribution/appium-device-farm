@@ -156,7 +156,7 @@ model Device {
   isActive        Boolean  @default(true) @map("is_active")
   isFlagged        Boolean  @default(false) @map("is_flagged")
   flaggedReason   String?   @map("flagged_reason")
-  usage           BIGINT    @default(0) @map("usage")
+  usage           BigInt    @default(0) @map("usage")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   teamDevices     TeamDevice[] @relation("DeviceToTeamDevice")
