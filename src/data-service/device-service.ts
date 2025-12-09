@@ -215,7 +215,7 @@ export async function updateDeviceDetails() {
       .update(function (d: IDevice) {
         d.name = device.name ?? d.name;
         d.tags = device.tags?.split(',').filter(Boolean) || [];
-        d.totalUtilizationTimeMilliSec = device.usage;
+        d.totalUtilizationTimeMilliSec = Number(device.usage);
       });
   }
 }
