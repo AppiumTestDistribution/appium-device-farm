@@ -1,6 +1,6 @@
 {
   "name": "appium-device-farm",
-  "version": "11.2.5",
+  "version": "11.2.13",
   "description": "An appium 2.0 plugin that manages and create driver session on available devices.",
   "main": "./lib/src/main.js",
   "scripts": {
@@ -94,7 +94,7 @@
     "cors": "^2.8.5",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
-    "express": "^5.0.0",
+    "express": "5.2.0",
     "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
     "generate-api-key": "^1.0.2",

@@ -1,5 +1,4 @@
 import { Node } from '@prisma/client';
-import { IPluginArgs } from '../interfaces/IPluginArgs';
 import os from 'os';
 import { prisma } from '../prisma';
 import { JWT_SECRET } from '../auth/middleware/auth.middleware';
@@ -63,7 +62,7 @@ export class NodeService {
     }
   }
 
-  static async getAllNodes(secure: boolean = true) {
+  static async getAllNodes(secure = true) {
     return prisma.node.findMany({
       select: {
         id: true,

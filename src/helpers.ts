@@ -1,19 +1,19 @@
 /* eslint-disable no-prototype-builtins */
+import AsyncLock from 'async-lock';
+import asyncWait from 'async-wait-until';
+import axios from 'axios';
+import getPort from 'get-port';
+import _ from 'lodash';
+import normalizeUrl from 'normalize-url';
+import ora from 'ora';
 import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
-import getPort from 'get-port';
-import AsyncLock from 'async-lock';
-import { IDevice } from './interfaces/IDevice';
-import _ from 'lodash';
-import log from './logger';
 import Cloud from './enums/Cloud';
-import normalizeUrl from 'normalize-url';
-import ora from 'ora';
-import asyncWait from 'async-wait-until';
-import axios from 'axios';
 import { FakeModuleLoader } from './fake-module-loader';
+import { IDevice } from './interfaces/IDevice';
 import { IExternalModuleLoader } from './interfaces/IExternalModule';
+import log from './logger';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
 
@@ -35,8 +35,8 @@ class PortManager {
    */
   async getAndAllocateFreePort(portRange?: string): Promise<number> {
     return this.lock.acquire('port-allocation', async () => {
+      // eslint-disable-next-line no-constant-condition
       while (true) {
-        let port: number;
         let portOptions: number[] | undefined;
 
         // Determine which ports to try
@@ -59,7 +59,7 @@ class PortManager {
         }
 
         // Get a free port from the system
-        port = portOptions ? await getPort({ port: portOptions }) : await getPort();
+        const port = portOptions ? await getPort({ port: portOptions }) : await getPort();
 
         // Atomically allocate it (we're in the lock, so this is safe)
         if (!this.allocatedPorts.has(port)) {

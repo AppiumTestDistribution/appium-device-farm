@@ -1,3 +1,54 @@
+## [11.2.13](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.12...v11.2.13) (2025-12-11)
+
+### Bug Fixes
+
+* integer overflow issue ([#1996](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1996)) ([956cb29](https://github.com/AppiumTestDistribution/appium-device-farm/commit/956cb2921eede0cf0237857440085c7b56daef9f))
+
+## [11.2.12](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.11...v11.2.12) (2025-12-11)
+
+### Bug Fixes
+
+* [#1939](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1939) ([#1992](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1992)) ([ae7b11d](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ae7b11d382532e5ddb6c4eb13c17143cc2df6827))
+* Remove NPM_TOKEN from publish workflow ([#1994](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1994)) ([37e33bc](https://github.com/AppiumTestDistribution/appium-device-farm/commit/37e33bca6b264fbfb91cdae30beb79b2149ca5f4))
+* Update publish.yml for permissions and release tokens ([#1995](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1995)) ([5774246](https://github.com/AppiumTestDistribution/appium-device-farm/commit/57742466f852bbe49dd6025164f3ad8f478d16bf))
+* Update publish.yml to include permissions ([#1993](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1993)) ([fb04779](https://github.com/AppiumTestDistribution/appium-device-farm/commit/fb047791d76b026becc01efe2334d7f02506301d))
+
+## [11.2.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.10...v11.2.11) (2025-12-05)
+
+### Bug Fixes
+
+* express version for sesssion creation ([#1983](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1983)) ([fadab5e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/fadab5e46a49fd071efc3346b094c783443c7ae7))
+
+## [11.2.10](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.9...v11.2.10) (2025-12-04)
+
+### Bug Fixes
+
+* branding ([#1980](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1980)) ([ad45276](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ad45276682f0a5b489251c4345123f2dd62499b4))
+
+## [11.2.9](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.8...v11.2.9) (2025-12-03)
+
+### Bug Fixes
+
+* replace rmdirSync with rmSync for cacheDir ([#1977](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1977)) ([4fde1c1](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4fde1c1a2eae604dccfa96c95fa08208745c8db3))
+
+## [11.2.8](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.7...v11.2.8) (2025-12-02)
+
+### Bug Fixes
+
+* remove duplicate call to send device updates to the hub ([#1973](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1973)) ([5268627](https://github.com/AppiumTestDistribution/appium-device-farm/commit/526862790ae01442292235d0cd773235c3fbc44e))
+
+## [11.2.7](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.6...v11.2.7) (2025-11-28)
+
+### Bug Fixes
+
+* Corrected the logic for sending devices to the hub + correct text when sending iOS devices ([#1970](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1970)) ([bc8a5f8](https://github.com/AppiumTestDistribution/appium-device-farm/commit/bc8a5f8ab3c9ba6b97508e02dcef5c911695e407))
+
+## [11.2.6](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.5...v11.2.6) (2025-11-25)
+
+### Bug Fixes
+
+* Fix lint ([#1965](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1965)) ([47cde2e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/47cde2ea928b46aabe544713cbdcff5184b1ab39))
+
 ## [11.2.5](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.4...v11.2.5) (2025-11-14)
 
 ### Bug Fixes

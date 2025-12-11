@@ -215,7 +215,7 @@ export async function updateDeviceDetails() {
       .update(function (d: IDevice) {
         d.name = device.name ?? d.name;
         d.tags = device.tags?.split(',').filter(Boolean) || [];
-        d.totalUtilizationTimeMilliSec = device.usage;
+        d.totalUtilizationTimeMilliSec = Number(device.usage);
       });
   }
 }
@@ -252,7 +252,10 @@ export async function getTeamDevicesForUser(userId: string): Promise<TeamDevice[
     },
   });
 
-  return teamDevices;
+  return teamDevices.map((td) => ({
+    ...td,
+    device: td.device ? { ...td.device, usage: Number(td.device.usage) } : null,
+  }));
 }
 
 export async function filterDeviceForUser(
