@@ -294,7 +294,10 @@ export class TeamService {
         },
       });
 
-      return createdTeamDevices;
+      return createdTeamDevices.map((td) => ({
+        ...td,
+        device: td.device ? { ...td.device, usage: Number(td.device.usage) } : null,
+      }));
     } catch (error) {
       log.error(`Error adding devices to team: ${error}`);
       throw error;
