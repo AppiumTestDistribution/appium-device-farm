@@ -5,10 +5,6 @@ on:
    push:
       branches: [ main ]
       
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read
-
 jobs:
    build:
       runs-on: macos-latest
@@ -28,4 +24,5 @@ jobs:
          - run: npx semantic-release
            env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              NPM_TOKEN: ${{ secrets.npm_token }}
            name: Release
