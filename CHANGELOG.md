@@ -1,3 +1,9 @@
+## [11.2.14](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.13...v11.2.14) (2025-12-11)
+
+### Bug Fixes
+
+* update actions/checkout action to v6 ([#1963](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1963)) ([bc7816e](https://github.com/AppiumTestDistribution/appium-device-farm/commit/bc7816e4570e291b2b05b3f4723ab61428521ec7))
+
 ## [11.2.13](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.12...v11.2.13) (2025-12-11)
 
 ### Bug Fixes
