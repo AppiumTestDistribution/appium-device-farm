@@ -1,3 +1,12 @@
+## [11.2.12](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.11...v11.2.12) (2025-12-11)
+
+### Bug Fixes
+
+* [#1939](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1939) ([#1992](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1992)) ([ae7b11d](https://github.com/AppiumTestDistribution/appium-device-farm/commit/ae7b11d382532e5ddb6c4eb13c17143cc2df6827))
+* Remove NPM_TOKEN from publish workflow ([#1994](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1994)) ([37e33bc](https://github.com/AppiumTestDistribution/appium-device-farm/commit/37e33bca6b264fbfb91cdae30beb79b2149ca5f4))
+* Update publish.yml for permissions and release tokens ([#1995](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1995)) ([5774246](https://github.com/AppiumTestDistribution/appium-device-farm/commit/57742466f852bbe49dd6025164f3ad8f478d16bf))
+* Update publish.yml to include permissions ([#1993](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1993)) ([fb04779](https://github.com/AppiumTestDistribution/appium-device-farm/commit/fb047791d76b026becc01efe2334d7f02506301d))
+
 ## [11.2.11](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.10...v11.2.11) (2025-12-05)
 
 ### Bug Fixes
