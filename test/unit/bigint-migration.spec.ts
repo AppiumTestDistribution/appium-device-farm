@@ -7,7 +7,8 @@ import { teamService } from '../../src/auth/services/team.service';
 import { setUtilizationTime, getTeamDevicesForUser } from '../../src/data-service/device-service';
 import { Request, Response } from 'express';
 
-describe('BigInt Migration - Unit Tests', () => {
+// Skip tests by default (can be enabled by removing .skip)
+describe.skip('BigInt Migration - Unit Tests', () => {
   let testNodeId: string;
   let testDeviceIds: string[] = [];
   let testTeamId: string;

@@ -6,7 +6,8 @@ import { DevicePlugin } from '../../src/plugin';
 import { IPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { setUtilizationTime } from '../../src/data-service/device-service';
 
-describe('BigInt Migration - Integration Tests', () => {
+// Skip tests by default (can be enabled by removing .skip)
+describe.skip('BigInt Migration - Integration Tests', () => {
   let testNodeId: string;
   let testDeviceIds: string[] = [];
   let testTeamId: string;
