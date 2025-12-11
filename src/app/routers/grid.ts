@@ -26,9 +26,16 @@ import {
 
 const SERVER_UP_TIME = new Date().toISOString();
 
+function serializeDevice(device: any) {
+  return {
+    ...device,
+    usage: Number(device.usage),
+  };
+}
+
 async function getSavedDevices(request: Request, response: Response) {
   const devices = await prisma.device.findMany();
-  return response.json(devices);
+  return response.json(devices.map(serializeDevice));
 }
 
 async function getDevices(request: Request, response: Response) {

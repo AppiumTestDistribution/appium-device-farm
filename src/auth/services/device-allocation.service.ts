@@ -5,10 +5,17 @@ import { ATDRepository } from '../../data-service/db';
 /**
  * Device allocation service for handling device allocation operations
  */
+function serializeDevice(device: any) {
+  return {
+    ...device,
+    usage: Number(device.usage),
+  };
+}
+
 export class DeviceAllocationService {
   async getAllDevices() {
     const devices = await prisma.device.findMany();
-    return devices;
+    return devices.map(serializeDevice);
   }
 
   /**
