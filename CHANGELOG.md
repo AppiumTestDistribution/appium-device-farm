@@ -1,3 +1,9 @@
+## [11.2.13](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.12...v11.2.13) (2025-12-11)
+
+### Bug Fixes
+
+* integer overflow issue ([#1996](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1996)) ([956cb29](https://github.com/AppiumTestDistribution/appium-device-farm/commit/956cb2921eede0cf0237857440085c7b56daef9f))
+
 ## [11.2.12](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.11...v11.2.12) (2025-12-11)
 
 ### Bug Fixes
