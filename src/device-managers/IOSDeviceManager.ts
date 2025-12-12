@@ -532,7 +532,9 @@ export default class IOSDeviceManager implements IDeviceManager {
       }
       log.info(`Uninstalled app ${bundleId} from device ${device.udid}`);
     } catch (err: any) {
-      log.warn(`Failed to uninstall app ${bundleId} from device ${device.udid}. Error: ${err.message}`);
+      log.warn(
+        `Failed to uninstall app ${bundleId} from device ${device.udid}. Error: ${err.message}`,
+      );
     }
   }
 }

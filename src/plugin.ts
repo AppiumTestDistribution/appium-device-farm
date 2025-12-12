@@ -18,11 +18,7 @@ import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
-import {
-  AndroidDeviceManager,
-  DeviceFarmManager,
-  IOSDeviceManager,
-} from './device-managers';
+import { AndroidDeviceManager, DeviceFarmManager, IOSDeviceManager } from './device-managers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import {
   allocateDeviceForSession,

@@ -707,7 +707,9 @@ export default class AndroidDeviceManager implements IDeviceManager {
       await adbInstance.adbExec(['-s', device.udid, 'uninstall', packageId]);
       log.info(`Uninstalled app ${packageId} from device ${device.udid}`);
     } catch (err: any) {
-      log.warn(`Failed to uninstall app ${packageId} from device ${device.udid}. Error: ${err.message}`);
+      log.warn(
+        `Failed to uninstall app ${packageId} from device ${device.udid}. Error: ${err.message}`,
+      );
     }
   }
 }
