@@ -1,3 +1,9 @@
+## [11.2.15](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.14...v11.2.15) (2025-12-12)
+
+### Bug Fixes
+
+* ios manual control ([#1997](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1997)) ([7fd116b](https://github.com/AppiumTestDistribution/appium-device-farm/commit/7fd116b771d4674f06d41a467da3506f8a544fda))
+
 ## [11.2.14](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.13...v11.2.14) (2025-12-11)
 
 ### Bug Fixes
