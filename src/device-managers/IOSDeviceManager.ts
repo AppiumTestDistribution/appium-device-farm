@@ -1,4 +1,4 @@
-import { utilities as IOSUtils } from 'appium-ios-device';
+import { utilities as IOSUtils, services } from 'appium-ios-device';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import Simctl from 'node-simctl';
 import os from 'os';
@@ -508,5 +508,33 @@ export default class IOSDeviceManager implements IDeviceManager {
     // list runtimes and log availability errors
     const list = await simctl.list();
     return { simctl, list };
+  }
+
+  public async uninstallApp(device: IDevice, bundleId: string) {
+    try {
+      if (device.realDevice) {
+        log.info(`Uninstalling ${bundleId} from real device ${device.udid}`);
+        const installationService = await services.startInstallationProxyService(device.udid);
+        try {
+          await installationService.uninstallApplication(bundleId);
+        } catch (err) {
+          log.warn(`Could not uninstall app ${bundleId} from ${device.udid}: ${err}`);
+        } finally {
+          installationService.close();
+        }
+      } else {
+        log.info(`Uninstalling ${bundleId} from simulator ${device.udid}`);
+
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        await execAsync(`xcrun simctl uninstall ${device.udid} ${bundleId}`);
+      }
+      log.info(`Uninstalled app ${bundleId} from device ${device.udid}`);
+    } catch (err: any) {
+      log.warn(
+        `Failed to uninstall app ${bundleId} from device ${device.udid}. Error: ${err.message}`,
+      );
+    }
   }
 }

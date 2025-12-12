@@ -1,24 +1,24 @@
-import { IDeviceManager } from '../interfaces/IDeviceManager';
-import { asyncForEach, getFreePort } from '../helpers';
-import { ADB, getSdkRootFromEnv } from 'appium-adb';
-import log from '../logger';
-import _ from 'lodash';
 import { fs } from '@appium/support';
-import ChromeDriverManager from './ChromeDriverManager';
-import { Container } from 'typedi';
 import Adb, { Client, DeviceWithPath } from '@devicefarmer/adbkit';
-import { AbortController } from 'node-abort-controller';
-import asyncWait from 'async-wait-until';
-import NodeDevices from './NodeDevices';
-import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
-import Devices from './cloud/Devices';
-import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
-import { IDevice } from '../interfaces/IDevice';
-import { DeviceUpdate } from '../types/DeviceUpdate';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
+import { ADB, getSdkRootFromEnv } from 'appium-adb';
+import asyncWait from 'async-wait-until';
 import { sleep, waitForCondition } from 'asyncbox';
+import _ from 'lodash';
+import { AbortController } from 'node-abort-controller';
+import { Container } from 'typedi';
+import { addNewDevice, generateDeviceId, removeDevice } from '../data-service/device-service';
+import { asyncForEach, getFreePort } from '../helpers';
+import { IDevice } from '../interfaces/IDevice';
+import { IDeviceManager } from '../interfaces/IDeviceManager';
+import { DeviceTypeToInclude, IPluginArgs } from '../interfaces/IPluginArgs';
+import log from '../logger';
 import { DevicePlugin } from '../plugin';
+import { DeviceUpdate } from '../types/DeviceUpdate';
 import { enhancedADBManager } from '../utils/enhanced-adb-manager';
+import ChromeDriverManager from './ChromeDriverManager';
+import Devices from './cloud/Devices';
+import NodeDevices from './NodeDevices';
 
 export default class AndroidDeviceManager implements IDeviceManager {
   private adb: ADB | undefined;
@@ -700,4 +700,16 @@ export default class AndroidDeviceManager implements IDeviceManager {
 
     return deviceName;
   };
+
+  public async uninstallApp(device: IDevice, packageId: string) {
+    try {
+      const { adbInstance } = await this.getAdb();
+      await adbInstance.adbExec(['-s', device.udid, 'uninstall', packageId]);
+      log.info(`Uninstalled app ${packageId} from device ${device.udid}`);
+    } catch (err: any) {
+      log.warn(
+        `Failed to uninstall app ${packageId} from device ${device.udid}. Error: ${err.message}`,
+      );
+    }
+  }
 }
