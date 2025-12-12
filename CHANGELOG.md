@@ -1,3 +1,9 @@
+## [11.3.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.15...v11.3.0) (2025-12-12)
+
+### Features
+
+* Added support to cleanup apps ([#1999](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1999)) ([bbac6ec](https://github.com/AppiumTestDistribution/appium-device-farm/commit/bbac6ec5149180446fd94ed5abc3a361528b0448))
+
 ## [11.2.15](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.14...v11.2.15) (2025-12-12)
 
 ### Bug Fixes
