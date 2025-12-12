@@ -179,7 +179,7 @@
     "appium": "^3.0.0",
     "appium-uiautomator2-driver": "^5.0.3",
     "appium-xcuitest-driver": "^10.1.2",
-    "babel-eslint": "10.1.0",
+    "@babel/eslint-parser": "7.11.0",
     "chai": "4.5.0",
     "chai-as-promised": "^7.1.1",
     "chai-exclude": "^2.1.0",
