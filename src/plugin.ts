@@ -18,7 +18,11 @@ import {
   addNewPendingSession,
   removePendingSession,
 } from './data-service/pending-sessions-service';
-import { DeviceFarmManager } from './device-managers';
+import {
+  AndroidDeviceManager,
+  DeviceFarmManager,
+  IOSDeviceManager,
+} from './device-managers';
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import {
   allocateDeviceForSession,
@@ -56,7 +60,6 @@ import _ from 'lodash';
 import { DeviceFarmApiClient } from './api-client';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
 import { config, config as pluginConfig } from './config';
-import { getFreePort, releasePorts } from './helpers';
 import { ATDRepository } from './data-service/db';
 import { NodeService } from './data-service/node-service';
 import { addCLIArgs } from './data-service/pluginArgs';
@@ -68,6 +71,7 @@ import { AfterSessionDeletedEvent } from './events/after-session-deleted-event';
 import { BeforeSessionCreatedEvent } from './events/before-session-create-event';
 import { SessionCreatedEvent } from './events/session-created-event';
 import { UnexpectedServerShutdownEvent } from './events/unexpected-server-shutdown-event';
+import { getFreePort, releasePorts } from './helpers';
 import { IDeviceFilterOptions } from './interfaces/IDeviceFilterOptions';
 import { DefaultPluginArgs, IPluginArgs } from './interfaces/IPluginArgs';
 import { DEVICE_CONNECTIONS_FACTORY } from './iProxy';
@@ -460,6 +464,7 @@ class DevicePlugin extends BasePlugin {
               lastname: user.lastname,
             }
           : undefined,
+        deviceFarmCapabilities,
       });
       if (isRemoteOrCloudSession) {
         addProxyHandler(sessionId, device.host);
@@ -745,6 +750,52 @@ class DevicePlugin extends BasePlugin {
 
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
+
+    if (device) {
+      log.info(`📱 Cleanup: Device found: ${device.udid}`);
+      const deviceFarmManager = Container.get(DeviceFarmManager);
+      const deviceManagers = await deviceFarmManager.deviceInstances();
+      log.info(
+        `📱 Cleanup: Loaded managers: ${deviceManagers.map((m) => m.constructor.name).join(', ')}`,
+      );
+
+      if (device.platform.toLowerCase() === 'android') {
+        const androidApps =
+          device.deviceFarmCapabilities?.androidCleanUpApps || this.pluginArgs.androidCleanUpApps;
+        log.info(`📱 Cleanup: Android apps to cleanup: ${JSON.stringify(androidApps)}`);
+        if (androidApps && androidApps.length > 0) {
+          const androidManager = deviceManagers.find((m) => m instanceof AndroidDeviceManager);
+          if (androidManager) {
+            if (androidManager.uninstallApp) {
+              for (const app of androidApps) {
+                await androidManager.uninstallApp(device, app);
+              }
+            }
+          } else {
+            log.warn(`📱 Cleanup: AndroidManager not found in device managers.`);
+          }
+        }
+      } else if (device.platform.toLowerCase() === 'ios') {
+        const iosApps =
+          device.deviceFarmCapabilities?.iosCleanUpApps || this.pluginArgs.iosCleanUpApps;
+        log.info(`📱 Cleanup: iOS apps to cleanup: ${JSON.stringify(iosApps)}`);
+        if (iosApps && iosApps.length > 0) {
+          const iosManager = deviceManagers.find((m) => m instanceof IOSDeviceManager);
+          if (iosManager) {
+            if (iosManager.uninstallApp) {
+              for (const app of iosApps) {
+                await iosManager.uninstallApp(device, app);
+              }
+            }
+          } else {
+            log.warn(`📱 Cleanup: IOSDeviceManager not found in device managers.`);
+          }
+        }
+      }
+    } else {
+      log.info(`📱 Cleanup: No device found for session ${sessionId}`);
+    }
+
     const res = await next();
     await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
     if (device?.platform === 'ios' && device.realDevice) {

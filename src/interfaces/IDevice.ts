@@ -49,4 +49,5 @@ export interface IDevice {
     firstname: string;
     lastname: string;
   };
+  deviceFarmCapabilities?: Record<string, any>;
 }

@@ -86,6 +86,10 @@ export interface IPluginArgs {
   //node
   nodeName?: string;
   portRange?: string;
+
+  // cleanup
+  androidCleanUpApps?: string[];
+  iosCleanUpApps?: string[];
 }
 
 export const DefaultPluginArgs: IPluginArgs = {
@@ -115,4 +119,6 @@ export const DefaultPluginArgs: IPluginArgs = {
   liveStreaming: true,
   wdaBundleId: '',
   preBuildWDAPath: '',
+  androidCleanUpApps: [],
+  iosCleanUpApps: [],
 };

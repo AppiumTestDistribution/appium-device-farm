@@ -10,6 +10,7 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import log from '../logger';
+import { uninstallApplication } from '../modules/device-control/DeviceHelper';
 import Devices from './cloud/Devices';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
 import { IosTracker } from './iOSTracker';
@@ -508,5 +509,23 @@ export default class IOSDeviceManager implements IDeviceManager {
     // list runtimes and log availability errors
     const list = await simctl.list();
     return { simctl, list };
+  }
+
+  public async uninstallApp(device: IDevice, bundleId: string) {
+    try {
+      if (device.realDevice) {
+        log.info(`Uninstalling ${bundleId} from real device ${device.udid}`);
+        await uninstallApplication(device.udid, bundleId);
+      } else {
+        log.info(`Uninstalling ${bundleId} from simulator ${device.udid}`);
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        await execAsync(`xcrun simctl uninstall ${device.udid} ${bundleId}`);
+      }
+      log.info(`Uninstalled app ${bundleId} from device ${device.udid}`);
+    } catch (err: any) {
+      log.warn(`Failed to uninstall app ${bundleId} from device ${device.udid}. Error: ${err.message}`);
+    }
   }
 }
