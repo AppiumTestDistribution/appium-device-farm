@@ -1,4 +1,4 @@
-import { utilities as IOSUtils } from 'appium-ios-device';
+import { utilities as IOSUtils, services } from 'appium-ios-device';
 import { getDeviceInfo } from 'appium-ios-device/build/lib/utilities';
 import Simctl from 'node-simctl';
 import os from 'os';
@@ -10,7 +10,6 @@ import { IDevice } from '../interfaces/IDevice';
 import { IDeviceManager } from '../interfaces/IDeviceManager';
 import { DeviceTypeToInclude, IDerivedDataPath, IPluginArgs } from '../interfaces/IPluginArgs';
 import log from '../logger';
-import { uninstallApplication } from '../modules/device-control/DeviceHelper';
 import Devices from './cloud/Devices';
 import { IOSDeviceInfoMap } from './IOSDeviceType';
 import { IosTracker } from './iOSTracker';
@@ -515,9 +514,17 @@ export default class IOSDeviceManager implements IDeviceManager {
     try {
       if (device.realDevice) {
         log.info(`Uninstalling ${bundleId} from real device ${device.udid}`);
-        await uninstallApplication(device.udid, bundleId);
+        const installationService = await services.startInstallationProxyService(device.udid);
+        try {
+          await installationService.uninstallApplication(bundleId);
+        } catch (err) {
+          log.warn(`Could not uninstall app ${bundleId} from ${device.udid}: ${err}`);
+        } finally {
+          installationService.close();
+        }
       } else {
         log.info(`Uninstalling ${bundleId} from simulator ${device.udid}`);
+
         const { exec } = require('child_process');
         const util = require('util');
         const execAsync = util.promisify(exec);

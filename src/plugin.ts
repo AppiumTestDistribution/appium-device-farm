@@ -750,6 +750,15 @@ class DevicePlugin extends BasePlugin {
 
     await unblockDeviceMatchingFilter({ session_id: sessionId });
     log.info(`📱 Unblocking the device that is blocked for session ${sessionId}`);
+    const res = await next();
+    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
+    if (device?.platform === 'ios' && device.realDevice) {
+      try {
+        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid);
+      } catch (err) {
+        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
+      }
+    }
 
     if (device) {
       log.info(`📱 Cleanup: Device found: ${device.udid}`);
@@ -794,16 +803,6 @@ class DevicePlugin extends BasePlugin {
       }
     } else {
       log.info(`📱 Cleanup: No device found for session ${sessionId}`);
-    }
-
-    const res = await next();
-    await EventBus.fire(new AfterSessionDeletedEvent({ sessionId: sessionId, device: device }));
-    if (device?.platform === 'ios' && device.realDevice) {
-      try {
-        await DEVICE_CONNECTIONS_FACTORY.releaseConnection(device.udid);
-      } catch (err) {
-        log.warn(`Error while releasing connection for device ${device.udid}. Error: ${err}`);
-      }
     }
 
     // Release all collected ports
