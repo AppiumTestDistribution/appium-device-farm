@@ -1,3 +1,9 @@
+## [11.3.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.3.0...v11.3.1) (2025-12-21)
+
+### Bug Fixes
+
+* Android emulators not booting when platform is set to 'both' ([#1457](https://github.com/AppiumTestDistribution/appium-device-farm/issues/1457)) ([#2003](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2003)) ([12b33cb](https://github.com/AppiumTestDistribution/appium-device-farm/commit/12b33cb8eb58f2e2407a40381fc958cab359fdf0))
+
 ## [11.3.0](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.2.15...v11.3.0) (2025-12-12)
 
 ### Features
