@@ -205,7 +205,11 @@ class DevicePlugin extends BasePlugin {
     registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
 
     externalModule.updateServer(expressApp, httpServer);
-    if (hasEmulators && pluginArgs.platform.toLowerCase() === 'android') {
+    if (
+      hasEmulators &&
+      (pluginArgs.platform.toLowerCase() === 'android' ||
+        pluginArgs.platform.toLowerCase() === 'both')
+    ) {
       log.info('Emulators will be booted!!');
       const adb = await enhancedADBManager.getLocalADB();
       const array = pluginArgs.emulators || [];
