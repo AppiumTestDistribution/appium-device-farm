@@ -90,7 +90,7 @@
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "bluebird": "^3.7.2",
-    "commander": "^12.1.0",
+    "commander": "^14.0.2",
     "cors": "^2.8.5",
     "emittery": "0.13.1",
     "eventemitter2": "^6.4.9",
