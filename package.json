@@ -92,7 +92,7 @@
     "bluebird": "^3.7.2",
     "commander": "^12.1.0",
     "cors": "^2.8.5",
-    "emittery": "0.13.1",
+    "emittery": "1.2.0",
     "eventemitter2": "^6.4.9",
     "express": "5.2.0",
     "form-data": "^4.0.0",
