@@ -1,3 +1,9 @@
+## [11.3.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.3.1...v11.3.2) (2025-12-29)
+
+### Bug Fixes
+
+* Stop android streaming app when closing the session ([#2000](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2000)) ([dc73602](https://github.com/AppiumTestDistribution/appium-device-farm/commit/dc736029beed8b816bbe863854ed6ff5fb4326d3))
+
 ## [11.3.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v11.3.0...v11.3.1) (2025-12-21)
 
 ### Bug Fixes
