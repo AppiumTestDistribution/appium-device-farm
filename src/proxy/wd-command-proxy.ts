@@ -107,7 +107,7 @@ function handler(cliArgs: Record<string, any>, middlewares: ExpressMiddleware[])
         } else {
           remoteProxyMap.get(sessionId)(req, res, next);
         }
-        if (req.method === 'DELETE') {
+        if (req.method === 'DELETE' && new RegExp(`/session/${sessionId}$`).test(req.path)) {
           log.info(
             `📱 Unblocking the device that is blocked for session ${sessionId} in remote machine`,
           );
