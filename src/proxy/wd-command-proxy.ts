@@ -7,8 +7,9 @@ import { unblockDeviceMatchingFilter, updateCmdExecutedTime } from '../data-serv
 import axios from 'axios';
 import log from '../logger';
 import { getSessionIdFromUrl, hasHubArgument } from '../helpers';
-import { ExpressMiddleware } from '../interfaces/IExternalModule';
 import { v4 } from 'uuid';
+
+export type ExpressMiddleware = (request: Request, response: Response, next: NextFunction) => void;
 
 const remoteProxyMap: Map<string, any> = new Map();
 const remoteHostMap: Map<string, any> = new Map();

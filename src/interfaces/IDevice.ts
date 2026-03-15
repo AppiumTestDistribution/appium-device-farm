@@ -32,7 +32,6 @@ export interface IDevice {
   nodeId?: string;
   width: string;
   height: string;
-  liveStreaming?: boolean;
   wdaBundleId?: string;
   productModel?: string;
   deviceTypeIdentifier?: string;

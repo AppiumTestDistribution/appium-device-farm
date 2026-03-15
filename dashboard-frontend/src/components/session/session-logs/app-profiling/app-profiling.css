@@ -1,0 +1,7 @@
+.app-profiling-container {
+  @apply !max-w-[700px] flex flex-col m-auto items-center h-full;
+}
+
+.chart-row {
+  @apply ml-[0] mr-[0] my-[25px] h-full w-full px-[50px] py-[0];
+}

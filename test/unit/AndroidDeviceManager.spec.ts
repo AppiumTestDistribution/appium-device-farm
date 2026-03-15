@@ -114,7 +114,7 @@ describe('Android Device Manager', function () {
         systemPort: 54321,
         width: '350',
         height: '600',
-        liveStreaming: true,
+
         host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -129,7 +129,7 @@ describe('Android Device Manager', function () {
         width: '350',
         height: '600',
         tags: [],
-        liveStreaming: true,
+
         name: 'sdk_phone_x86',
         state: 'device',
         deviceType: 'real',
@@ -204,7 +204,7 @@ describe('Android Device Manager', function () {
         systemPort: 54321,
         width: '350',
         height: '600',
-        liveStreaming: true,
+
         host: `http://${ip.address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -268,7 +268,7 @@ describe('Android Device Manager', function () {
         udid: 'YOGAA1BBB4124',
         width: '350',
         height: '600',
-        liveStreaming: true,
+
         platform: 'android',
         systemPort: 54322,
         host: `http://${ip.address()}:4723`,
@@ -338,7 +338,7 @@ describe('Android Device Manager', function () {
         systemPort: 54322,
         width: '350',
         height: '600',
-        liveStreaming: true,
+
         host: 'http://10.1.1.1:3333',
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,

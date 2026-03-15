@@ -1,0 +1,35 @@
+.capabilities {
+  @apply text-[12px] flex flex-col max-w-[440px] m-[16px];
+}
+
+.tabs {
+  @apply flex;
+}
+
+.tab-header {
+  @apply cursor-pointer font-bold w-full py-2 px-4 border-b border-gray-300;
+}
+
+.tab-header.active {
+  @apply text-blue-500 border-b-2 border-blue-500;
+}
+
+.tab-content {
+  @apply h-full overflow-y-auto;
+}
+
+.key-value-pair {
+  @apply flex text-sm my-16 w-full;
+}
+
+.key {
+  @apply font-bold m-0 w-48 mr-2 whitespace-nowrap overflow-hidden overflow-ellipsis;
+}
+
+.value {
+  @apply text-gray-500 m-0 w-1/2;
+}
+
+.download {
+  @apply w-1/2 text-white bg-green-500 py-2 px-5 mr-10 ml-20 rounded text-center text-base;
+}

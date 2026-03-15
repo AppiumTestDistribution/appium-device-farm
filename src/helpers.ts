@@ -10,9 +10,7 @@ import os from 'os';
 import path from 'path';
 import tcpPortUsed from 'tcp-port-used';
 import Cloud from './enums/Cloud';
-import { FakeModuleLoader } from './fake-module-loader';
 import { IDevice } from './interfaces/IDevice';
-import { IExternalModuleLoader } from './interfaces/IExternalModule';
 import log from './logger';
 
 const APPIUM_VENDOR_PREFIX = 'appium:';
@@ -327,22 +325,6 @@ export function safeParseJson(jsonString: string) {
   }
 }
 
-export async function loadExternalModules(): Promise<IExternalModuleLoader> {
-  // TODO: Should handle DB failures in different way
-
-  // eslint-disable-next-line
-  // @ts-ignore
-  return import(/* webpackMode: "eager" */ './modules')
-    .then((externalModule) => {
-      console.log(externalModule);
-      return new (externalModule as any).default();
-    })
-    .catch((err) => {
-      console.error('Error Loading External Module', err);
-      return new FakeModuleLoader();
-    });
-  //return new FakeModuleLoader();
-}
 
 export async function registerErrorHandlers() {
   process.on('unhandledRejection', (reason, p) => {

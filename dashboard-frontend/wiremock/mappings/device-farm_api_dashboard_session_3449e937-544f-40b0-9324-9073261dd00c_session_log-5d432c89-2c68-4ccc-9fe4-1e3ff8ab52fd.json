@@ -1,0 +1,23 @@
+{
+  "id" : "5d432c89-2c68-4ccc-9fe4-1e3ff8ab52fd",
+  "name" : "device-farm_api_dashboard_session_3449e937-544f-40b0-9324-9073261dd00c_session_log",
+  "request" : {
+    "url" : "/device-farm/api/dashboard/session/3449e937-544f-40b0-9324-9073261dd00c/session_log",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "[{\"id\":\"4189808d-8097-46ae-be77-4365b3485569\",\"sessionId\":\"3449e937-544f-40b0-9324-9073261dd00c\",\"commandName\":\"click\",\"url\":\"/wd/hub/session/3449e937-544f-40b0-9324-9073261dd00c/element/00000000-0000-001c-ffff-ffff000000ac/click\",\"method\":\"POST\",\"title\":\"Click\",\"subtitle\":\"\",\"body\":\"{}\",\"response\":\"{\\\"value\\\":null}\",\"screenshot\":null,\"isSuccess\":true,\"createdAt\":\"2024-04-25T09:53:42.623Z\",\"updatedAt\":\"2024-04-25T09:53:42.623Z\",\"eventId\":null},{\"id\":\"d00096c1-b2f6-4e09-b16a-280a4694a3d5\",\"sessionId\":\"3449e937-544f-40b0-9324-9073261dd00c\",\"commandName\":\"findElement\",\"url\":\"/wd/hub/session/3449e937-544f-40b0-9324-9073261dd00c/element\",\"method\":\"POST\",\"title\":\"Find Element\",\"subtitle\":\"\",\"body\":\"{\\\"using\\\":\\\"accessibility id\\\",\\\"value\\\":\\\"slider1\\\"}\",\"response\":\"{\\\"value\\\":{\\\"element-6066-11e4-a52e-4f735466cecf\\\":\\\"00000000-0000-001c-ffff-ffff000000ac\\\",\\\"ELEMENT\\\":\\\"00000000-0000-001c-ffff-ffff000000ac\\\"}}\",\"screenshot\":null,\"isSuccess\":true,\"createdAt\":\"2024-04-25T09:53:41.609Z\",\"updatedAt\":\"2024-04-25T09:53:41.609Z\",\"eventId\":null},{\"id\":\"6bcd323b-facd-4151-a64e-eaa224100e41\",\"sessionId\":\"3449e937-544f-40b0-9324-9073261dd00c\",\"commandName\":\"click\",\"url\":\"/wd/hub/session/3449e937-544f-40b0-9324-9073261dd00c/element/00000000-0000-001c-ffff-ffff00000010/click\",\"method\":\"POST\",\"title\":\"Click\",\"subtitle\":\"\",\"body\":\"{}\",\"response\":\"{\\\"value\\\":null}\",\"screenshot\":null,\"isSuccess\":true,\"createdAt\":\"2024-04-25T09:53:41.362Z\",\"updatedAt\":\"2024-04-25T09:53:41.362Z\",\"eventId\":null},{\"id\":\"ffb1713a-8ba7-45c9-aba5-259d5ba4cb8e\",\"sessionId\":\"3449e937-544f-40b0-9324-9073261dd00c\",\"commandName\":\"findElement\",\"url\":\"/wd/hub/session/3449e937-544f-40b0-9324-9073261dd00c/element\",\"method\":\"POST\",\"title\":\"Find Element\",\"subtitle\":\"\",\"body\":\"{\\\"using\\\":\\\"accessibility id\\\",\\\"value\\\":\\\"login\\\"}\",\"response\":\"{\\\"value\\\":{\\\"element-6066-11e4-a52e-4f735466cecf\\\":\\\"00000000-0000-001c-ffff-ffff00000010\\\",\\\"ELEMENT\\\":\\\"00000000-0000-001c-ffff-ffff00000010\\\"}}\",\"screenshot\":null,\"isSuccess\":true,\"createdAt\":\"2024-04-25T09:53:41.180Z\",\"updatedAt\":\"2024-04-25T09:53:41.180Z\",\"eventId\":null},{\"id\":\"215f534d-1291-48bb-ad5d-29c71b3c3db0\",\"sessionId\":\"3449e937-544f-40b0-9324-9073261dd00c\",\"commandName\":\"performActions\",\"url\":\"/wd/hub/session/3449e937-544f-40b0-9324-9073261dd00c/actions\",\"method\":\"POST\",\"title\":\"Perform Actions\",\"subtitle\":\"\",\"body\":\"{\\\"actions\\\":[{\\\"type\\\":\\\"pointer\\\",\\\"id\\\":\\\"finger1\\\",\\\"parameters\\\":{\\\"pointerType\\\":\\\"touch\\\"},\\\"actions\\\":[{\\\"type\\\":\\\"pointerMove\\\",\\\"duration\\\":0,\\\"x\\\":100,\\\"y\\\":100},{\\\"type\\\":\\\"pointerDown\\\",\\\"button\\\":0},{\\\"type\\\":\\\"pause\\\",\\\"duration\\\":500},{\\\"type\\\":\\\"pointerMove\\\",\\\"duration\\\":1000,\\\"origin\\\":\\\"pointer\\\",\\\"x\\\":-50,\\\"y\\\":0},{\\\"type\\\":\\\"pointerUp\\\",\\\"button\\\":0}]}]}\",\"response\":\"{\\\"value\\\":null}\",\"screenshot\":null,\"isSuccess\":true,\"createdAt\":\"2024-04-25T09:53:40.951Z\",\"updatedAt\":\"2024-04-25T09:53:40.951Z\",\"eventId\":null}]",
+    "headers" : {
+      "Keep-Alive" : "timeout=800",
+      "ETag" : "W/\"b4c-qe9ZjZAu5sa/lkvad576nknezeI\"",
+      "Access-Control-Allow-Origin" : "*",
+      "Date" : "Tue, 30 Apr 2024 09:21:17 GMT",
+      "Content-Type" : "application/json; charset=utf-8",
+      "X-Powered-By" : "Express"
+    }
+  },
+  "uuid" : "5d432c89-2c68-4ccc-9fe4-1e3ff8ab52fd",
+  "persistent" : true,
+  "insertionIndex" : 7
+}

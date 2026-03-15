@@ -69,7 +69,6 @@ export interface IPluginArgs {
   cloud?: CloudConfig;
   bindHostOrIp: string;
   enableDashboard: boolean;
-  liveStreaming: boolean;
   wdaBundleId: string;
   preBuildWDAPath: string;
 
@@ -116,7 +115,6 @@ export const DefaultPluginArgs: IPluginArgs = {
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
   remoteConnectionTimeout: 60000,
-  liveStreaming: true,
   wdaBundleId: '',
   preBuildWDAPath: '',
   androidCleanUpApps: [],

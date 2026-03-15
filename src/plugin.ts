@@ -33,10 +33,10 @@ import {
 import {
   hasCloudArgument,
   isDeviceFarmRunning,
-  loadExternalModules,
   nodeUrl,
   stripAppiumPrefixes,
 } from './helpers';
+import { Dashboard } from './dashboard';
 import { IDevice } from './interfaces/IDevice';
 import {
   CreateSessionResponseInternal,
@@ -89,7 +89,7 @@ let androidDeviceType: any;
 let iosDeviceType: any;
 let hasEmulators: any;
 let proxy: any;
-let externalModule: any;
+let dashboard: Dashboard;
 class DevicePlugin extends BasePlugin {
   static nodeBasePath = '';
   private pluginArgs: IPluginArgs = Object.assign({}, DefaultPluginArgs);
@@ -146,7 +146,6 @@ class DevicePlugin extends BasePlugin {
 
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     DevicePlugin.serverArgs = cliArgs;
-    externalModule = await loadExternalModules();
     const pluginConfigs = cliArgs.plugin as PluginConfig;
     let pluginArgs: IPluginArgs;
     if (pluginConfigs['device-farm'] !== undefined) {
@@ -167,14 +166,7 @@ class DevicePlugin extends BasePlugin {
         adbExecTimeout: 60000,
       });
     }
-    externalModule.onPluginLoaded(
-      cliArgs,
-      pluginArgs,
-      httpServer,
-      pluginConfig,
-      EventBus,
-      DevicePlugin.adbInstance,
-    );
+    dashboard = new Dashboard(EventBus, cliArgs, pluginArgs);
     const hubArgument = pluginArgs.hub;
     DevicePlugin.NODE_ID = config.serverMetadata.id;
     DevicePlugin.IS_HUB = !pluginArgs.hub;
@@ -202,9 +194,23 @@ class DevicePlugin extends BasePlugin {
     hasEmulators = pluginArgs.emulators && pluginArgs.emulators.length > 0;
     expressApp.use('/device-farm', createRouter(pluginArgs));
 
-    registerProxyMiddlware(expressApp, cliArgs, externalModule.getMiddleWares());
+    registerProxyMiddlware(expressApp, cliArgs, [
+      dashboard.requestInterceptingMiddleware.bind(dashboard),
+    ]);
 
-    externalModule.updateServer(expressApp, httpServer);
+    dashboard.addRoutes(expressApp);
+
+    // Sanitize the status of existing sessions on startup
+    const { prisma: prismaClient } = await import('./prisma');
+    await prismaClient.session.updateMany({
+      data: {
+        hasLiveVideo: false,
+        status: 'unmarked',
+      },
+      where: {
+        OR: [{ hasLiveVideo: true }, { status: 'running' }],
+      },
+    });
     if (
       hasEmulators &&
       (pluginArgs.platform.toLowerCase() === 'android' ||
@@ -414,7 +420,7 @@ class DevicePlugin extends BasePlugin {
         device.realDevice &&
         device.nodeId === DevicePlugin.NODE_ID
       ) {
-        log.info(`📱 Forwarding ios port to real device ${device.udid} for manual interaction`);
+        log.info(`📱 Forwarding ios port to real device ${device.udid} for MJPEG streaming`);
         try {
           await DEVICE_CONNECTIONS_FACTORY.requestConnection(device.udid, device.mjpegServerPort, {
             usePortForwarding: true,
