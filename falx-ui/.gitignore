@@ -1,6 +1,7 @@
 node_modules
 .idea
 lib/
+dist/
 .DS_Store
 .history
 .vscode
@@ -12,5 +13,3 @@ temp-appium
 .env
 src/public/*
 docs/reference
-.npmrc
-.playwright-mcp/

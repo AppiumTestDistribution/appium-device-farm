@@ -1,0 +1,23 @@
+export interface ISession {
+  id: string;
+  buildId: string;
+  name: string | null;
+  status: string;
+  desiredCapabilities: string;
+  sessionCapabilities: string;
+  nodeId: string;
+  hasLiveVideo: boolean;
+  videoRecording: string | null;
+  startTime: string;
+  deviceLogs: string;
+  endTime: string | null;
+  failureReason: string | null;
+  deviceUdid: string;
+  devicePlatform: string;
+  deviceVersion: string;
+  deviceName: string;
+  createdAt: string;
+  updatedAt: string;
+  live?: string;
+  appProfiling?: string;
+}

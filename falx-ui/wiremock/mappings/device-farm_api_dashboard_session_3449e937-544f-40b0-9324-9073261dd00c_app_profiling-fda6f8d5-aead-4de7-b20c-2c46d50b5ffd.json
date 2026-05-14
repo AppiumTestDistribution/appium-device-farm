@@ -1,0 +1,23 @@
+{
+  "id" : "fda6f8d5-aead-4de7-b20c-2c46d50b5ffd",
+  "name" : "device-farm_api_dashboard_session_3449e937-544f-40b0-9324-9073261dd00c_app_profiling",
+  "request" : {
+    "url" : "/device-farm/api/dashboard/session/3449e937-544f-40b0-9324-9073261dd00c/app_profiling",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"device_info\":{\"total_cpu\":4,\"total_memory\":\"2009436\",\"api_level\":33,\"app_package\":\"com.vodqareactnative\"},\"profiling_logs\":[{\"timestamp\":\"2024-04-25T09:53:36.247Z\",\"cpu\":\"37.0\",\"memory\":\"244768\",\"total_cpu_used\":341,\"total_memory_used\":1750400,\"raw_cpu_log\":\"400%cpu 126%user  11%nice 185%sys  59%idle   4%iow  11%irq   4%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1750400K used,   259036K free,     2964K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:37.254Z\",\"cpu\":\"26.0\",\"memory\":\"248232\",\"total_cpu_used\":361,\"total_memory_used\":1812036,\"raw_cpu_log\":\"400%cpu 111%user  12%nice 211%sys  39%idle   4%iow  17%irq   6%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1812036K used,   197400K free,     2996K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:38.241Z\",\"cpu\":\"24.0\",\"memory\":\"249160\",\"total_cpu_used\":74,\"total_memory_used\":1828920,\"raw_cpu_log\":\"400%cpu  30%user   0%nice  37%sys 326%idle   2%iow   4%irq   1%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1828920K used,   180516K free,     3036K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:39.237Z\",\"cpu\":\"10.0\",\"memory\":\"257048\",\"total_cpu_used\":47,\"total_memory_used\":1831440,\"raw_cpu_log\":\"400%cpu  17%user   6%nice  18%sys 353%idle   0%iow   5%irq   1%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1831440K used,   177996K free,     3244K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:40.239Z\",\"cpu\":\"13.0\",\"memory\":\"257276\",\"total_cpu_used\":87,\"total_memory_used\":1851192,\"raw_cpu_log\":\"400%cpu  36%user   2%nice  42%sys 313%idle   1%iow   5%irq   1%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1851192K used,   158244K free,     3248K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:41.253Z\",\"cpu\":\"11.0\",\"memory\":\"257628\",\"total_cpu_used\":112,\"total_memory_used\":1759236,\"raw_cpu_log\":\"400%cpu  28%user   8%nice  65%sys 288%idle   3%iow   7%irq   1%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1759236K used,   250200K free,     3120K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:42.246Z\",\"cpu\":\"37.0\",\"memory\":\"256704\",\"total_cpu_used\":178,\"total_memory_used\":1792200,\"raw_cpu_log\":\"400%cpu  66%user   5%nice  89%sys 222%idle   6%iow  10%irq   2%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1792200K used,   217236K free,     3140K buffers\\r\"},{\"timestamp\":\"2024-04-25T09:53:43.278Z\",\"cpu\":\"22.0\",\"memory\":\"257484\",\"total_cpu_used\":108,\"total_memory_used\":1801588,\"raw_cpu_log\":\"400%cpu  38%user   6%nice  53%sys 292%idle   3%iow   7%irq   1%sirq   0%host\\r\",\"raw_memory_log\":\"  Mem:  2009436K total,  1801588K used,   207848K free,     3156K buffers\\r\"}]}",
+    "headers" : {
+      "Keep-Alive" : "timeout=800",
+      "ETag" : "W/\"a34-wGO84zJfIYCYNbNDkkaGxS4Km4I\"",
+      "Access-Control-Allow-Origin" : "*",
+      "Date" : "Tue, 30 Apr 2024 09:22:11 GMT",
+      "Content-Type" : "application/json; charset=utf-8",
+      "X-Powered-By" : "Express"
+    }
+  },
+  "uuid" : "fda6f8d5-aead-4de7-b20c-2c46d50b5ffd",
+  "persistent" : true,
+  "insertionIndex" : 4
+}

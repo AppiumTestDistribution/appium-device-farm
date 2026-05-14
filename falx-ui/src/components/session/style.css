@@ -1,0 +1,8 @@
+/* styles.css */
+.table-header {
+  @apply p-3 font-bold whitespace-nowrap text-center bg-gray-800 text-yellow-400;
+}
+
+.table-data {
+  @apply p-3;
+}

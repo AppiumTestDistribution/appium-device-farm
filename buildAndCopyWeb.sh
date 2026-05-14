@@ -1,20 +1,20 @@
 #!/bin/bash
-if [ -d "dashboard-frontend" ]; then
-  cd dashboard-frontend
+if [ -d "falx-ui" ]; then
+  cd falx-ui
   if [ -e "package.json" ]; then
       # shellcheck disable=SC2164
-      echo 'Building dashboard-frontend...'
+      echo 'Building falx-ui...'
       npm install --force
       npm run build
       # shellcheck disable=SC2103
       cd ..
       rm -rf src/public
       mkdir src/public
-      cp -R ./dashboard-frontend/dist/* src/public/
+      cp -R ./falx-ui/dist/* src/public/
       echo "Build date - `date` by `whoami`" > src/public/version.txt
   else
-    echo "Directory dashboard-frontend exists but empty."
+    echo "Directory falx-ui exists but empty."
   fi
 else
-  echo "Directory dashboard-frontend does not exist."
+  echo "Directory falx-ui does not exist."
 fi

@@ -1,0 +1,43 @@
+.build-session {
+  @apply flex items-center flex-wrap gap-[16px] mb-[16px] p-[16px] bg-[#ffffff] rounded-[4px] cursor-pointer [box-shadow:0_0_3px_rgba(33,_33,_33,_0.2)] border-[2px] border-[solid] border-[rgb(255,255,255)];
+}
+
+.build-session:hover {
+  @apply hover:[box-shadow:unset] hover:border-[#15252b];
+}
+
+.build-session-column {
+  @apply flex flex-col gap-[8px] w-1/2;
+}
+
+.build-session_name {
+  @apply text-[12px] font-semibold text-[#212121];
+}
+
+.build-session-device {
+  @apply flex items-center flex-wrap gap-[12px];
+}
+
+.build-session-device img {
+  @apply w-[16px] h-[16px];
+}
+
+.build-session-device div {
+  @apply flex items-center gap-[6px];
+}
+
+.build-session-device p {
+  @apply text-[11px] m-0 font-normal;
+}
+
+.build-session-device_last_updated {
+  @apply text-[#9e9e9e];
+}
+
+.build-session_status {
+  @apply text-[14px] font-semibold uppercase w-1/5 min-w-[140px] text-[#9e9e9e];
+}
+
+.build-session_time {
+  @apply text-[14px] font-semibold w-1/5 min-w-[140px] text-[#9e9e9e];
+}
