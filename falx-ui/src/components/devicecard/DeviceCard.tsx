@@ -93,18 +93,18 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   }, [device.host]);
 
   const getStatusColor = (status: string): string => {
-    if (!status) return 'text-gray-400 bg-gray-400/10';
-    if (status === 'ready') return 'text-emerald-400 bg-emerald-400/10';
-    if (status === 'busy') return 'text-amber-400 bg-amber-400/10';
-    if (status === 'offline') return 'text-red-400 bg-red-400/10';
-    if (status === 'blocked') return 'text-purple-400 bg-red-400/10';
-    return 'text-gray-400 bg-gray-400/10';
+    if (!status) return 'text-text-faint bg-slate-50 border border-slate-100';
+    if (status === 'ready') return 'text-emerald-700 bg-emerald-50 border border-emerald-100';
+    if (status === 'busy') return 'text-amber-700 bg-amber-50 border border-amber-100';
+    if (status === 'offline') return 'text-red-700 bg-red-50 border border-red-100';
+    if (status === 'blocked') return 'text-purple-700 bg-purple-50 border border-purple-100';
+    return 'text-text-faint bg-slate-50 border border-slate-100';
   };
 
   const getPlatformIcon = (platform: string): JSX.Element => {
     if (platform === 'ios' || platform === 'tvos') {
       return (
-        <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-5 w-5 text-text-faint" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17.537 12.625a4.421 4.421 0 0 0 2.684 4.047 10.96 10.96 0 0 1-1.384 2.845c-.834 1.218-1.7 2.432-3.062 2.457-1.34.025-1.77-.794-3.3-.794-1.531 0-2.01.769-3.275.82-1.316.049-2.317-1.318-3.158-2.532-1.72-2.484-3.032-7.017-1.27-10.077A4.9 4.9 0 0 1 8.91 6.884c1.292-.025 2.51.869 3.3.869.789 0 2.27-1.075 3.828-.917a4.67 4.67 0 0 1 3.66 1.984 4.524 4.524 0 0 0-2.16 3.805m-2.52-7.432A4.4 4.4 0 0 0 16.06 2a4.482 4.482 0 0 0-2.945 1.516 4.185 4.185 0 0 0-1.061 3.093 3.708 3.708 0 0 0 2.967-1.416Z" />
         </svg>
       );
@@ -112,12 +112,12 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
     // Sleek Android icon SVG
     if (platform === 'android') {
       return (
-        <svg className="h-5 w-5 text-green-400" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17.6 9.48l1.43-2.48a.5.5 0 1 0-.87-.5l-1.44 2.5A7.97 7.97 0 0 0 6.28 9l-1.44-2.5a.5.5 0 1 0-.87.5l1.43 2.48A7.98 7.98 0 0 0 4 13v5a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-2h4v2a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-5a7.98 7.98 0 0 0-1.4-3.52zM7.5 17a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 1 0zm10 0a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 1 0z" />
         </svg>
       );
     }
-    return <Smartphone className="h-5 w-5 text-gray-400" />;
+    return <Smartphone className="h-5 w-5 text-text-faint" />;
   };
 
   const handleBlockDevice = async (): Promise<void> => {
@@ -154,37 +154,37 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   const isLocal = !isCloud && hubNodeId && device.nodeId === hubNodeId;
   const locationTypeLabel = isCloud ? 'Cloud' : isLocal ? 'Local' : 'Remote';
   const locationTypeClass = isCloud
-    ? 'bg-purple-900 text-purple-300'
+    ? 'bg-violet-50 text-violet-700 border border-violet-100'
     : isLocal
-      ? 'bg-cyan-900 text-cyan-300'
-      : 'bg-orange-900 text-orange-300';
+      ? 'bg-blue-50 text-blue-700 border border-blue-100'
+      : 'bg-orange-50 text-orange-700 border border-orange-100';
 
   return (
-    <div className="bg-gray-800 rounded-md p-5 flex flex-col gap-2 items-stretch">
+    <div className="bg-surface border border-border-soft rounded-lg shadow-sm hover:shadow-md hover:-translate-y-px transition-all p-5 flex flex-col gap-2 items-stretch">
       {/* Top: Name, icon, and version */}
       <div className="flex items-center gap-2">
-        <span className="text-lg font-semibold text-left" style={{ color: '#ffc200' }}>
+        <span className="text-lg font-semibold text-left text-text-strong">
           {device.name || 'Unnamed Device'}
         </span>
         {getPlatformIcon(device.platform)}
         {/* Version number next to icon for Android/iOS */}
         {['android', 'ios', 'tvos'].includes(device.platform) && (
-          <span className="text-xs px-2 py-0.5 bg-gray-700 rounded-full text-gray-300 font-medium whitespace-nowrap">
+          <span className="text-xs px-2 py-0.5 bg-surface-2 rounded text-text-muted font-medium whitespace-nowrap">
             {device.sdk ? `v${device.sdk}` : 'v1.0'}
           </span>
         )}
       </div>
       {/* UDID */}
-      <div className="text-xs text-gray-400 font-mono truncate text-left">{device.udid}</div>
+      <div className="text-xs text-text-faint font-mono truncate text-left">{device.udid}</div>
       {/* Device type, status row (no platform text) */}
       <div className="flex items-center gap-2 mt-1 mb-1 flex-wrap">
         {device.deviceType === 'real' && (
-          <span className={'px-2 py-0.5 rounded text-xs font-semibold bg-blue-900 text-blue-300'}>
+          <span className={'px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100'}>
             Real
           </span>
         )}
         {device.deviceType !== 'real' && (
-          <span className={'px-2 py-0.5 rounded text-xs font-semibold bg-green-900 text-green-300'}>
+          <span className={'px-2 py-0.5 rounded text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-100'}>
             {device.platform === 'android'
               ? 'Emulator'
               : device.platform === 'ios' || device.platform === 'tvos'
@@ -192,11 +192,11 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
                 : 'Emulator'}
           </span>
         )}
-        <span className="text-gray-500">•</span>
+        <span className="text-text-faint">•</span>
         <span className={`px-2 py-0.5 rounded text-xs font-semibold ${locationTypeClass}`}>
           {locationTypeLabel}
         </span>
-        <span className="text-gray-500">•</span>
+        <span className="text-text-faint">•</span>
         <span
           className={`px-2 py-0.5 rounded text-xs font-semibold tracking-wide ${getStatusColor(status)}`}
         >
@@ -206,7 +206,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
           device.platform === 'tvos' ||
           device.platform === 'android') && (
           <>
-            <span className="text-gray-500">•</span>
+            <span className="text-text-faint">•</span>
             <span
               className={`px-2 py-0.5 rounded text-xs font-semibold tracking-wide ${getStatusColor(
                 status,
@@ -222,13 +222,13 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
         )}
       </div>
       {/* Location, Utilization */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 mt-1 mb-2">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-text-muted mt-1 mb-2">
         <div className="flex items-center gap-1">
-          <MapPin className="w-4 h-4 text-yellow-400" />
+          <MapPin className="w-4 h-4 text-text-faint" />
           <span>{hostLocation}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Clock className="w-4 h-4 text-yellow-400" />
+          <Clock className="w-4 h-4 text-text-faint" />
           <span>
             {device.totalUtilizationTimeMilliSec
               ? prettyMilliseconds(device.totalUtilizationTimeMilliSec)
@@ -238,34 +238,34 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
       </div>
 
       {/* Tags (always on a new row) */}
-      <div className="flex items-center gap-1 text-xs text-gray-400 mb-2">
-        <Tag className="w-4 h-4 text-yellow-400" />
+      <div className="flex items-center gap-1 text-xs text-text-muted mb-2">
+        <Tag className="w-4 h-4 text-text-faint" />
         {device.tags && device.tags.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {device.tags.map((tag, idx) => (
               <span
                 key={idx}
-                className="px-2 py-0.5 text-xs font-medium bg-gray-700 rounded-full text-gray-300 truncate max-w-[100px]"
+                className="px-2 py-0.5 text-xs font-medium bg-surface-2 rounded-full text-text-muted truncate max-w-[100px]"
               >
                 {tag}
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-gray-400">-</span>
+          <span className="text-text-faint">-</span>
         )}
       </div>
       {device.activeUser && (
         <>
           <div className="flex flex-wrap items-center gap-1.5">
-            <User2Icon className="w-4 h-4 text-yellow-400" />
+            <User2Icon className="w-4 h-4 text-text-faint" />
             <Avatar
               firstname={device.activeUser.firstname}
               lastname={device.activeUser.lastname}
               size="sm"
               variant="text"
             />
-            <span className="text-sm text-white">
+            <span className="text-sm text-text-muted">
               {device.activeUser.firstname} {device.activeUser.lastname}
             </span>
           </div>
@@ -280,7 +280,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
               <button
                 onClick={handleUnblockDevice}
                 disabled={status === 'offline' || Boolean(device.cloud)}
-                className="hover:border hover:border-yellow-400 flex-1 px-4 py-2.5 bg-gray-700 text-gray-200 hover:bg-gray-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm rounded-md"
+                className="flex-1 px-3 py-1.5 bg-brand text-white hover:bg-brand-hover transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-brand-ring"
               >
                 Unblock
               </button>
@@ -289,7 +289,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
               <button
                 onClick={handleBlockDevice}
                 disabled={status === 'offline' || Boolean(device.cloud)}
-                className="hover:border hover:border-yellow-400 flex-1 px-4 py-2.5 bg-gray-700 text-gray-200 hover:bg-gray-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm rounded-md"
+                className="flex-1 px-3 py-1.5 bg-surface border border-border text-text hover:bg-surface-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-brand-ring"
               >
                 Block
               </button>
