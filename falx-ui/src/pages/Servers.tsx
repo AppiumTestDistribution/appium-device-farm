@@ -355,7 +355,7 @@ const Servers: React.FC = () => {
   );
 
   return (
-    <div className="flex h-[calc(100vh-60px)]">
+    <div className="flex bg-gray-900 min-h-[calc(100vh-56px)]">
       {/* Left Panel - Node List */}
       <div className="w-1/4 min-w-[250px] max-w-[350px] p-4 border-r border-gray-700 overflow-y-auto bg-gray-900">
         <div className="flex items-center gap-2 mb-6">

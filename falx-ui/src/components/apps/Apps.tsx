@@ -100,7 +100,7 @@ export default function AppList() {
   }, [fetchAppList]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
+    <div className="flex flex-col bg-gray-900 min-h-[calc(100vh-56px)]">
       <div className="flex items-center justify-between px-6 py-4">
         <button
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors border border-gray-600"

@@ -282,7 +282,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-gray-900 min-h-[calc(100vh-56px)] text-white">
       <h1 className="text-2xl font-bold mb-4 text-white">Admin Dashboard</h1>
 
       {error && (

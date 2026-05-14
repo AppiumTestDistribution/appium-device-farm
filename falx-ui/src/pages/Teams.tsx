@@ -333,7 +333,7 @@ const Teams: React.FC = () => {
   }
 
   return (
-    <div className="w-full p-6 text-gray-300">
+    <div className="w-full p-6 text-gray-300 bg-gray-900 min-h-[calc(100vh-56px)]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Teams Management</h1>
         <button

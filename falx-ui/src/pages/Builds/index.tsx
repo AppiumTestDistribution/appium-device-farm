@@ -204,7 +204,7 @@ function Builds() {
   };
 
   return (
-    <div className="max-w-8xl mx-auto">
+    <div className="max-w-8xl mx-auto bg-gray-900 min-h-[calc(100vh-56px)]">
       <BuildContainer
         selectedBuild={selectedBuild}
         handleBuildClick={handleSelectedBuildChange}
