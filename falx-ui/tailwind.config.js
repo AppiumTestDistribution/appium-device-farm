@@ -15,6 +15,32 @@ export default {
       xl: '1440px',
     },
     extend: {
+      colors: {
+        // Surfaces
+        'app-bg':      '#F8FAFC',
+        'surface':     '#FFFFFF',
+        'surface-2':   '#F1F5F9',
+        'border-soft': '#E2E8F0',
+        'border':      '#CBD5E1',
+
+        // Text
+        'text-strong': '#0F172A',
+        'text':        '#334155',
+        'text-muted':  '#64748B',
+        'text-faint':  '#94A3B8',
+
+        // Brand (indigo)
+        'brand':       '#4F46E5',
+        'brand-hover': '#4338CA',
+        'brand-soft':  '#EEF2FF',
+        'brand-ring':  '#A5B4FC',
+
+        // Status (light-bg-tuned)
+        'status-ok':   '#10B981',
+        'status-warn': '#F59E0B',
+        'status-err':  '#EF4444',
+        'status-info': '#3B82F6',
+      },
       animation: {
         'spin-slow': 'spin 20s linear infinite',
         'spin-slow-reverse': 'spin 15s linear infinite reverse',
