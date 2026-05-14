@@ -3,7 +3,7 @@ import { IDeviceFilter } from '../../interfaces/IDeviceFilter';
 import { IDevice } from '../../interfaces/IDevice';
 import DeviceFarmApiService from '../../api-service';
 import '../session/style.css';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Search } from 'lucide-react';
 import DeviceCard from '../devicecard/DeviceCard';
 
 interface IDeviceExplorerState {
@@ -62,11 +62,11 @@ function CustomDropdown({
   return (
     <div className="flex flex-col relative" ref={ref}>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-sm font-medium text-gray-200 text-left">{label}</label>
+        <label className="block text-sm font-medium text-text text-left">{label}</label>
         {clearable && value && (
           <button
             type="button"
-            className="text-xs text-blue-400 hover:underline ml-2"
+            className="text-xs text-brand hover:underline ml-2"
             onClick={onClear}
           >
             Clear
@@ -75,12 +75,12 @@ function CustomDropdown({
       </div>
       <button
         type="button"
-        className="w-full px-4 py-2.5 bg-gray-800/30 border border-gray-700/30 rounded-lg text-white text-left focus:outline-none focus:ring-1 focus:ring-blue-500/30 focus:border-transparent transition-all duration-200 text-sm flex items-center justify-between"
+        className="w-full px-4 py-2.5 bg-surface border border-border-soft rounded-lg text-text text-left focus:outline-none focus:ring-2 focus:ring-brand-ring focus:border-brand transition-all duration-200 text-sm flex items-center justify-between"
         onClick={() => setOpen((v) => !v)}
         style={{ textAlign: 'left' }}
       >
         <span
-          className={selected ? '' : 'text-gray-500'}
+          className={selected ? '' : 'text-text-faint'}
           style={{ textAlign: 'left', width: '100%' }}
         >
           {selected ? selected.label : placeholder || 'Select'}
@@ -96,11 +96,11 @@ function CustomDropdown({
         </svg>
       </button>
       {open && (
-        <div className="absolute left-0 right-0 mt-1 bg-gray-900/95 border-2 border-gray-600 rounded-lg shadow-lg z-10 max-h-56 overflow-auto">
+        <div className="absolute left-0 right-0 mt-1 bg-surface border border-border-soft rounded-lg shadow-lg z-10 max-h-56 overflow-auto">
           {options.map((opt) => (
             <div
               key={opt.label}
-              className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-700/40 ${opt.value === value ? 'bg-gray-700/30' : ''} text-gray-100`}
+              className={`px-4 py-2 text-sm cursor-pointer hover:bg-surface-2 ${opt.value === value ? 'bg-surface-2' : ''} text-text`}
               onClick={() => {
                 onChange(opt.value);
                 setOpen(false);
@@ -147,11 +147,11 @@ function MultiSelectDropdown({
   return (
     <div className="flex flex-col relative" ref={ref}>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-sm font-medium text-gray-200 text-left">{label}</label>
+        <label className="block text-sm font-medium text-text text-left">{label}</label>
         {clearable && values.length > 0 && (
           <button
             type="button"
-            className="text-xs text-blue-400 hover:underline ml-2"
+            className="text-xs text-brand hover:underline ml-2"
             onClick={onClear}
           >
             Clear
@@ -160,12 +160,12 @@ function MultiSelectDropdown({
       </div>
       <button
         type="button"
-        className="w-full px-4 py-2.5 bg-gray-800/30 border border-gray-700/30 rounded-lg text-white text-left focus:outline-none focus:ring-1 focus:ring-blue-500/30 focus:border-transparent transition-all duration-200 text-sm flex items-center justify-between"
+        className="w-full px-4 py-2.5 bg-surface border border-border-soft rounded-lg text-text text-left focus:outline-none focus:ring-2 focus:ring-brand-ring focus:border-brand transition-all duration-200 text-sm flex items-center justify-between"
         onClick={() => setOpen((v) => !v)}
         style={{ textAlign: 'left' }}
       >
         <span
-          className={selectedLabels.length ? '' : 'text-gray-500'}
+          className={selectedLabels.length ? '' : 'text-text-faint'}
           style={{ textAlign: 'left', width: '100%' }}
         >
           {selectedLabels.length ? selectedLabels.join(', ') : placeholder || 'Select'}
@@ -181,11 +181,11 @@ function MultiSelectDropdown({
         </svg>
       </button>
       {open && (
-        <div className="absolute left-0 right-0 mt-1 bg-gray-900/95 border-2 border-gray-600 rounded-lg shadow-lg z-10 max-h-56 overflow-auto">
+        <div className="absolute left-0 right-0 mt-1 bg-surface border border-border-soft rounded-lg shadow-lg z-10 max-h-56 overflow-auto">
           {options.map((opt) => (
             <div
               key={opt.value}
-              className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-700/40 flex items-center gap-2 ${values.includes(opt.value) ? 'bg-gray-700/30' : ''} text-gray-100`}
+              className={`px-4 py-2 text-sm cursor-pointer hover:bg-surface-2 flex items-center gap-2 ${values.includes(opt.value) ? 'bg-surface-2' : ''} text-text`}
               onClick={() => {
                 if (values.includes(opt.value)) {
                   onChange(values.filter((v) => v !== opt.value));
@@ -199,7 +199,7 @@ function MultiSelectDropdown({
                 type="checkbox"
                 checked={values.includes(opt.value)}
                 readOnly
-                className="form-checkbox h-4 w-4 text-blue-500 bg-gray-800 border-gray-600 rounded focus:ring-0"
+                className="form-checkbox h-4 w-4 text-brand bg-surface border-border-soft rounded focus:ring-0"
               />
               <span>{opt.label}</span>
             </div>
@@ -272,13 +272,13 @@ const EmptyState = () => {
           </svg>
         </div>
       </div>
-      <h3 className="text-2xl font-semibold text-gray-100 mb-2">No Devices Found</h3>
-      <p className="text-gray-400 max-w-md mb-6">
+      <h3 className="text-2xl font-semibold text-text mb-2">No Devices Found</h3>
+      <p className="text-text-muted max-w-md mb-6">
         It seems there are no devices available at the moment.
       </p>
       <button
         onClick={() => window.location.reload()}
-        className="px-6 py-3 bg-blue-600/90 text-white rounded-lg hover:bg-blue-700/90 transition-all duration-200 flex items-center gap-2"
+        className="px-6 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-all duration-200 flex items-center gap-2"
       >
         <RefreshCw className="w-4 h-4" />
         Refresh Devices
@@ -534,9 +534,9 @@ export default class DeviceExplorer extends React.Component<
                 },
               })
             }
-            className="w-4 h-4 text-blue-600 focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+            className="w-4 h-4 text-brand focus:ring-brand ring-offset-white focus:ring-2 bg-surface border-border-soft"
           />
-          <label htmlFor="inline-radio-all" className="ms-2 text-sm font-medium text-gray-300">
+          <label htmlFor="inline-radio-all" className="ms-2 text-sm font-medium text-text">
             All
           </label>
         </div>
@@ -555,9 +555,9 @@ export default class DeviceExplorer extends React.Component<
                 },
               })
             }
-            className="w-4 h-4 text-blue-600 focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+            className="w-4 h-4 text-brand focus:ring-brand ring-offset-white focus:ring-2 bg-surface border-border-soft"
           />
-          <label htmlFor="inline-radio-ready" className="ms-2 text-sm font-medium text-gray-300">
+          <label htmlFor="inline-radio-ready" className="ms-2 text-sm font-medium text-text">
             Ready
           </label>
         </div>
@@ -576,9 +576,9 @@ export default class DeviceExplorer extends React.Component<
                 },
               })
             }
-            className="w-4 h-4 text-blue-600 focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+            className="w-4 h-4 text-brand focus:ring-brand ring-offset-white focus:ring-2 bg-surface border-border-soft"
           />
-          <label htmlFor="inline-radio-busy" className="ms-2 text-sm font-medium text-gray-300">
+          <label htmlFor="inline-radio-busy" className="ms-2 text-sm font-medium text-text">
             Busy
           </label>
         </div>
@@ -597,16 +597,16 @@ export default class DeviceExplorer extends React.Component<
                 },
               })
             }
-            className="w-4 h-4 text-blue-600 focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600"
+            className="w-4 h-4 text-brand focus:ring-brand ring-offset-white focus:ring-2 bg-surface border-border-soft"
           />
-          <label htmlFor="inline-radio-offline" className="ms-2 text-sm font-medium text-gray-300">
+          <label htmlFor="inline-radio-offline" className="ms-2 text-sm font-medium text-text">
             Offline
           </label>
         </div>
         <div className="flex items-center me-3">
           <button
             onClick={this.fetchDevices}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg text-gray-200 hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-lg text-text hover:bg-surface-2 transition-colors"
           >
             <RefreshCw className={'w-4 h-4'} />
             Refresh
@@ -659,7 +659,7 @@ export default class DeviceExplorer extends React.Component<
     );
     const tagOptions = allTags.map((t) => ({ label: t, value: t }));
     return (
-      <div className="w-full min-h-screen bg-gray-900 p-6">
+      <div className="w-full bg-app-bg min-h-[calc(100vh-56px)] text-text px-6 py-6">
         <style>{styles}</style>
         <div className="max-w-[1600px] mx-auto space-y-6">
           {/* Search input and Filter Button */}
@@ -667,25 +667,16 @@ export default class DeviceExplorer extends React.Component<
             <div className="relative w-72">
               <input
                 type="text"
-                className="pl-10 pr-4 py-2.5 bg-gray-800/30 border border-gray-700/30 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500/30 focus:border-transparent transition-all duration-200 text-sm w-full"
+                className="bg-surface border border-border-soft rounded-md pl-9 pr-3 py-2 text-sm text-text placeholder-text-faint focus:outline-none focus:ring-2 focus:ring-brand-ring focus:border-brand w-full"
                 placeholder="Search with device name or udid"
                 value={this.state.filter.name}
                 onChange={(e) => this.setFilter({ name: e.target.value })}
               />
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-faint w-4 h-4 pointer-events-none" />
             </div>
             <button
               ref={this.filterButtonRef}
-              className={`flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg text-gray-200 hover:bg-gray-700 transition-colors border border-gray-700 ${showFilterPopup ? 'ring-2 ring-blue-500' : ''}`}
+              className={`bg-surface border border-border text-text hover:bg-surface-2 px-3 py-2 rounded-md text-sm font-medium inline-flex items-center gap-1.5 ${showFilterPopup ? 'ring-2 ring-brand-ring' : ''}`}
               onClick={() => this.setState({ showFilterPopup: !showFilterPopup })}
             >
               <svg
@@ -706,14 +697,14 @@ export default class DeviceExplorer extends React.Component<
             {showFilterPopup && (
               <div
                 ref={this.filterPopupRef}
-                className="absolute right-0 mt-2 z-50 bg-gray-900/95 rounded-lg p-0 w-[380px] border-2 border-gray-600 shadow-2xl animate-fadeIn"
+                className="absolute right-0 mt-2 z-50 bg-surface rounded-lg p-0 w-[380px] border border-border-soft shadow-2xl animate-fadeIn"
                 style={{ minWidth: 340 }}
               >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 pt-5 pb-2 border-b border-gray-800/30">
-                  <div className="text-lg font-semibold text-gray-100">Filter</div>
+                <div className="flex items-center justify-between px-6 pt-5 pb-2 border-b border-border-soft">
+                  <div className="text-lg font-semibold text-text">Filter</div>
                   <button
-                    className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-gray-800/30"
+                    className="text-text-faint hover:text-text transition-colors p-1.5 rounded-full hover:bg-surface-2"
                     onClick={() => this.setState({ showFilterPopup: false })}
                     aria-label="Close"
                   >
@@ -811,15 +802,15 @@ export default class DeviceExplorer extends React.Component<
                   />
                 </div>
                 {/* Footer */}
-                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-800/30 bg-gray-900/80 rounded-b-lg">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-border-soft bg-surface-2 rounded-b-lg">
                   <button
-                    className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-200"
+                    className="px-5 py-2.5 text-sm font-medium text-text bg-surface border border-border rounded-lg hover:bg-surface-2 transition-all duration-200"
                     onClick={() => this.setState({ filter: { ...DEFAULT_FILTER } })}
                   >
                     Reset
                   </button>
                   <button
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600/90 rounded-lg hover:bg-blue-700/90 transition-all duration-200"
+                    className="px-5 py-2.5 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand/90 transition-all duration-200"
                     onClick={() => {
                       this.fetchDevices();
                       this.setState({ showFilterPopup: false });
