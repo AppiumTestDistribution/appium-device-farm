@@ -3,7 +3,7 @@ import './App.css';
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DeviceExplorer from './components/device-explorer/device-explorer';
-import Header from './components/header/Header';
+import { AppLayout } from './components/layout/AppLayout';
 import Builds from './pages/Builds';
 import AppList from './components/apps/Apps';
 import { EnhancedTrends } from './components/stats/trends';
@@ -30,10 +30,7 @@ const ProtectedRouteWrapper: React.FC<ProtectedRouteWrapperProps> = ({
 }) => {
   return (
     <ProtectedRoute adminOnly={adminOnly}>
-      <div className="bg-gray-900">
-        <Header />
-        {children}
-      </div>
+      <AppLayout>{children}</AppLayout>
     </ProtectedRoute>
   );
 };
