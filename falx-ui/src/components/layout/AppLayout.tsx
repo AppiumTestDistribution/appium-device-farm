@@ -19,14 +19,14 @@ function Shell({ children }: { children: ReactNode }) {
   const { pinned } = useSidebarLayout();
   return (
     <div className="min-h-screen bg-app-bg text-text">
+      <TopBar />
       <Sidebar />
-      <div
-        className="flex min-h-screen flex-col transition-[margin-left] duration-200 ease-out"
+      <main
+        className="transition-[margin-left] duration-200 ease-out"
         style={{ marginLeft: pinned ? 240 : 56 }}
       >
-        <TopBar />
-        <main className="flex-1">{children}</main>
-      </div>
+        {children}
+      </main>
     </div>
   );
 }
