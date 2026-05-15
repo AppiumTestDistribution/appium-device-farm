@@ -14,3 +14,6 @@ src/public/*
 docs/reference
 .npmrc
 .playwright-mcp/
+
+# go-ios device-pairing identity (contains a private key)
+selfIdentity.plist

@@ -21,3 +21,4 @@ before committing to a slice.
 |---|------|--------|
 | 01 | [Android streaming via Tango](01-android-streaming-spike.md) | done 2026-05-15 — **GREEN**, proceed to slice |
 | 02 | [iOS streaming via WDA + go-ios](02-ios-streaming-spike.md) | Phase 1 done 2026-05-15 — streaming PASS, tap injection FAIL → spike 03 needed |
+| 03 | [iOS tap injection on iOS 26+](03-ios-tap-injection-spike.md) | not started — prerequisite for iOS device-use slice |

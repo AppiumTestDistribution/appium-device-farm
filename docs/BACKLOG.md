@@ -93,6 +93,51 @@ you go.
 - `falx-ui/` started as a copy of `dashboard-frontend/`. Keep upstream
   `dashboard-frontend/` untouched so upstream UI updates can be cherry-picked
   if useful.
+- **WDA + iOS 26 tap regression (spike 02, 2026-05-15).** WDA 12.2.2 (stock
+  Appium fork, May 2026 main) on iOS 26.4.2 silently no-ops every
+  tap-injection endpoint: `/wda/tap`, W3C `/actions`,
+  `/wda/dragfromtoforduration`, and `/element/<id>/click` all return
+  `200 null` with no visible UI effect. READ APIs and element finders
+  work fine; only write/dispatch is broken. Spike 03 is the prerequisite
+  follow-up before iOS device-use can ship. Hardware-button presses
+  (`/wda/pressButton`) showed anecdotal evidence of working — useful
+  fallback channel worth confirming.
+- **go-ios `runwda` bundle-ID convention shifted for iOS 17+ / Xcode 15+.**
+  Both `--bundleid` and `--testrunnerbundleid` must be the `.xctrunner`
+  runner-app bundle id (e.g. `com.you.WebDriverAgentRunner.xctrunner`).
+  The pre-iOS-17 convention of passing the test bundle id without the
+  `.xctrunner` suffix returns "Did not find test app for '…' on device"
+  on iOS 26. Update any internal docs that still show the old form.
+- **go-ios RSD tunnel daemon serialises poorly under concurrent
+  connections.** Spawning `ios runwda` + the two `ios forward`s in
+  parallel causes two of three to die with
+  `could not connect to RSD: read: connection reset by peer`. Spawn
+  sequentially with ~3 s after runwda and ~0.5 s between forwards.
+  Reliable. Documented in spike 02's server bridge.
+- **WDA's `/wda/tap/0` legacy element-id slot endpoint is removed.**
+  Use `/wda/tap` (no `/0`). The slot was deprecated years ago and 12.2.2
+  finally drops it; old tutorials that say "pass `0` for absolute screen
+  taps" return 404 now.
+- **WDA's MJPEG server uses a non-standard multipart boundary in
+  `Content-Type`.** The header value already includes the `--` prefix
+  that RFC 2046 says belongs only in the body delimiter
+  (`boundary=--BoundaryString`; body separator is exactly
+  `--BoundaryString`). Clients parsing the stream must use the header
+  value verbatim — *don't* prepend `--`.
+- **WDA's MJPEG server is single-client.** A second connection gets the
+  Content-Type but no body data. Falx must multiplex one upstream MJPEG
+  into N browser viewers on the hub.
+- **WDA cannot unlock past Face ID / passcode.** `/wda/unlock` only
+  wakes the screen; the device must be manually unlocked.
+  Long-running automation needs Auto-Lock = Never. Locked-state shows
+  as a black MJPEG frame with no error indicator — Falx UI needs a
+  "device is locked" overlay driven by `/wda/locked`.
+- **WDA tap coords are iOS POINTS, not physical pixels.** The MJPEG
+  stream returns native pixels (1284×2778 on iPhone 12 Pro Max @3x)
+  but WDA's `/wda/screen` reports `screenSize: {428, 926}, scale: 3`
+  and tap APIs work in the 428×926 point space. Client must divide
+  pixel coords by `screen.scale` (or compute scale from
+  `screen.screenSize / image.naturalWidth`) before posting taps.
 
 ## Open questions
 
