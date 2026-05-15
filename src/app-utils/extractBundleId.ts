@@ -44,5 +44,9 @@ export default async function getWDABundleID() {
   await createZip();
   const cache = new AppInfosCache(log);
   const info = await cache.put(ipaPath);
-  return await info.CFBundleIdentifier;
+  const bundleId = info.CFBundleIdentifier;
+  if (!bundleId) {
+    throw new Error('Cannot extract CFBundleIdentifier from WDA IPA');
+  }
+  return bundleId;
 }
