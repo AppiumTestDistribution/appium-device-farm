@@ -325,7 +325,6 @@ export function safeParseJson(jsonString: string) {
   }
 }
 
-
 export async function registerErrorHandlers() {
   process.on('unhandledRejection', (reason, p) => {
     log.error('******  UnhandledRejection ******');
