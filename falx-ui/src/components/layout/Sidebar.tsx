@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useSidebarLayout } from './SidebarLayoutContext';
 import { SidebarItem } from './SidebarItem';
+import { logo } from './logo';
 
 const RAIL_WIDTH = 56;
 const DRAWER_WIDTH = 240;
@@ -69,7 +70,7 @@ export function Sidebar() {
           : { type: 'spring', stiffness: 300, damping: 30 }
       }
       className={[
-        'fixed left-0 top-14 bottom-0 z-40',
+        'fixed left-0 top-0 bottom-0 z-50',
         'flex flex-col',
         'bg-surface-2 border-r border-border-soft',
         // Drawer overlay shadow only when hover-expanded (not pinned).
@@ -78,23 +79,29 @@ export function Sidebar() {
       ].join(' ')}
       aria-label="Primary"
     >
-      {/* Pin toggle, only when drawer is expanded */}
-      {expanded && (
-        <div className="flex items-center justify-end h-12 px-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setPinned(!pinned)}
-            aria-label={pinned ? 'Unpin sidebar' : 'Pin sidebar'}
-            aria-pressed={pinned}
-            className="rounded p-1 text-text-muted hover:bg-surface-2 hover:text-text-strong focus:outline-none focus:ring-2 focus:ring-brand-ring"
-          >
-            <ChevronsRight
-              size={16}
-              className={`transition-transform ${pinned ? 'rotate-180' : ''}`}
-            />
-          </button>
-        </div>
-      )}
+      {/* Header row: logo (+ wordmark + pin when expanded). Always h-14 so it visually aligns with the top bar below. */}
+      <div className="flex items-center h-14 px-3 shrink-0">
+        <img src={logo} alt="" className="h-7 w-7 shrink-0" />
+        {expanded && (
+          <>
+            <span className="ml-2 font-semibold text-text-strong tracking-tight">Falx</span>
+            <button
+              type="button"
+              onClick={() => setPinned(!pinned)}
+              aria-label={pinned ? 'Unpin sidebar' : 'Pin sidebar'}
+              aria-pressed={pinned}
+              className="ml-auto rounded p-1 text-text-muted hover:bg-surface-2 hover:text-text-strong focus:outline-none focus:ring-2 focus:ring-brand-ring"
+            >
+              <ChevronsRight
+                size={16}
+                className={`transition-transform ${pinned ? 'rotate-180' : ''}`}
+              />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="h-px bg-border-soft mx-2" />
 
       {/* Primary section */}
       <nav className="flex flex-col py-2 gap-0.5">

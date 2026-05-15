@@ -4,12 +4,13 @@ import Avatar from '../common/Avatar';
 import ProfilePopup from '../header/ProfilePopup';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCurrentPageTitle } from './useCurrentPageTitle';
-import { logo } from './logo';
+import { useSidebarLayout } from './SidebarLayoutContext';
 
 export function TopBar() {
   const title = useCurrentPageTitle();
   const navigate = useNavigate();
   const { user, logout, isAdmin, isAuthDisabled } = useAuth();
+  const { pinned } = useSidebarLayout();
   const [profileOpen, setProfileOpen] = useState(false);
 
   const handleLogout = () => {
@@ -20,19 +21,15 @@ export function TopBar() {
 
   return (
     <header
-      className="sticky top-0 z-50 h-14 bg-surface border-b border-border-soft"
+      className="sticky top-0 z-40 h-14 bg-surface border-b border-border-soft"
       role="banner"
     >
-      <div className="flex items-center justify-between h-full px-4">
-        <div className="flex items-center min-w-0">
-          {/* Brand: logo + wordmark + divider — fixed at 56px wide column visually aligns with sidebar rail */}
-          <div className="flex items-center w-12 shrink-0">
-            <img src={logo} alt="" className="h-7 w-7" />
-          </div>
-          <span className="font-semibold text-text-strong tracking-tight mr-4">Falx</span>
-          <div className="h-6 w-px bg-border-soft mr-4" aria-hidden />
-          <h1 className="text-lg font-semibold text-text-strong truncate">{title}</h1>
-        </div>
+      <div
+        className="flex items-center justify-between h-full pr-4 transition-[padding-left] duration-200 ease-out"
+        style={{ paddingLeft: (pinned ? 240 : 56) + 16 }}
+      >
+        {/* paddingLeft = sidebar width + 16px gutter, so the title aligns with content below */}
+        <h1 className="text-lg font-semibold text-text-strong truncate">{title}</h1>
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="relative">
