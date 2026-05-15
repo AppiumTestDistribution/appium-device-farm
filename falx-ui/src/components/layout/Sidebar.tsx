@@ -70,7 +70,7 @@ export function Sidebar() {
           : { type: 'spring', stiffness: 300, damping: 30 }
       }
       className={[
-        'fixed left-0 top-14 bottom-0 z-40',
+        'fixed left-0 top-0 bottom-0 z-50',
         'flex flex-col',
         'bg-surface-2 border-r border-border-soft',
         // Drawer overlay shadow only when hover-expanded (not pinned).
@@ -80,7 +80,7 @@ export function Sidebar() {
       aria-label="Primary"
     >
       {/* Header row: logo (+ wordmark + pin when expanded) */}
-      <div className="flex items-center h-12 px-3 shrink-0">
+      <div className="flex items-center h-14 px-3 shrink-0">
         <img src={logo} alt="" className="h-7 w-7 shrink-0" />
         {expanded && (
           <>

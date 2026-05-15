@@ -19,11 +19,10 @@ export function TopBar() {
 
   return (
     <header
-      className="sticky top-0 z-50 h-14 bg-surface border-b border-border-soft"
+      className="sticky top-0 z-40 h-14 bg-surface border-b border-border-soft"
       role="banner"
     >
-      <div className="flex items-center justify-between h-full pl-[72px] pr-6">
-        {/* pl-[72px] = 56px rail + 16px page gutter */}
+      <div className="flex items-center justify-between h-full pl-6 pr-6">
         <h1 className="text-lg font-semibold text-text-strong truncate">{title}</h1>
 
         <div className="flex items-center gap-3">
