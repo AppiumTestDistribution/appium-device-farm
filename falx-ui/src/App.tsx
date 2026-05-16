@@ -17,6 +17,7 @@ import Teams from './pages/Teams';
 import Devices from './pages/Devices';
 import Servers from './pages/Servers';
 import ProfilePage from './pages/Profiles/ProfilePage';
+import UseDevice from './pages/UseDevice/UseDevice';
 
 // Protected route wrapper component
 interface ProtectedRouteWrapperProps {
@@ -59,6 +60,7 @@ const protectedRoutes: ProtectedRoute[] = [
   { path: '/devices', element: <Devices />, adminOnly: true },
   { path: '/servers', element: <Servers /> },
   { path: '/profile', element: <ProfilePage /> },
+  { path: '/use-device/:udid', element: <UseDevice /> },
   // {
   //   path: '/servers/:nodeId/terminal',
   //   element: (
