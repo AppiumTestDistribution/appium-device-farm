@@ -72,14 +72,14 @@ Per [CLAUDE.md](../../../CLAUDE.md): new top-level dependencies require an ADR.
 - Modify: `falx-ui/package.json` (UI deps)
 - Add: `src/device-stream/android/scrcpy-server.jar`
 
-- [ ] **Step 1: Confirm spike artifacts exist**
+- [x] **Step 1: Confirm spike artifacts exist**
 
 ```bash
 ls -la /tmp/falx-spike-android/server/scrcpy-server.jar
 ```
 Expected: file exists, ~90164 bytes. If not, abort and rebuild from Spike 01 findings.
 
-- [ ] **Step 2: Create the ADR**
+- [x] **Step 2: Create the ADR**
 
 ```bash
 mkdir -p docs/decisions
@@ -132,7 +132,7 @@ On-device runtime: `scrcpy-server-v3.3.3.jar` shipped as a binary asset under `s
 - WebCodecs is Chromium-only. Falx-UI must feature-detect and show a clear "use Chrome or Edge" message in other browsers.
 ```
 
-- [ ] **Step 3: Add server-side npm deps**
+- [x] **Step 3: Add server-side npm deps**
 
 Run from repo root:
 ```bash
@@ -144,7 +144,7 @@ npm install --save \
   @yume-chan/stream-extra@^2.5.3
 ```
 
-- [ ] **Step 4: Add falx-ui npm deps**
+- [x] **Step 4: Add falx-ui npm deps**
 
 ```bash
 cd falx-ui
@@ -155,7 +155,7 @@ npm install --save \
 cd ..
 ```
 
-- [ ] **Step 5: Vendor the scrcpy-server.jar**
+- [x] **Step 5: Vendor the scrcpy-server.jar**
 
 ```bash
 mkdir -p src/device-stream/android
@@ -164,7 +164,7 @@ shasum -a 256 src/device-stream/android/scrcpy-server.jar
 ```
 Expected sha256 starts with `7e70323b`. If different, the spike's JAR was replaced; halt and reconcile.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add docs/decisions/0001-streaming-toolchain.md package.json package-lock.json falx-ui/package.json falx-ui/package-lock.json src/device-stream/android/scrcpy-server.jar
@@ -188,7 +188,7 @@ Pure type/constant definitions. No logic.
 **Files:**
 - Create: `src/device-stream/types.ts`
 
-- [ ] **Step 1: Write the types file**
+- [x] **Step 1: Write the types file**
 
 ```typescript
 // src/device-stream/types.ts
@@ -250,14 +250,14 @@ export const ACTION_UP = 1;
 export const ACTION_MOVE = 2;
 ```
 
-- [ ] **Step 2: Verify TS compiles**
+- [x] **Step 2: Verify TS compiles**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -i 'device-stream' || echo "OK"
 ```
 Expected: `OK` (no errors mentioning device-stream).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/device-stream/types.ts
@@ -274,7 +274,7 @@ Pure-logic binary protocol helpers. Testable without a device.
 - Create: `src/device-stream/android/framing.ts`
 - Test: `test/unit/device-stream-framing.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-framing.spec.ts`:
 ```typescript
@@ -374,14 +374,14 @@ describe('device-stream framing', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-framing.spec.ts
 ```
 Expected: failures with `Cannot find module '../../src/device-stream/android/framing'`.
 
-- [ ] **Step 3: Implement the framing module**
+- [x] **Step 3: Implement the framing module**
 
 `src/device-stream/android/framing.ts`:
 ```typescript
@@ -450,14 +450,14 @@ export function decodeClientKeycodeMessage(
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-framing.spec.ts
 ```
-Expected: all 9 tests pass.
+Expected: all 9 tests pass. (Actually 10 tests passed.)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/android/framing.ts test/unit/device-stream-framing.spec.ts
@@ -474,7 +474,7 @@ Tracks active Use Device sessions, exposes the state machine, fans EventBus sess
 - Create: `src/device-stream/registry.ts`
 - Test: `test/unit/device-stream-registry.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-registry.spec.ts`:
 ```typescript
@@ -586,14 +586,14 @@ describe('UseDeviceRegistry', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-registry.spec.ts
 ```
 Expected: failures with `Cannot find module '../../src/device-stream/registry'`.
 
-- [ ] **Step 3: Implement the registry**
+- [x] **Step 3: Implement the registry**
 
 `src/device-stream/registry.ts`:
 ```typescript
@@ -678,14 +678,14 @@ export class UseDeviceRegistry {
 export const useDeviceRegistry = new UseDeviceRegistry();
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-registry.spec.ts
 ```
-Expected: all tests pass.
+Expected: all tests pass. (7 tests passed; plan estimated "8".)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/registry.ts test/unit/device-stream-registry.spec.ts
@@ -702,14 +702,14 @@ Wraps Tango's `AdbScrcpyClient`. Tests use sinon to stub the scrcpy client witho
 - Create: `src/device-stream/android/bridge.ts`
 - Test: `test/unit/device-stream-android-bridge.spec.ts`
 
-- [ ] **Step 1: Read the spike's bridge code for reference**
+- [x] **Step 1: Read the spike's bridge code for reference**
 
 ```bash
 cat /tmp/falx-spike-android/server/index.ts | sed -n '93,247p'
 ```
 This is the working spike implementation. The bridge module refactors lines 93–247 into a class, removes the WS coupling, and adds a leftover-process pre-flight kill.
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 `test/unit/device-stream-android-bridge.spec.ts`:
 ```typescript
@@ -802,14 +802,14 @@ describe('AndroidScrcpyBridge', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-android-bridge.spec.ts
 ```
 Expected: failures, missing module.
 
-- [ ] **Step 4: Implement the bridge**
+- [x] **Step 4: Implement the bridge**
 
 `src/device-stream/android/bridge.ts`:
 ```typescript
@@ -1030,14 +1030,14 @@ async function defaultPushJar(adb: Adb, jarBytes: Uint8Array): Promise<void> {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-android-bridge.spec.ts
 ```
-Expected: all tests pass.
+Expected: all tests pass. (5 passing.) Deviations from plan code: writer.getWriter() hoisted out of pipe write callback (correctness); sizeChanged handler registered before start() resolves (test timing); pushJar seam signature changed to take jarPath instead of jarBytes so test stubs don't need the file; `proc.exited` not `.exit` (real Tango API); `subprocess.shellProtocol` null-guard; `as any` casts on inject* args for @yume-chan branded enum types.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/device-stream/android/bridge.ts test/unit/device-stream-android-bridge.spec.ts
@@ -1054,7 +1054,7 @@ Wires the registry + bridge to Express routes. Subscribes to the upstream EventB
 - Create: `src/device-stream/router.ts`
 - Modify: `src/dashboard/router.ts` (mount the new module)
 
-- [ ] **Step 1: Survey the existing dashboard router**
+- [x] **Step 1: Survey the existing dashboard router**
 
 ```bash
 grep -n "router.get\|router.post\|router.use" src/dashboard/router.ts | head -20
@@ -1062,14 +1062,14 @@ grep -n "registerRoutes\|register" src/dashboard/router.ts | head -5
 ```
 Note where new routes mount. The new module exports a registration function called by `dashboard/router.ts`.
 
-- [ ] **Step 2: Survey the EventBus surface**
+- [x] **Step 2: Survey the EventBus surface**
 
 ```bash
 grep -rn "EventBus\|sessionEnded\|sessionFinished" src/ --include="*.ts" | grep -v node_modules | head -20
 ```
 Identify the exact event name fired when an Appium session ends. The registry will subscribe to it.
 
-- [ ] **Step 3: Write the router module**
+- [x] **Step 3: Write the router module**
 
 `src/device-stream/router.ts`:
 ```typescript
@@ -1338,7 +1338,7 @@ async function handleWsConnection(
 }
 ```
 
-- [ ] **Step 4: Mount the router in dashboard/router.ts**
+- [x] **Step 4: Mount the router in dashboard/router.ts**
 
 Read the existing file to find the right spot:
 ```bash
@@ -1353,7 +1353,7 @@ import { registerDeviceStreamRoutes } from '../device-stream/router';
   registerDeviceStreamRoutes(router, pluginArgs);
 ```
 
-- [ ] **Step 5: Attach the WS upgrade handler at plugin start**
+- [x] **Step 5: Attach the WS upgrade handler at plugin start**
 
 ```bash
 grep -rn "createServer\|httpServer\|http\\.Server" src/ --include="*.ts" | grep -v node_modules | head -10
@@ -1362,13 +1362,13 @@ Find where the Appium plugin gets the underlying HTTP server. Add a call to `att
 
 If the existing plugin doesn't expose the underlying HTTP server cleanly, hook into the Appium plugin lifecycle's `updateServer` (per `plugin.ts` pattern). Read `src/plugin.ts` around line 423 for the existing `updateServer` shape and add the WS upgrade attach there.
 
-- [ ] **Step 6: Verify compile**
+- [x] **Step 6: Verify compile**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -i 'device-stream' || echo "OK"
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/device-stream/router.ts src/dashboard/router.ts src/plugin.ts
@@ -1384,14 +1384,14 @@ When an Appium session ends for any reason (admin kill, idle sweep, Appium clien
 **Files:**
 - Modify: `src/device-stream/router.ts` (add EventBus subscription on registration)
 
-- [ ] **Step 1: Identify the EventBus end-of-session event name**
+- [x] **Step 1: Identify the EventBus end-of-session event name** — `AfterSessionDeletedEvent` at `src/events/after-session-deleted-event.ts`. Fired by upstream at every Appium session-end path; payload `{ sessionId, device? }`. EventBus API is `EventBus.addListener(AfterSessionDeletedEvent.listener(cb))` — NOT `EventBus.on('name', cb)` as the plan assumed. Plan code adjusted accordingly.
 
 ```bash
 grep -rn "EventBus\|EventEmitter\|sessionEnd\|deleteSession\|delete.*session" src/ --include="*.ts" | grep -v node_modules | grep -v "test/" | head -20
 ```
 Falx upstream uses an EventBus pattern. Identify the exact event name fired on session deletion. Common names: `session:ended`, `sessionFinished`, `delete_session`. If multiple exist, prefer the one fired on EVERY teardown path (including external cleanups).
 
-- [ ] **Step 2: Subscribe at module init**
+- [x] **Step 2: Subscribe at module init**
 
 Append to `src/device-stream/router.ts`, in `registerDeviceStreamRoutes`:
 
@@ -1410,7 +1410,7 @@ import { Container } from 'typedi';
 import type { EventBus } from '../events/event-bus'; // adjust path to match upstream
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/device-stream/router.ts
@@ -1426,7 +1426,7 @@ Mocks `AdbScrcpyClient` and exercises the full start → stream → stop → eve
 **Files:**
 - Create: `test/integration/device-stream-lifecycle.spec.ts`
 
-- [ ] **Step 1: Write the integration test**
+- [x] **Step 1: Write the integration test**
 
 `test/integration/device-stream-lifecycle.spec.ts`:
 ```typescript
@@ -1487,14 +1487,14 @@ describe('device-stream lifecycle (integration)', function () {
 });
 ```
 
-- [ ] **Step 2: Run the integration test**
+- [x] **Step 2: Run the integration test**
 
 ```bash
 npx mocha -r ts-node/register test/integration/device-stream-lifecycle.spec.ts
 ```
 Expected: pass (one assertion).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add test/integration/device-stream-lifecycle.spec.ts
@@ -1510,14 +1510,14 @@ The frontend's wrapper for the new backend endpoints.
 **Files:**
 - Create: `falx-ui/src/api-service/use-device.ts`
 
-- [ ] **Step 1: Survey existing API service pattern**
+- [x] **Step 1: Survey existing API service pattern** — controller surveyed: api-client is fetch-based, returns parsed JSON on 2xx and the raw `Response` on non-2xx. Plan's axios-style code adapted.
 
 ```bash
 ls falx-ui/src/api-service
 head -30 falx-ui/src/api-service/api-client.ts
 ```
 
-- [ ] **Step 2: Implement the API service**
+- [x] **Step 2: Implement the API service** — also includes backend tweak: `POST /use-device/stop` now returns `200 + {}` instead of `204` so the api-client's `response.json()` doesn't throw. One-line patch to `src/device-stream/router.ts`.
 
 `falx-ui/src/api-service/use-device.ts`:
 ```typescript
@@ -1546,7 +1546,7 @@ export async function endUseDeviceSession(sessionId: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/api-service/use-device.ts
@@ -1562,7 +1562,7 @@ Shown if WebCodecs / H.264 is unavailable.
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/BrowserUnsupported.tsx`
 
-- [ ] **Step 1: Implement the component**
+- [x] **Step 1: Implement the component**
 
 ```typescript
 // falx-ui/src/pages/UseDevice/BrowserUnsupported.tsx
@@ -1591,7 +1591,7 @@ export function BrowserUnsupported() {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/BrowserUnsupported.tsx
@@ -1607,14 +1607,14 @@ The load-bearing component: WebSocket + WebCodecs decoder + canvas + pointer/key
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/AndroidStreamCanvas.tsx`
 
-- [ ] **Step 1: Read the client spike for reference**
+- [x] **Step 1: Read the client spike for reference** — controller read it. The plan's import names were wrong; corrected for the implementer: `BitmapVideoFrameRenderer` (not `WebCodecsVideoDecoderRenderer`), `decoder.writable.getWriter()` (not `decoder.writer`), `ScrcpyVideoCodecId.H264` (not the string `'h264'`).
 
 ```bash
 cat /tmp/falx-spike-android/client/src/App.tsx
 ```
 The spike's decoder + pointer logic is the source of truth. Adapt it into a function component.
 
-- [ ] **Step 2: Implement the component using forwardRef + useImperativeHandle**
+- [x] **Step 2: Implement the component using forwardRef + useImperativeHandle**
 
 `falx-ui/src/pages/UseDevice/AndroidStreamCanvas.tsx`:
 ```typescript
@@ -1760,7 +1760,7 @@ export const AndroidStreamCanvas = forwardRef<AndroidStreamHandle, Props>(
 );
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/AndroidStreamCanvas.tsx
@@ -1776,7 +1776,7 @@ Renders Back / Home / Recents / Stop.
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/ControlToolbar.tsx`
 
-- [ ] **Step 1: Implement the component**
+- [x] **Step 1: Implement the component**
 
 `falx-ui/src/pages/UseDevice/ControlToolbar.tsx`:
 ```typescript
@@ -1828,7 +1828,7 @@ export function ControlToolbar(props: Props) {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/ControlToolbar.tsx
@@ -1844,7 +1844,7 @@ Composes the page: browser detection, start request, mounts AndroidStreamCanvas 
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/UseDevice.tsx`
 
-- [ ] **Step 1: Implement the page using a ref to the canvas**
+- [x] **Step 1: Implement the page using a ref to the canvas**
 
 `falx-ui/src/pages/UseDevice/UseDevice.tsx`:
 ```typescript
@@ -1942,7 +1942,7 @@ export default function UseDevice() {
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/UseDevice.tsx
@@ -1956,13 +1956,13 @@ git commit -m "feat(falx-ui): UseDevice page composes stream + toolbar"
 **Files:**
 - Modify: `falx-ui/src/App.tsx`
 
-- [ ] **Step 1: Read existing route list**
+- [x] **Step 1: Read existing route list** — controller surveyed: routes live in a `protectedRoutes` array (App.tsx ~line 46). Just append an array entry; the wrapper is applied automatically.
 
 ```bash
 sed -n '1,80p' falx-ui/src/App.tsx
 ```
 
-- [ ] **Step 2: Add the route**
+- [x] **Step 2: Add the route**
 
 Find the protected routes block in `falx-ui/src/App.tsx`. Add:
 ```tsx
@@ -1978,7 +1978,7 @@ import UseDevice from './pages/UseDevice/UseDevice';
 />
 ```
 
-- [ ] **Step 3: Verify dev build**
+- [x] **Step 3: Verify dev build**
 
 ```bash
 cd falx-ui
@@ -1987,7 +1987,7 @@ cd ..
 ```
 Expected: build succeeds.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add falx-ui/src/App.tsx
@@ -2001,14 +2001,14 @@ git commit -m "feat(falx-ui): mount /use-device/:udid route under AppLayout"
 **Files:**
 - Modify: `falx-ui/src/components/devicecard/DeviceCard.tsx`
 
-- [ ] **Step 1: Read current DeviceCard structure**
+- [x] **Step 1: Read current DeviceCard structure** — controller surveyed: action-buttons row at ~line 278 inside `<div className="pt-2 flex gap-3">`. Existing Block/Unblock use `bg-brand` theme tokens, not raw Tailwind blue.
 
 ```bash
 sed -n '1,40p' falx-ui/src/components/devicecard/DeviceCard.tsx
 grep -n "Block\|Unblock\|action" falx-ui/src/components/devicecard/DeviceCard.tsx | head -10
 ```
 
-- [ ] **Step 2: Add the button**
+- [x] **Step 2: Add the button** — uses `bg-brand` / `bg-brand-hover` / `focus:ring-brand-ring` theme tokens (per 2026-05-15 UI shell slice convention) instead of the plan's raw Tailwind blue.
 
 In `falx-ui/src/components/devicecard/DeviceCard.tsx`, add a navigation hook:
 ```typescript
@@ -2032,13 +2032,13 @@ In the action-buttons row, after the existing Block/Unblock button (or before �
 
 Match the existing light-theme conventions from the 2026-05-15 UI shell slice.
 
-- [ ] **Step 3: Verify dev build**
+- [x] **Step 3: Verify dev build**
 
 ```bash
 cd falx-ui && npm run build && cd ..
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add falx-ui/src/components/devicecard/DeviceCard.tsx
@@ -2054,14 +2054,14 @@ Keeps the proprietary path linkable during dev.
 **Files:**
 - Modify: `falx-ui/src/components/header/Header.tsx` (or wherever the topbar lives — check `falx-ui/src/components/layout/TopBar.tsx` first since the UI shell slice introduced that)
 
-- [ ] **Step 1: Locate the topbar component**
+- [x] **Step 1: Locate the topbar component** — `falx-ui/src/components/layout/TopBar.tsx`. Right-side utility cluster has just the profile button today.
 
 ```bash
 ls falx-ui/src/components/layout/
 grep -rn "TopBar\|Header" falx-ui/src/components/layout/ falx-ui/src/components/header/ 2>/dev/null | head -10
 ```
 
-- [ ] **Step 2: Add the dropdown entry**
+- [x] **Step 2: Add the dropdown entry** — added as a styled `<a>` link (`text-text-soft hover:text-text` theme tokens) before the profile button. No dropdown component existed, so used a single inline link.
 
 In the utility cluster (right side of the topbar), add a link or dropdown item:
 ```tsx
@@ -2077,7 +2077,7 @@ In the utility cluster (right side of the topbar), add a link or dropdown item:
 
 If a dropdown menu component already exists in the topbar, add it as an item there instead.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/components/layout/TopBar.tsx  # or the actual file path
@@ -2088,21 +2088,11 @@ git commit -m "feat(falx-ui): Legacy Use Device link in topbar (dev-only fallbac
 
 ## Task 16: Run full test suite
 
-- [ ] **Step 1: Run existing tests + new tests**
+- [x] **Step 1: Run existing tests + new tests** — `npm test`: **148 passing, 4 pending, 0 failures.** Includes the 23 new device-stream tests + the 125 pre-existing tests; the ES2020 target bump and EventBus/dashboard/plugin edits introduced no regressions.
 
-```bash
-npm test
-```
-Expected: all tests pass. Resolve any failures.
+- [x] **Step 2: Build the UI** — `cd falx-ui && npm run build`: **2,092.89 kB raw / 678.96 kB gzipped.** Baseline on `main` measured by controller: 2,035.65 kB raw / 658.85 kB gzipped. **Delta: +57 KB raw, +20 KB gzipped** — well under the spec's <200 KB gzipped acceptance criterion.
 
-- [ ] **Step 2: Build the UI**
-
-```bash
-cd falx-ui && npm run build && cd ..
-```
-Expected: build succeeds, bundle size reported. Note Tango decoder delta < 200 KB gzipped per acceptance criteria.
-
-- [ ] **Step 3: Commit if any fixes needed**
+- [x] **Step 3: Commit if any fixes needed** — no fixes required.
 
 If you needed to fix anything to make tests pass:
 ```bash

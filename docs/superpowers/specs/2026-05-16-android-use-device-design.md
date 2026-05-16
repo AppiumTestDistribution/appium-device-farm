@@ -482,3 +482,90 @@ Per [CLAUDE.md](../../../CLAUDE.md), new top-level dependencies require
 an ADR. The five `@yume-chan/*` npm packages plus the bundled GPL-v3
 `scrcpy-server.jar` warrant a single ADR covering the streaming
 toolchain choice. ADR drafting is part of the implementation plan.
+
+---
+
+## 7. Implementation findings (2026-05-17)
+
+End-to-end manual verification on the Samsung Galaxy Note9 (Android 10,
+udid `27fc9e35e9217ece`) surfaced three integration bugs after the unit /
+integration tests went green. All three were patched in a single follow-up
+commit; spec contract is otherwise unchanged.
+
+### 7.1 Upstream `createSession` crash on missing `firstMatch`
+
+**Symptom.** First click on **Use Device** returned a 500 from the inner
+POST `/wd/hub/session`. Backend stack:
+
+```
+TypeError: Cannot read properties of undefined (reading '0')
+    at DevicePlugin.createSession (lib/src/plugin.js:278:68)
+```
+
+**Cause.** Upstream's `createSession` does
+`Object.assign({}, caps.firstMatch[0], caps.alwaysMatch)` unconditionally.
+Our `/use-device/start` body only sent `alwaysMatch`, so `caps.firstMatch`
+was `undefined` and the `[0]` access threw.
+
+**Fix.** Send `firstMatch: [{}]` alongside `alwaysMatch`. Standard W3C
+shape; one-line change in `src/device-stream/router.ts`.
+
+### 7.2 `scrcpy-server.jar` not copied to `lib/`
+
+**Symptom.** After the `firstMatch` fix, `/start` failed with
+`ENOENT: ... lib/src/device-stream/android/scrcpy-server.jar`.
+
+**Cause.** `tsc -b` only compiles `.ts` files. The repo's `copy-files`
+script (run after `tsc`) copied `src/public/` to `lib/` but had no rule
+for the new binary asset.
+
+**Fix.** Extended the `copy-files` script in `package.json` to also
+`mkdir -p lib/src/device-stream/android && cp` the JAR. Future
+`npm run build` invocations carry the JAR automatically.
+
+### 7.3 `/start` deadlock waiting for first `sizeChanged`
+
+**Symptom.** After the JAR fix, `/start` hung indefinitely. Trace logs
+showed `step3: bridge.start() resolved` followed by
+`step4: awaiting first sizeChanged event` with no further progress.
+
+**Cause.** scrcpy's `sizeChanged` event fires only once the video
+ReadableStream is being **consumed**. Our `/start` was waiting for
+`sizeChanged` before responding with the `streamUrl`. The stream
+wasn't consumed until the client opened the WS. The client couldn't
+open the WS until it received the `streamUrl`. Classic chicken-and-egg.
+
+**Fix.** Drop the "wait for dimensions in `/start`" step. `/start`
+now returns immediately after `bridge.start()` with `deviceWidth=0`
+/ `deviceHeight=0` placeholders. When the WS connects,
+`pipeVideoTo` consumes the stream, `sizeChanged` fires, the server
+sends a `META` frame over the WS with real dimensions, and the
+client's `WebCodecsVideoDecoder.sizeChanged` callback resizes the
+canvas. The brief 0×0 phase is invisible (canvas isn't rendered
+until the first decoded frame).
+
+**Spec impact.** `StartUseDeviceResponse.deviceWidth/Height` are now
+nominally always `0` from the backend on Android. The contract still
+includes them for forward-compatibility (iOS slice may populate them
+from WDA screen-size queries), but Falx-UI clients should not rely on
+them — read dimensions from the WS `META` packet instead. The
+`AndroidStreamCanvas` already follows this pattern.
+
+### 7.4 Verification outcome
+
+After all three patches, on Samsung Galaxy Note9 / Android 10:
+- `/start` returns in ~3.4 s (well under 5 s budget).
+- Live H.264 video flows over WS, canvas renders Google Now Launcher
+  with full responsiveness.
+- Tap injection: dispatched pointer event at normalized (0.56, 0.86)
+  correctly opened Google Play (the Play Store icon's position).
+- **Back / Home / Recents** toolbar buttons each invoke the correct
+  Android keycode (4 / 3 / 187) and the device reacts within ~1 s.
+- **Stop** tears down: redirects to `/`, deletes the Appium session,
+  `[device-stream] session ... terminated` in logs, and
+  `adb shell ps -A | grep scrcpy` is empty afterwards (no leak).
+
+**Cross-vendor coverage.** Only Samsung tested in this run. Per
+spec §4 testing requirements, a second Android vendor family
+(Pixel / Xiaomi / OnePlus / etc.) must be verified before merge.
+This is the only remaining gate.

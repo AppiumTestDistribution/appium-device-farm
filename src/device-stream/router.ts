@@ -56,9 +56,11 @@ export function registerDeviceStreamRoutes(
 
     let appiumSessionId: string | undefined;
     let bridgeHandle: Awaited<ReturnType<AndroidScrcpyBridge['start']>> | undefined;
+    log.info(`[device-stream] /start invoked for udid=${body.udid}`);
     try {
       // 1. Create an Appium session through our own plugin (reserves device).
       const createUrl = `http://localhost:${pluginCallbackPort(pluginArgs)}/wd/hub/session`;
+      log.info(`[device-stream] step1: POST ${createUrl}`);
       const caps = {
         capabilities: {
           alwaysMatch: {
@@ -67,6 +69,10 @@ export function registerDeviceStreamRoutes(
             'appium:udid': body.udid,
             'appium:newCommandTimeout': 3600,
           },
+          // Upstream plugin's createSession reads caps.firstMatch[0]
+          // unconditionally; without this it throws "Cannot read properties
+          // of undefined (reading '0')".
+          firstMatch: [{}],
         },
       };
       const created = await axios.post<{ value: AppiumSessionCreateResult }>(
@@ -75,40 +81,47 @@ export function registerDeviceStreamRoutes(
         { timeout: 90_000 },
       );
       appiumSessionId = created.data.value.sessionId;
+      log.info(`[device-stream] step1: appiumSessionId=${appiumSessionId}`);
 
       // 2. Connect to local adb-server, build the Adb client.
+      log.info(`[device-stream] step2: connecting to adb-server 127.0.0.1:5037`);
       const connector = new AdbServerNodeTcpConnector({
         host: '127.0.0.1',
         port: 5037,
       });
       const serverClient = new AdbServerClient(connector);
+      log.info(`[device-stream] step2: calling serverClient.getDevices()`);
       const devices = await serverClient.getDevices();
+      log.info(`[device-stream] step2: getDevices returned ${devices.length} device(s): ${JSON.stringify(devices.map((d: any) => ({ serial: d.serial, state: d.state, transportId: String(d.transportId) })))}`);
       const picked = devices.find(
         (d: any) => d.serial === body.udid && d.state === 'device',
       );
       if (!picked) throw new Error(`device ${body.udid} not online via adb`);
+      log.info(`[device-stream] step2: picked transportId=${String(picked.transportId)}; calling createAdb`);
       const adb = await serverClient.createAdb({
         transportId: picked.transportId,
       } as any);
+      log.info(`[device-stream] step2: adb client ready`);
 
       // 3. Start the scrcpy bridge.
+      log.info(`[device-stream] step3: starting AndroidScrcpyBridge`);
       const bridge = new AndroidScrcpyBridge(adb, { jarPath: JAR_PATH });
       bridgeHandle = await bridge.start();
+      log.info(`[device-stream] step3: bridge.start() resolved`);
 
-      // 4. Wait for first sizeChanged so we can report dimensions.
-      const dim = await new Promise<{ width: number; height: number }>(
-        (resolve) => {
-          bridgeHandle!.onDimensions(resolve);
-        },
-      );
+      // 4. Skip "wait for dimensions" — scrcpy doesn't emit sizeChanged
+      // until the video stream is consumed, and we don't consume it until
+      // the client connects the WS. The WS handler sends a META packet to
+      // the client once dimensions arrive; the client's canvas adapts.
+      // Register placeholder dimensions; real ones flow over the WS.
 
       // 5. Register in registry.
       const session = useDeviceRegistry.register({
         sessionId: appiumSessionId!,
         udid: body.udid,
         platform: 'android',
-        deviceWidth: dim.width,
-        deviceHeight: dim.height,
+        deviceWidth: 0,
+        deviceHeight: 0,
         stop: async () => {
           await bridgeHandle!.stop();
           try {
@@ -132,12 +145,13 @@ export function registerDeviceStreamRoutes(
       const protocol = req.protocol === 'https' ? 'wss' : 'ws';
       const streamPath = `/device-farm/api/dashboard/use-device/stream/${session.sessionId}`;
       const streamUrl = `${protocol}://${host}${streamPath}`;
+      log.info(`[device-stream] step7: responding streamUrl=${streamUrl}`);
       return res.json({
         sessionId: session.sessionId,
         streamUrl,
         platform: 'android',
-        deviceWidth: dim.width,
-        deviceHeight: dim.height,
+        deviceWidth: 0,
+        deviceHeight: 0,
       });
     } catch (err) {
       log.error(
