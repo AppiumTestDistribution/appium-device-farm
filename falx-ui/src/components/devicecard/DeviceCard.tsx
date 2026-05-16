@@ -1,6 +1,7 @@
 import { Clock, MapPin, Smartphone, Tag, User2Icon } from 'lucide-react';
 import prettyMilliseconds from 'pretty-ms';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DeviceFarmApiService from '../../api-service';
 import { useAuth } from '../../contexts/AuthContext';
 import { IDevice } from '../../interfaces/IDevice';
@@ -62,6 +63,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   setDevicePollingStatus,
 }) => {
   const { isAdmin, isCurrentUser } = useAuth();
+  const navigate = useNavigate();
   const [isBlocked, setIsBlocked] = useState<boolean>(device.busy);
   const [showActionButtons] = useState(device.session_id ? isAdmin() : true);
   const [hubNodeId, setHubNodeId] = useState<string | null>(null);
@@ -276,6 +278,15 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
       {(!device.session_id || isAdmin() || isCurrentUser(device.activeUser?.id)) && (
         <>
           <div className="pt-2 flex gap-3">
+            {device.platform === 'android' && (
+              <button
+                onClick={() => navigate(`/use-device/${device.udid}`)}
+                disabled={status === 'offline' || Boolean(device.cloud) || device.busy || device.userBlocked}
+                className="flex-1 px-3 py-1.5 bg-brand text-white hover:bg-brand-hover transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-brand-ring"
+              >
+                Use Device
+              </button>
+            )}
             {isAdmin() && (device.userBlocked || device.busy) && (
               <button
                 onClick={handleUnblockDevice}
