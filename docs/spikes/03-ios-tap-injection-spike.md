@@ -276,3 +276,268 @@ Add a `## Findings` section at the bottom with:
 
 Stop when this file is updated. The next move after this spike is the
 cross-platform iOS+Android browser device-use slice in `docs/slices/`.
+
+## Findings
+
+Run 2026-05-16 against the same iPhone 12 Pro Max (`iPhone13,4`,
+`kry-phone`, UDID `00008101-001A408E2EB9001E`, iOS 26.4.2) used in
+spike 02, via USB. WDA 12.2.2 from spike 02's Xcode build was still
+installed and trusted (~6 days left on the free-cert). Tunnel daemon
+needed a fresh `sudo ios tunnel start` (had died since yesterday).
+Spike directory: `/tmp/falx-spike-ios-tap/`. Server infrastructure was
+reused from `/tmp/falx-spike-ios/server/` per the spike plan.
+
+### Headline: spike 02's "broken WDA tap" was a coord-units bug, not a regression
+
+The premise of this whole spike — *"WDA tap injection silently no-ops
+on iOS 26.4.2"* — is **false**. WDA tap dispatch works fine on this
+device, today, against the unchanged WDA 12.2.2 build, with the
+bare-minimum session capabilities `{"platformName": "iOS"}`.
+
+What actually happened in spike 02: its client code sent the `<img>`'s
+**physical pixel coordinates** (1284×2778 on this device) to WDA's
+`/wda/tap`, while WDA expects **iOS points** (428×926 — the screen
+divided by `screen.scale = 3`). Pixel-space coordinates land far
+off-screen in point space; iOS clamps or drops them, and WDA returns
+`200 / value: null` as it normally does when a tap is dispatched but
+hits nothing actionable. Spike 02 even called out the units bug in
+its Surprises section but didn't connect it to the "broken dispatch"
+finding because it had hit other 500/404 errors on the *bundleId* path
+that masked the diagnosis.
+
+This was caught here by tapping the Photos icon on SpringBoard at
+correct point coords (263.5, 859.5) — Photos launched instantly, every
+trial. The earlier "200-null no-op" symptom is fully explained.
+
+### Channel matrix
+
+| Channel | Status | Notes |
+|---|---|---|
+| **A — extended session capabilities** | **PASS** | Passes all 3 pass criteria with the bare-minimum `{"platformName": "iOS"}` body. The richer variants from the spike plan (variants 2–6, with `appium:bundleId`) actually *fail* on iOS 26 because the SpringBoard refuses to open Settings via WDA's session-launch path — see "iOS 26 SpringBoard launch regression" below. The bare-minimum variant is the one Falx should use. |
+| B — `/appium/settings` runtime tunables | SKIPPED | A passed; no need. |
+| C — latest WDA `main` rebuild | SKIPPED | A passed; no need. |
+| D — Sauce / HeadSpin fork | SKIPPED | A passed; no need. |
+| E — go-ios direct HID | SKIPPED | A passed; no need. (Recorded as future fallback if WDA is ever unavailable.) |
+| F — tidevice | SKIPPED | A passed; no need. |
+| G — custom XCTest harness | SKIPPED | A passed; no need. |
+
+### Recommended channel — A, bare-minimum WDA session
+
+**Adopt:** Channel A. The exact session-creation body that works:
+
+```http
+POST http://localhost:8100/session
+Content-Type: application/json
+
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS"
+    }
+  }
+}
+```
+
+Then dispatch taps with WDA's stock endpoints in iOS POINTS:
+
+```http
+POST /session/<sid>/wda/tap
+{"x": 263.5, "y": 859.5}
+
+POST /session/<sid>/wda/dragfromtoforduration
+{"fromX": 380, "fromY": 463, "toX": 40, "toY": 463, "duration": 0.25}
+
+POST /session/<sid>/wda/keys
+{"value": ["W", "i", "F", "i"]}
+```
+
+No `appium:` capabilities are needed. No runtime `/appium/settings`
+tweaks are needed. The default WDA dispatch pipeline works.
+
+### Pass-criteria results
+
+1. **Single tap — 10/10.** Tap at the fixed point (263.5, 859.5) — the
+   Photos icon centre — launched `com.apple.mobileslideshow` on every
+   one of 10 consecutive trials. Drift across trials: 0.0 points (the
+   icon stays where it is; SpringBoard reflows nothing across
+   launch/terminate cycles). Inter-trial cleanup was
+   `POST /wda/apps/terminate {bundleId: com.apple.mobileslideshow}`,
+   which works for system apps and returns the device to SpringBoard
+   within ~400 ms.
+
+2. **Swipe — PASS.** A `dragfromtoforduration` from (380, 463) to
+   (40, 463) over 0.25 s flipped SpringBoard from home page 1 (18
+   visible icons) to home page 2 (15 visible icons). 14 icons
+   disappeared, 11 new icons appeared, 4 shared. The reverse-direction
+   swipe restored page 1 cleanly. Coordinates are in iOS points and
+   directly observable in the source tree (icon rects are reported in
+   points too).
+
+3. **Tap-then-type — PASS.** A vertical swipe down from (214, 200) to
+   (214, 600) over 0.3 s opened Spotlight, which auto-focused its
+   `SpotlightSearchField` (visible in the source tree as a TextField
+   with `name: SpotlightSearchField, value: "Search"`).
+   `POST /wda/keys {"value":["W","i","F","i"]}` updated the field's
+   value to `"WiFi"` exactly. Search result cells matching "Wi-Fi"
+   appeared in the tree, including the system Wi-Fi setting cell.
+   Dismissed Spotlight with an upward swipe.
+
+### Subjective stability
+
+Excellent within the run. 10/10 taps, swipe and typing both first-try
+on a clean Spotlight gesture. Zero WDA restarts, zero device reboots,
+zero stalls. The bare-minimum session creates in <500 ms and survives
+a multi-minute trial sequence without state drift. No flake observed
+across the ~3 minutes of total trial activity.
+
+The only off-happy-path drama belonged to the spike *plan*, not the
+spike *channel* — see "iOS 26 SpringBoard launch regression" below.
+
+### Coordinate-units note (the load-bearing detail)
+
+**Use iOS points, not pixels.** On this device:
+
+- Screen in points: **428 × 926** (reported by `GET /wda/screen` as
+  `screenSize: {width: 428, height: 926}`).
+- Screen in pixels: **1284 × 2778** (the MJPEG frame dimensions).
+- Scale factor: **3** (reported as `screen.scale` from the same
+  endpoint).
+
+Conversion: `point = pixel / scale`. A pixel-space tap at
+(791, 2579) — what a naïve `<img>` click would produce for the Photos
+icon — is well off the screen's point-space (max 428, 926) and WDA
+silently drops it.
+
+Every WDA write endpoint (`/wda/tap`, `dragfromtoforduration`,
+`/actions` with pointer events) takes iOS points. The source tree's
+`rect` values are also in points. So as long as the client computes
+coords in the same space the source tree reports them in (or scales
+the `<img>` click by `screenSize / naturalWidth`), it just works.
+
+### iOS 26 SpringBoard launch regression — real, separate from tap dispatch
+
+Two things really *are* broken on iOS 26 against this WDA build, but
+neither matters for tap injection:
+
+1. **`appium:bundleId` in session caps → 500.** Including
+   `appium:bundleId` (or non-prefixed `bundleId`) in
+   `capabilities.alwaysMatch` returns
+   `Error Domain=FBSOpenApplicationServiceErrorDomain Code=1
+   "The request to open <bundle> failed."` — both for first-party
+   targets like `com.apple.Preferences` and for SpringBoard itself.
+   iOS 26 is refusing to let the WDA xctrunner app launch other apps
+   via the SpringBoard open-application service. xctrunner doesn't
+   have the entitlement.
+
+2. **`POST /wda/apps/launch` and `/wda/apps/activate` → 400 with the
+   same error.** Same root cause: WDA's session API tries to launch
+   via the same private SpringBoard service, and iOS 26 refuses it for
+   the xctrunner.
+
+**Workaround:** don't try to launch apps via WDA on iOS 26. Use
+SpringBoard taps instead — `find_icons()` over the source tree gives
+the rect of every home-screen icon with a non-zero rect on the
+*current* home page; a `/wda/tap` at that icon's centre launches the
+app reliably (the OS treats it as a real user tap on the SpringBoard
+icon, with full entitlements). Cleanup via `POST /wda/apps/terminate`
+*does* work — it doesn't go through SpringBoard's open-app service.
+
+There's also `/wda/homescreen` (gone — 404 "unknown command") to add
+to the list of dead endpoints; spike 02 already documented `/wda/touch/perform`
+and `/wda/tap/0` as removed.
+
+For Falx, this means the iOS device-use slice should:
+
+- Use bare WDA sessions (no `bundleId` capability).
+- Reach app contexts by tapping SpringBoard icons, not by setting
+  session bundleIds or calling `/wda/apps/launch`.
+- Provide a "home" button in the Falx UI implemented as
+  `terminate(activeBundleId)` rather than a `/wda/homescreen` call.
+
+### Swipe + text-input results — all green
+
+All three pass criteria pass with the same Channel A session. No
+typing-via-paste fallback needed. `/wda/keys` works for character
+strings without the iOS keyboard panel even needing to be on screen
+(WDA's keys endpoint pipes directly into the focused first-responder
+text field via XCTest).
+
+### Code size
+
+- `channel_a_full.py` — **315 LOC** (Python stdlib only — no
+  third-party deps; runs against system Python 3.14). Contains the
+  WDA HTTP client, session helpers, icon-finder, and the 3 pass-criteria
+  trial drivers.
+- `channel_a.py` — **434 LOC** (older variant that tested
+  capability-set permutations; obviated by the bare-session result but
+  kept in the spike dir for reference).
+- Diagnostic probes — `probe.py` (54), `probe_source.py` (80),
+  `probe_source2.py` (52), `probe_icons.py` (42),
+  `probe_springboard.py` (84), `probe_tap_test.py` (78). These were
+  throwaway investigation scripts that pinned down the
+  bundleId-launch failure and the coord-units re-finding; not part of
+  the Falx slice deliverable.
+
+**Productive Channel A driver: ~315 LOC**, stdlib-only Python. The
+"add tap injection to Falx" slice can do most of this with ~30–50
+LOC in the existing TypeScript server (it already proxies `/wda/tap`).
+
+### Open questions for the slice phase
+
+- **`com.apple.Preferences` is unreachable from WDA on iOS 26.** If
+  Falx ever needs to drive a user into the Settings app
+  programmatically (e.g. "open the Wi-Fi panel" for a test scenario),
+  the only path is tap-the-Settings-icon-on-SpringBoard. For arbitrary
+  user-installed apps the same workaround applies: tap the icon, don't
+  call `apps/launch`.
+- **Finding icons that aren't on the current home page.** `find_icons`
+  only sees the visible page's icons. The iOS App Library is a more
+  reliable target ("swipe left until App Library, then tap a known
+  cell") but is more brittle UI-wise. The Spotlight approach used in
+  criterion 3 — open Spotlight, type the app name, tap the first
+  result — is the cleanest universal "launch any app" pattern and
+  should be the Falx primitive for app-launch.
+- **`/wda/apps/terminate` on user apps.** Worked here for system
+  apps (Photos, Camera, etc). Not tested against user-installed apps
+  in this spike. Should be fine — terminate doesn't go through
+  SpringBoard's open-app service — but worth a one-line sanity check
+  in the slice.
+- **Multi-touch / pinch / two-finger gestures.** Not in the spike's
+  scope. WDA's `/actions` API in principle supports multi-touch via
+  multiple pointer streams in the same actions array; that path is
+  untested here.
+- **Coordinate scaling in the Falx UI.** The existing spike 02 client
+  is still broken (sends pixel coords). The slice must take MJPEG
+  pixel coords, divide by `screen.scale`, and POST points. Could be a
+  3-line fix once `/wda/screen` is fetched on session start.
+- **iOS-26-only behaviour vs older iOS.** This spike validated against
+  iOS 26.4.2 only. Older iOS likely behaves the same for tap dispatch
+  but may *not* have the SpringBoard launch refusal, so older devices
+  may permit `apps/launch`. Falx should treat the SpringBoard-tap
+  workaround as the always-correct path and not try to detect iOS
+  version.
+- **Security note on the channel.** The Channel A channel runs over
+  WDA's HTTP endpoint on `localhost:8100`. No auth, no encryption.
+  Falx is on-prem so the trust boundary is the device-host machine;
+  WDA must not be exposed beyond `127.0.0.1` (default behaviour, but
+  worth gating in the slice).
+
+### Decision
+
+**Adopt Channel A** for iOS in the Falx device-use slice. No fork, no
+rebuild, no extra dependency, no custom XCTest harness, no
+`pip install tidevice`. Use the bare-minimum WDA session, the stock
+`/wda/tap`, `/wda/dragfromtoforduration`, and `/wda/keys` endpoints,
+with two caveats:
+
+- Always convert client-side MJPEG pixel coordinates to iOS points
+  using `screen.scale` from `/wda/screen` before posting.
+- Never use `appium:bundleId` in session caps and never call
+  `/wda/apps/launch` or `/wda/apps/activate` on iOS 26 — they will
+  fail. App-launch is "tap the SpringBoard icon" (or "open Spotlight,
+  type, tap").
+
+This makes Falx's iOS dispatch stack identical to the iOS streaming
+stack adopted in spike 02 — same WDA build, same go-ios tunnel
+infrastructure, same session, same single port. The follow-on slice
+can proceed without further iOS-engine spikes.
