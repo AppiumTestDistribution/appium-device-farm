@@ -170,7 +170,7 @@ export function registerDeviceStreamRoutes(
       const { sessionId } = req.params;
       await useDeviceRegistry.stop(sessionId);
       bridgeHandles.delete(sessionId);
-      return res.status(204).send();
+      return res.status(200).json({});
     },
   );
 
