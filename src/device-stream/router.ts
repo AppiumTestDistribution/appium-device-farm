@@ -18,6 +18,8 @@ import { useDeviceRegistry } from './registry';
 import { StartUseDeviceRequest } from './types';
 import log from '../logger';
 import { IPluginArgs } from '../interfaces/IPluginArgs';
+import EventBus from '../notifier/event-bus';
+import { AfterSessionDeletedEvent } from '../events/after-session-deleted-event';
 
 const JAR_PATH = path.join(__dirname, 'android', 'scrcpy-server.jar');
 
@@ -170,6 +172,17 @@ export function registerDeviceStreamRoutes(
       bridgeHandles.delete(sessionId);
       return res.status(204).send();
     },
+  );
+
+  // EventBus subscription: when an Appium session ends for any reason
+  // (external kill, idle sweep, client disconnect), tear down the bridge.
+  // Idempotent — registry.stop is a no-op for unknown / already-terminated
+  // sessions, so this is safe even when /stop or WS-close already ran.
+  EventBus.addListener(
+    AfterSessionDeletedEvent.listener(({ sessionId }) => {
+      void useDeviceRegistry.stop(sessionId);
+      bridgeHandles.delete(sessionId);
+    }),
   );
 }
 
