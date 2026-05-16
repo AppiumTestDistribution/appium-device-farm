@@ -32,6 +32,15 @@ export function TopBar() {
         <h1 className="text-lg font-semibold text-text-strong truncate">{title}</h1>
 
         <div className="flex items-center gap-3 shrink-0">
+          <a
+            href="/device-farm/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-text-soft hover:text-text px-2 py-1 rounded-md hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-brand-ring"
+            title="Open the legacy (proprietary) Use Device page in a new tab"
+          >
+            Legacy Use Device
+          </a>
           <div className="relative">
             <button
               type="button"
