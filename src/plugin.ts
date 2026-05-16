@@ -60,6 +60,7 @@ import { ATDRepository } from './data-service/db';
 import { NodeService } from './data-service/node-service';
 import { addCLIArgs } from './data-service/pluginArgs';
 import debugLog from './debugLog';
+import { attachDeviceStreamWebSocket } from './device-stream/router';
 import NodeDevices from './device-managers/NodeDevices';
 import Cloud from './enums/Cloud';
 import SessionType from './enums/SessionType';
@@ -143,6 +144,7 @@ class DevicePlugin extends BasePlugin {
   ): Promise<void> {
     config.goIOSTunnelInfoPort = await getFreePort();
     DevicePlugin.httpServer = httpServer;
+    attachDeviceStreamWebSocket(httpServer);
 
     log.debug(`📱 Update server with CLI Args: ${JSON.stringify(cliArgs)}`);
     DevicePlugin.serverArgs = cliArgs;

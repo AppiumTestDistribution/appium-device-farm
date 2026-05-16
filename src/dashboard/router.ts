@@ -31,6 +31,7 @@ import getWDABundleID from '../app-utils/extractBundleId';
 import { deviceManagementController } from './controllers/device-management-controller';
 import { getIosDeviceLogs } from './controllers/ios/device-control';
 import { SESSION_MANAGER } from './sessions/SessionManager';
+import { registerDeviceStreamRoutes } from '../device-stream/router';
 
 interface ErrorResponse {
   error: true;
@@ -773,6 +774,9 @@ function registerRoutes(router: Router, pluginArgs: IPluginArgs) {
   // Device tag/name routes
   router.post('/device-tag', authMiddleware(pluginArgs), addDeviceTags);
   router.post('/device-name', authMiddleware(pluginArgs), handleDeviceNameUpdate);
+
+  // Device stream (Use Device)
+  registerDeviceStreamRoutes(router, pluginArgs);
 }
 
 export default { register: registerRoutes };
