@@ -1,66 +1,119 @@
+import { randomUUID } from 'node:crypto';
 import { UseDeviceSession, Platform } from './types';
 import log from '../logger';
 
-interface RegisterParams {
+interface PromoteParams {
   sessionId: string;
-  udid: string;
-  platform: Platform;
   deviceWidth: number;
   deviceHeight: number;
-  /** Idempotent teardown — called at most once per session by the registry. */
   stop: () => Promise<void>;
 }
 
+type EntryKind = 'reservation' | 'session';
+
 interface InternalEntry {
+  kind: EntryKind;
+  /** For 'reservation', this is the reservation token. For 'session', sessionId. */
+  primaryKey: string;
   session: UseDeviceSession;
-  stop: () => Promise<void>;
-  /** Promise of in-progress stop, or undefined when not stopping. */
+  stop?: () => Promise<void>;
   stopping?: Promise<void>;
 }
 
 export class UseDeviceRegistry {
-  private entries = new Map<string, InternalEntry>();
+  /** Keyed by reservation token (kind=reservation) OR sessionId (kind=session). */
+  private byKey = new Map<string, InternalEntry>();
+  /** Secondary index for UDID-uniqueness. Both reservations and sessions occupy. */
+  private byUdid = new Map<string, InternalEntry>();
 
-  register(params: RegisterParams): UseDeviceSession {
-    if (this.entries.has(params.sessionId)) {
-      throw new Error(
-        `UseDeviceRegistry: sessionId ${params.sessionId} already registered`,
-      );
-    }
+  /**
+   * Atomically reserve a UDID. Returns a token to be passed to promote()
+   * or releaseReservation(). Returns null if the UDID is already held
+   * by any reservation or live session.
+   */
+  tryReserveUdid(udid: string, platform: Platform): string | null {
+    if (this.byUdid.has(udid)) return null;
+    const token = randomUUID();
     const session: UseDeviceSession = {
-      sessionId: params.sessionId,
-      udid: params.udid,
-      platform: params.platform,
-      state: 'running',
-      deviceWidth: params.deviceWidth,
-      deviceHeight: params.deviceHeight,
+      sessionId: token, // placeholder — replaced on promote
+      udid,
+      platform,
+      state: 'starting',
+      deviceWidth: 0,
+      deviceHeight: 0,
       createdAt: Date.now(),
     };
-    this.entries.set(params.sessionId, {
+    const entry: InternalEntry = {
+      kind: 'reservation',
+      primaryKey: token,
       session,
-      stop: params.stop,
-    });
+    };
+    this.byKey.set(token, entry);
+    this.byUdid.set(udid, entry);
+    log.info(`[device-stream] reserved udid=${udid} token=${token}`);
+    return token;
+  }
+
+  /**
+   * Promote a reservation into a live session. Throws if the token has
+   * already been promoted or never existed.
+   */
+  promote(reservationToken: string, params: PromoteParams): UseDeviceSession {
+    const entry = this.byKey.get(reservationToken);
+    if (!entry || entry.kind !== 'reservation') {
+      throw new Error(
+        `UseDeviceRegistry: no reservation for token ${reservationToken}`,
+      );
+    }
+    // Swap primary key from token to real sessionId.
+    this.byKey.delete(reservationToken);
+    entry.kind = 'session';
+    entry.primaryKey = params.sessionId;
+    entry.session.sessionId = params.sessionId;
+    entry.session.state = 'running';
+    entry.session.deviceWidth = params.deviceWidth;
+    entry.session.deviceHeight = params.deviceHeight;
+    entry.stop = params.stop;
+    this.byKey.set(params.sessionId, entry);
+    // byUdid still points at the same entry; no change needed.
     log.info(
-      `[device-stream] session ${session.sessionId} registered for ${session.udid} (${session.platform})`,
+      `[device-stream] promoted reservation ${reservationToken} -> session ${params.sessionId} for ${entry.session.udid}`,
     );
-    return session;
+    return entry.session;
+  }
+
+  /**
+   * Drop a reservation. No-op if the token is unknown OR has already been
+   * promoted (in which case the session must go through stop() instead).
+   */
+  releaseReservation(reservationToken: string): void {
+    const entry = this.byKey.get(reservationToken);
+    if (!entry || entry.kind !== 'reservation') return;
+    this.byKey.delete(reservationToken);
+    this.byUdid.delete(entry.session.udid);
+    log.info(`[device-stream] released reservation ${reservationToken}`);
   }
 
   get(sessionId: string): UseDeviceSession | undefined {
-    return this.entries.get(sessionId)?.session;
+    const entry = this.byKey.get(sessionId);
+    return entry?.session;
+  }
+
+  getByUdid(udid: string): UseDeviceSession | undefined {
+    return this.byUdid.get(udid)?.session;
   }
 
   list(): UseDeviceSession[] {
-    return Array.from(this.entries.values()).map((e) => e.session);
+    return Array.from(this.byKey.values()).map((e) => e.session);
   }
 
   async stop(sessionId: string): Promise<void> {
-    const entry = this.entries.get(sessionId);
-    if (!entry) return;
+    const entry = this.byKey.get(sessionId);
+    if (!entry || entry.kind !== 'session' || !entry.stop) return;
     if (entry.stopping) return entry.stopping;
     entry.session.state = 'stopping';
-    entry.stopping = entry
-      .stop()
+    const stopFn = entry.stop;
+    entry.stopping = stopFn()
       .catch((err) => {
         log.warn(
           `[device-stream] stop ${sessionId} threw: ${(err as Error)?.message ?? err}`,
@@ -68,10 +121,38 @@ export class UseDeviceRegistry {
       })
       .finally(() => {
         entry.session.state = 'terminated';
-        this.entries.delete(sessionId);
+        this.byKey.delete(sessionId);
+        this.byUdid.delete(entry.session.udid);
         log.info(`[device-stream] session ${sessionId} terminated`);
       });
     return entry.stopping;
+  }
+
+  /**
+   * @deprecated Use tryReserveUdid + promote. Kept as a back-compat shim
+   * so Task 1's commit doesn't break the router until Task 2 lands. Remove
+   * the shim in Task 2.
+   */
+  register(params: {
+    sessionId: string;
+    udid: string;
+    platform: Platform;
+    deviceWidth: number;
+    deviceHeight: number;
+    stop: () => Promise<void>;
+  }): UseDeviceSession {
+    const token = this.tryReserveUdid(params.udid, params.platform);
+    if (!token) {
+      throw new Error(
+        `UseDeviceRegistry: udid ${params.udid} already in use`,
+      );
+    }
+    return this.promote(token, {
+      sessionId: params.sessionId,
+      deviceWidth: params.deviceWidth,
+      deviceHeight: params.deviceHeight,
+      stop: params.stop,
+    });
   }
 }
 
