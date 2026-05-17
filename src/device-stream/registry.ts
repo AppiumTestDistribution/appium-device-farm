@@ -128,32 +128,6 @@ export class UseDeviceRegistry {
     return entry.stopping;
   }
 
-  /**
-   * @deprecated Use tryReserveUdid + promote. Kept as a back-compat shim
-   * so Task 1's commit doesn't break the router until Task 2 lands. Remove
-   * the shim in Task 2.
-   */
-  register(params: {
-    sessionId: string;
-    udid: string;
-    platform: Platform;
-    deviceWidth: number;
-    deviceHeight: number;
-    stop: () => Promise<void>;
-  }): UseDeviceSession {
-    const token = this.tryReserveUdid(params.udid, params.platform);
-    if (!token) {
-      throw new Error(
-        `UseDeviceRegistry: udid ${params.udid} already in use`,
-      );
-    }
-    return this.promote(token, {
-      sessionId: params.sessionId,
-      deviceWidth: params.deviceWidth,
-      deviceHeight: params.deviceHeight,
-      stop: params.stop,
-    });
-  }
 }
 
 /** Module-singleton registry instance, mirroring upstream patterns. */

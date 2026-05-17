@@ -15,16 +15,22 @@ describe('UseDeviceRegistry', () => {
     registry = new UseDeviceRegistry();
   });
 
+  /** Helper: reserve + promote in one call, mirroring the old register() shim. */
+  function registerSession(
+    reg: UseDeviceRegistry,
+    sessionId: string,
+    udid: string,
+    stop: () => Promise<void>,
+    deviceWidth = 1,
+    deviceHeight = 1,
+  ) {
+    const token = reg.tryReserveUdid(udid, 'android')!;
+    return reg.promote(token, { sessionId, deviceWidth, deviceHeight, stop });
+  }
+
   describe('register + get', () => {
     it('registers a session and retrieves it', () => {
-      registry.register({
-        sessionId: 's1',
-        udid: 'u1',
-        platform: 'android',
-        deviceWidth: 528,
-        deviceHeight: 1080,
-        stop: stopFn,
-      });
+      registerSession(registry, 's1', 'u1', stopFn, 528, 1080);
       const got = registry.get('s1');
       expect(got).to.exist;
       expect(got!.sessionId).to.equal('s1');
@@ -36,43 +42,23 @@ describe('UseDeviceRegistry', () => {
     });
 
     it('rejects duplicate udid', () => {
-      const params = {
-        sessionId: 's1',
-        udid: 'u1',
-        platform: 'android' as const,
-        deviceWidth: 1,
-        deviceHeight: 1,
-        stop: stopFn,
-      };
-      registry.register(params);
-      expect(() => registry.register(params)).to.throw(/already in use/);
+      registerSession(registry, 's1', 'u1', stopFn);
+      expect(() => registerSession(registry, 's2', 'u1', stopFn)).to.throw(
+        /already in use|no reservation/,
+      );
     });
   });
 
   describe('stop', () => {
     it('transitions state through stopping → terminated and invokes stop fn', async () => {
-      registry.register({
-        sessionId: 's1',
-        udid: 'u1',
-        platform: 'android',
-        deviceWidth: 1,
-        deviceHeight: 1,
-        stop: stopFn,
-      });
+      registerSession(registry, 's1', 'u1', stopFn);
       await registry.stop('s1');
       expect(stopFn).to.have.been.calledOnce;
       expect(registry.get('s1')).to.be.undefined;
     });
 
     it('is idempotent — second call resolves without throwing or re-invoking stop', async () => {
-      registry.register({
-        sessionId: 's1',
-        udid: 'u1',
-        platform: 'android',
-        deviceWidth: 1,
-        deviceHeight: 1,
-        stop: stopFn,
-      });
+      registerSession(registry, 's1', 'u1', stopFn);
       await registry.stop('s1');
       await registry.stop('s1');
       expect(stopFn).to.have.been.calledOnce;
@@ -92,14 +78,7 @@ describe('UseDeviceRegistry', () => {
           resolveStop = r;
         }),
       );
-      registry.register({
-        sessionId: 's1',
-        udid: 'u1',
-        platform: 'android',
-        deviceWidth: 1,
-        deviceHeight: 1,
-        stop: slowStop,
-      });
+      registerSession(registry, 's1', 'u1', slowStop);
       const p1 = registry.stop('s1');
       const p2 = registry.stop('s1');
       resolveStop();

@@ -54,6 +54,17 @@ export function registerDeviceStreamRoutes(
         .json({ error: 'missing_udid', message: 'udid is required' });
     }
 
+    // Atomic UDID reservation BEFORE any I/O. JavaScript is single-threaded,
+    // so check-then-insert in the registry is the entire mutex.
+    const reservationToken = useDeviceRegistry.tryReserveUdid(body.udid, 'android');
+    if (!reservationToken) {
+      log.info(`[device-stream] /start 409: udid ${body.udid} already in use`);
+      return res.status(409).json({
+        error: 'device_busy',
+        message: `Device ${body.udid} is already in use by another Use Device session`,
+      });
+    }
+
     let appiumSessionId: string | undefined;
     let bridgeHandle: Awaited<ReturnType<AndroidScrcpyBridge['start']>> | undefined;
     log.info(`[device-stream] /start invoked for udid=${body.udid}`);
@@ -113,13 +124,11 @@ export function registerDeviceStreamRoutes(
       // until the video stream is consumed, and we don't consume it until
       // the client connects the WS. The WS handler sends a META packet to
       // the client once dimensions arrive; the client's canvas adapts.
-      // Register placeholder dimensions; real ones flow over the WS.
+      // Promote with placeholder dimensions; real ones flow over the WS.
 
-      // 5. Register in registry.
-      const session = useDeviceRegistry.register({
+      // 5. Promote the reservation into a live session.
+      const session = useDeviceRegistry.promote(reservationToken, {
         sessionId: appiumSessionId!,
-        udid: body.udid,
-        platform: 'android',
         deviceWidth: 0,
         deviceHeight: 0,
         stop: async () => {
@@ -157,6 +166,9 @@ export function registerDeviceStreamRoutes(
       log.error(
         `[device-stream] /start failed: ${(err as Error)?.message ?? err}`,
       );
+      // Release the reservation in every error path.
+      useDeviceRegistry.releaseReservation(reservationToken);
+      // Best-effort cleanup of partially-allocated resources.
       if (bridgeHandle) await bridgeHandle.stop().catch(() => {});
       if (appiumSessionId) {
         try {
@@ -164,7 +176,11 @@ export function registerDeviceStreamRoutes(
             `http://localhost:${pluginCallbackPort(pluginArgs)}/wd/hub/session/${appiumSessionId}`,
             { timeout: 30_000 },
           );
-        } catch {}
+        } catch (delErr) {
+          log.warn(
+            `[device-stream] cleanup DELETE appium session ${appiumSessionId} failed: ${(delErr as Error)?.message ?? delErr}`,
+          );
+        }
       }
       const message = (err as Error)?.message ?? String(err);
       if (message.includes('busy') || message.includes('blocked')) {
