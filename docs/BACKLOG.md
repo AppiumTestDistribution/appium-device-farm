@@ -50,6 +50,17 @@ doesn't need to happen now but shouldn't be lost. Move items into
 - **Refine.dev evaluation** — B2B admin framework. Could speed up admin-screen
   delivery. Revisit if many CRUD screens to build.
 - **Biome** — replace ESLint + Prettier with single tool. Cheap upgrade.
+- **Dashboard availability source-of-truth alignment with `UseDeviceRegistry`** —
+  surfaced 2026-05-17 during concurrency-fix verification. Repro: Tab B holds
+  an active Use Device session; Tab A sees the device with an **Unblock**
+  button; clicking Unblock marks it available in Tab A's view but the live
+  Use Device session in Tab B continues. `/start` correctly returns 409 if
+  Tab A tries to claim, so the registry is authoritative; the dashboard
+  derives availability from the older upstream `IDevice.busy` flag. Fix:
+  either (a) extend the Unblock route to also call
+  `useDeviceRegistry.stop(...)` for the device's session, or (b) make the
+  dashboard's availability check consult `UseDeviceRegistry` first. Small
+  slice when convenient.
 
 ## Operations / infra (deferred)
 

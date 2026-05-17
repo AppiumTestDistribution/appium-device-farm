@@ -45,13 +45,13 @@ That's it. No new files. ~80 LOC delta across the two source files.
 - Modify: `src/device-stream/registry.ts`
 - Modify: `test/unit/device-stream-registry.spec.ts`
 
-- [ ] **Step 1: Read the existing registry to remind yourself of the shape**
+- [x] **Step 1: Read the existing registry to remind yourself of the shape**
 
 ```bash
 cat src/device-stream/registry.ts
 ```
 
-- [ ] **Step 2: Add the failing tests**
+- [x] **Step 2: Add the failing tests**
 
 Append to `test/unit/device-stream-registry.spec.ts`:
 
@@ -201,14 +201,14 @@ describe('reservation API', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-registry.spec.ts
 ```
 Expected: new tests fail with method-not-found / undefined errors.
 
-- [ ] **Step 4: Implement the reservation API in `registry.ts`**
+- [x] **Step 4: Implement the reservation API in `registry.ts`**
 
 The full revised `src/device-stream/registry.ts`:
 
@@ -376,7 +376,7 @@ export const useDeviceRegistry = new UseDeviceRegistry();
 
 Note: existing slice 1 tests that exercise `register()` should still pass after Task 1 — the shim preserves behaviour for the single-session-per-udid happy path. Tests asserting "duplicate sessionId throws" need updating: the new contract is "duplicate UDID throws". If any existing test relies on the old error message, adjust the assertion to match the new shim's error.
 
-- [ ] **Step 5: Run all registry tests to verify they pass**
+- [x] **Step 5: Run all registry tests to verify they pass**
 
 ```bash
 npx mocha -r ts-node/register test/unit/device-stream-registry.spec.ts
@@ -385,12 +385,14 @@ Expected: all tests pass (the existing register/get/stop/concurrency tests + the
 
 Note: the old `register()` method is removed. If any other test or production code calls `register()` directly, switch it to `tryReserveUdid` + `promote`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/device-stream/registry.ts test/unit/device-stream-registry.spec.ts
 git commit -m "feat(device-stream): registry reservation API for atomic UDID claim"
 ```
+
+→ Committed as `444dd61`. Reservation API + 13 new tests; 20/20 registry tests green.
 
 ---
 
@@ -399,13 +401,13 @@ git commit -m "feat(device-stream): registry reservation API for atomic UDID cla
 **Files:**
 - Modify: `src/device-stream/router.ts`
 
-- [ ] **Step 1: Read the current `/start` handler**
+- [x] **Step 1: Read the current `/start` handler**
 
 ```bash
 grep -n "use-device/start\|registry\.register\|UseDeviceRegistry" src/device-stream/router.ts
 ```
 
-- [ ] **Step 2: Modify the `/start` handler**
+- [x] **Step 2: Modify the `/start` handler**
 
 Find the `router.post('/use-device/start', ...)` block in `src/device-stream/router.ts`. The new structure:
 
@@ -533,30 +535,32 @@ Key differences from the original:
 
 Keep all other handler behaviour (adb connection, bridge start, stream URL construction, stop handler, WS heartbeat) identical to the existing implementation.
 
-- [ ] **Step 3: Remove the deprecated `register()` shim from `registry.ts`**
+- [x] **Step 3: Remove the deprecated `register()` shim from `registry.ts`**
 
 Open `src/device-stream/registry.ts` and delete the entire `register(params)` method that Task 1 added as a back-compat shim. No other caller uses it now.
 
-- [ ] **Step 4: Verify TypeScript compiles**
+- [x] **Step 4: Verify TypeScript compiles**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -E 'device-stream|error' | head -20
 ```
 Expected: no errors mentioning device-stream.
 
-- [ ] **Step 5: Run all unit tests**
+- [x] **Step 5: Run all unit tests**
 
 ```bash
 npm test
 ```
 Expected: all tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/device-stream/router.ts src/device-stream/registry.ts
 git commit -m "fix(device-stream): atomic UDID reservation in /start prevents stuck busy state"
 ```
+
+→ Committed as `76f3310`. `/start` reserves atomically, promotes on success, releases on every failure path; `register()` shim deleted; legacy registry tests ported via `registerSession` helper. 161 passing / 4 pending / 0 failing. tsc clean.
 
 ---
 
@@ -564,14 +568,14 @@ git commit -m "fix(device-stream): atomic UDID reservation in /start prevents st
 
 After the two commits, run the verification battery. **The human runs this** with the Android phone attached.
 
-- [ ] **Step 1: Rebuild and run Falx**
+- [x] **Step 1: Rebuild and run Falx**
 
 ```bash
 npm run build
 appium server -ka 800 --use-plugins=device-farm -pa /wd/hub
 ```
 
-- [ ] **Step 2: 100-cycle leak script — regression check**
+- [x] **Step 2: 100-cycle leak script — regression check**
 
 ```bash
 export AUTH_TOKEN="Bearer <token from browser>"
@@ -580,14 +584,14 @@ node /tmp/falx-cycle-test.mjs
 ```
 Expected: 100/100 clean, scrcpy procs = 0 at the end, latency distribution similar to pre-fix (start p50 ~3.3 s, stop p50 ~360 ms ± 10%).
 
-- [ ] **Step 3: Concurrent claim test**
+- [x] **Step 3: Concurrent claim test**
 
 1. Open Chrome Tab A → Falx → click **Use Device** on the test device → wait for stream.
 2. Open Chrome Tab B → Falx → click **Use Device** on the same device.
 
 Expected: Tab B sees a "device busy" error or modal **within 1 second** (the 409 path). Tab A keeps streaming.
 
-- [ ] **Step 4: Refresh-during-pending test**
+- [x] **Step 4: Refresh-during-pending test**
 
 1. Open Tab A → start a Use Device session, leave it streaming.
 2. Open Tab B → click **Use Device** on the same device → should see 409 quickly.
@@ -599,22 +603,22 @@ Tab B can now manually retry by clicking **Use Device** again — if Tab A has t
 
 **Critical**: at no point should the dashboard show "device in use" with no active session.
 
-- [ ] **Step 5: Sanity check — sequential acceptance unchanged**
+- [x] **Step 5: Sanity check — sequential acceptance unchanged**
 
 Run the slice 1 manual checklist:
-- [ ] Click Use Device → video appears.
-- [ ] Tap accuracy holds.
-- [ ] Back / Home / Recents work.
-- [ ] Stop button cleanly returns to `/`, device frees within 2 s.
-- [ ] Close tab without Stop → device frees within ~5 s.
+- [x] Click Use Device → video appears.
+- [x] Tap accuracy holds.
+- [x] Back / Home / Recents work.
+- [x] Stop button cleanly returns to `/`, device frees within 2 s.
+- [x] Close tab without Stop → device frees within ~5 s.
 
-- [ ] **Step 6: Append findings to the design**
+- [x] **Step 6: Append findings to the design**
 
 If everything passes, append a `## Findings` section to [docs/superpowers/specs/2026-05-17-android-use-device-concurrency-fix-design.md](../specs/2026-05-17-android-use-device-concurrency-fix-design.md) noting: 100-cycle still green, concurrent claim 409 reproducible, refresh-during-pending no stuck busy state, sequential acceptance unchanged.
 
 If anything fails, append the failure and stop — don't try to patch on top.
 
-- [ ] **Step 7: Final commit**
+- [x] **Step 7: Final commit**
 
 ```bash
 git add -A

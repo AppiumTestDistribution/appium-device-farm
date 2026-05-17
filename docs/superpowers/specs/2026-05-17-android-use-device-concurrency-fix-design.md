@@ -241,3 +241,55 @@ router.post('/use-device/start', async (req, res) => {
   small (≤ device count, currently low). O(N) is fine. If the registry
   grows past tens of entries, add a secondary `Map<udid, token>`. Don't
   prematurely optimise.
+
+---
+
+## 6. Findings (2026-05-17, post-implementation)
+
+Manual verification on Android phone. Both fix commits in place
+(`444dd61` registry API, `76f3310` `/start` migration + shim removal).
+
+### Acceptance — all green
+
+- **100-cycle leak script:** 100 cycles in 406.6 s. Start p50 = 3325 ms,
+  p95 = 3372 ms, max = 4383 ms. Stop p50 = 353 ms, p95 = 384 ms,
+  max = 402 ms. Final scrcpy procs = 0 (baseline 0). Latency distribution
+  matches the pre-fix slice-1 manual-verification numbers within noise.
+  No regression to the sequential path.
+- **Concurrent claim test (Bug A):** Tab A streaming; Tab B clicks
+  **Use Device** on the same UDID → Tab B sees 409 immediately
+  (no 90 s hang). Tab A keeps streaming. Reproducible on demand.
+- **Refresh-during-pending (Bug B):** Tab A streaming, Tab B blocked
+  with 409, then refresh Tab A → Tab A's session torn down → Tab A
+  re-claims successfully on remount. Tab B can subsequently retry and
+  claim once Tab A's stop completes. No stuck "device busy" state.
+- **Tab-close releases device:** Closing Tab B without **Stop** frees
+  the device; Tab A's dashboard shows it as available after a refresh
+  (~5 s teardown window — same as slice 1).
+- **Sequential acceptance unchanged:** Click → video, tap accuracy,
+  Back / Home / Recents, **Stop** button cleanly returns to `/`. All
+  green.
+
+### Follow-up surfaced (out of scope for this fix-up)
+
+- **"Unblock" button on the dashboard desyncs from the Use Device
+  registry.** Repro: Tab B holds an active Use Device session for
+  device X. Tab A views the dashboard, sees X marked "in use" with an
+  **Unblock** button (the upstream
+  `appium-device-farm` block/unblock mechanism). Clicking **Unblock**
+  makes Tab A's dashboard show X as available — but X still has the
+  live Use Device session in Tab B. If Tab A then clicks **Use
+  Device** on X, `/start` correctly returns 409 ("Device already in
+  use"). After another refresh, the dashboard re-shows X as available
+  even though it isn't.
+  
+  Root cause sketch: the upstream Unblock route operates on the
+  upstream `IDevice.busy` flag without consulting `UseDeviceRegistry`.
+  Our 409 from `/start` is the authoritative state; the dashboard
+  derives availability from the older flag. This pre-existed the
+  concurrency fix — it became visible only because `/start` now
+  correctly rejects instead of queueing.
+  
+  Disposition: log to `docs/BACKLOG.md` as a separate small slice
+  ("dashboard availability should reflect Use Device registry, not
+  just upstream busy flag"). Do not expand this fix-up.
