@@ -116,4 +116,24 @@ export class WDAClient {
       },
     });
   }
+
+  async actions(sessionId: string, sequence: unknown[]): Promise<void> {
+    await this.http.post(`/session/${sessionId}/actions`, {
+      actions: [{
+        type: 'pointer',
+        id: 'finger1',
+        parameters: { pointerType: 'touch' },
+        actions: sequence,
+      }],
+    });
+  }
+
+  async tapViaActions(sessionId: string, x: number, y: number): Promise<void> {
+    await this.actions(sessionId, [
+      { type: 'pointerMove', duration: 0, x, y },
+      { type: 'pointerDown', button: 0 },
+      { type: 'pause', duration: 30 },
+      { type: 'pointerUp', button: 0 },
+    ]);
+  }
 }

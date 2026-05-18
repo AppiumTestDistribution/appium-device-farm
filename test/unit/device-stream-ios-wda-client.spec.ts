@@ -249,4 +249,73 @@ describe('WDAClient', () => {
       },
     );
   });
+
+  it('actions POSTs a W3C actions envelope to /session/<sid>/actions', async () => {
+    let posted: any = null;
+    await withServer(
+      (req, res) => {
+        let body = '';
+        req.on('data', (c) => (body += c));
+        req.on('end', () => {
+          if (req.url === '/session/SID-2/actions' && req.method === 'POST') {
+            posted = JSON.parse(body);
+            res.writeHead(200, {}); res.end(JSON.stringify({ value: null }));
+          }
+        });
+      },
+      async (baseUrl) => {
+        const c = new WDAClient(baseUrl);
+        const sequence = [
+          { type: 'pointerMove', duration: 0, x: 100, y: 200 },
+          { type: 'pointerDown', button: 0 },
+        ];
+        await c.actions('SID-2', sequence);
+        expect(posted).to.deep.equal({
+          actions: [
+            {
+              type: 'pointer',
+              id: 'finger1',
+              parameters: { pointerType: 'touch' },
+              actions: sequence,
+            },
+          ],
+        });
+      },
+    );
+  });
+
+  it('tapViaActions POSTs a 4-step move/down/pause/up sequence to /session/<sid>/actions', async () => {
+    let posted: any = null;
+    await withServer(
+      (req, res) => {
+        let body = '';
+        req.on('data', (c) => (body += c));
+        req.on('end', () => {
+          if (req.url === '/session/SID-3/actions' && req.method === 'POST') {
+            posted = JSON.parse(body);
+            res.writeHead(200, {}); res.end(JSON.stringify({ value: null }));
+          }
+        });
+      },
+      async (baseUrl) => {
+        const c = new WDAClient(baseUrl);
+        await c.tapViaActions('SID-3', 263.5, 859.5);
+        expect(posted).to.deep.equal({
+          actions: [
+            {
+              type: 'pointer',
+              id: 'finger1',
+              parameters: { pointerType: 'touch' },
+              actions: [
+                { type: 'pointerMove', duration: 0, x: 263.5, y: 859.5 },
+                { type: 'pointerDown', button: 0 },
+                { type: 'pause', duration: 30 },
+                { type: 'pointerUp', button: 0 },
+              ],
+            },
+          ],
+        });
+      },
+    );
+  });
 });
