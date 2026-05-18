@@ -50,6 +50,7 @@ export function IOSStreamCanvas(
   const ringRef = useRef<{ x: number; y: number; tStartMs: number } | null>(null);
   const trailRef = useRef<{ x: number; y: number; tMs: number }[]>([]);
   const overlayRafRef = useRef<number | null>(null);
+  const renderOverlaysRef = useRef<() => void>(() => {});
 
   function renderOverlays() {
     const c = canvasRef.current;
@@ -87,6 +88,10 @@ export function IOSStreamCanvas(
     }
   }
 
+  // Keep the ref current so the WS effect can call renderOverlays without
+  // being in its dependency array.
+  renderOverlaysRef.current = renderOverlays;
+
   // Connect WS.
   useEffect(() => {
     const ws = new WebSocket(streamUrl);
@@ -122,7 +127,12 @@ export function IOSStreamCanvas(
           const c = canvasRef.current;
           if (c) {
             const ctx = c.getContext('2d');
-            if (ctx) ctx.drawImage(bitmap, 0, 0, c.width, c.height);
+            if (ctx) {
+              ctx.drawImage(bitmap, 0, 0, c.width, c.height);
+              // Restore overlays synchronously so they are never erased for
+              // more than the current task tick (no rAF-gap flicker).
+              renderOverlaysRef.current();
+            }
           }
           bitmap.close();
         }).catch((e) => console.warn('[IOSStreamCanvas] decode failed', e))
