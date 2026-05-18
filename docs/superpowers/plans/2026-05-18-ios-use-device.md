@@ -299,7 +299,7 @@ Pure binary protocol encode/decode for the iOS-specific WS tags added in Task 1.
 - Create: `src/device-stream/ios/framing.ts`
 - Test: `test/unit/device-stream-ios-framing.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-ios-framing.spec.ts`:
 
@@ -412,13 +412,13 @@ describe('iOS framing', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests; verify they fail (module not found)**
+- [x] **Step 2: Run tests; verify they fail (module not found)**
 
 ```bash
 npm test -- --grep 'iOS framing'
 ```
 
-- [ ] **Step 3: Implement the framing module**
+- [x] **Step 3: Implement the framing module**
 
 `src/device-stream/ios/framing.ts`:
 
@@ -488,14 +488,14 @@ export function decodeIosClientMessage(buf: Buffer): IosClientMessage | null {
 }
 ```
 
-- [ ] **Step 4: Run tests; verify all pass**
+- [x] **Step 4: Run tests; verify all pass**
 
 ```bash
 npm test -- --grep 'iOS framing'
 ```
 Expected: 7 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/ios/framing.ts test/unit/device-stream-ios-framing.spec.ts
