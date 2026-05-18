@@ -69,14 +69,13 @@ export class IOSWdaBridge {
     await this.runIos(['image', 'auto', '--udid', udid], 30_000);
 
     // Step 2 — spawn `ios runwda` in the background.
+    // go-ios v1.0.188+ enforces "all-or-none" for bundleid/testrunnerbundleid/
+    // xctestconfig. Spike 02 worked on an older version that accepted partial
+    // flags; passing none lets go-ios auto-discover the installed xctest
+    // runner, which is robust to varying signed names and xctest target names.
     const runwda = spawnFn(
       'ios',
-      [
-        'runwda',
-        `--bundleid=${runnerBundleId}`,
-        `--testrunnerbundleid=${runnerBundleId}`,
-        `--udid=${udid}`,
-      ],
+      ['runwda', `--udid=${udid}`],
       { stdio: ['ignore', 'pipe', 'pipe'] },
     );
     this.pipeLogs('runwda', runwda);
