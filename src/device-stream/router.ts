@@ -334,6 +334,44 @@ async function handleIosStart(
     appiumSessionId = created.data.value.sessionId;
     log.info(`[device-stream] iOS appiumSessionId=${appiumSessionId}`);
 
+    // e2) Discover Appium's WDA session id and rebind. Appium's xcuitest
+    //     driver creates a fresh WDA session even when attaching via
+    //     webDriverAgentUrl, displacing the one our bridge made — so
+    //     our cached bridgeHandle.sessionId becomes stale and every
+    //     `/session/<stale>/wda/...` call would 404. Probe any unknown
+    //     WDA path; WDA includes the current session id at the top
+    //     level of every JSON response.
+    try {
+      const probe = await axios.get<{ sessionId?: string }>(
+        `http://localhost:${ports.wdaRestPort}/sessions`,
+        { timeout: 5_000, validateStatus: () => true },
+      );
+      const wdaSid = probe.data?.sessionId;
+      if (wdaSid && wdaSid !== bridgeHandle.sessionId) {
+        log.info(
+          `[device-stream] iOS rebinding WDA session ${bridgeHandle.sessionId} -> ${wdaSid}`,
+        );
+        bridgeHandle.sessionId = wdaSid;
+        // MJPEG settings are session-scoped on some WDA builds; re-apply
+        // so the tuned framerate/quality survives the session swap.
+        await bridgeHandle.wdaClient
+          .setMjpegSettings(wdaSid, {
+            mjpegServerFramerate: 20,
+            mjpegServerScreenshotQuality: 70,
+            mjpegScalingFactor: 100,
+          })
+          .catch((err) =>
+            log.warn(
+              `[device-stream] iOS setMjpegSettings after rebind failed: ${(err as Error)?.message}`,
+            ),
+          );
+      }
+    } catch (err) {
+      log.warn(
+        `[device-stream] iOS WDA session rebind probe failed: ${(err as Error)?.message}`,
+      );
+    }
+
     // f) Promote.
     const session = useDeviceRegistry.promote(reservationToken, {
       sessionId: appiumSessionId!,
