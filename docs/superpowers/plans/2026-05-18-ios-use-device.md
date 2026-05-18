@@ -1156,7 +1156,7 @@ This task has a smaller test surface than the previous ones — most of the valu
 **Files:**
 - Create: `src/device-stream/ios/bridge.ts`
 
-- [ ] **Step 1: Write the bridge module**
+- [x] **Step 1: Write the bridge module**
 
 `src/device-stream/ios/bridge.ts`:
 
@@ -1372,14 +1372,14 @@ export class IOSWdaBridge {
 }
 ```
 
-- [ ] **Step 2: Verify TS compiles**
+- [x] **Step 2: Verify TS compiles**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -i 'device-stream/ios' || echo "OK"
 ```
 Expected: `OK`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/device-stream/ios/bridge.ts
