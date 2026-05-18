@@ -103,16 +103,25 @@ export function IOSStreamCanvas(
   }, [handleRef]);
 
   function clientToPoints(e: React.PointerEvent<HTMLCanvasElement>): { x: number; y: number } {
-    const c = canvasRef.current!;
+    const c = canvasRef.current;
+    if (!c) return { x: 0, y: 0 };
     const rect = c.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * dims.widthPoints;
-    const y = ((e.clientY - rect.top) / rect.height) * dims.heightPoints;
+    const rawX = ((e.clientX - rect.left) / rect.width) * dims.widthPoints;
+    const rawY = ((e.clientY - rect.top) / rect.height) * dims.heightPoints;
+    const x = Math.max(0, Math.min(dims.widthPoints, rawX));
+    const y = Math.max(0, Math.min(dims.heightPoints, rawY));
     return { x, y };
   }
 
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
     const p = clientToPoints(e);
     pointerStart.current = { x: p.x, y: p.y, t: performance.now() };
+    e.preventDefault();
+  }
+
+  function onPointerCancel() {
+    pointerStart.current = null;
   }
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -148,6 +157,7 @@ export function IOSStreamCanvas(
       v.setUint32(17, Math.max(50, Math.round(dt)), false);
       ws.send(buf);
     }
+    e.preventDefault();
   }
 
   return (
@@ -155,6 +165,7 @@ export function IOSStreamCanvas(
       ref={canvasRef}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
       style={{
         maxWidth: '100%',
         maxHeight: 'calc(100vh - 200px)',
@@ -162,6 +173,7 @@ export function IOSStreamCanvas(
         height: 'auto',
         aspectRatio: `${dims.widthPoints} / ${dims.heightPoints}`,
         backgroundColor: 'black',
+        touchAction: 'none',
       }}
     />
   );
