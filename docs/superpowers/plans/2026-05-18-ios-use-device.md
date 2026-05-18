@@ -892,7 +892,7 @@ Single upstream multipart fetch → N downstream subscribers. Handles spike 02's
 - Create: `src/device-stream/ios/mjpeg.ts`
 - Test: `test/unit/device-stream-ios-mjpeg.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-ios-mjpeg.spec.ts`:
 
@@ -1018,13 +1018,13 @@ describe('MjpegFanout', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests; verify they fail (module not found)**
+- [x] **Step 2: Run tests; verify they fail (module not found)**
 
 ```bash
 npm test -- --grep MjpegFanout
 ```
 
-- [ ] **Step 3: Implement the MJPEG fan-out**
+- [x] **Step 3: Implement the MJPEG fan-out**
 
 `src/device-stream/ios/mjpeg.ts`:
 
@@ -1131,14 +1131,14 @@ export class MjpegFanout {
 }
 ```
 
-- [ ] **Step 4: Run tests; verify all pass**
+- [x] **Step 4: Run tests; verify all pass**
 
 ```bash
 npm test -- --grep MjpegFanout
 ```
 Expected: 4 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/ios/mjpeg.ts test/unit/device-stream-ios-mjpeg.spec.ts
