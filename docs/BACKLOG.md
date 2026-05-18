@@ -61,6 +61,25 @@ doesn't need to happen now but shouldn't be lost. Move items into
   `useDeviceRegistry.stop(...)` for the device's session, or (b) make the
   dashboard's availability check consult `UseDeviceRegistry` first. Small
   slice when convenient.
+- **WDA accessibility-snapshot-skip patch spike (iOS input latency)** —
+  surfaced 2026-05-19 closing the iOS input responsiveness slice. WDA's
+  `/wda/tap` and `/actions` handlers internally call
+  `Requesting snapshot of accessibility hierarchy` per move step (~50 ms
+  × N), per Appium issue
+  [#16230](https://github.com/appium/appium/issues/16230) — no upstream
+  fix. ≤2-day spike: clone WDA, patch the snapshot calls out of the tap/
+  actions hot path, rebuild, measure tap p50. If <300 ms, ship the patch
+  as a build-time `.patch` file under `infra/` (NOT a fork). Validate the
+  on-device gesture remains correct. Only attempt this when iOS demo
+  responsiveness becomes a priority again — the rest of the OSS iOS
+  ecosystem hits the same ceiling, so no rush from competitive standpoint.
+  See `docs/spikes/04-ios-input-latency-spike.md` for the baseline
+  numbers this would aim to beat.
+- **Track `tddworks/baguette` for real-device iOS HID injection** —
+  simulator-only today (uses iOS 26 private input APIs without WDA). If
+  the author extends to real devices via a runner-side injector, that's
+  the path to BrowserStack-grade iOS input feel without forking WDA.
+  Revisit quarterly.
 
 ## Operations / infra (deferred)
 
@@ -90,6 +109,17 @@ you go.
 - iOS on Linux via go-ios + tunneld is supported but expect ~5–10% extra
   flake vs. native Mac. iOS major-version releases break things until
   go-ios catches up.
+- **iOS interactive input dispatch via vanilla WDA has a 600–1800 ms
+  per-call latency floor on iOS 26** (measured against `kry-phone`
+  iPhone 12 Pro Max iOS 26.4.2 in spike 04, `docs/spikes/04-...`). This
+  is intrinsic to WDA's XCTest-based dispatch — every public OSS iOS
+  device farm hits the same ceiling (GADS, Sonic, ControlFloorAgent,
+  STF-iOS, atxserver2, tidevice — all use a WDA-shaped runner). There
+  is no public sub-100 ms alternative for iOS 26 real devices today.
+  Falx ships the same input feel as the rest of the OSS landscape; do
+  not promise BrowserStack-grade live drag until either Appium issue
+  #16230 lands or a non-WDA channel emerges. See the WDA-patch-spike
+  backlog item above for the one identified local lever.
 - Apple Developer Program limits 100 devices/year per Individual account;
   constrains iOS device count more than hardware does. Plan account strategy
   before buying 100+ iOS devices.
