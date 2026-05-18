@@ -265,8 +265,8 @@ describe('device-stream iOS lifecycle (integration)', function () {
       { method: 'POST' },
     );
     expect(stopRes2.status).to.equal(200);
-    // Give it a moment to settle.
-    await new Promise((r) => setTimeout(r, 100));
+    // Give it a moment to settle; resolves immediately if the path is synchronous.
+    await waitFor(() => bridgeStop.callCount === 1, 1000);
     // Registry already removed the session; second stop is a no-op.
     expect(bridgeStop.callCount).to.equal(1);
   });
