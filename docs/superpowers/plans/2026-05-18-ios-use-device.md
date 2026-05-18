@@ -2117,7 +2117,7 @@ Wire `IOSStreamCanvas` + `IOSControlToolbar` into the existing `UseDevice.tsx` r
 - Modify: `falx-ui/src/pages/UseDevice/UseDevice.tsx`
 - Modify: `falx-ui/src/components/devicecard/DeviceCard.tsx`
 
-- [ ] **Step 1: Modify `UseDevice.tsx`**
+- [x] **Step 1: Modify `UseDevice.tsx`**
 
 The existing component already calls `createUseDeviceSession(udid)` and renders `AndroidStreamCanvas` on success. Now:
 
@@ -2157,7 +2157,7 @@ if (session.platform === 'ios') {
 // existing Android branch unchanged
 ```
 
-- [ ] **Step 2: Modify `DeviceCard.tsx`**
+- [x] **Step 2: Modify `DeviceCard.tsx`**
 
 Find the existing condition that gates the Use Device button on `device.platform === 'android'` (or similar). Change to:
 
@@ -2169,14 +2169,14 @@ const isUseDeviceSupported =
 
 Keep the button styling unchanged.
 
-- [ ] **Step 3: Verify falx-ui builds and renders the iOS card button**
+- [x] **Step 3: Verify falx-ui builds and renders the iOS card button**
 
 ```bash
 cd falx-ui && npm run dev
 ```
 Open `http://localhost:5173/`. Visually confirm the iOS DeviceCard now shows the **Use Device** button.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/UseDevice.tsx falx-ui/src/components/devicecard/DeviceCard.tsx
