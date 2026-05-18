@@ -155,6 +155,15 @@ export class IOSWdaBridge {
       // Step 11 — push tuned MJPEG settings.
       await wdaClient.setMjpegSettings(sessionId, DEFAULT_MJPEG_SETTINGS);
 
+      // Dispatch-speed tunables: ~40% reduction in WDA per-call latency on
+      // iOS 26.4.2 (waitForIdleTimeout + animationCoolOffTimeout = 0).
+      // See docs/spikes/04-ios-input-latency-spike.md.
+      await wdaClient.setDispatchTunables(sessionId).catch((err) =>
+        log.warn(
+          `[ios-bridge] setDispatchTunables failed (non-fatal): ${(err as Error)?.message}`,
+        ),
+      );
+
       // Step 12 — start MJPEG fan-out.
       mjpegFanout = new MjpegFanout(
         `http://localhost:${ports.wdaMjpegPort}/mjpeg`,

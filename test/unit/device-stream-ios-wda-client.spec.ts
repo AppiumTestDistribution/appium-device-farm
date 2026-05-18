@@ -226,4 +226,27 @@ describe('WDAClient', () => {
       },
     );
   });
+
+  it('setDispatchTunables POSTs waitForIdleTimeout:0 and animationCoolOffTimeout:0 to /appium/settings', async () => {
+    let posted: any = null;
+    await withServer(
+      (req, res) => {
+        let body = '';
+        req.on('data', (c) => (body += c));
+        req.on('end', () => {
+          if (req.url === '/session/SID-1/appium/settings') {
+            posted = JSON.parse(body);
+            res.writeHead(200, {}); res.end(JSON.stringify({ value: {} }));
+          }
+        });
+      },
+      async (baseUrl) => {
+        const c = new WDAClient(baseUrl);
+        await c.setDispatchTunables('SID-1');
+        expect(posted).to.deep.equal({
+          settings: { waitForIdleTimeout: 0, animationCoolOffTimeout: 0 },
+        });
+      },
+    );
+  });
 });

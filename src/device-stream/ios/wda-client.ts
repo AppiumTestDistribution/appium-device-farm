@@ -105,4 +105,15 @@ export class WDAClient {
   async setMjpegSettings(sessionId: string, settings: MjpegSettings): Promise<void> {
     await this.http.post(`/session/${sessionId}/appium/settings`, { settings });
   }
+
+  async setDispatchTunables(sessionId: string): Promise<void> {
+    // Only two settings stick on WDA 12.2.2 (iOS 26.4.2); the rest are
+    // unrecognized. See docs/spikes/04-ios-input-latency-spike.md.
+    await this.http.post(`/session/${sessionId}/appium/settings`, {
+      settings: {
+        waitForIdleTimeout: 0,
+        animationCoolOffTimeout: 0,
+      },
+    });
+  }
 }
