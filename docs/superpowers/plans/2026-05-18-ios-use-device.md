@@ -73,7 +73,7 @@ Pure constants. No logic.
 **Files:**
 - Modify: `src/device-stream/types.ts`
 
-- [ ] **Step 1: Add iOS tags to `types.ts`**
+- [x] **Step 1: Add iOS tags to `types.ts`**
 
 Edit `src/device-stream/types.ts`. After the existing `CLIENT_KEYCODE_TAG = 0x11` line, add:
 
@@ -136,14 +136,14 @@ export interface StartUseDeviceResponse {
 }
 ```
 
-- [ ] **Step 2: Verify TS compiles**
+- [x] **Step 2: Verify TS compiles**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -i 'device-stream/types' || echo "OK"
 ```
 Expected: `OK`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/device-stream/types.ts
