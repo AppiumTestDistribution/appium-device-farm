@@ -70,12 +70,21 @@ export class IOSWdaBridge {
 
     // Step 2 — spawn `ios runwda` in the background.
     // go-ios v1.0.188+ enforces "all-or-none" for bundleid/testrunnerbundleid/
-    // xctestconfig. Spike 02 worked on an older version that accepted partial
-    // flags; passing none lets go-ios auto-discover the installed xctest
-    // runner, which is robust to varying signed names and xctest target names.
+    // xctestconfig. Its "auto-discover" path is misleading — it just falls
+    // back to `com.facebook.WebDriverAgentRunner.xctrunner` rather than
+    // scanning installed apps, so any non-Facebook signing breaks. Pass all
+    // three: bundleid + testrunnerbundleid = installed runner; xctestconfig =
+    // canonical WDA test-target name (`WebDriverAgentRunner.xctest`), which
+    // re-signing doesn't change.
     const runwda = spawnFn(
       'ios',
-      ['runwda', `--udid=${udid}`],
+      [
+        'runwda',
+        `--bundleid=${runnerBundleId}`,
+        `--testrunnerbundleid=${runnerBundleId}`,
+        '--xctestconfig=WebDriverAgentRunner.xctest',
+        `--udid=${udid}`,
+      ],
       { stdio: ['ignore', 'pipe', 'pipe'] },
     );
     this.pipeLogs('runwda', runwda);
