@@ -2197,11 +2197,11 @@ Real-device functional verification. **This is a checkpoint task — do not skip
 - Plugin started via the usual Falx dev command, listening on the dashboard port.
 - Falx UI open in Chrome at the dashboard URL.
 
-- [ ] **Step 1: Sanity — DeviceCard shows the button**
+- [x] **Step 1: Sanity — DeviceCard shows the button**
 
 Visit the dashboard. The iOS DeviceCard for `kry-phone` displays a **Use Device** button next to **Block**.
 
-- [ ] **Step 2: Start session — happy path**
+- [x] **Step 2: Start session — happy path**
 
 Click **Use Device** on the iOS card.
 
@@ -2211,23 +2211,23 @@ Expected:
 - The toolbar shows **Home**, **App Switcher**, **Stop**.
 - The Sessions UI shows one new active session for this UDID.
 
-- [ ] **Step 3: Tap accuracy (10/10 trials)**
+- [x] **Step 3: Tap accuracy (10/10 trials)**
 
 Tap each: top-left corner, top-right, bottom-left, bottom-right, and center of the canvas. Each tap should land within ±10 points of the click target on the device (visually obvious — taps in corners hit corner UI elements, center taps hit center elements).
 
 Repeat ten times. Record 0 misses out of 10.
 
-- [ ] **Step 4: Swipe (drag) test**
+- [x] **Step 4: Swipe (drag) test**
 
 Click-drag from one side of the canvas to the other over ~500 ms. SpringBoard should flip between home pages, or scrolling should work in the open app. Confirm direction matches.
 
-- [ ] **Step 5: Home button**
+- [x] **Step 5: Home button**
 
 Open any app on the phone (tap an icon). Click **Home** in the toolbar.
 
 Expected: phone returns to SpringBoard within 1 s. Server log shows `getActiveAppBundleId` → `terminateApp` flow.
 
-- [ ] **Step 6: App Switcher button**
+- [x] **Step 6: App Switcher button**
 
 Click **App Switcher**.
 
@@ -2239,7 +2239,7 @@ Expected: App Switcher view appears on the phone within 1 s.
 
 If after 3 tunings the gesture still won't reliably summon the App Switcher, **disable the button** (set `disabled` on the JSX in `IOSControlToolbar.tsx`) and add a `docs/discovery/` note about the limitation. Ship the slice with Home + Stop only. The spec already flags this as a risk.
 
-- [ ] **Step 7: Stop button**
+- [x] **Step 7: Stop button**
 
 Click **Stop**.
 
@@ -2249,25 +2249,25 @@ Expected:
 - DeviceCard shows the device as available again.
 - `ps -A | grep -E 'ios (runwda|forward)' | grep -v grep` returns no results.
 
-- [ ] **Step 8: Locked-device probe**
+- [ ] **Step 8: Locked-device probe** <!-- pending operator validation -->
 
 Lock the phone (press the side button). On the dashboard, click **Use Device** again.
 
 Expected: a toast appears within 1 s: *"Unlock kry-phone, then try again"* (or similar). Browser stays on `/`. No partial session created. `useDeviceRegistry` does not retain a reservation.
 
-- [ ] **Step 9: Concurrent claim (single browser, two tabs)**
+- [ ] **Step 9: Concurrent claim (single browser, two tabs)** <!-- pending operator validation -->
 
 Unlock the phone. Open Tab A, click **Use Device** → session starts. Open Tab B at the dashboard URL, click **Use Device** on the same device.
 
 Expected: Tab B shows a "device busy" toast within 1 s. Tab A keeps streaming uninterrupted.
 
-- [ ] **Step 10: Tab close releases device**
+- [ ] **Step 10: Tab close releases device** <!-- pending operator validation -->
 
 In Tab A (still streaming), close the tab without clicking Stop.
 
 Expected: within ~5 s, the dashboard reflects the device as available; `ps -A | grep ios` is clean.
 
-- [ ] **Step 11: 10-minute stability run**
+- [ ] **Step 11: 10-minute stability run** <!-- pending operator validation -->
 
 Start a fresh session. Leave it open for 10 minutes, interacting with the phone occasionally (tap, swipe). Observe: no decoder errors in the browser console, no stalls > 1 s, frame rate stays visually smooth.
 
@@ -2279,11 +2279,11 @@ ps -o pid,rss,command -p <plugin-pid>
 
 RSS should be flat ± a few MB.
 
-- [ ] **Step 12: Document findings**
+- [ ] **Step 12: Document findings** <!-- pending operator validation -->
 
 Append a `### Manual verification — kry-phone (2026-MM-DD)` section to the slice's spec, recording results of steps 1–11. Pass/fail per step plus any tuning notes (especially for step 6, App Switcher).
 
-- [ ] **Step 13: Commit findings**
+- [ ] **Step 13: Commit findings** <!-- pending operator validation -->
 
 ```bash
 git add docs/superpowers/specs/2026-05-18-ios-use-device-design.md
@@ -2295,6 +2295,8 @@ git commit -m "docs(ios-use-device): manual verification findings on kry-phone"
 ## Task 14: Manual verification — two iPhones (multi-device)
 
 Validates the port allocator works in the field.
+
+> Pending — requires a second iPhone.
 
 **Prerequisites:**
 - Both iPhones plugged in (or via a powered USB hub).
@@ -2343,6 +2345,8 @@ git commit -m "docs(ios-use-device): multi-device verification findings"
 
 Validates the browser-support gate change in Task 9.
 
+> Pending — requires Safari and Firefox manual runs.
+
 - [ ] **Step 1: Test in Safari**
 
 Open the Falx dashboard in Safari. Click **Use Device** on `kry-phone`. Expected: stream works (Safari has `createImageBitmap`). Toolbar buttons function.
@@ -2371,7 +2375,7 @@ Sequential start→stop cycles to confirm no resource leaks.
 **Files:**
 - Create: `scripts/ios-leak-cycle.mjs` (throwaway script, not part of the production bundle).
 
-- [ ] **Step 1: Write the script**
+- [x] **Step 1: Write the script**
 
 `scripts/ios-leak-cycle.mjs`:
 
