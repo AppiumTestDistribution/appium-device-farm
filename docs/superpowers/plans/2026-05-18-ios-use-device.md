@@ -1862,7 +1862,7 @@ The load-bearing iOS component. Owns the WS, the `<canvas>`, the JPEG decoder, a
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/IOSStreamCanvas.tsx`
 
-- [ ] **Step 1: Write the component**
+- [x] **Step 1: Write the component**
 
 `falx-ui/src/pages/UseDevice/IOSStreamCanvas.tsx`:
 
@@ -2037,13 +2037,13 @@ export function IOSStreamCanvas(
 }
 ```
 
-- [ ] **Step 2: Verify it builds**
+- [x] **Step 2: Verify it builds**
 
 ```bash
 cd falx-ui && npm run build && cd ..
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/IOSStreamCanvas.tsx
