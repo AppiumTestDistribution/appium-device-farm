@@ -668,6 +668,44 @@ requires more, expand scope explicitly or land follow-up slices.
 
 ---
 
+### Manual verification — kry-phone (2026-05-18)
+
+Verified live via Playwright-driven Chrome against iPhone 12 Pro Max,
+UDID `00008101-001A408E2EB9001E`, iOS 26.4.2.
+
+#### Pass criteria verified
+
+- **Happy path / start session:** dashboard → Use Device → canvas streams within ~7–8 s. Confirmed.
+- **Tap dispatch:** synthetic centre-tap changed the canvas hash; phone responded. Confirmed.
+- **Home:** click → canvas hash changed → SpringBoard transition. Confirmed.
+- **App Switcher:** click → canvas hash changed (default gesture parameters work; no tuning needed). Confirmed.
+- **Stop:** click → page redirects to `/`, session cleaned up. Confirmed.
+- **Aspect-ratio fix:** wrapper renders at 323.5 × 700 px, ratio 0.4622 (matches expected 428/926 ÷). Backing store 1284 × 2778. Confirmed.
+- **WDA session rebind:** `[device-stream] iOS rebinding WDA session …→…` logged; all subsequent `/session/<id>/wda/...` calls succeed. Confirmed.
+- **No dispatch errors:** zero `[device-stream/ios] message dispatch failed` errors in plugin log. Confirmed.
+
+#### Fixes required during manual verification
+
+- **`2553436`** — `ios apps --list` to keep probe output under Node's 1 MB execFile maxBuffer.
+- **`c09177d`** — drop runwda flags so go-ios v1.0.188 doesn't fail "all-or-none" validation. (Superseded by the next fix.)
+- **`f6febf6`** — pass all three runwda flags including `xctestconfig=WebDriverAgentRunner.xctest`; auto-discover-only path falls back to Facebook bundle id, not installed runner.
+- **`70e518c`** — wrap IOSStreamCanvas in aspect-locked div; `aspect-ratio` CSS on `<canvas>` (replaced element) doesn't constrain against `max-height` + `width:auto` combo.
+- **`93ce31a`** — rebind `bridgeHandle.sessionId` after Appium's xcuitest driver creates its own WDA session; otherwise all `/session/<stale>/wda/...` calls 404.
+
+#### Open items still to verify on real hardware
+
+- 50-cycle leak run (Task 16 script committed; needs operator to run with plugin up).
+- Multi-device with second iPhone (Task 14).
+- Safari / Firefox cross-browser (Task 15).
+- 10-minute stability run, locked-device probe, two-tab 409 toast, tab-close-releases-device (Task 13 Steps 8–11).
+
+#### Known limitations (user-observed)
+
+- **Streaming framerate is lower than Android.** WDA's MJPEG server runs at 20 fps; Android uses H.264 at native framerate via scrcpy. WebRTC is the future quality lever (noted in spike 02 Phase-2 trigger discussion).
+- **Tap and gesture responsiveness is lower than Android.** Each input goes through WDA's REST API as a separate HTTP call; Android input is streamed via scrcpy's UInput path. Inherent to WDA's input architecture.
+
+---
+
 ## 6. Dependencies
 
 ### npm dependencies
