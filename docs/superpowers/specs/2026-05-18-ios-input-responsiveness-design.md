@@ -1,11 +1,87 @@
 # iOS Input Responsiveness — design
 
-**Status:** spec, awaiting plan.
-**Branch (proposed):** `feat/ios-input-responsiveness`.
+**Status:** spec, revised after Phase-1 spike (2026-05-18). See §"Revision —
+2026-05-18, post-spike scope cut" at the top before reading the rest.
+**Branch:** `feat/ios-tap-perf-issues` (existing branch reused; original plan
+proposed `feat/ios-input-responsiveness` but operator preference was to keep
+the current branch).
 **Picks up from:** `feat/ios-use-device` (iOS Use Device slice, shipped
 2026-05-18). Same physical device: `kry-phone`, iPhone 12 Pro Max,
 iOS 26.4.2.
 **Seed:** `docs/superpowers/discovery/2026-05-18-ios-quality-followup-seed.md`.
+**Spike findings:** `docs/spikes/04-ios-input-latency-spike.md`.
+
+## Revision — 2026-05-18, post-spike scope cut
+
+Phase-1 spike (`docs/spikes/04-ios-input-latency-spike.md`) measured WDA's
+per-call dispatch wall-time on iOS 26.4.2 and found it is **600–1800 ms per
+call**, not the 30–80 ms the original spec assumed. This is intrinsic to
+WDA on iOS 26 (keep-alive doesn't help; only 2 of 8 attempted runtime
+tunables stick on WDA 12.2.2). With this floor, **true live drag tracking
+is not achievable in this slice** without changing the input channel
+(go-ios HID, tidevice, or a custom WDA fork) — all of which are larger
+investigations deferred to a future spike.
+
+**Operator decision (2026-05-18):** ship the achievable wins now (see
+§"Achievable scope" below), reframe the acceptance bar from "BrowserStack-
+grade" to "noticeably more responsive than current; on-device gesture no
+longer 'sluggish'; UI feels acknowledging via optimistic overlay even
+during the unavoidable WDA dispatch wait."
+
+**What changes from the original sections below:**
+
+- §"Goal" item 2 ("drag track follows finger in near-real-time") is
+  **dropped**. Replaced with: "swipes no longer replay slowly on the
+  iPhone; on-device gesture renders snappy regardless of how long the
+  operator drew the gesture."
+- §"Goal" item 3 ("BrowserStack-grade") becomes **"noticeably more
+  responsive Y/N"**.
+- §"Architecture / Phase 2(b) Live drag dispatch": the per-WS
+  `PointerState` machine, the new `pointer_start/move/end` WS messages,
+  the chained drag-segment dispatcher — all **DROPPED**. Not needed.
+  Existing `tap` / `swipe` messages stay; the only server changes are
+  duration cap + tap-via-actions.
+- §"Architecture / Phase 2(a) Optimistic canvas overlays": **kept as-is**.
+  This is now the single biggest perceptual win.
+- §"Architecture / Phase 2(c) Tap-path optimization" was conditional;
+  now **required** per spike Decision 2 (`/actions` p50 631 ms vs
+  `/wda/tap` 818 ms).
+- New required piece: **apply WDA tunables on session start** in
+  `bridge.ts` (`waitForIdleTimeout: 0`, `animationCoolOffTimeout: 0`).
+- New required piece: **cap swipe duration** at 120 ms regardless of
+  operator's drawn dt (in `router.ts` or canvas; revised plan picks).
+- §"Phase 3 / Manual verification" — checklist unchanged in shape but
+  the subjective verdict line becomes "noticeably more responsive Y/N"
+  (was "BrowserStack-grade Y/N").
+- Original §"Approach (chosen)" tradeoff discussion remains for record
+  but is superseded by the spike findings.
+
+**Achievable scope (4 implementation pieces):**
+
+1. **WDA tunables on session start** — `bridge.ts` posts
+   `{waitForIdleTimeout: 0, animationCoolOffTimeout: 0}` after creating
+   the WDA session. ~40 % dispatch-wall-time reduction.
+2. **Tap via `/actions`** — new `wdaClient.tapViaActions()` using a
+   1-frame down/up sequence. ~22 % faster than `/wda/tap` after tunables
+   (631 ms vs 818 ms p50).
+3. **Swipe duration cap** — clamp `durationMs` to `Math.min(120,
+   Math.max(50, dt))` so WDA renders even long-drawn swipes as snappy
+   ~120 ms gestures on-device. Direct fix for the "WDA replays the
+   swipe slowly on the iPhone" complaint the spike confirmed
+   (operator: "80 ms drag was smooth; 300 ms drag was sluggish").
+4. **Optimistic canvas overlays** — finger-down ring + drag trail on
+   the canvas, layered over MJPEG. Masks the unavoidable 600 ms+
+   WDA dispatch wait perceptually.
+
+Original 19-task plan replaced by a ~6-task revised plan (see the new
+plan file `docs/superpowers/plans/2026-05-18-ios-input-responsiveness.md`
+v2).
+
+The original sections below are kept as the source of design reasoning
+and to record what was considered. Where they conflict with this revision,
+the revision wins.
+
+---
 
 ## Goal
 
