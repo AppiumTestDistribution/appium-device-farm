@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { URL } from 'node:url';
+import log from '../../logger';
 
 export type JpegHandler = (jpeg: Buffer) => void;
 
@@ -14,6 +15,13 @@ export class MjpegFanout {
   start(): Promise<void> {
     if (this.stopped) throw new Error('MjpegFanout: cannot start after stop');
     return new Promise<void>((resolve, reject) => {
+      let settled = false;
+      const settle = (fn: () => void) => {
+        if (settled) return;
+        settled = true;
+        fn();
+      };
+
       const url = new URL(this.upstreamUrl);
       this.req = http.get(
         {
@@ -25,23 +33,29 @@ export class MjpegFanout {
         (res) => {
           this.res = res;
           if (res.statusCode !== 200) {
-            reject(new Error(`MJPEG upstream status ${res.statusCode}`));
+            settle(() => reject(new Error(`MJPEG upstream status ${res.statusCode}`)));
             return;
           }
           // WDA uses the header value verbatim as the body delimiter — do NOT prepend `--`.
           const ct = res.headers['content-type'] ?? '';
           const m = /boundary=(.+)$/i.exec(ct);
           if (!m) {
-            reject(new Error('MJPEG response missing boundary'));
+            settle(() => reject(new Error('MJPEG response missing boundary')));
             return;
           }
           const boundary = m[1]!.trim();
           this.parseStream(res, boundary);
-          resolve();
+          settle(() => resolve());
         },
       );
+
       this.req.on('error', (err) => {
-        if (!this.stopped) reject(err);
+        if (this.stopped) return;
+        if (!settled) {
+          settle(() => reject(err));
+        } else {
+          log.warn(`[ios-mjpeg] upstream request error after start: ${err.message}`);
+        }
       });
     });
   }
@@ -88,8 +102,12 @@ export class MjpegFanout {
         buf = buf.slice(bodyEnd);
       }
     });
-    res.on('error', () => { /* dispatcher closes; subscribers see no more frames */ });
-    res.on('end', () => { /* upstream closed; no more frames */ });
+    res.on('error', (err: Error) => {
+      if (!this.stopped) log.warn(`[ios-mjpeg] upstream response error: ${err.message}`);
+    });
+    res.on('end', () => {
+      if (!this.stopped) log.info('[ios-mjpeg] upstream closed (end)');
+    });
   }
 
   private dispatch(jpeg: Buffer): void {
