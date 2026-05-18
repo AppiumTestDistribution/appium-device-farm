@@ -8,10 +8,11 @@ export class DeviceLockedError extends Error {
 }
 
 export class WDANotRunningError extends Error {
+  public readonly cause?: unknown;
   constructor(public readonly baseUrl: string, cause?: unknown) {
     super(`WDA not reachable at ${baseUrl}`);
     this.name = 'WDANotRunningError';
-    (this as any).cause = cause;
+    this.cause = cause;
   }
 }
 
