@@ -2431,7 +2431,7 @@ console.log(`start: p50=${p(startTimes, 0.5)}ms p95=${p(startTimes, 0.95)}ms max
 console.log(`stop:  p50=${p(stopTimes, 0.5)}ms p95=${p(stopTimes, 0.95)}ms max=${Math.max(...stopTimes)}ms`);
 ```
 
-- [ ] **Step 2: Run the script with the plugin running**
+- [x] **Step 2: Run the script with the plugin running**
 
 ```bash
 node scripts/ios-leak-cycle.mjs
@@ -2444,11 +2444,11 @@ ps -A | grep -E 'ios (runwda|forward)' | grep -v grep
 ```
 Expected: no output.
 
-- [ ] **Step 3: Document findings**
+- [x] **Step 3: Document findings**
 
 Append the start/stop p50/p95/max latencies and the "0 leaked processes" result to the spec under a `### 50-cycle leak verification` heading.
 
-- [ ] **Step 4: Commit findings**
+- [x] **Step 4: Commit findings**
 
 ```bash
 git add docs/superpowers/specs/2026-05-18-ios-use-device-design.md scripts/ios-leak-cycle.mjs
