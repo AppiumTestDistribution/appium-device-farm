@@ -1399,7 +1399,7 @@ Modify `src/device-stream/router.ts` to:
 **Files:**
 - Modify: `src/device-stream/router.ts`
 
-- [ ] **Step 1: Add platform lookup helper at top of file**
+- [x] **Step 1: Add platform lookup helper at top of file**
 
 In `src/device-stream/router.ts`, near the existing helpers (`pluginPort`, `pluginCallbackPort`), add:
 
@@ -1441,7 +1441,7 @@ async function lookupPlatformByUdid(udid: string): Promise<Platform | undefined>
 }
 ```
 
-- [ ] **Step 2: Restructure the `/start` handler to branch on platform**
+- [x] **Step 2: Restructure the `/start` handler to branch on platform**
 
 Replace the existing `/start` handler body with this dispatching version. Keep the existing Android logic verbatim inside the `if (platform === 'android')` branch. For iOS, the new path:
 
@@ -1482,7 +1482,7 @@ router.post('/use-device/start', async (req: Request, res: Response) => {
 
 Extract the existing Android `/start` body into a function `handleAndroidStart(req, res, body, reservationToken, pluginArgs)` (no logic changes — pure refactor for clarity). The function moves the existing try/catch block; in the catch path `useDeviceRegistry.releaseReservation(reservationToken)` is already correct.
 
-- [ ] **Step 3: Implement `handleIosStart`**
+- [x] **Step 3: Implement `handleIosStart`**
 
 Add this new function in the same file:
 
@@ -1620,7 +1620,7 @@ async function handleIosStart(
 }
 ```
 
-- [ ] **Step 4: Update the WS handler to branch on platform**
+- [x] **Step 4: Update the WS handler to branch on platform**
 
 In `handleWsConnection`, after `const session = useDeviceRegistry.get(sessionId)`, branch:
 
@@ -1713,21 +1713,21 @@ async function handleIosWs(ws: WebSocket, sessionId: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 5: Verify TS compiles**
+- [x] **Step 5: Verify TS compiles**
 
 ```bash
 npx tsc --noEmit -p tsconfig.json 2>&1 | grep -i 'device-stream' || echo "OK"
 ```
 Expected: `OK`.
 
-- [ ] **Step 6: Verify existing Android tests still pass**
+- [x] **Step 6: Verify existing Android tests still pass**
 
 ```bash
 npm test
 ```
 Expected: existing unit/integration suite still passes (Android path was a pure refactor — extraction into `handleAndroidStart`).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/device-stream/router.ts
