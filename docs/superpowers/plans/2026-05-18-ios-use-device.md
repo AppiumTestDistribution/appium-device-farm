@@ -2059,7 +2059,7 @@ Three buttons: Home, App Switcher, Stop. Same visual treatment as the Android `C
 **Files:**
 - Create: `falx-ui/src/pages/UseDevice/IOSControlToolbar.tsx`
 
-- [ ] **Step 1: Write the toolbar**
+- [x] **Step 1: Write the toolbar**
 
 `falx-ui/src/pages/UseDevice/IOSControlToolbar.tsx`:
 
@@ -2094,13 +2094,13 @@ export function IOSControlToolbar({ streamHandle, onStop }: IOSControlToolbarPro
 
 The styling here is deliberately minimal; the implementing subagent should match the existing Android `ControlToolbar.tsx` look (same button shapes, spacing, semantic color tokens) — keep parity within the AppLayout shell.
 
-- [ ] **Step 2: Verify it builds**
+- [x] **Step 2: Verify it builds**
 
 ```bash
 cd falx-ui && npm run build && cd ..
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/IOSControlToolbar.tsx
