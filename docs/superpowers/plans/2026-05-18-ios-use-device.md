@@ -160,7 +160,7 @@ UDID → `(wdaRestPort, wdaMjpegPort)` allocator. Pure logic, fully testable.
 - Create: `src/device-stream/ios/port-allocator.ts`
 - Test: `test/unit/device-stream-ios-port-allocator.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-ios-port-allocator.spec.ts`:
 
@@ -216,14 +216,14 @@ describe('IOSPortAllocator', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests; verify they fail with module-not-found**
+- [x] **Step 2: Run tests; verify they fail with module-not-found**
 
 ```bash
 npm test -- --grep IOSPortAllocator
 ```
 Expected: errors importing `port-allocator` (file does not exist).
 
-- [ ] **Step 3: Write the allocator**
+- [x] **Step 3: Write the allocator**
 
 `src/device-stream/ios/port-allocator.ts`:
 
@@ -275,14 +275,14 @@ export class IOSPortAllocator {
 }
 ```
 
-- [ ] **Step 4: Run tests; verify all pass**
+- [x] **Step 4: Run tests; verify all pass**
 
 ```bash
 npm test -- --grep IOSPortAllocator
 ```
 Expected: 6 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/ios/port-allocator.ts test/unit/device-stream-ios-port-allocator.spec.ts
