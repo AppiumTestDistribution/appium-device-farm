@@ -74,11 +74,9 @@ function pluginPort(pluginArgs: IPluginArgs): number {
 async function lookupPlatformByUdid(
   udid: string,
 ): Promise<Platform | undefined> {
-  // Cast: IDeviceFilterOptions is a broad filter type; udid alone is a valid
-  // selector used elsewhere in device-service for single-device lookups.
-  const device = await getDevice({ udid } as any);
+  const device = await getDevice({ udid: [udid] });
   if (!device) return undefined;
-  const p = String((device as any).platform ?? '').toLowerCase();
+  const p = String(device.platform ?? '').toLowerCase();
   if (p === 'android') return 'android';
   if (p === 'ios') return 'ios';
   return undefined;
