@@ -512,7 +512,7 @@ Thin axios-based wrapper over WDA's REST API. Tested against a real `http.Server
 - Create: `src/device-stream/ios/wda-client.ts`
 - Test: `test/unit/device-stream-ios-wda-client.spec.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `test/unit/device-stream-ios-wda-client.spec.ts`:
 
@@ -748,13 +748,13 @@ describe('WDAClient', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests; verify they fail (module not found)**
+- [x] **Step 2: Run tests; verify they fail (module not found)**
 
 ```bash
 npm test -- --grep 'WDAClient'
 ```
 
-- [ ] **Step 3: Implement the WDA client**
+- [x] **Step 3: Implement the WDA client**
 
 `src/device-stream/ios/wda-client.ts`:
 
@@ -868,14 +868,14 @@ export class WDAClient {
 }
 ```
 
-- [ ] **Step 4: Run tests; verify all pass**
+- [x] **Step 4: Run tests; verify all pass**
 
 ```bash
 npm test -- --grep 'WDAClient'
 ```
 Expected: 10 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/device-stream/ios/wda-client.ts test/unit/device-stream-ios-wda-client.spec.ts
