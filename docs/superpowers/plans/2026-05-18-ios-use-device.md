@@ -1804,7 +1804,7 @@ git commit -m "test(device-stream/ios): end-to-end lifecycle integration test"
 **Files:**
 - Modify: `falx-ui/src/pages/UseDevice/BrowserUnsupported.tsx`
 
-- [ ] **Step 1: Add a platform prop and per-platform gate**
+- [x] **Step 1: Add a platform prop and per-platform gate**
 
 The component now takes `platform?: 'android' | 'ios'`. If undefined, defaults to Android's strict gate (current behavior).
 
@@ -1839,14 +1839,14 @@ export function isBrowserSupportedForPlatform(platform: 'android' | 'ios'): bool
 
 `UseDevice.tsx` (Task 12) will call `isBrowserSupportedForPlatform(platform)` after the `/start` response arrives and render `BrowserUnsupported` if false.
 
-- [ ] **Step 2: Verify it builds**
+- [x] **Step 2: Verify it builds**
 
 ```bash
 cd falx-ui && npm run build && cd ..
 ```
 Expected: build succeeds.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add falx-ui/src/pages/UseDevice/BrowserUnsupported.tsx
