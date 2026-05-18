@@ -207,7 +207,10 @@ export class IOSWdaBridge {
     }
   }
 
-  /** Probe `ios apps --udid` for the runner bundle id. */
+  /** Probe `ios apps --list --udid` for the runner bundle id.
+   *  `--list` returns bundle-id-only lines (~kB) instead of full plist metadata
+   *  (~MB); the latter blows Node's default 1 MB execFile maxBuffer on devices
+   *  with many apps and gets miscategorised as "not installed". */
   static async probeWdaInstalled(
     udid: string,
     runnerBundleId: string,
@@ -215,9 +218,11 @@ export class IOSWdaBridge {
   ): Promise<void> {
     let stdout = '';
     try {
-      const r = await promisify(execFileFn)('ios', ['apps', '--udid', udid], {
-        timeout: 10_000,
-      });
+      const r = await promisify(execFileFn)(
+        'ios',
+        ['apps', '--list', '--udid', udid],
+        { timeout: 10_000 },
+      );
       stdout = String((r as { stdout?: string }).stdout ?? '');
     } catch {
       throw new WDANotInstalledError(runnerBundleId);
