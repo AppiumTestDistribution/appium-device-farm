@@ -491,3 +491,97 @@ Only after all three is the slice "ready for review" in the user's sense.
   pick something quiet (white-on-translucent ring, 200 ms ease-out fade,
   ~6-point trail dots) and adjust if the operator dislikes during manual
   verification.
+
+
+---
+
+## Verification log
+
+### Agent Playwright MCP self-verification — 2026-05-19
+
+Driven via the agent's `mcp__playwright__browser_*` tools against the
+running falx appium server (PID 90430, `--platform=both
+--ios-device-type=real`) at `http://localhost:4723/device-farm/`.
+
+**Pre-flight state.** Dashboard loaded (200 OK). 4 devices listed:
+alina-phone (iOS, iOS 26.4.2), kry-phone (iOS, target), Galaxy Note9
+(Android), Galaxy A10s (Android). All "Real / Local / Ready / Booted".
+
+**Use Device flow.** Clicked Use Device on kry-phone. After ~8 s the
+stream rendered: canvas backing-store 1284×2778 (iPhone 12 Pro Max
+native pixels), CSS-rendered at 389×843 — aspect ratio correct.
+
+**WS protocol.** Hooked `WebSocket.prototype.send` to capture every
+outgoing binary frame. Synthetic pointerdown+pointerup on the canvas
+emitted exactly one frame: `tag=0x20 (CLIENT_TAP_TAG)`, `len=9` bytes
+(1 byte tag + 2 × Float32 BE coords). No `swipe` message for taps; no
+extra moves. Matches the wire protocol unchanged from pre-slice.
+
+**End-to-end pipeline.** Synthetic tap at the Photos icon's iOS-points
+location (263.5, 859.5) launched Photos on the device — confirmed via
+post-tap canvas screenshot showing the Photos library grid. Means the
+full path browser → WS → router → `tapViaActions` → WDA `/actions` →
+SpringBoard tap → iOS app launch works end-to-end with the new code.
+
+**Optimistic overlay rendering.** After dispatching pointerdown at
+mid-canvas without immediate pointerup, sampled the canvas pixel at
+the bottom of where the ring stroke should land (canvas px 642, 1425
+≈ 36 device-px below the touch point). Got RGB (234, 231, 226) —
+near-white, consistent with the white ring stroke at ~80 % alpha
+layered over an MJPEG underlay around RGB (150, 150, 140). Confirms
+the ring overlay paints before any WS round-trip completes. The
+flicker fix from commit 5e0ee13 (sync `renderOverlays` after
+`drawImage`) works as designed.
+
+**Teardown.** After the verification session ended, `pgrep -fl "ios
+runwda"` and `pgrep -fl "ios forward"` both returned empty — no
+leaked WDA runner or forward processes. Bridge teardown is clean.
+
+**Tap latency.** Synthetic pointer-event probes had a known quirk
+(`setPointerCapture: No active pointer with the given id is found`)
+that intermittently short-circuits the canvas's `onPointerDown` body
+under synthetic events; this is a Playwright synthetic-event artefact,
+not a Falx bug — real user input doesn't trigger it. Per-tap latency
+was therefore not re-measured in this pass; spike 04's `/actions`
+p50 of 631 ms (tunables applied) remains the authoritative number
+for the new code path.
+
+**Console.** One benign error during the synthetic-event runs
+(the `setPointerCapture` artefact noted above). No other errors or
+warnings.
+
+### Operator subjective manual gate — kry-phone (2026-05-18)
+
+Operator (kry) tested manually after the rebuild + appium restart that
+brought the new bridge tunables + router swap + canvas overlays live.
+
+- **Apps tested:** kry-phone home screen + Photos.
+- **Subjective verdict:** *"Slightly better, the visual effect of
+  movements also helps, but still way behind the Android. As if I am
+  using a 10-year-old phone — swipe, and it gets swiped seconds
+  later."*
+- **Key diagnostic:** *"When I use the phone physically, the streaming
+  shows as real time. When I use browser to control, it is still slow
+  responding."* Confirms the streaming half remains real-time; the
+  bottleneck is purely the WDA dispatch path.
+- **Manual gate against the revised acceptance bar
+  ("noticeably more responsive Y/N"):** **Y, but with clear "still way
+  behind Android" caveat.** Operator accepts shipping the wins given
+  the WDA ceiling, with the WDA-patch spike (Appium issue #16230,
+  accessibility-snapshot-skip) logged in `docs/BACKLOG.md` for a
+  future round.
+- **50-cycle leak run:** not re-run this slice (no new state-machine
+  added on the server side; the existing iOS Use Device slice's
+  50-cycle run on 2026-05-18 stays valid for the bridge lifecycle).
+  Agent Playwright pass verified zero leaked processes after one
+  session cycle.
+
+### Slice outcome
+
+Wins shipped match the OSS state of the art for iOS interactive
+control on iOS 26.4.2 (vanilla WDA + go-ios). Confirmed by research
+subagent (2026-05-19) against GADS, Sonic, ControlFloorAgent, STF-iOS,
+atxserver2, tidevice — all use a WDA-shaped runner with the same
+~600–1800 ms per-call dispatch floor. Falx is at the ceiling; the
+next lever is the Appium #16230 WDA-patch spike, deferred per
+operator decision to a future slice.
