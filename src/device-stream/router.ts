@@ -636,15 +636,23 @@ async function handleIosWs(
 
     try {
       if (msg.kind === 'tap') {
-        await handle.wdaClient.tap(handle.sessionId, msg.x, msg.y);
+        // /actions is ~22% faster than /wda/tap on WDA 12.2.2 + iOS 26.4.2
+        // after tunables; see docs/spikes/04-ios-input-latency-spike.md.
+        await handle.wdaClient.tapViaActions(handle.sessionId, msg.x, msg.y);
       } else if (msg.kind === 'swipe') {
+        // Cap on-device replay duration: WDA renders drags at the requested
+        // duration. Operator-drawn long swipes (e.g. 300ms) feel sluggish
+        // on the iPhone; clamping to 120ms gives a snappy on-device gesture
+        // regardless of how long the operator drew it. Lower bound preserves
+        // distinguishability vs taps. See docs/spikes/04-ios-input-latency-spike.md.
+        const cappedDuration = Math.min(120, Math.max(50, msg.durationMs));
         await handle.wdaClient.drag(
           handle.sessionId,
           msg.x1,
           msg.y1,
           msg.x2,
           msg.y2,
-          msg.durationMs,
+          cappedDuration,
         );
       } else if (msg.kind === 'intent') {
         if (msg.intent === 'home') {
