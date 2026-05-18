@@ -160,21 +160,41 @@ export function IOSStreamCanvas(
     e.preventDefault();
   }
 
+  // Aspect-locked wrapper. Three reasons for this shape:
+  //   1. `aspect-ratio` on a `<canvas>` is unreliable: the intrinsic
+  //      backing-store size (`width`/`height` HTML attrs) keeps the layout
+  //      pinned to the intrinsic width whenever max-height clips, so the
+  //      locked ratio quietly breaks.
+  //   2. The wrapper carries the aspect-ratio + definite height. With
+  //      `width: auto` it would still stretch to fill a flex-column parent,
+  //      so we set `alignSelf: 'center'` to opt out of cross-axis stretch
+  //      and let the width derive from `height × aspect`.
+  //   3. The canvas inside fills the wrapper via `width: 100%; height: 100%`
+  //      so its CSS size is decoupled from its backing-store size.
   return (
-    <canvas
-      ref={canvasRef}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerCancel}
+    <div
       style={{
+        alignSelf: 'center',
         maxWidth: '100%',
         maxHeight: 'calc(100vh - 200px)',
+        height: 'calc(100vh - 200px)',
         width: 'auto',
-        height: 'auto',
         aspectRatio: `${dims.widthPoints} / ${dims.heightPoints}`,
         backgroundColor: 'black',
-        touchAction: 'none',
       }}
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          touchAction: 'none',
+        }}
+      />
+    </div>
   );
 }
