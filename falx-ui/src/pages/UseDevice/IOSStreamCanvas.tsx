@@ -1,4 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import {
+  drawRing,
+  drawTrail,
+  ringIsExpired,
+  trimTrail,
+  type RingState,
+  type TrailPoint,
+} from './overlay-renderer';
+
+const RING_LIFETIME_MS = 220;
+const TRAIL_MAX_AGE_MS = 280;
 
 // Match constants from src/device-stream/types.ts.
 const SRV_TAG_META = 0x01;
@@ -36,6 +47,45 @@ export function IOSStreamCanvas(
   });
   const decodeInFlight = useRef<Promise<unknown> | null>(null);
   const pointerStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const ringRef = useRef<{ x: number; y: number; tStartMs: number } | null>(null);
+  const trailRef = useRef<{ x: number; y: number; tMs: number }[]>([]);
+  const overlayRafRef = useRef<number | null>(null);
+
+  function renderOverlays() {
+    const c = canvasRef.current;
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+    const now = performance.now();
+    const ring = ringRef.current;
+    const trail = trailRef.current;
+    if (ring) {
+      const ageMs = now - ring.tStartMs;
+      if (ringIsExpired(ageMs, RING_LIFETIME_MS)) {
+        ringRef.current = null;
+      } else {
+        const state: RingState = { x: ring.x, y: ring.y, ageMs, lifetimeMs: RING_LIFETIME_MS };
+        drawRing(ctx, state);
+      }
+    }
+    if (trail.length > 0) {
+      const aged: TrailPoint[] = trail.map((p) => ({ x: p.x, y: p.y, ageMs: now - p.tMs }));
+      const kept = trimTrail(aged, TRAIL_MAX_AGE_MS);
+      trailRef.current = trail.filter((_, i) => aged[i].ageMs <= TRAIL_MAX_AGE_MS);
+      drawTrail(ctx, kept, TRAIL_MAX_AGE_MS);
+    }
+    if (ringRef.current || trailRef.current.length > 0) {
+      overlayRafRef.current = requestAnimationFrame(renderOverlays);
+    } else {
+      overlayRafRef.current = null;
+    }
+  }
+
+  function startOverlayLoop() {
+    if (overlayRafRef.current == null) {
+      overlayRafRef.current = requestAnimationFrame(renderOverlays);
+    }
+  }
 
   // Connect WS.
   useEffect(() => {
@@ -83,6 +133,10 @@ export function IOSStreamCanvas(
     return () => {
       ws.close();
       wsRef.current = null;
+      if (overlayRafRef.current != null) {
+        cancelAnimationFrame(overlayRafRef.current);
+        overlayRafRef.current = null;
+      }
     };
   }, [streamUrl]);
 
@@ -102,33 +156,57 @@ export function IOSStreamCanvas(
     return () => handleRef(null);
   }, [handleRef]);
 
-  function clientToPoints(e: React.PointerEvent<HTMLCanvasElement>): { x: number; y: number } {
+  function clientToCanvasAndPoints(e: React.PointerEvent<HTMLCanvasElement>): {
+    px: number; py: number; x: number; y: number;
+  } {
     const c = canvasRef.current;
-    if (!c) return { x: 0, y: 0 };
+    if (!c) return { px: 0, py: 0, x: 0, y: 0 };
     const rect = c.getBoundingClientRect();
-    const rawX = ((e.clientX - rect.left) / rect.width) * dims.widthPoints;
-    const rawY = ((e.clientY - rect.top) / rect.height) * dims.heightPoints;
-    const x = Math.max(0, Math.min(dims.widthPoints, rawX));
-    const y = Math.max(0, Math.min(dims.heightPoints, rawY));
-    return { x, y };
+    const relX = (e.clientX - rect.left) / rect.width;
+    const relY = (e.clientY - rect.top) / rect.height;
+    const rawX = relX * dims.widthPoints;
+    const rawY = relY * dims.heightPoints;
+    return {
+      px: Math.max(0, Math.min(c.width, relX * c.width)),
+      py: Math.max(0, Math.min(c.height, relY * c.height)),
+      x: Math.max(0, Math.min(dims.widthPoints, rawX)),
+      y: Math.max(0, Math.min(dims.heightPoints, rawY)),
+    };
   }
 
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
-    const p = clientToPoints(e);
-    pointerStart.current = { x: p.x, y: p.y, t: performance.now() };
+    const p = clientToCanvasAndPoints(e);
+    const now = performance.now();
+    pointerStart.current = { x: p.x, y: p.y, t: now };
+    ringRef.current = { x: p.px, y: p.py, tStartMs: now };
+    trailRef.current = [{ x: p.px, y: p.py, tMs: now }];
+    startOverlayLoop();
+    e.preventDefault();
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!pointerStart.current) return;
+    const p = clientToCanvasAndPoints(e);
+    const now = performance.now();
+    trailRef.current.push({ x: p.px, y: p.py, tMs: now });
+    if (trailRef.current.length > 64) trailRef.current.shift();
+    startOverlayLoop();
     e.preventDefault();
   }
 
   function onPointerCancel() {
     pointerStart.current = null;
+    trailRef.current = [];
+    ringRef.current = null;
   }
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     const start = pointerStart.current;
     pointerStart.current = null;
+    trailRef.current = [];
     if (!start) return;
-    const end = clientToPoints(e);
+    const end = clientToCanvasAndPoints(e);
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const dt = performance.now() - start.t;
@@ -186,6 +264,7 @@ export function IOSStreamCanvas(
       <canvas
         ref={canvasRef}
         onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
         style={{
