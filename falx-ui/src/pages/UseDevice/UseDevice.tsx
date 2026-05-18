@@ -10,12 +10,12 @@ import {
   AndroidStreamHandle,
 } from './AndroidStreamCanvas';
 import { ControlToolbar } from './ControlToolbar';
-import { BrowserUnsupported } from './BrowserUnsupported';
-
-function webCodecsAvailable(): boolean {
-  return typeof (globalThis as unknown as { VideoDecoder?: unknown })
-    .VideoDecoder !== 'undefined';
-}
+import {
+  BrowserUnsupported,
+  isBrowserSupportedForPlatform,
+} from './BrowserUnsupported';
+import { IOSStreamCanvas, IOSStreamHandle } from './IOSStreamCanvas';
+import { IOSControlToolbar } from './IOSControlToolbar';
 
 export default function UseDevice() {
   const { udid } = useParams<{ udid: string }>();
@@ -23,9 +23,12 @@ export default function UseDevice() {
   const [session, setSession] = useState<StartUseDeviceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const canvasRef = useRef<AndroidStreamHandle>(null);
+  const [streamHandle, setStreamHandle] = useState<IOSStreamHandle | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (!webCodecsAvailable() || !udid) return;
+    if (!udid) return;
     let cancelled = false;
     createUseDeviceSession(udid)
       .then((s) => {
@@ -55,7 +58,6 @@ export default function UseDevice() {
     canvasRef.current?.sendKeycode(keycode);
   }
 
-  if (!webCodecsAvailable()) return <BrowserUnsupported />;
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -74,6 +76,28 @@ export default function UseDevice() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-gray-600">Starting session…</p>
+      </div>
+    );
+  }
+
+  if (!isBrowserSupportedForPlatform(session.platform)) {
+    return <BrowserUnsupported platform={session.platform} />;
+  }
+
+  if (session.platform === 'ios') {
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <IOSControlToolbar
+          streamHandle={streamHandle}
+          onStop={handleStop}
+        />
+        <IOSStreamCanvas
+          streamUrl={session.streamUrl}
+          sessionId={session.sessionId}
+          initialDeviceWidth={session.deviceWidth}
+          initialDeviceHeight={session.deviceHeight}
+          handleRef={setStreamHandle}
+        />
       </div>
     );
   }

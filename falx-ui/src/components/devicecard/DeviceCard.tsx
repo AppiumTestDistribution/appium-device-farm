@@ -278,7 +278,8 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
       {(!device.session_id || isAdmin() || isCurrentUser(device.activeUser?.id)) && (
         <>
           <div className="pt-2 flex gap-3">
-            {device.platform === 'android' && (
+            {(device.platform?.toLowerCase() === 'android' ||
+              device.platform?.toLowerCase() === 'ios') && (
               <button
                 onClick={() => navigate(`/use-device/${device.udid}`)}
                 disabled={status === 'offline' || Boolean(device.cloud) || device.busy || device.userBlocked}

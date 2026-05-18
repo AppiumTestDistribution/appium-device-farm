@@ -6,6 +6,8 @@ export interface StartUseDeviceResponse {
   platform: 'android' | 'ios';
   deviceWidth: number;
   deviceHeight: number;
+  /** iOS-only screen scale factor (pixels per point). Returned by the backend for iOS sessions. */
+  scale?: number;
 }
 
 /**
