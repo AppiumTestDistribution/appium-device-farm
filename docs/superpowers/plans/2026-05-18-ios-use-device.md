@@ -1752,7 +1752,7 @@ End-to-end test with the real router + WS server + registry, but mocked `WDAClie
 
 This test is intentionally non-TDD: the moving parts are exercised by the unit tests; the integration test is a smoke test that the wiring matches.
 
-- [ ] **Step 1: Write the integration test**
+- [x] **Step 1: Write the integration test**
 
 `test/integration/device-stream-ios-lifecycle.spec.ts` — outline (full body to be filled in by the implementing subagent, following the same shape as `test/integration/device-stream-lifecycle.spec.ts`):
 
@@ -1781,14 +1781,14 @@ Acceptance for this task:
 - Test asserts `/stop` calls `bridgeHandle.stop` once, idempotent on a second call.
 - Test asserts second `/start` for the same UDID before stop returns 409.
 
-- [ ] **Step 2: Run the test**
+- [x] **Step 2: Run the test**
 
 ```bash
 npm test -- test/integration/device-stream-ios-lifecycle.spec.ts
 ```
 Expected: all assertions pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add test/integration/device-stream-ios-lifecycle.spec.ts
