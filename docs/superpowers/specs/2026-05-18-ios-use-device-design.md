@@ -704,6 +704,25 @@ UDID `00008101-001A408E2EB9001E`, iOS 26.4.2.
 - **Streaming framerate is lower than Android.** WDA's MJPEG server runs at 20 fps; Android uses H.264 at native framerate via scrcpy. WebRTC is the future quality lever (noted in spike 02 Phase-2 trigger discussion).
 - **Tap and gesture responsiveness is lower than Android.** Each input goes through WDA's REST API as a separate HTTP call; Android input is streamed via scrcpy's UInput path. Inherent to WDA's input architecture.
 
+### 50-cycle leak verification — kry-phone (2026-05-18)
+
+`scripts/ios-leak-cycle.mjs` ran 50 sequential start→stop cycles against
+the plugin:
+
+- **Start latency:** p50 = 5331 ms, p95 = 5773 ms, max = 5788 ms.
+  Comfortably under the 8 s acceptance budget. Latency trended **down**
+  over the run (cycle 1: 5768 ms → cycle 50: 5300 ms), consistent with
+  warm-cache effects on `ios image auto` and Appium driver init — i.e.
+  no compounding resource cost.
+- **Stop latency:** p50 = 26 ms, p95 = 31 ms, max = 59 ms. The HTTP ACK
+  is near-instant; the actual teardown (deleteSession, SIGKILL of
+  runwda + forwards, MJPEG fan-out stop) runs async in the registry's
+  stop closure.
+- **Process leaks:** `ps -A | grep -E 'ios (runwda|forward)'` returned
+  zero rows immediately after the run. No leaked go-ios children.
+- **Port allocator:** slot 0 (`8100`/`9100`) reused cleanly across all
+  50 cycles; no slot exhaustion or off-by-one allocation.
+
 ---
 
 ## 6. Dependencies
