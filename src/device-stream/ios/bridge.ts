@@ -130,61 +130,67 @@ export class IOSWdaBridge {
     // Step 8 — create WDA session (bare-minimum caps per spike 03).
     const sessionId = await wdaClient.createSession();
 
-    // Step 9 — lock probe.
-    if (await wdaClient.getLocked(sessionId)) {
+    let mjpegFanout: MjpegFanout | undefined;
+    try {
+      // Step 9 — lock probe.
+      if (await wdaClient.getLocked(sessionId)) {
+        throw new DeviceLockedError();
+      }
+
+      // Step 10 — read screen dimensions.
+      const screen: ScreenInfo = await wdaClient.getScreen(sessionId);
+      const deviceWidthPoints = screen.width;
+      const deviceHeightPoints = screen.height;
+      const deviceWidthPixels = Math.round(screen.width * screen.scale);
+      const deviceHeightPixels = Math.round(screen.height * screen.scale);
+
+      // Step 11 — push tuned MJPEG settings.
+      await wdaClient.setMjpegSettings(sessionId, DEFAULT_MJPEG_SETTINGS);
+
+      // Step 12 — start MJPEG fan-out.
+      mjpegFanout = new MjpegFanout(
+        `http://localhost:${ports.wdaMjpegPort}/mjpeg`,
+      );
+      await mjpegFanout.start();
+
+      let stopped = false;
+      const stop = async (): Promise<void> => {
+        if (stopped) return;
+        stopped = true;
+        try {
+          await mjpegFanout!.stop();
+        } catch (e) {
+          log.warn(`[ios-bridge] mjpeg.stop: ${e}`);
+        }
+        try {
+          await wdaClient.deleteSession(sessionId);
+        } catch (e) {
+          log.warn(`[ios-bridge] deleteSession: ${e}`);
+        }
+        await this.killAll(runwda, forwardRest, forwardMjpeg);
+        log.info(`[ios-bridge] stopped udid=${udid}`);
+      };
+
+      log.info(
+        `[ios-bridge] ready udid=${udid} sessionId=${sessionId} ${deviceWidthPoints}x${deviceHeightPoints} @${screen.scale}x`,
+      );
+      return {
+        sessionId,
+        deviceWidthPoints,
+        deviceHeightPoints,
+        deviceWidthPixels,
+        deviceHeightPixels,
+        scale: screen.scale,
+        wdaClient,
+        mjpegFanout,
+        stop,
+      };
+    } catch (err) {
+      if (mjpegFanout) await mjpegFanout.stop().catch(() => {});
       await wdaClient.deleteSession(sessionId).catch(() => {});
       await this.killAll(runwda, forwardRest, forwardMjpeg);
-      throw new DeviceLockedError();
+      throw err;
     }
-
-    // Step 10 — read screen dimensions.
-    const screen: ScreenInfo = await wdaClient.getScreen(sessionId);
-    const deviceWidthPoints = screen.width;
-    const deviceHeightPoints = screen.height;
-    const deviceWidthPixels = Math.round(screen.width * screen.scale);
-    const deviceHeightPixels = Math.round(screen.height * screen.scale);
-
-    // Step 11 — push tuned MJPEG settings.
-    await wdaClient.setMjpegSettings(sessionId, DEFAULT_MJPEG_SETTINGS);
-
-    // Step 12 — start MJPEG fan-out.
-    const mjpegFanout = new MjpegFanout(
-      `http://localhost:${ports.wdaMjpegPort}/mjpeg`,
-    );
-    await mjpegFanout.start();
-
-    let stopped = false;
-    const stop = async (): Promise<void> => {
-      if (stopped) return;
-      stopped = true;
-      try {
-        await mjpegFanout.stop();
-      } catch (e) {
-        log.warn(`[ios-bridge] mjpeg.stop: ${e}`);
-      }
-      try {
-        await wdaClient.deleteSession(sessionId);
-      } catch (e) {
-        log.warn(`[ios-bridge] deleteSession: ${e}`);
-      }
-      await this.killAll(runwda, forwardRest, forwardMjpeg);
-      log.info(`[ios-bridge] stopped udid=${udid}`);
-    };
-
-    log.info(
-      `[ios-bridge] ready udid=${udid} sessionId=${sessionId} ${deviceWidthPoints}x${deviceHeightPoints} @${screen.scale}x`,
-    );
-    return {
-      sessionId,
-      deviceWidthPoints,
-      deviceHeightPoints,
-      deviceWidthPixels,
-      deviceHeightPixels,
-      scale: screen.scale,
-      wdaClient,
-      mjpegFanout,
-      stop,
-    };
   }
 
   /** Probe `ios info --udid` to confirm tunnel daemon + device pairing. */
