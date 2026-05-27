@@ -3,9 +3,16 @@ import path from 'path';
 import { plist, fs, tempDir, zip } from 'appium/support';
 import { LRUCache } from 'lru-cache';
 import B from 'bluebird';
+import type { StringRecord } from '@appium/types';
 
-/** @type {LRUCache<string, import('@appium/types').StringRecord>} */
-const MANIFEST_CACHE = new LRUCache({
+type IOSManifestPayload = StringRecord<unknown> & {
+  CFBundleIdentifier?: string;
+  CFBundleVersion?: string;
+  CFBundleSupportedPlatforms?: string[];
+  CFBundleExecutable?: string;
+};
+
+const MANIFEST_CACHE = new LRUCache<string, IOSManifestPayload>({
   max: 40,
   updateAgeOnHas: true,
 });
@@ -22,8 +29,9 @@ export default class AppInfosCache {
     this.log = log;
   }
 
-  async extractManifestProperty(bundlePath: any, propertyName: any) {
-    const result = (await this.put(bundlePath))[propertyName];
+  async extractManifestProperty(bundlePath: any, propertyName: string) {
+    const manifest = await this.put(bundlePath);
+    const result = manifest[propertyName];
     this.log.debug(`${propertyName}: ${JSON.stringify(result)}`);
     return result;
   }
@@ -50,14 +58,14 @@ export default class AppInfosCache {
     return await this.extractManifestProperty(bundlePath, 'CFBundleExecutable');
   }
 
-  async put(bundlePath: any) {
+  async put(bundlePath: any): Promise<IOSManifestPayload> {
     return (await fs.stat(bundlePath)).isFile()
       ? await this._putIpa(bundlePath)
       : await this._putApp(bundlePath);
   }
 
-  async _putIpa(ipaPath: any) {
-    let manifestPayload;
+  async _putIpa(ipaPath: any): Promise<IOSManifestPayload> {
+    let manifestPayload: IOSManifestPayload | undefined;
     let lastError;
     try {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -68,8 +76,9 @@ export default class AppInfosCache {
         }
 
         const hash = `${entry.crc32}`;
-        if (MANIFEST_CACHE.has(hash)) {
-          manifestPayload = MANIFEST_CACHE.get(hash);
+        const cachedManifest = MANIFEST_CACHE.get(hash);
+        if (cachedManifest !== undefined) {
+          manifestPayload = cachedManifest;
           return false;
         }
         const tmpRoot = await tempDir.openDir();
@@ -110,11 +119,12 @@ export default class AppInfosCache {
     return manifestPayload;
   }
 
-  async _putApp(appPath: any) {
+  async _putApp(appPath: any): Promise<IOSManifestPayload> {
     const manifestPath = path.join(appPath, MANIFEST_FILE_NAME);
     const hash = await fs.hash(manifestPath);
-    if (MANIFEST_CACHE.has(hash)) {
-      return MANIFEST_CACHE.get(hash);
+    const cachedManifest = MANIFEST_CACHE.get(hash);
+    if (cachedManifest !== undefined) {
+      return cachedManifest;
     }
     const [payload, stat] = await B.all([
       this._readPlist(manifestPath, appPath),
@@ -129,9 +139,9 @@ export default class AppInfosCache {
     return payload;
   }
 
-  async _readPlist(plistPath: any, bundlePath: any) {
+  async _readPlist(plistPath: any, bundlePath: any): Promise<IOSManifestPayload> {
     try {
-      return await plist.parsePlistFile(plistPath);
+      return (await plist.parsePlistFile(plistPath)) as IOSManifestPayload;
     } catch (e: any) {
       this.log.debug(e.stack);
       throw new Error(
