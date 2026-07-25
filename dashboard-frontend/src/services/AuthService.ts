@@ -21,6 +21,19 @@ export interface AuthResponse {
   user: User;
 }
 
+/**
+ * apiClient resolves - rather than rejects - on a non-2xx response, handing back the raw
+ * Response instead of parsed JSON. A caller that ignores the return value therefore treats
+ * a failed request as a success. That is what kept issue #2035 invisible: the delete request
+ * 404'd, deleteUser resolved anyway, and the table dropped the row while the user was still
+ * in the database, only to reappear on the next refresh.
+ */
+function assertOk(result: unknown, action: string): void {
+  if (result instanceof Response && !result.ok) {
+    throw new Error(`${action} failed with HTTP ${result.status}`);
+  }
+}
+
 // Auth service class
 class AuthService {
   // Store token in localStorage
@@ -122,35 +135,25 @@ class AuthService {
       isActive?: boolean;
     },
   ): Promise<void> {
-    try {
-      await apiClient.makePUTRequest(`/users/${userId}`, {}, data);
-    } catch (error) {
-      throw new Error('Error updating user');
-    }
+    const result = await apiClient.makePUTRequest(`/users/${userId}`, {}, data);
+    assertOk(result, 'Update user');
   }
 
   public async activateUser(userId: string): Promise<void> {
-    try {
-      await apiClient.makePUTRequest(`/auth/users/${userId}/activate`, {}, {});
-    } catch (error) {
-      throw new Error('Error activating user');
-    }
+    const result = await apiClient.makePUTRequest(`/auth/users/${userId}/activate`, {}, {});
+    assertOk(result, 'Activate user');
   }
 
   public async deactivateUser(userId: string): Promise<void> {
-    try {
-      await apiClient.makePUTRequest(`/auth/users/${userId}/deactivate`, {}, {});
-    } catch (error) {
-      throw new Error('Error deactivating user');
-    }
+    const result = await apiClient.makePUTRequest(`/auth/users/${userId}/deactivate`, {}, {});
+    assertOk(result, 'Deactivate user');
   }
 
+  // Deletion lives on the users router (`/users/:id`), not the auth router. Only the
+  // activate/deactivate actions are nested under `/auth/users/:userId/...`.
   public async deleteUser(userId: string): Promise<void> {
-    try {
-      await apiClient.makeDELETERequest(`/auth/users/${userId}`);
-    } catch (error) {
-      throw new Error('Error deleting user');
-    }
+    const result = await apiClient.makeDELETERequest(`/users/${userId}`);
+    assertOk(result, 'Delete user');
   }
 
   // Logout user

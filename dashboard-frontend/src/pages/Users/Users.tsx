@@ -195,12 +195,6 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleDelete = (userId: string) => {
-    console.log(`Delete user: ${userId}`);
-    // Add delete logic here (e.g., call API, show confirmation, update state)
-    // Example: if (window.confirm('Are you sure?')) { ... call delete API ... }
-  };
-
   const handleCreateUser = async () => {
     const errors = validateCreateForm(createFormData);
     if (Object.keys(errors).length > 0) {
