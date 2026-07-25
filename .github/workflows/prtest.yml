@@ -31,6 +31,10 @@ jobs:
       run: |
         # Add your script commands here
         npm test
+    - name: Run Dashboard Unit Test
+      # `npm run bundle` above already installed dashboard-frontend's dependencies
+      # via buildAndCopyWeb.sh, so this only runs the suite.
+      run: npm test --prefix dashboard-frontend
     - name: Run lint
       run: |
         npm run prettier-check

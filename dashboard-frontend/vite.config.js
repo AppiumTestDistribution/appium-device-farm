@@ -7,4 +7,8 @@ export default defineConfig({
   build: {
     assetsDir: './device-farm/ui-assets',
   },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+  },
 });
