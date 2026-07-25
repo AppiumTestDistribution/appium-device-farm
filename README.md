@@ -43,7 +43,7 @@ With Appium Device-farm, teams can:
 > manual-control implementation — for example a `scrcpy`-style pipeline for Android and a
 > non-WDA-blocking approach for iOS — please open an issue or a PR. We are always happy to review and
 > merge community contributions. Likewise, if a sponsor wants to fund this work, we are ready to pick
-> it back up: see [GitHub Sponsors](https://github.com/sponsors/saikrishna321) or
+> it back up: see 
 > [Open Collective](https://opencollective.com/appium-device-farm).
 >
 > **Security:** the unmaintained [`ip`](https://github.com/indutny/node-ip) package has been dropped in
