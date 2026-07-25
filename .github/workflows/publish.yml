@@ -11,7 +11,10 @@ jobs:
       steps:
          - uses: actions/checkout@v6
            with:
-             submodules: recursive
+             # Keep PAT_TOKEN. checkout persists these credentials, and @semantic-release/git
+             # reuses them to push the version bump and tag back to main - the default
+             # GITHUB_TOKEN is not enough for that. `submodules: recursive` was dropped:
+             # .gitmodules was removed in 6367a60, so there is nothing left to recurse into.
              token: ${{ secrets.PAT_TOKEN }}
          - uses: actions/setup-node@v3
            with:
