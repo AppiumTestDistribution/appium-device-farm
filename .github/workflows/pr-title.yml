@@ -10,6 +10,17 @@ jobs:
     steps:
       - uses: beemojs/conventional-pr-action@v3
         with:
-          config-preset: angular
+          # The action installs the preset at run time and resolves it with a CommonJS
+          # loader. Every conventional-changelog preset went ESM-only at v8 (`type: module`,
+          # an `exports` map with only an `import` condition and no `main`), so the default
+          # `config-version: latest` can no longer be required and the action aborts with
+          # `Preset "..." does not exist`. Pin to the last CJS release.
+          #
+          # `conventionalcommits` rather than `angular` because its header pattern is
+          # /^(\w*)(?:\((.*)\))?!?: (.*)$/ - the `!?` accepts the `feat!:` breaking-change
+          # marker, which the angular pattern rejects. It is also the preset .releaserc
+          # already uses for release-notes-generator.
+          config-preset: conventionalcommits
+          config-version: '7'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
