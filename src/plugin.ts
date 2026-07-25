@@ -30,12 +30,7 @@ import {
   setupCronUpdateDeviceList,
   updateDeviceList,
 } from './device-utils';
-import {
-  hasCloudArgument,
-  isDeviceFarmRunning,
-  nodeUrl,
-  stripAppiumPrefixes,
-} from './helpers';
+import { hasCloudArgument, isDeviceFarmRunning, nodeUrl, stripAppiumPrefixes } from './helpers';
 import { Dashboard } from './dashboard';
 import { IDevice } from './interfaces/IDevice';
 import {

@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import path from 'path';
 import { plist, fs, tempDir, zip } from 'appium/support';
+import { StringRecord } from '@appium/types';
 import { LRUCache } from 'lru-cache';
 import B from 'bluebird';
 
-/** @type {LRUCache<string, import('@appium/types').StringRecord>} */
-const MANIFEST_CACHE = new LRUCache({
+const MANIFEST_CACHE = new LRUCache<string, StringRecord>({
   max: 40,
   updateAgeOnHas: true,
 });
@@ -50,14 +50,14 @@ export default class AppInfosCache {
     return await this.extractManifestProperty(bundlePath, 'CFBundleExecutable');
   }
 
-  async put(bundlePath: any) {
+  async put(bundlePath: any): Promise<StringRecord> {
     return (await fs.stat(bundlePath)).isFile()
       ? await this._putIpa(bundlePath)
       : await this._putApp(bundlePath);
   }
 
-  async _putIpa(ipaPath: any) {
-    let manifestPayload;
+  async _putIpa(ipaPath: any): Promise<StringRecord> {
+    let manifestPayload: StringRecord | undefined;
     let lastError;
     try {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -110,11 +110,12 @@ export default class AppInfosCache {
     return manifestPayload;
   }
 
-  async _putApp(appPath: any) {
+  async _putApp(appPath: any): Promise<StringRecord> {
     const manifestPath = path.join(appPath, MANIFEST_FILE_NAME);
     const hash = await fs.hash(manifestPath);
-    if (MANIFEST_CACHE.has(hash)) {
-      return MANIFEST_CACHE.get(hash);
+    const cached = MANIFEST_CACHE.get(hash);
+    if (cached) {
+      return cached;
     }
     const [payload, stat] = await B.all([
       this._readPlist(manifestPath, appPath),
@@ -129,9 +130,9 @@ export default class AppInfosCache {
     return payload;
   }
 
-  async _readPlist(plistPath: any, bundlePath: any) {
+  async _readPlist(plistPath: any, bundlePath: any): Promise<StringRecord> {
     try {
-      return await plist.parsePlistFile(plistPath);
+      return (await plist.parsePlistFile(plistPath)) as StringRecord;
     } catch (e: any) {
       this.log.debug(e.stack);
       throw new Error(
