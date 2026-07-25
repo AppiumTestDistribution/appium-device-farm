@@ -36,16 +36,6 @@ export class LocalSession extends RemoteSession {
     return SessionType.LOCAL;
   }
 
-  getLiveVideoUrl(): string | null {
-    const { address } = this.driver.opts || this.driver;
-    const mjpegServerPort = this.getCapabilities()['mjpegServerPort'];
-    if (mjpegServerPort && !isNaN(mjpegServerPort)) {
-      return `http://${address}:${mjpegServerPort}`;
-    } else {
-      return null;
-    }
-  }
-
   async startDeviceLog() {
     this.saveDeviceLog = true;
   }

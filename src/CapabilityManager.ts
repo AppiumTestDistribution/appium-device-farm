@@ -13,7 +13,6 @@ export enum DEVICE_FARM_CAPABILITIES {
   VIDEO_RECORDING = 'recordVideo',
   VIDEO_RESOLUTION = 'videoResolution',
   VIDEO_TIME_LIMIT = 'videoTimeLimit',
-  LIVE_VIDEO = 'liveVideo',
   SCREENSHOT_ON_FAILURE = 'screenshotOnFailure',
   SCREENSHOT_ON_ALL = 'screenshotOnAll',
   DEVICE_FARM_OPTIONS = 'df:options',
@@ -27,10 +26,6 @@ export enum DEVICE_FARM_CAPABILITIES {
   FILTER_BY_HOST = 'filterByHost',
   SAVE_DEVICE_LOGS = 'saveDeviceLogs',
   TAGS = 'tags',
-}
-
-function isCapabilityAlreadyPresent(caps: ISessionCapability, capabilityName: string) {
-  return _.has(caps.alwaysMatch, capabilityName) || _.has(caps.firstMatch[0], capabilityName);
 }
 
 function deleteAlwaysMatch(caps: ISessionCapability, capabilityName: string) {
@@ -59,7 +54,7 @@ async function findAppPath(caps: any) {
 export async function androidCapabilities(
   caps: ISessionCapability,
   freeDevice: IDevice,
-  options: { liveVideo: boolean; portRange?: string },
+  options: { portRange?: string },
 ) {
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
@@ -70,14 +65,7 @@ export async function androidCapabilities(
   caps.firstMatch[0]['appium:adbPort'] = freeDevice.adbPort;
   if (freeDevice.chromeDriverPath)
     caps.firstMatch[0]['appium:chromedriverExecutable'] = freeDevice.chromeDriverPath;
-  if (!isCapabilityAlreadyPresent(caps, 'appium:mjpegServerPort')) {
-    caps.firstMatch[0]['appium:mjpegServerPort'] = options.liveVideo
-      ? await getFreePort(options.portRange)
-      : undefined;
-  }
-  if (!options.liveVideo) {
-    deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
-  }
+  deleteAlwaysMatch(caps, 'appium:mjpegServerPort');
   deleteAlwaysMatch(caps, 'appium:udid');
   deleteAlwaysMatch(caps, 'appium:systemPort');
   deleteAlwaysMatch(caps, 'appium:chromeDriverPort');
@@ -90,22 +78,14 @@ export async function iOSCapabilities(
   caps: ISessionCapability,
   freeDevice: IDevice,
   options: {
-    liveVideo: boolean;
     portRange?: string;
   },
 ) {
-  if (!process.env.GO_IOS) {
-    freeDevice.mjpegServerPort = options.liveVideo
-      ? await getFreePort(options.portRange)
-      : undefined;
-  }
-
   caps.firstMatch[0] = caps.firstMatch[0] || {};
   caps.firstMatch[0]['appium:app'] = await findAppPath(caps);
   caps.firstMatch[0]['appium:udid'] = freeDevice.udid;
   caps.firstMatch[0]['appium:deviceName'] = freeDevice.name;
   caps.firstMatch[0]['appium:platformVersion'] = freeDevice.sdk;
-  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort;
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getFreePort(
     options.portRange,
   );
@@ -139,13 +119,9 @@ export async function iOSCapabilities(
     'appium:app',
   ];
 
-  if (!options.liveVideo) {
-    deleteMatch.push('appium:mjpegServerPort');
-  }
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
   await updatedAllocatedDevice(freeDevice, {
     wdaLocalPort: freeDevice.wdaLocalPort,
-    mjpegServerPort: freeDevice.mjpegServerPort,
     webDriverAgentUrl: freeDevice.webDriverAgentUrl,
   });
 }

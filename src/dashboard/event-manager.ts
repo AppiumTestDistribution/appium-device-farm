@@ -39,7 +39,7 @@ export class DashboardEventManager {
       desiredCapabilities: this.prepareCapabilities(session, 'desired', capabilities),
       sessionCapabilities: this.prepareCapabilities(session),
       nodeId: device.nodeId,
-      hasLiveVideo: session.getLiveVideoUrl() !== null,
+      hasLiveVideo: false,
       deviceUdid: device.udid,
       devicePlatform: device.platform,
       deviceVersion: device.sdk,

@@ -2,7 +2,6 @@ import axios from 'axios';
 import { NextFunction, Request, Response, Router } from 'express';
 import fs from 'fs';
 import _ from 'lodash';
-import { MjpegProxy } from 'mjpeg-proxy';
 import multer from 'multer';
 import os from 'os';
 import path from 'path';
@@ -372,26 +371,6 @@ async function stopAppProfiling(request: Request, response: Response) {
   return response.status(200).send(profiling);
 }
 
-const MJPEG_PROXY_CACHE: Map<string, any> = new Map();
-
-async function streamLiveSessionVideo(request: Request, response: Response) {
-  const { sessionId } = request.params;
-  const session = SESSION_MANAGER.getSession(sessionId);
-  const videoUrl = session?.getLiveVideoUrl();
-
-  if (!videoUrl) {
-    const errorResponse: ErrorResponse = {
-      error: true,
-      message: `Live video not available for session with id ${sessionId}`,
-    };
-    return response.status(500).json(errorResponse);
-  }
-
-  const proxy = MJPEG_PROXY_CACHE.get(sessionId) || new MjpegProxy(videoUrl);
-  MJPEG_PROXY_CACHE.set(sessionId, proxy);
-  proxy.proxyRequest(request, response);
-}
-
 async function addDeviceTags(req: Request, res: Response) {
   const { host, udid, tags } = req.body;
   const device = await getDevice({
@@ -752,7 +731,6 @@ function registerRoutes(router: Router, pluginArgs: IPluginArgs) {
   router.post('/node', authMiddleware(pluginArgs), registerNode);
 
   // Session detail routes
-  router.get('/session/:sessionId/liveVideo', streamLiveSessionVideo);
   router.get('/session/:sessionId/device_logs', getDeviceLogs);
   router.get('/session/:sessionId/session_log', getSessionLogs);
   router.get('/session/:sessionId/start_app_profiling', startAppProfiling);

@@ -89,16 +89,6 @@ export class RemoteSession extends DeviceFarmSession {
       });
   }
 
-  getLiveVideoUrl(): string | null {
-    const url = new URL(this.baseUrl);
-    const capabilities = this.getCapabilities();
-    if (capabilities['mjpegServerPort'] && !isNaN(capabilities['mjpegServerPort'])) {
-      return `${url.origin}/device-farm/api/session/${this.sessionId}/liveVideo`;
-    } else {
-      return null;
-    }
-  }
-
   async startDeviceLog() {
     this.saveDeviceLog = true;
   }

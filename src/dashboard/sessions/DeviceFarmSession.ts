@@ -42,8 +42,6 @@ export abstract class DeviceFarmSession {
 
   abstract getType(): SessionType;
 
-  abstract getLiveVideoUrl(): string | null;
-
   abstract startDeviceLog(): Promise<void>;
 
   abstract getDeviceLogs(force?: boolean): Promise<Array<any> | null>;

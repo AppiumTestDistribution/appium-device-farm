@@ -135,9 +135,6 @@ export async function allocateDeviceForSession(
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
   const intervalBetweenAttempts =
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_QUERY_INTERVAL] || deviceQueryIntervalMs;
-  const liveVideo = _.isNil(deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO])
-    ? true
-    : JSON.parse(deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.LIVE_VIDEO]);
 
   try {
     await waitUntil(
@@ -203,7 +200,6 @@ export async function allocateDeviceForSession(
 
     // FIXME: convert this into a return value
     await updateCapabilityForDevice(capability, device, {
-      liveVideo,
       newCommandTimeout: newCommandTimeout,
       portRange: pluginArgs.portRange,
     });
@@ -224,7 +220,6 @@ export async function updateCapabilityForDevice(
   capability: any,
   device: IDevice,
   options: {
-    liveVideo: boolean;
     newCommandTimeout?: number;
     portRange?: string;
   },
