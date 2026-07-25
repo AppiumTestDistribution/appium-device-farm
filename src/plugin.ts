@@ -51,7 +51,6 @@ import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-prox
 import { PluginConfig, ServerArgs } from '@appium/types';
 import http from 'http';
 import * as https from 'https';
-import ip from 'ip';
 import _ from 'lodash';
 import { DeviceFarmApiClient } from './api-client';
 import { getDeviceFarmCapabilities } from './CapabilityManager';
@@ -79,6 +78,7 @@ import {
 } from './utils/auth';
 import { enhancedADBManager } from './utils/enhanced-adb-manager';
 import { NodeHealthMonitor } from './utils/node-heath-monitor';
+import { getLocalIPv4Address } from './utils/network';
 
 const commandsQueueGuard = new AsyncLock();
 const NODE_HEALTH_MONITOR_INTERVAL = 1000 * 30; // 30 seconds
@@ -111,7 +111,7 @@ class DevicePlugin extends BasePlugin {
     this.pluginArgs = Object.assign({}, DefaultPluginArgs, cliArgs as unknown as IPluginArgs);
     // not pretty but will do for now
     if (this.pluginArgs.bindHostOrIp === undefined) {
-      this.pluginArgs.bindHostOrIp = ip.address('ipv4');
+      this.pluginArgs.bindHostOrIp = getLocalIPv4Address();
     }
   }
 
@@ -175,7 +175,7 @@ class DevicePlugin extends BasePlugin {
     DevicePlugin.nodeBasePath = cliArgs.basePath;
 
     if (pluginArgs.bindHostOrIp === undefined) {
-      pluginArgs.bindHostOrIp = ip.address();
+      pluginArgs.bindHostOrIp = getLocalIPv4Address();
     }
 
     log.debug(`📱 Update server with Plugin Args: ${JSON.stringify(pluginArgs)}`);

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { expect } from 'chai';
 import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from './e2ehelper';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import { IDevice } from '../../src/interfaces/IDevice';
 import * as chai from 'chai';
 import chaiExclude from 'chai-exclude';
@@ -36,7 +36,7 @@ describe('PCloudy Devices', () => {
     appiumHome: APPIUM_HOME!,
   });
 
-  const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
+  const hub_url = `http://${getLocalIPv4Address()}:${HUB_APPIUM_PORT}`;
 
   it('Should be able to run the android with PCloudy config', async () => {
     let androidDevices = (await axios.get(`${hub_url}/device-farm/api/device/android`)).data;

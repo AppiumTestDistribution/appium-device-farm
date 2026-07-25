@@ -1,7 +1,7 @@
 import { DeviceWithPath } from '@devicefarmer/adbkit';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import _ from 'lodash';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
@@ -115,7 +115,7 @@ describe('Android Device Manager', function () {
         width: '350',
         height: '600',
 
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -205,7 +205,7 @@ describe('Android Device Manager', function () {
         width: '350',
         height: '600',
 
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',
@@ -271,7 +271,7 @@ describe('Android Device Manager', function () {
 
         platform: 'android',
         systemPort: 54322,
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         chromeDriverPath: '/var/path/chromedriver',

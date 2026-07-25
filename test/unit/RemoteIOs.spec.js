@@ -1,4 +1,4 @@
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import Sinon from 'sinon';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
 import * as Helper from '../../src/helpers';
@@ -8,8 +8,8 @@ import axios from 'axios';
 import os from 'os';
 import path from 'path';
 let sandbox = Sinon.createSandbox();
-const firstNode = ip.address();
-const secondNode = ip.address();
+const firstNode = getLocalIPv4Address();
+const secondNode = getLocalIPv4Address();
 const cliArgs = {
   'device-farm': {
     platform: 'iOS',

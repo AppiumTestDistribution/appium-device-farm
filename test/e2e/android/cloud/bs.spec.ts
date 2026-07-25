@@ -2,7 +2,7 @@ import { pluginE2EHarness } from '@appium/plugin-test-support';
 import path from 'path';
 import { remote } from 'webdriverio';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../../../src/utils/network';
 import type { Options } from '@wdio/types';
 import 'dotenv/config';
 import axios from 'axios';
@@ -11,7 +11,7 @@ import { default as chaiAsPromised } from 'chai-as-promised';
 import * as chai from 'chai';
 chai.use(chaiAsPromised);
 
-const APPIUM_HOST = ip.address();
+const APPIUM_HOST = getLocalIPv4Address();
 const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,

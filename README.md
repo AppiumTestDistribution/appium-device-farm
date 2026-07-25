@@ -22,6 +22,35 @@ With Appium Device-farm, teams can:
 6. Record and replay test runs, enabling teams to review test executions, reproduce issues, and ensure thorough testing coverage.
 
 > [!IMPORTANT]
+> ## 🚨 Breaking Changes - Version 12.0.0
+>
+> **Manual device control (remote control / live device streaming) has been removed.**
+>
+> The manual control experience was built on top of WebDriverAgent for iOS streaming. In practice this
+> turned out to be a poor foundation: WDA-driven screenshot streaming is slow, it competes with the
+> automation session for the same WDA instance, and it was the root cause of a long tail of issues around
+> lag, dropped frames, stalled sessions and flaky device state. Keeping it working across new iOS
+> versions needed more time than we can give it right now, so rather than ship something that degrades
+> the rest of the grid, we have taken it out.
+>
+> **What this means for you:**
+> - The device streaming / manual interaction view is no longer part of the dashboard.
+> - Automation (session creation, device allocation, hub/node, dashboard, logs, video recording) is unaffected.
+> - If you depend on manual control, stay on the `11.x` line until an alternative lands.
+>
+> **We would love help here.** This is open source and we are not closing the door on the feature — we
+> simply do not have the bandwidth to own it. If you (or your company) want to build a better
+> manual-control implementation — for example a `scrcpy`-style pipeline for Android and a
+> non-WDA-blocking approach for iOS — please open an issue or a PR. We are always happy to review and
+> merge community contributions. Likewise, if a sponsor wants to fund this work, we are ready to pick
+> it back up: see [GitHub Sponsors](https://github.com/sponsors/saikrishna321) or
+> [Open Collective](https://opencollective.com/appium-device-farm).
+>
+> **Security:** the unmaintained [`ip`](https://github.com/indutny/node-ip) package has been dropped in
+> favour of Node's built-in `os.networkInterfaces()`. This clears the SSRF advisory
+> ([CVE-2024-29415](https://nvd.nist.gov/vuln/detail/CVE-2024-29415)) that had no upstream patch.
+
+> [!IMPORTANT]
 > ## 🚨 Breaking Changes - Version 10.0.0 and Above
 > 
 > Starting from version 10.0.0, we have introduced several breaking changes:

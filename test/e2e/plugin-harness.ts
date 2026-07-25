@@ -8,7 +8,7 @@ import { AppiumServer, ServerArgs } from '@appium/types';
 import path from 'path';
 import yaml from 'js-yaml';
 import fs from 'fs';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 
 type PluginHarnessServerArgs = { subcommand: string; configFile: string };
 
@@ -227,7 +227,7 @@ export function pluginE2EHarness(opts: E2ESetupOpts & { enableGoIos?: boolean })
       exec(process.execPath, serverArgs, {
         env,
       });
-      return waitServer(host ?? ip.address(), port ?? 4723, 60);
+      return waitServer(host ?? getLocalIPv4Address(), port ?? 4723, 60);
     }
 
     // Use axios to hit appium endpoint until it returns 200 OK

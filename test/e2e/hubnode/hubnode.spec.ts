@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../../src/utils/network';
 // we are using custom plugin harness as we want to run two instance of device-farm simultaneously
 import axios from 'axios';
 import * as chai from 'chai';
@@ -21,7 +21,7 @@ chai.use(chaiAsPromised);
 
 let driver: any;
 
-const APPIUM_HOST = ip.address();
+const APPIUM_HOST = getLocalIPv4Address();
 const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,

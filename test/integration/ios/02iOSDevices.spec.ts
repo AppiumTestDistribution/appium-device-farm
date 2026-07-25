@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../../src/utils/network';
 import { Container } from 'typedi';
 import { DeviceFarmManager } from '../../../src/device-managers';
 
@@ -15,7 +15,7 @@ import { DefaultPluginArgs } from '../../../src/interfaces/IPluginArgs';
 import { sessionRequestMap } from '../../../src/proxy/wd-command-proxy';
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-  remote: [`http://${ip.address()}:4723`],
+  remote: [`http://${getLocalIPv4Address()}:4723`],
   iosDeviceType: 'both',
 });
 const NODE_ID = uuidv4();

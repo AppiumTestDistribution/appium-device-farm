@@ -1,5 +1,5 @@
 import fs from 'fs';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import os from 'os';
 import path from 'path';
 import { DefaultPluginArgs, IPluginArgs } from '../../src/interfaces/IPluginArgs';
@@ -20,7 +20,7 @@ const ifaces = os.networkInterfaces();
 }
  */
 
-const localIp = ip.address();
+const localIp = getLocalIPv4Address();
 const ifaceNames = Object.keys(ifaces);
 
 // find first ip address coming from device other than localIp

@@ -1,7 +1,7 @@
 import waitUntil from 'async-wait-until';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import { Container } from 'typedi';
 import { v4 as uuidv4 } from 'uuid';
 import { ATDRepository } from '../../src/data-service/db';
@@ -20,7 +20,7 @@ import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 chai.use(chaiAsPromised);
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-  remote: [`http://${ip.address()}:4723`],
+  remote: [`http://${getLocalIPv4Address()}:4723`],
   skipChromeDownload: true,
 });
 

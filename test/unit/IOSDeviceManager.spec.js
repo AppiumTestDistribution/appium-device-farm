@@ -1,6 +1,6 @@
 import * as IOSUtils from 'appium-ios-device/build/lib/utilities';
 import { expect } from 'chai';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import IOSDeviceManager from '../../src/device-managers/IOSDeviceManager';
@@ -18,7 +18,7 @@ const cliArgs = {
 };
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-  remote: [`http://${ip.address()}:4723`],
+  remote: [`http://${getLocalIPv4Address()}:4723`],
   skipChromeDownload: true,
 });
 
@@ -49,7 +49,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -57,7 +57,7 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices({ iosDeviceType: 'both' }, []);
@@ -73,15 +73,15 @@ describe('IOS Device Manager', () => {
         platform: 'ios',
         tags: [],
         wdaLocalPort: 54093,
-        webDriverAgentHost: `http://${ip.address()}`,
-        webDriverAgentUrl: `http://${ip.address()}:54093`,
+        webDriverAgentHost: `http://${getLocalIPv4Address()}`,
+        webDriverAgentUrl: `http://${getLocalIPv4Address()}:54093`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
         width: '375',
         productModel: 'iPhone12,8',
         wdaBundleId: '',
         height: '667',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         mjpegServerPort: 54093,
       },
       {
@@ -90,7 +90,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
       {
         name: 'iPad Air (3rd generation)',
@@ -98,7 +98,7 @@ describe('IOS Device Manager', () => {
         state: 'Booted',
         sdk: '14.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
     expect(getFreePortStub).to.have.been.calledWith('8100-8110');
@@ -200,7 +200,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices('both', [], { port: 4723, plugin: cliArgs });
@@ -220,9 +220,9 @@ describe('IOS Device Manager', () => {
         tags: [],
         platform: 'ios',
         wdaLocalPort: 54093,
-        webDriverAgentHost: `http://${ip.address()}`,
-        webDriverAgentUrl: `http://${ip.address()}:54093`,
-        host: `http://${ip.address()}:4723`,
+        webDriverAgentHost: `http://${getLocalIPv4Address()}`,
+        webDriverAgentUrl: `http://${getLocalIPv4Address()}:54093`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         mjpegServerPort: 54093,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
@@ -233,7 +233,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
   });
@@ -252,7 +252,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices({ iosDeviceType: 'simulated' }, []);
@@ -263,7 +263,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
   });
@@ -282,7 +282,7 @@ describe('IOS Device Manager', () => {
         state: 'Shutdown',
         sdk: '13.5',
         platform: 'ios',
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
       },
     ]);
     const devices = await iosDevices.getDevices({ iosDeviceType: 'real' }, [], {
@@ -301,11 +301,11 @@ describe('IOS Device Manager', () => {
         deviceType: 'real',
         platform: 'ios',
         wdaLocalPort: 54093,
-        webDriverAgentHost: `http://${ip.address()}`,
-        webDriverAgentUrl: `http://${ip.address()}:54093`,
+        webDriverAgentHost: `http://${getLocalIPv4Address()}`,
+        webDriverAgentUrl: `http://${getLocalIPv4Address()}:54093`,
         sessionStartTime: 0,
         totalUtilizationTimeMilliSec: 0,
-        host: `http://${ip.address()}:4723`,
+        host: `http://${getLocalIPv4Address()}:4723`,
         width: '375',
         productModel: 'iPhone12,8',
         wdaBundleId: '',

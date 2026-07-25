@@ -1,11 +1,11 @@
 import { Options } from '@wdio/types';
 import { remote } from 'webdriverio';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../../../src/utils/network';
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import path from 'path';
 import { ensureAppiumHome, HUB_APPIUM_PORT, PLUGIN_PATH } from '../../e2ehelper';
 
-const APPIUM_HOST = ip.address();
+const APPIUM_HOST = getLocalIPv4Address();
 const APPIUM_PORT = 4723;
 const WDIO_PARAMS = {
   connectionRetryCount: 0,

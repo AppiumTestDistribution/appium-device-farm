@@ -2,7 +2,7 @@
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import axios from 'axios';
 import { expect } from 'chai';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import { ATDRepository } from '../../src/data-service/db';
 import NodeDevices from '../../src/device-managers/NodeDevices';
 import { IDevice } from '../../src/interfaces/IDevice';
@@ -92,7 +92,7 @@ describe('Basic Plugin Test', () => {
     appiumHome: APPIUM_HOME!,
   });
 
-  const hub_url = `http://${ip.address()}:${HUB_APPIUM_PORT}`;
+  const hub_url = `http://${getLocalIPv4Address()}:${HUB_APPIUM_PORT}`;
 
   it('Basic Plugin test', async () => {
     (await axios.get(`${hub_url}/device-farm`)).status.should.eql(200);

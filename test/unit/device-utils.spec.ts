@@ -1,5 +1,5 @@
 import chai from 'chai';
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../src/utils/network';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { Container } from 'typedi';
@@ -112,7 +112,7 @@ describe('Device Utils', () => {
     busy: false,
     realDevice: false,
     deviceType: 'simulator',
-    host: `http://${ip.address()}:4723`,
+    host: `http://${getLocalIPv4Address()}:4723`,
     totalUtilizationTimeMilliSec: 0,
     sessionStartTime: 0,
     offline: false,
@@ -143,7 +143,7 @@ describe('Device Utils', () => {
   const devices = [hub1Device, hub2Device, localDeviceiOS, noHostDevice] as unknown as IDevice[];
 
   const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-    remote: [`http://${ip.address()}:4723`],
+    remote: [`http://${getLocalIPv4Address()}:4723`],
     iosDeviceType: 'both',
     androidDeviceType: 'both',
   });
@@ -365,7 +365,7 @@ describe('Device Utils', () => {
         id: 'dev-utils-mock-1',
         udid: 'device1',
         busy: true,
-        host: ip.address(),
+        host: getLocalIPv4Address(),
         lastCmdExecutedAt:
           new Date().getTime() - (DefaultPluginArgs.newCommandTimeoutSec + 5) * 1000,
         nodeId: NODE_ID,
@@ -375,7 +375,7 @@ describe('Device Utils', () => {
         id: 'dev-utils-mock-2',
         udid: 'device2',
         busy: true,
-        host: ip.address(),
+        host: getLocalIPv4Address(),
         lastCmdExecutedAt: new Date().getTime() - 30000,
         newCommandTimeout: 20000 / 1000,
         nodeId: NODE_ID,
@@ -385,7 +385,7 @@ describe('Device Utils', () => {
         id: 'dev-utils-mock-3',
         udid: 'device3',
         busy: true,
-        host: ip.address(),
+        host: getLocalIPv4Address(),
         lastCmdExecutedAt: new Date().getTime(),
         nodeId: NODE_ID,
         sdk: '1.0',
@@ -409,10 +409,10 @@ describe('Device Utils', () => {
 
     // Verify the expected behavior
     unblockDeviceMock.should.have.been.calledTwice;
-    unblockDeviceMock.should.have.been.calledWith('device1', ip.address());
-    unblockDeviceMock.should.have.been.calledWith('device2', ip.address());
-    unblockDeviceMock.should.not.have.been.calledWith('device3', ip.address());
-    unblockDeviceMock.should.not.have.been.calledWith('device3', ip.address());
+    unblockDeviceMock.should.have.been.calledWith('device1', getLocalIPv4Address());
+    unblockDeviceMock.should.have.been.calledWith('device2', getLocalIPv4Address());
+    unblockDeviceMock.should.not.have.been.calledWith('device3', getLocalIPv4Address());
+    unblockDeviceMock.should.not.have.been.calledWith('device3', getLocalIPv4Address());
   });
 
   it('should release device on node that is not used for more than the timeout', async () => {
@@ -432,7 +432,7 @@ describe('Device Utils', () => {
         id: 'dev-utils-mock-6',
         udid: 'device2',
         busy: true,
-        host: ip.address(),
+        host: getLocalIPv4Address(),
         lastCmdExecutedAt: new Date().getTime(),
         nodeId: NODE_ID,
         sdk: '1.0',
@@ -442,7 +442,7 @@ describe('Device Utils', () => {
         id: 'dev-utils-mock-7',
         udid: 'device3',
         busy: true,
-        host: ip.address(),
+        host: getLocalIPv4Address(),
         userBlocked: true,
         lastCmdExecutedAt: new Date().getTime() - 30000,
         newCommandTimeout: 20000 / 1000,
@@ -461,7 +461,7 @@ describe('Device Utils', () => {
     // Verify the expected behavior
     unblockDeviceMock.should.have.been.calledOnce;
     unblockDeviceMock.should.have.been.calledWith('device1', 'http://anotherhost:4723');
-    unblockDeviceMock.should.have.not.been.calledWith('device3', ip.address());
+    unblockDeviceMock.should.have.not.been.calledWith('device3', getLocalIPv4Address());
   });
 
   it('Block and unblock device', async () => {

@@ -1,4 +1,4 @@
-import ip from 'ip';
+import { getLocalIPv4Address } from '../utils/network';
 import { IDevice } from './IDevice';
 
 export interface AxiosProxy {
@@ -111,7 +111,7 @@ export const DefaultPluginArgs: IPluginArgs = {
   checkBlockedDevicesIntervalMs: 30000,
   newCommandTimeoutSec: 60,
   cloud: undefined,
-  bindHostOrIp: ip.address(),
+  bindHostOrIp: getLocalIPv4Address(),
   enableDashboard: false,
   removeDevicesFromDatabaseBeforeRunningThePlugin: false,
   remoteConnectionTimeout: 60000,

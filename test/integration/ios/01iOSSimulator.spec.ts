@@ -10,7 +10,7 @@ import {
   updateDeviceList,
 } from '../../../src/device-utils';
 
-import ip from 'ip';
+import { getLocalIPv4Address } from '../../../src/utils/network';
 import { flatten } from 'lodash';
 import Simctl from 'node-simctl';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,7 +28,7 @@ const REQUEST_ID = uuidv4();
 sessionRequestMap.set(REQUEST_ID, {} as any);
 
 const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-  remote: [`http://${ip.address()}:4723`],
+  remote: [`http://${getLocalIPv4Address()}:4723`],
   iosDeviceType: 'both',
 });
 
@@ -45,7 +45,7 @@ async function markSimulatorsAsBooted() {
 
 async function initDeviceFarm(iosDeviceType: string) {
   const pluginArgs = Object.assign({}, DefaultPluginArgs, {
-    remote: [`http://${ip.address()}:4723`],
+    remote: [`http://${getLocalIPv4Address()}:4723`],
     iosDeviceType: iosDeviceType,
   });
   await initializeStorage();
