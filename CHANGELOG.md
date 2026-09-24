@@ -1,3 +1,9 @@
+## [12.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v12.0.1...v12.0.2) (2026-09-24)
+
+### Bug Fixes
+
+* **profiling:** App Profiling logs always empty on teen_process >= 4 ([#2061](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2061)) ([4af8c04](https://github.com/AppiumTestDistribution/appium-device-farm/commit/4af8c0401da3acd2242878da6ba94073628e48a8))
+
 ## [12.0.1](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v12.0.0...v12.0.1) (2026-07-25)
 
 ### Bug Fixes
