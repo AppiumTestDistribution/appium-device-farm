@@ -252,6 +252,12 @@ Contributions are welcome! Please see the [LICENSE](LICENSE) file for details.
 
 ![alt text](assets/image-3.png)
 
+## Run on the TestMu AI Mobile Device Cloud
+
+<a href="https://www.testmuai.com"><img src="assets/testmu-ai-logo.png" alt="TestMu AI" width="300"></a>
+
+Need more devices than you have on your desk? [TestMu AI](https://www.testmuai.com) (formerly LambdaTest) offers a mobile device cloud with thousands of real Android and iOS devices, so you can run your Appium tests at scale without maintaining a device lab. Appium Device Farm plugs straight into it: point the plugin at the TestMu AI hub (see [`serverConfig/lt-config.json`](serverConfig/lt-config.json)) and your sessions are allocated to cloud devices just like local ones.
+
 ## Thanks to contributors 💙
 
 <a href="https://github.com/AppiumTestDistribution/appium-device-farm/graphs/contributors">

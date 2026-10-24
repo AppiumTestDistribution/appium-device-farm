@@ -61,8 +61,13 @@ class AndroidAppProfiler extends EventEmitter {
         }
       });
 
-      this.proc.on('lines-stdout', (lines) => {
+      // teen_process >= 4 emits the legacy `lines-stdout` event once PER LINE (via readline), whereas this parser
+      // expects a whole `top` frame (mem on lines[1], cpu on lines[3], processes from lines[4]). With one line per
+      // event `lines[3]` is always undefined, every frame is dropped and `profiling_logs` stays empty. Subscribe to
+      // the raw `output` stream instead and split each frame (one screen repaint per `-d 1` interval) ourselves.
+      this.proc.on('output', (stdout: string) => {
         resolve();
+        const lines = (stdout || '').split('\n');
         if (!lines[3]) {
           return;
         }
