@@ -35,7 +35,7 @@ export class DashboardEventManager {
     const createOptions: Record<string, any> = {
       id: session.getId(),
       buildId: (await getOrCreateNewBuild(capabilities)).id,
-      title: capabilities[DEVICE_FARM_CAPABILITIES.SESSION_NAME] || undefined,
+      name: capabilities[DEVICE_FARM_CAPABILITIES.SESSION_NAME] || undefined,
       desiredCapabilities: this.prepareCapabilities(session, 'desired', capabilities),
       sessionCapabilities: this.prepareCapabilities(session),
       nodeId: device.nodeId,
