@@ -89,6 +89,10 @@ export async function iOSCapabilities(
   caps.firstMatch[0]['appium:wdaLocalPort'] = freeDevice.wdaLocalPort = await getFreePort(
     options.portRange,
   );
+  // Screen recording still uses MJPEG even when live device streaming is disabled.
+  caps.firstMatch[0]['appium:mjpegServerPort'] = freeDevice.mjpegServerPort = await getFreePort(
+    options.portRange,
+  );
   if (freeDevice.realDevice && !caps.firstMatch[0]['df:skipReport']) {
     const wdaFileName = freeDevice.platform === 'tvos' ? 'wda-resign_tvos.ipa' : 'wda-resign.ipa';
     const wdaInfo = await prisma.appInformation.findFirst({
@@ -122,6 +126,7 @@ export async function iOSCapabilities(
   deleteMatch.forEach((value) => deleteAlwaysMatch(caps, value));
   await updatedAllocatedDevice(freeDevice, {
     wdaLocalPort: freeDevice.wdaLocalPort,
+    mjpegServerPort: freeDevice.mjpegServerPort,
     webDriverAgentUrl: freeDevice.webDriverAgentUrl,
   });
 }
