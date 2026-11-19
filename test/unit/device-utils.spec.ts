@@ -1,4 +1,5 @@
 import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { getLocalIPv4Address } from '../../src/utils/network';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -9,7 +10,7 @@ import * as DeviceService from '../../src/data-service/device-service';
 import { addNewDevice } from '../../src/data-service/device-service';
 import { DeviceFarmManager } from '../../src/device-managers';
 import * as DeviceUtils from '../../src/device-utils';
-import { allocateDeviceForSession } from '../../src/device-utils';
+import { allocateDeviceForSession, getDeviceAvailabilityTimeout } from '../../src/device-utils';
 import { IDevice } from '../../src/interfaces/IDevice';
 import { DefaultPluginArgs } from '../../src/interfaces/IPluginArgs';
 import { prisma } from '../../src/prisma';
@@ -17,6 +18,7 @@ import { sessionRequestMap } from '../../src/proxy/wd-command-proxy';
 
 chai.should();
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 const expect = chai.expect;
 const sandbox = sinon.createSandbox();
 const NODE_ID = uuidv4();
@@ -202,6 +204,46 @@ describe('Device Utils', () => {
             'No device matching request.. Device request: {"platform":"android","udid":["emulator-5555"],"filterByHost":"http://192.168.0.226:4723"}',
           ),
     );
+  });
+
+  it('Device availability timeout comes from df:deviceAvailabilityTimeout, else the default', () => {
+    const withTimeout = {
+      alwaysMatch: { platformName: 'android', 'df:deviceAvailabilityTimeout': 1234 },
+      firstMatch: [{}],
+    };
+    const withoutTimeout = { alwaysMatch: { platformName: 'android' }, firstMatch: [{}] };
+    expect(getDeviceAvailabilityTimeout(withTimeout, 777)).to.equal(1234);
+    expect(getDeviceAvailabilityTimeout(withoutTimeout, 777)).to.equal(777);
+  });
+
+  it('Allocate devices counts the time a request already waited towards its timeout', async () => {
+    (await ATDRepository.DeviceModel).removeDataOnly();
+    const deviceManager = new DeviceFarmManager(
+      'android',
+      { androidDeviceType: 'both', iosDeviceType: 'both' },
+      4723,
+      Object.assign(pluginArgs, { maxSessions: 3 }),
+      NODE_ID,
+    );
+    Container.set(DeviceFarmManager, deviceManager);
+    await addNewDevice(devices);
+    const capabilities = {
+      alwaysMatch: {
+        platformName: 'android',
+        'appium:app': '/Downloads/VodQA.apk',
+        'df:filterByHost': 'http://192.168.0.226:4723',
+      },
+      firstMatch: [{}],
+    };
+    // The only matching device is taken by the first request, so the second one has to wait.
+    await allocateDeviceForSession(REQUEST_ID, capabilities, 1000, 100, pluginArgs);
+
+    const startedAt = Date.now();
+    await expect(
+      allocateDeviceForSession(REQUEST_ID, capabilities, 5000, 100, pluginArgs, startedAt - 4800),
+    ).to.be.rejectedWith('Device request');
+    // About 200 ms of the 5 s timeout were left, not the full 5 s.
+    expect(Date.now() - startedAt).to.be.below(2000);
   });
 
   it('Allocate devices for session with tag filter', async () => {
