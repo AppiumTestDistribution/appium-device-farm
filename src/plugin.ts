@@ -22,6 +22,7 @@ import { AndroidDeviceManager, DeviceFarmManager, IOSDeviceManager } from './dev
 import ChromeDriverManager from './device-managers/ChromeDriverManager';
 import {
   allocateDeviceForSession,
+  getDeviceAvailabilityTimeout,
   initializeStorage,
   removeStaleDevices,
   setupCronCheckStaleDevices,
@@ -40,7 +41,11 @@ import {
   W3CNewSessionResponseError,
 } from './interfaces/ISessionCapability';
 import log from './logger';
-import { addProxyHandler, registerProxyMiddlware } from './proxy/wd-command-proxy';
+import {
+  addProxyHandler,
+  registerProxyMiddlware,
+  sessionRequestMap,
+} from './proxy/wd-command-proxy';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { PluginConfig, ServerArgs } from '@appium/types';
@@ -72,6 +77,7 @@ import {
   sanitizeSessionCapabilities,
 } from './utils/auth';
 import { enhancedADBManager } from './utils/enhanced-adb-manager';
+import { runInSessionQueue } from './utils/session-queue';
 import { NodeHealthMonitor } from './utils/node-heath-monitor';
 import { getLocalIPv4Address } from './utils/network';
 
@@ -355,35 +361,40 @@ class DevicePlugin extends BasePlugin {
     stripAppiumPrefixes(allFirstMatchCaps);
     const mergedCapabilites = Object.assign({}, caps.firstMatch[0], caps.alwaysMatch);
     log.info(`Merged Capabilities: ${JSON.stringify(mergedCapabilites, null, 2)}`);
+    const requestedAt = new Date().getTime();
     await addNewPendingSession({
       ...Object.assign({}, caps.firstMatch[0], caps.alwaysMatch),
       capability_id: pendingSessionId,
       // mark the insertion date
-      createdAt: new Date().getTime(),
+      createdAt: requestedAt,
     });
 
     /**
      *  Wait untill a free device is available for the given capabilities
      */
     console.log(`Acquiring Lock with name ${this.getLockName(mergedCapabilites)}`);
-    const device = await commandsQueueGuard.acquire(
-      this.getLockName(mergedCapabilites),
-      async (): Promise<IDevice> => {
-        //await refreshDeviceList();
-        try {
-          return await allocateDeviceForSession(
+    let device: IDevice;
+    try {
+      device = await runInSessionQueue(commandsQueueGuard, this.getLockName(mergedCapabilites), {
+        requestId: pendingSessionId,
+        requestedAt,
+        timeoutMs: getDeviceAvailabilityTimeout(caps, this.pluginArgs.deviceAvailabilityTimeoutMs),
+        checkIntervalMs: this.pluginArgs.deviceAvailabilityQueryIntervalMs,
+        isClientConnected: () => sessionRequestMap.has(pendingSessionId),
+        run: () =>
+          allocateDeviceForSession(
             pendingSessionId,
             caps,
             this.pluginArgs.deviceAvailabilityTimeoutMs,
             this.pluginArgs.deviceAvailabilityQueryIntervalMs,
             this.pluginArgs,
-          );
-        } catch (err) {
-          await removePendingSession(pendingSessionId);
-          throw err;
-        }
-      },
-    );
+            requestedAt,
+          ),
+      });
+    } catch (err) {
+      await removePendingSession(pendingSessionId);
+      throw err;
+    }
 
     let session: CreateSessionResponseInternal | W3CNewSessionResponseError | Error;
     const isRemoteOrCloudSession = !device.nodeId || device.nodeId !== DevicePlugin.NODE_ID;

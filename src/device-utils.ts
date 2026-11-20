@@ -89,6 +89,20 @@ export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
 }
 
 /**
+ * The time a new session request may wait for a device: `df:deviceAvailabilityTimeout` when the
+ * request sets it, otherwise the plugin's default.
+ */
+export function getDeviceAvailabilityTimeout(
+  capability: ISessionCapability,
+  defaultTimeoutMs: number,
+): number {
+  return (
+    getDeviceFarmCapabilities(capability)[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] ||
+    defaultTimeoutMs
+  );
+}
+
+/**
  * For given capability, wait untill a free device is available from the database
  * and update the capability json with required device informations
  * @param requestId
@@ -96,6 +110,7 @@ export function isDeviceConfigPathAbsolute(path: string): boolean | undefined {
  * @param deviceTimeOutMs
  * @param deviceQueryIntervalMs
  * @param pluginArgs
+ * @param requestedAt when the request was received, if it waited before this call
  * @returns
  */
 export async function allocateDeviceForSession(
@@ -104,6 +119,7 @@ export async function allocateDeviceForSession(
   deviceTimeOutMs: number,
   deviceQueryIntervalMs: number,
   pluginArgs: IPluginArgs,
+  requestedAt?: number,
 ): Promise<IDevice> {
   const firstMatch = Object.assign({}, capability.firstMatch[0], capability.alwaysMatch);
   debugLog(`firstMatch: ${JSON.stringify(firstMatch)}`);
@@ -131,8 +147,12 @@ export async function allocateDeviceForSession(
   }
 
   debugLog(`Device allocation request for filter: ${JSON.stringify(filters)}`);
-  const timeout =
-    deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_TIMEOUT] || deviceTimeOutMs;
+  // When the request was queued before it got here, the time it already waited counts too.
+  const timeout = Math.max(
+    getDeviceAvailabilityTimeout(capability, deviceTimeOutMs) -
+      (requestedAt === undefined ? 0 : Date.now() - requestedAt),
+    1,
+  );
   const intervalBetweenAttempts =
     deviceFarmCapabilities[DEVICE_FARM_CAPABILITIES.DEVICE_QUERY_INTERVAL] || deviceQueryIntervalMs;
 
