@@ -75,63 +75,90 @@ export async function removeDevice(devices: IDevice[]) {
 
 export async function addNewDevice(devices: IDevice[], host?: string): Promise<IDevice[]> {
   /**
-   * If the newly identified devices are not in the database, then add them to the database
+   * If the newly identified devices are not in the database, then add them to the database.
+   * Devices that are already known - either by their generated id or by the
+   * (udid, host) unique key - are updated in place instead of being inserted again.
+   * This keeps device registration idempotent: e.g. when a docker container is deleted
+   * and re-run with the same name/params, the container gets a new node id (the metadata
+   * file is regenerated) while udid and host stay the same. Inserting a new row in that
+   * case violates the (udid, host) unique constraint on the Device table.
    */
+  // make sure all devices have host and id before any database operation
+  for (const device of devices) {
+    if (device.host === undefined && host !== undefined) {
+      device.host = host;
+    }
+    device.id = device.id ?? generateDeviceId(device);
+  }
+
   const savedDevices = await prisma.device.findMany();
-  const devicesToAdd = devices
-    .map((d) => {
-      d.id = d.id ?? generateDeviceId(d);
-      return d;
-    })
-    .filter((device) => !savedDevices.some((savedDevice) => savedDevice.id === device.id))
-    .map(
-      (device) =>
-        ({
-          id: device.id,
-          name: device.name,
-          udid: device.udid,
-          host: device.host,
-          platform: device.platform,
-          version: device.sdk,
-          nodeId: device.nodeId,
-          real: device.realDevice,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          tags: null,
-          isActive: true,
-        }) as Device,
-    );
+  const savedDevicesById = new Map(
+    savedDevices.map((savedDevice) => [savedDevice.id, savedDevice]),
+  );
+  const savedDevicesByUdidHost = new Map(
+    savedDevices.map((savedDevice) => [`${savedDevice.udid}::${savedDevice.host}`, savedDevice]),
+  );
 
-  const alreadyAddedDevices = devices
-    .map((d) => {
-      d.id = d.id ?? generateDeviceId(d);
-      return d;
-    })
-    .filter((device) => savedDevices.some((savedDevice) => savedDevice.id === device.id));
+  for (const device of devices) {
+    const existingDevice =
+      savedDevicesById.get(device.id as string) ??
+      (device.host !== undefined
+        ? savedDevicesByUdidHost.get(`${device.udid}::${device.host}`)
+        : undefined);
 
-  await prisma.device.updateMany({
-    where: {
-      id: {
-        in: alreadyAddedDevices.map((d) => generateDeviceId(d)),
-      },
-    },
-    data: {
+    const deviceData = {
+      name: device.name,
+      udid: device.udid,
+      host: device.host,
+      platform: device.platform,
+      version: device.sdk,
+      nodeId: device.nodeId,
+      real: device.realDevice,
       isActive: true,
-    },
-  });
+      updatedAt: new Date(),
+    };
 
-  await prisma.device.createMany({
-    data: devicesToAdd,
-  });
+    if (existingDevice) {
+      // Update the existing row in place instead of inserting a duplicate.
+      // The id is refreshed as well so that lookups based on generateDeviceId()
+      // keep matching after the node id changed (ON UPDATE CASCADE keeps
+      // TeamDevice rows pointing at this device).
+      await prisma.device.update({
+        where: { id: existingDevice.id },
+        data: { ...deviceData, id: device.id } as Device,
+      });
+      debugLog(`Updated existing device "${device.udid}" on host "${device.host}" in the database`);
+    } else {
+      try {
+        await prisma.device.create({
+          data: {
+            ...deviceData,
+            id: device.id,
+            tags: null,
+            createdAt: new Date(),
+          } as Device,
+        });
+      } catch (error: any) {
+        // A concurrent registration may have inserted the same (udid, host) row in the
+        // meantime. Update that row instead of failing with a unique constraint error.
+        if (error?.code === 'P2002' && device.host !== undefined) {
+          log.warn(
+            `Device "${device.udid}" on host "${device.host}" was registered concurrently. Updating the existing row.`,
+          );
+          await prisma.device.update({
+            where: { udid_host: { udid: device.udid, host: device.host } },
+            data: deviceData as Device,
+          });
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
 
   const addedDevices = devices.map(async function (
     device: IDevice & { $loki?: number; meta?: object },
   ) {
-    // make sure all devices have host
-    if (device.host === undefined && host !== undefined) {
-      device.host = host;
-    }
-
     // make sure all devices have default values from IDevice
     device = Object.assign(
       {
@@ -158,7 +185,25 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
         log.warn(`Unable to add device "${device.udid}" to database. Reason: ${error}`);
       }
     } else {
-      debugLog(`Device "${device.udid}" already exists in database`);
+      debugLog(`Device "${device.udid}" already exists in database, updating it`);
+      // refresh the registration details of the stored device (e.g. after the node
+      // re-registered with a new node id) while keeping its runtime state
+      // (busy/session information must not be reset by a device list update)
+      (await ATDRepository.DeviceModel)
+        .chain()
+        .find({ udid: device.udid, host: device.host })
+        .update(function (d: IDevice) {
+          d.id = device.id ?? d.id;
+          d.nodeId = device.nodeId ?? d.nodeId;
+          d.host = device.host ?? d.host;
+          d.name = device.name ?? d.name;
+          d.state = device.state ?? d.state;
+          d.sdk = device.sdk ?? d.sdk;
+          d.platform = device.platform ?? d.platform;
+          d.deviceType = device.deviceType ?? d.deviceType;
+          d.realDevice = device.realDevice ?? d.realDevice;
+          d.offline = device.offline ?? d.offline;
+        });
     }
   });
 
