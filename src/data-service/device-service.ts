@@ -186,9 +186,12 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
       }
     } else {
       debugLog(`Device "${device.udid}" already exists in database, updating it`);
-      // refresh the registration details of the stored device (e.g. after the node
-      // re-registered with a new node id) while keeping its runtime state
-      // (busy/session information must not be reset by a device list update)
+      // refresh only the registration details of the stored device (e.g. after
+      // the node re-registered with a new node id). Runtime state such as
+      // `state`, `offline`, `busy` and `session_id` is owned by the boot
+      // monitor / allocator and must not be clobbered by a device list update:
+      // the scanned list can be stale (e.g. node-simctl caches `simctl list`),
+      // which would reset a booted simulator back to "Shutdown".
       (await ATDRepository.DeviceModel)
         .chain()
         .find({ udid: device.udid, host: device.host })
@@ -197,12 +200,10 @@ export async function addNewDevice(devices: IDevice[], host?: string): Promise<I
           d.nodeId = device.nodeId ?? d.nodeId;
           d.host = device.host ?? d.host;
           d.name = device.name ?? d.name;
-          d.state = device.state ?? d.state;
           d.sdk = device.sdk ?? d.sdk;
           d.platform = device.platform ?? d.platform;
           d.deviceType = device.deviceType ?? d.deviceType;
           d.realDevice = device.realDevice ?? d.realDevice;
-          d.offline = device.offline ?? d.offline;
         });
     }
   });

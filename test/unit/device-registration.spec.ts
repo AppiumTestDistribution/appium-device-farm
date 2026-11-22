@@ -155,7 +155,7 @@ describe('Device registration (issue #2005)', function () {
   });
 
   it('re-registration by the same node (periodic device list update) keeps runtime state and does not duplicate', async () => {
-    // mark the device busy in loki (e.g. session allocated on the hub)
+    // mark the device busy/booted in loki (e.g. session allocated, boot monitor ran)
     const deviceModel = await ATDRepository.DeviceModel;
     deviceModel
       .chain()
@@ -163,6 +163,7 @@ describe('Device registration (issue #2005)', function () {
       .update(function (d: IDevice) {
         d.busy = true;
         d.session_id = 'some-session-id';
+        d.state = 'Booted';
       });
 
     // node posts its device list again (busy=false on the node side)
@@ -173,9 +174,11 @@ describe('Device registration (issue #2005)', function () {
 
     const lokiRows = await lokiRowsForUdid();
     expect(lokiRows.length).to.be.equal(1);
-    // busy/session state must be preserved, not reset by the re-registration
+    // busy/session/state must be preserved, not reset by the re-registration
+    // (the scanned device list can report a stale state like "Shutdown")
     expect(lokiRows[0].busy).to.be.equal(true);
     expect(lokiRows[0].session_id).to.be.equal('some-session-id');
+    expect(lokiRows[0].state).to.be.equal('Booted');
   });
 
   it('handles concurrent registration of the same udid+host without a unique constraint error', async () => {
