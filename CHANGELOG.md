@@ -1,3 +1,10 @@
+## [12.0.3](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v12.0.2...v12.0.3) (2026-11-23)
+
+### Bug Fixes
+
+* allocate unique MJPEG ports for iOS sessions ([#2066](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2066)) ([89d0fda](https://github.com/AppiumTestDistribution/appium-device-farm/commit/89d0fda8d1b2dab19097ba6e19203683049528cb))
+* count queue time against the device availability timeout ([#2067](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2067)) ([5943ed5](https://github.com/AppiumTestDistribution/appium-device-farm/commit/5943ed5e5e913ad2d24b65977a249fdbc0100989)), closes [#2064](https://github.com/AppiumTestDistribution/appium-device-farm/issues/2064)
+
 ## [12.0.2](https://github.com/AppiumTestDistribution/appium-device-farm/compare/v12.0.1...v12.0.2) (2026-09-24)
 
 ### Bug Fixes
